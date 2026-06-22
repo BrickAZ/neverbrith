@@ -1,0 +1,13 @@
+.agents/
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.backup
+

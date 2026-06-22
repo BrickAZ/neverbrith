@@ -1,0 +1,69 @@
+<items gfxroot="gfx/Items/" version="1">
+  <!-- 被动道具：风油精 -->
+  <passive
+    name="EssentialBalm"
+    cache="all"
+    description="3岁以下儿童慎用"
+    gfx="P_EssentialBalm.png"
+    quality="3"
+    tags="offensive summonable"
+  />
+    <!-- 被动道具：芜湖 -->
+  <passive
+    name="Wuhu"
+    cache="all"
+    description="黑风吹过呜呼起飞"
+    gfx="Wuhu.png"
+    quality="4"
+    tags="offensive summonable"
+  />
+  <!-- 主动道具：春药 -->
+  <active
+    name="Aphrodisiac"
+    cache="all"
+    maxcharges="1"
+    description="性奋"
+    gfx="Chunyao.png"
+    quality="2"
+    tags="devil offensive"
+  />
+  <!-- 主动道具：八音盒 -->
+  <active
+    name="Musicbox"
+    cache="all"
+    maxcharges="12"
+    description="爱之思念跨越生死"
+    gfx="Musicbox.png"
+    quality="4"
+    tags="dead noeden nochallenge angel"
+  /><!-- 主动道具：天使盒 -->
+  <active
+    name="Angelbox"
+    cache="all"
+    maxcharges="0"
+    description=""
+    gfx="Angelbox.png"
+    quality="4"
+    tags="noeden nochallenge angel offensive"
+  />
+    <!-- 主动道具：恶魔盒 -->
+  <active
+    name="Devilbox"
+    cache="all"
+    maxcharges="0"
+    description=""
+    gfx="Devilbox.png"
+    quality="4"
+    tags="noeden nochallenge devil offensive"
+  />
+  <!-- 主动道具：ds4 -->
+  <active
+    name="ds4"
+    cache="all"
+    maxcharges="0"
+    description=""
+    gfx="ds4.png"
+    quality="4"
+    tags="noeden nochallenge"
+  />    
+</items>
