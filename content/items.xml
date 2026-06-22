@@ -32,7 +32,7 @@
     name="Musicbox"
     cache="all"
     maxcharges="12"
-    description="爱之思念跨越生死"
+    description="20秒安魂倒计时"
     gfx="Musicbox.png"
     quality="4"
     tags="dead noeden nochallenge angel"

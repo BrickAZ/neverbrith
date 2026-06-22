@@ -1,5 +1,6 @@
 <music root="music/">
 	<track
+    id="736"
     name="MusicboxTheme"
     path="MusicboxTheme.ogg"
     loop="true"
