@@ -40,18 +40,22 @@
   <active
     name="Angelbox"
     cache="all"
-    maxcharges="0"
-    description=""
+    maxcharges="12"
+    initcharge="12"
+    chargetype="special"
+    description="盈魂引向天国"
     gfx="Angelbox.png"
-    quality="4"
+    quality="3"
     tags="noeden nochallenge angel offensive"
   />
     <!-- 主动道具：恶魔盒 -->
   <active
     name="Devilbox"
     cache="all"
-    maxcharges="0"
-    description=""
+    maxcharges="12"
+    initcharge="12"
+    chargetype="special"
+    description="暗血引向深渊"
     gfx="Devilbox.png"
     quality="4"
     tags="noeden nochallenge devil offensive"
