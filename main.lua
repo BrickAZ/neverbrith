@@ -1,14 +1,35 @@
 -- 注册模组
 local Neverbirth = RegisterMod("neverbirth", 1)
 
+local ITEM_NAME_CANDIDATES = {
+    EssentialBalm = { "EssentialBalm", "风油精" },
+    Wuhu = { "Wuhu", "芜湖！~" },
+    Chunyao = { "Aphrodisiac", "春药" },
+    Musicbox = { "Musicbox", "八音盒" },
+    Angelbox = { "Angelbox", "天使盒" },
+    Devilbox = { "Devilbox", "恶魔盒" },
+    DS4 = { "ds4" },
+}
+
+local function FindItemIdByNames(names)
+    for _, name in ipairs(names) do
+        local itemId = Isaac.GetItemIdByName(name)
+        if type(itemId) == "number" and itemId > 0 then
+            return itemId
+        end
+    end
+
+    return -1
+end
+
 local Items = {
-    EssentialBalm = Isaac.GetItemIdByName("EssentialBalm"),
-    Wuhu = Isaac.GetItemIdByName("Wuhu"),
-    Chunyao = Isaac.GetItemIdByName("Aphrodisiac"),
-    Musicbox = Isaac.GetItemIdByName("Musicbox"),
-    Angelbox = Isaac.GetItemIdByName("Angelbox"),
-    Devilbox = Isaac.GetItemIdByName("Devilbox"),
-    DS4 = Isaac.GetItemIdByName("ds4"),
+    EssentialBalm = FindItemIdByNames(ITEM_NAME_CANDIDATES.EssentialBalm),
+    Wuhu = FindItemIdByNames(ITEM_NAME_CANDIDATES.Wuhu),
+    Chunyao = FindItemIdByNames(ITEM_NAME_CANDIDATES.Chunyao),
+    Musicbox = FindItemIdByNames(ITEM_NAME_CANDIDATES.Musicbox),
+    Angelbox = FindItemIdByNames(ITEM_NAME_CANDIDATES.Angelbox),
+    Devilbox = FindItemIdByNames(ITEM_NAME_CANDIDATES.Devilbox),
+    DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
 
 local DEBUG_PRINT_ITEM_IDS = true

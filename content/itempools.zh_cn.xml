@@ -1,0 +1,47 @@
+<!-- weight 是权重，DecreaseBy 是每次道具被移除时权重减少，RemoveOn 是权重减少到对应数值时移出物品池 -->
+<ItemPools>
+    <Pool Name="boss"> <!-- 首领房 -->
+        <Item Name="风油精" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="devil"> <!-- 恶魔房 -->
+        <Item Name="春药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="天使盒" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="angel"> <!-- 天使 -->
+        <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="恶魔盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="treasure"> <!-- 宝箱 -->
+        <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="shop"> <!-- 商店 -->
+        <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="secret"> <!-- 隐藏 -->
+        <Item Name="八音盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="天使盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="恶魔盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="curse"> <!-- 刺房/诅咒房 -->
+        <Item Name="恶魔盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="goldenChest"> <!-- 金箱子 -->
+        <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="oldChest"> <!-- 旧箱子 -->
+        <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="woodenChest"> <!-- 木箱子 -->
+        <Item Name="八音盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+</ItemPools>

@@ -14,9 +14,10 @@ local function containsHan(text)
     return text ~= nil and text:match("[\228-\233][\128-\191][\128-\191]") ~= nil
 end
 
-local function loadNeverbirthWithEID()
+local function loadNeverbirthWithEID(options)
+    options = options or {}
     local callbacks = {}
-    local itemIds = {
+    local logicalItemIds = {
         EssentialBalm = 733,
         Wuhu = 734,
         Aphrodisiac = 735,
@@ -25,6 +26,7 @@ local function loadNeverbirthWithEID()
         Devilbox = 738,
         ds4 = 739,
     }
+    local itemIdsByLoadedName = options.itemIdsByLoadedName or logicalItemIds
     local eidCalls = {}
 
     package.loaded.json = nil
@@ -104,7 +106,7 @@ local function loadNeverbirthWithEID()
 
     Isaac = {
         GetItemIdByName = function(name)
-            return itemIds[name] or -1
+            return itemIdsByLoadedName[name] or -1
         end,
         GetMusicIdByName = function(name)
             if name == "MusicboxTheme" then
@@ -187,9 +189,54 @@ local function loadNeverbirthWithEID()
 
     return {
         eidCalls = eidCalls,
-        itemIds = itemIds,
+        itemIds = logicalItemIds,
     }
 end
+
+local expectedXmlItems = {
+    EssentialBalm = {
+        enName = "EssentialBalm",
+        zhName = "风油精",
+        description = "Handle with care",
+        zhDescription = "3岁以下儿童慎用",
+    },
+    Wuhu = {
+        enName = "Wuhu",
+        zhName = "芜湖！~",
+        description = "Dark wind, wild flight",
+        zhDescription = "黑风吹过呜呼起飞",
+    },
+    Aphrodisiac = {
+        enName = "Aphrodisiac",
+        zhName = "春药",
+        description = "Heat of the moment",
+        zhDescription = "性奋",
+    },
+    Musicbox = {
+        enName = "Musicbox",
+        zhName = "八音盒",
+        description = "Your life, on a timer",
+        zhDescription = "为你的生命倒计时",
+    },
+    Angelbox = {
+        enName = "Angelbox",
+        zhName = "天使盒",
+        description = "Full hearts, heavenbound",
+        zhDescription = "盈魂引向天国",
+    },
+    Devilbox = {
+        enName = "Devilbox",
+        zhName = "恶魔盒",
+        description = "Black hearts, below",
+        zhDescription = "暗血引向深渊",
+    },
+    ds4 = {
+        enName = "ds4",
+        zhName = "ds4",
+        description = "",
+        zhDescription = "",
+    },
+}
 
 local expectedEID = {
     EssentialBalm = {
@@ -264,16 +311,6 @@ local expectedEID = {
     },
 }
 
-local expectedXmlDescriptions = {
-    EssentialBalm = "Handle with care",
-    Wuhu = "Dark wind, wild flight",
-    Aphrodisiac = "Heat of the moment",
-    Musicbox = "Your life, on a timer",
-    Angelbox = "Full hearts, heavenbound",
-    Devilbox = "Black hearts, below",
-    ds4 = "",
-}
-
 local function findEIDCall(calls, id, language)
     local found = nil
     for _, call in ipairs(calls) do
@@ -311,27 +348,151 @@ local function test_eid_registers_explicit_english_and_chinese_descriptions()
     end
 end
 
-local function getItemXmlDescription(itemName)
+local function test_item_ids_are_resolved_from_english_or_chinese_loaded_names()
+    local chineseLookupNames = {}
+    local baselineEnv = loadNeverbirthWithEID()
+    for itemName, expected in pairs(expectedXmlItems) do
+        chineseLookupNames[expected.zhName] = baselineEnv.itemIds[itemName]
+    end
+
+    local englishEnv = loadNeverbirthWithEID()
+    local chineseEnv = loadNeverbirthWithEID({ itemIdsByLoadedName = chineseLookupNames })
+
+    for itemName, itemId in pairs(englishEnv.itemIds) do
+        assertTruthy(findEIDCall(englishEnv.eidCalls, itemId, "en_us"), "English-name lookup should register EID for " .. itemName)
+        assertTruthy(findEIDCall(chineseEnv.eidCalls, itemId, "en_us"), "Chinese-name lookup should register EID for " .. itemName)
+        assertTruthy(findEIDCall(chineseEnv.eidCalls, itemId, "zh_cn"), "Chinese-name lookup should register Chinese EID for " .. itemName)
+    end
+end
+
+local function readFile(path)
+    local file = assert(io.open(path, "r"))
+    local text = file:read("*a")
+    file:close()
+    return text
+end
+
+local function getItemXmlBlockFromText(text, xmlName)
+    local block = text:match('<active%s+name="' .. xmlName .. '"(.-)/>')
+        or text:match('<passive%s+name="' .. xmlName .. '"(.-)/>')
+    assertTruthy(block, "items.xml should contain item " .. xmlName)
+    return block
+end
+
+local function getItemXmlBlock(itemName)
     local file = assert(io.open("content/items.xml", "r"))
     local text = file:read("*a")
     file:close()
 
-    local block = text:match('<[pa][ac][st][si][iv][vee]*%s+name="' .. itemName .. '"(.-)/>')
-        or text:match('<active%s+name="' .. itemName .. '"(.-)/>')
-        or text:match('<passive%s+name="' .. itemName .. '"(.-)/>')
-    assertTruthy(block, "items.xml should contain item " .. itemName)
-    return block:match('description="(.-)"')
+    return getItemXmlBlockFromText(text, expectedXmlItems[itemName].enName)
 end
 
-local function test_items_xml_uses_english_fallback_descriptions()
-    for itemName, expectedDescription in pairs(expectedXmlDescriptions) do
-        local description = getItemXmlDescription(itemName)
-        assertEquals(description, expectedDescription, itemName .. " XML description")
+local function test_items_xml_uses_english_pickup_names_and_descriptions_by_default()
+    for itemName, expected in pairs(expectedXmlItems) do
+        local block = getItemXmlBlock(itemName)
+        local description = block:match('description="(.-)"')
+        assertEquals(description, expected.description, itemName .. " XML description")
         assertEquals(containsHan(description), false, itemName .. " XML description should not contain Chinese")
     end
 end
 
+local function fileExists(path)
+    local file = io.open(path, "r")
+    if file then
+        file:close()
+        return true
+    end
+    return false
+end
+
+local function normalizeNewlines(text)
+    return (text:gsub("\r\n", "\n"))
+end
+
+local function collectItemNamesFromItemsXml(text)
+    local names = {}
+    for name in text:gmatch('<%w+%s+name="(.-)"') do
+        names[name] = true
+    end
+    return names
+end
+
+local function assertItemPoolsReferenceExistingItems(itempoolsText, itemNames, label)
+    for referencedName in itempoolsText:gmatch('<Item%s+Name="(.-)"') do
+        assertTruthy(itemNames[referencedName], label .. " itempools.xml references missing item name " .. referencedName)
+    end
+end
+
+local function test_language_templates_are_parseable_and_localize_pickup_names()
+    local englishTemplate = readFile("content/items.en_us.xml")
+    local chineseTemplate = readFile("content/items.zh_cn.xml")
+    local englishPools = readFile("content/itempools.en_us.xml")
+    local chinesePools = readFile("content/itempools.zh_cn.xml")
+
+    for itemName, expected in pairs(expectedXmlItems) do
+        local englishBlock = getItemXmlBlockFromText(englishTemplate, expected.enName)
+        local chineseBlock = getItemXmlBlockFromText(chineseTemplate, expected.zhName)
+        local englishDescription = englishBlock:match('description="(.-)"')
+        local chineseDescription = chineseBlock:match('description="(.-)"')
+
+        assertEquals(englishDescription, expected.description, itemName .. " English template description")
+        assertEquals(chineseDescription, expected.zhDescription, itemName .. " Chinese template description")
+        assertEquals(containsHan(expected.enName), false, itemName .. " English pickup name should not contain Chinese")
+        if itemName ~= "ds4" then
+            assertTruthy(containsHan(expected.zhName), itemName .. " Chinese pickup name should contain Chinese")
+        end
+        assertEquals(containsHan(englishDescription), false, itemName .. " English template should not contain Chinese")
+        if itemName ~= "ds4" then
+            assertTruthy(containsHan(chineseDescription), itemName .. " Chinese template should contain Chinese")
+        end
+    end
+
+    assertItemPoolsReferenceExistingItems(englishPools, collectItemNamesFromItemsXml(englishTemplate), "English")
+    assertItemPoolsReferenceExistingItems(chinesePools, collectItemNamesFromItemsXml(chineseTemplate), "Chinese")
+end
+
+local function test_default_xml_files_match_english_templates()
+    assertEquals(
+        normalizeNewlines(readFile("content/items.xml")),
+        normalizeNewlines(readFile("content/items.en_us.xml")),
+        "default items.xml should match the English language template"
+    )
+    assertEquals(
+        normalizeNewlines(readFile("content/itempools.xml")),
+        normalizeNewlines(readFile("content/itempools.en_us.xml")),
+        "default itempools.xml should match the English language template"
+    )
+end
+
+local function test_playable_files_do_not_depend_on_neverbirth_stringtable_tokens()
+    for _, path in ipairs({
+        "content/items.xml",
+        "content/items.en_us.xml",
+        "content/items.zh_cn.xml",
+        "content/itempools.xml",
+        "content/itempools.en_us.xml",
+        "content/itempools.zh_cn.xml",
+        "main.lua",
+    }) do
+        local text = readFile(path)
+        assertEquals(text:find("#NEVERBIRTH_", 1, true), nil, path .. " should not contain inactive localization tokens")
+    end
+    assertEquals(fileExists("resources/stringtable.sta"), false, "inactive mod stringtable should not ship in playable v2.1")
+end
+
+local function test_failed_stringtable_experiment_is_documented()
+    local text = readFile("docs/localization-token-research.md")
+    assertTruthy(text:find("resources/stringtable.sta", 1, true), "token research should mention the tested stringtable path")
+    assertTruthy(text:find("#NEVERBIRTH_", 1, true), "token research should mention the failed token symptom")
+    assertTruthy(text:find("not loaded", 1, true), "token research should record that the mod stringtable was not loaded")
+end
+
 test_eid_registers_explicit_english_and_chinese_descriptions()
-test_items_xml_uses_english_fallback_descriptions()
+test_item_ids_are_resolved_from_english_or_chinese_loaded_names()
+test_items_xml_uses_english_pickup_names_and_descriptions_by_default()
+test_language_templates_are_parseable_and_localize_pickup_names()
+test_default_xml_files_match_english_templates()
+test_playable_files_do_not_depend_on_neverbirth_stringtable_tokens()
+test_failed_stringtable_experiment_is_documented()
 
 print("localization tests passed")

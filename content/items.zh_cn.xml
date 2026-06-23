@@ -1,61 +1,61 @@
 <items gfxroot="gfx/Items/" version="1">
   <!-- 被动道具：风油精 -->
   <passive
-    name="EssentialBalm"
+    name="风油精"
     cache="all"
-    description="Handle with care"
+    description="3岁以下儿童慎用"
     gfx="P_EssentialBalm.png"
     quality="3"
     tags="offensive summonable"
   />
     <!-- 被动道具：芜湖 -->
   <passive
-    name="Wuhu"
+    name="芜湖！~"
     cache="all"
-    description="Dark wind, wild flight"
+    description="黑风吹过呜呼起飞"
     gfx="Wuhu.png"
     quality="4"
     tags="offensive summonable"
   />
   <!-- 主动道具：春药 -->
   <active
-    name="Aphrodisiac"
+    name="春药"
     cache="all"
     maxcharges="1"
-    description="Heat of the moment"
+    description="性奋"
     gfx="Chunyao.png"
     quality="2"
     tags="devil offensive"
   />
   <!-- 主动道具：八音盒 -->
   <active
-    name="Musicbox"
+    name="八音盒"
     cache="all"
     maxcharges="12"
-    description="Your life, on a timer"
+    description="为你的生命倒计时"
     gfx="Musicbox.png"
     quality="4"
     tags="dead noeden nochallenge angel"
   /><!-- 主动道具：天使盒 -->
   <active
-    name="Angelbox"
+    name="天使盒"
     cache="all"
     maxcharges="12"
     initcharge="12"
     chargetype="special"
-    description="Full hearts, heavenbound"
+    description="盈魂引向天国"
     gfx="Angelbox.png"
     quality="3"
     tags="noeden nochallenge angel offensive"
   />
     <!-- 主动道具：恶魔盒 -->
   <active
-    name="Devilbox"
+    name="恶魔盒"
     cache="all"
     maxcharges="12"
     initcharge="12"
     chargetype="special"
-    description="Black hearts, below"
+    description="暗血引向深渊"
     gfx="Devilbox.png"
     quality="4"
     tags="noeden nochallenge devil offensive"
