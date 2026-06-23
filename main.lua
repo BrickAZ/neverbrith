@@ -15,48 +15,78 @@ local DEBUG_PRINT_ITEM_IDS = true
 
 local EID_DESCRIPTIONS = {
     [Items.EssentialBalm] = {
-        Name = "风油精",
-        Description = "↑ +1攻击力#↓ -0.2弹速",
-        EnglishName = "Essential Balm",
-        EnglishDescription = "{{Damage}} +1 damage#{{Shotspeed}} -0.2 shot speed",
+        en_us = {
+            name = "Essential Balm",
+            eidDescription = "{{Damage}} +1 damage#{{Shotspeed}} -0.2 shot speed",
+        },
+        zh_cn = {
+            name = "风油精",
+            eidDescription = "↑ +1攻击力#↓ -0.2弹速",
+        },
     },
     [Items.Wuhu] = {
-        Name = "芜湖！~",
-        Description = "↑ +1移速#↑ 攻速上限达到30#↑ +40攻击力#↓ -1弹速",
-        EnglishName = "Wuhu!",
-        EnglishDescription = "{{Speed}} +1 speed#{{Tears}} Sets fire delay to 0#{{Damage}} +40 damage#{{Shotspeed}} -1 shot speed",
+        en_us = {
+            name = "Wuhu!",
+            eidDescription = "{{Speed}} +1 speed#{{Tears}} Max fire rate#{{Damage}} +40 damage#{{Shotspeed}} -1 shot speed",
+        },
+        zh_cn = {
+            name = "芜湖！~",
+            eidDescription = "↑ +1移速#↑ 攻速上限达到30#↑ +40攻击力#↓ -1弹速",
+        },
     },
     [Items.Chunyao] = {
-        Name = "Chunyao",
-        Description = "使用后扣除1滴完整的血#{{Warning}} 优先扣红心 #{{Warning}} 不致死#↑ +0.5攻击力#↑ +0.5攻速#角色进入魅惑状态#眼泪获得追踪效果#持续3秒",
-        EnglishName = "Aphrodisiac",
-        EnglishDescription = "On use, removes 1 full heart#{{Warning}} Prioritizes red hearts #{{Warning}} Cannot kill you#{{Damage}} +0.5 damage#{{Tears}} +0.5 fire rate#Charms the player#Tears become homing#Lasts 3 seconds",
+        en_us = {
+            name = "Aphrodisiac",
+            eidDescription = "Spend 1 full heart without dying#{{Damage}} +0.5 damage#{{Tears}} +0.5 fire rate#Charm effect and homing tears for 3 seconds",
+        },
+        zh_cn = {
+            name = "春药",
+            eidDescription = "使用后扣除1滴完整的血#{{Warning}} 优先扣红心 #{{Warning}} 不致死#↑ +0.5攻击力#↑ +0.5攻速#角色进入魅惑状态#眼泪获得追踪效果#持续3秒",
+        },
     },
     [Items.Musicbox] = {
-        Name = "八音盒",
-        Description = "使用后进入20秒无敌状态，眼泪变红并播放八音盒音乐#{{Warning}} 倒计时结束时强制死亡#第二次使用不会延长倒计时#未充能且受到致死伤害时，失去八音盒并自动触发一次#八音盒期间压制计划C的自杀死亡，但保留杀敌伤害#只有额外生命可以继续游戏",
-        EnglishName = "Music Box",
-        EnglishDescription = "On use, grants 20 seconds of invincibility, red tears, and MusicboxTheme music#{{Warning}} Forces death when the countdown ends#Using it again will not extend the timer#If uncharged and lethal damage is incoming, removes Music Box and triggers once#While active, blocks Plan C's suicide death but keeps its enemy damage#Only extra lives can continue the run",
+        en_us = {
+            name = "Music Box",
+            eidDescription = "20 seconds of invincibility and red tears#{{Warning}} Death when the timer ends#Reuse does not extend time#When uncharged, blocks one lethal hit and triggers itself#Extra lives can save you",
+        },
+        zh_cn = {
+            name = "八音盒",
+            eidDescription = "使用后进入20秒无敌状态，眼泪变红并播放八音盒音乐#{{Warning}} 倒计时结束时强制死亡#第二次使用不会延长倒计时#未充能且受到致死伤害时，失去八音盒并自动触发一次#八音盒期间压制计划C的自杀死亡，但保留杀敌伤害#只有额外生命可以继续游戏",
+        },
     },
     [Items.Angelbox] = {
-        Name = "天使盒",
-        Description = "每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满12格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#持有时一半恶魔房概率转为天使房概率",
-        EnglishName = "Angel Box",
-        EnglishDescription = "Each player's first use: grants 1 full soul heart for each red heart container#Afterwards, overflowing soul hearts charge this item up to 12#Non-first use: tries to guarantee an angel room this floor#If this floor's angel room was not entered before use, that player adds 1 extra quality 4 angel pool item when it is first entered#While held, converts half of devil room chance into angel room chance",
+        en_us = {
+            name = "Angel Box",
+            eidDescription = "First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Favors angel rooms while held",
+        },
+        zh_cn = {
+            name = "天使盒",
+            eidDescription = "每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满12格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#持有时一半恶魔房概率转为天使房概率",
+        },
     },
     [Items.Devilbox] = {
-        Name = "恶魔盒",
-        Description = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满12格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#持有时一半交易房方向转为恶魔房概率",
-        EnglishName = "Devil Box",
-        EnglishDescription = "Each player's first use: grants 1 full black heart for each red heart container#Afterwards, overflowing black hearts charge this item up to 12#Non-first use: tries to guarantee a devil room this floor#If this floor's devil room was not entered before use, that player adds 1 extra quality 3 devil pool item when it is first entered#While held, converts half of deal room direction into devil room chance",
+        en_us = {
+            name = "Devil Box",
+            eidDescription = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Favors devil rooms while held",
+        },
+        zh_cn = {
+            name = "恶魔盒",
+            eidDescription = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满12格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#持有时一半交易房方向转为恶魔房概率",
+        },
     },
     [Items.DS4] = {
-        Name = "ds4",
-        Description = "{{Warning}} 效果尚未实现",
-        EnglishName = "ds4",
-        EnglishDescription = "{{Warning}} Effect not implemented yet",
+        en_us = {
+            name = "ds4",
+            eidDescription = "{{Warning}} Effect not implemented yet",
+        },
+        zh_cn = {
+            name = "ds4",
+            eidDescription = "{{Warning}} 效果尚未实现",
+        },
     },
 }
+
+local EID_LANGUAGE_ORDER = { "en_us", "zh_cn" }
 
 local function IsValidItemId(id)
     if id == nil then
@@ -87,8 +117,12 @@ local function RegisterEIDDescriptions()
 
     for id, item in pairs(EID_DESCRIPTIONS) do
         if IsValidItemId(id) then
-            EID:addCollectible(id, item.EnglishDescription or item.Description, item.EnglishName or item.Name)
-            EID:addCollectible(id, item.Description, item.Name, "zh_cn")
+            for _, language in ipairs(EID_LANGUAGE_ORDER) do
+                local localizedText = item[language] or item.en_us
+                if localizedText then
+                    EID:addCollectible(id, localizedText.eidDescription, localizedText.name, language)
+                end
+            end
         end
     end
 
@@ -849,17 +883,22 @@ local function IsIncomingDamageLethal(player, amount)
 end
 
 local function IsMusicboxSlotUncharged(player, slot)
+    if player.GetActiveCharge then
+        local ok, charge = pcall(function()
+            return player:GetActiveCharge(slot)
+        end)
+        if ok and charge ~= nil then
+            return charge < MUSICBOX_MAX_CHARGE
+        end
+    end
+
     if player.NeedsCharge then
         local ok, needsCharge = pcall(function()
             return player:NeedsCharge(slot)
         end)
-        if ok then
+        if ok and needsCharge ~= nil then
             return needsCharge
         end
-    end
-
-    if player.GetActiveCharge then
-        return player:GetActiveCharge(slot) < MUSICBOX_MAX_CHARGE
     end
 
     return false
@@ -894,7 +933,9 @@ local function TryTriggerPanicMusicbox(player, amount)
     end
 
     if player.RemoveCollectible then
-        player:RemoveCollectible(Items.Musicbox, false, slot, true)
+        pcall(function()
+            player:RemoveCollectible(Items.Musicbox, false, slot, true)
+        end)
     end
 
     StartMusicboxEffect(player, "panic")

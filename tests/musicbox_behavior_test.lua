@@ -247,7 +247,11 @@ local function loadNeverbirth(savedStore)
             activeCharges = options.activeCharges or { [ActiveSlot.SLOT_PRIMARY] = 12 },
             needsCharge = options.needsCharge,
             mortalDamage = options.mortalDamage,
+            hearts = options.hearts or 2,
+            soulHearts = options.soulHearts or 0,
+            boneHearts = options.boneHearts or 0,
             willRevive = options.willRevive or false,
+            removeCollectibleThrows = options.removeCollectibleThrows or false,
         }
 
         function player:ToPlayer()
@@ -282,6 +286,10 @@ local function loadNeverbirth(savedStore)
         end
 
         function player:RemoveCollectible(itemId, ignoreModifiers, slot, removeFromPlayerForm)
+            if self.removeCollectibleThrows then
+                error("RemoveCollectible failed")
+            end
+
             self.removeCalls[#self.removeCalls + 1] = {
                 itemId = itemId,
                 ignoreModifiers = ignoreModifiers,
@@ -304,7 +312,15 @@ local function loadNeverbirth(savedStore)
         end
 
         function player:GetHearts()
-            return 2
+            return self.hearts
+        end
+
+        function player:GetSoulHearts()
+            return self.soulHearts
+        end
+
+        function player:GetBoneHearts()
+            return self.boneHearts
         end
 
         function player:AddHearts(amount)
@@ -396,6 +412,88 @@ local function test_uncharged_musicbox_auto_triggers_on_lethal_damage()
 
     tick(env, 600)
     assertEquals(player.killCount, 1, "panic-triggered Musicbox should still kill after 20 seconds")
+end
+
+local function test_uncharged_musicbox_auto_triggers_on_real_half_heart_lethal_damage()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        hearts = 1,
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 0 },
+    })
+    local damage = env.getCallback(ModCallbacks.MC_ENTITY_TAKE_DMG)
+
+    local result = damage(env.mod, player, 1, 0, nil, 0)
+
+    assertEquals(result, false, "real half-heart lethal damage should be cancelled by panic Musicbox trigger")
+    assertEquals(#player.removeCalls, 1, "panic trigger should remove Musicbox without relying on HasMortalDamage")
+    assertTruthy(env.savedStore.snapshot and env.savedStore.snapshot.musicboxDeathDebt, "real damage panic trigger should save death debt")
+end
+
+local function test_full_charge_musicbox_does_not_auto_trigger_on_lethal_damage()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        hearts = 1,
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+    })
+    local damage = env.getCallback(ModCallbacks.MC_ENTITY_TAKE_DMG)
+
+    local result = damage(env.mod, player, 1, 0, nil, 0)
+
+    assertEquals(result, nil, "full-charge Musicbox should not auto trigger on lethal damage")
+    assertEquals(#player.removeCalls, 0, "full-charge Musicbox should not be removed by panic trigger")
+    assertEquals(env.savedStore.snapshot == nil, true, "full-charge Musicbox should not save a panic death debt")
+end
+
+local function test_full_main_charge_ignores_needs_charge_from_secondary_battery()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        hearts = 1,
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+        needsCharge = true,
+    })
+    local damage = env.getCallback(ModCallbacks.MC_ENTITY_TAKE_DMG)
+
+    local result = damage(env.mod, player, 1, 0, nil, 0)
+
+    assertEquals(result, nil, "main charge at 12 should not auto trigger even if NeedsCharge reports true")
+    assertEquals(#player.removeCalls, 0, "NeedsCharge true should not remove a usable Musicbox")
+end
+
+local function test_uncharged_musicbox_in_secondary_slot_auto_triggers()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        hearts = 1,
+        activeItems = {
+            [ActiveSlot.SLOT_PRIMARY] = 0,
+            [ActiveSlot.SLOT_SECONDARY] = env.items.Musicbox,
+        },
+        activeCharges = { [ActiveSlot.SLOT_SECONDARY] = 0 },
+    })
+    local damage = env.getCallback(ModCallbacks.MC_ENTITY_TAKE_DMG)
+
+    local result = damage(env.mod, player, 1, 0, nil, 0)
+
+    assertEquals(result, false, "uncharged Musicbox in secondary slot should auto trigger on lethal damage")
+    assertEquals(#player.removeCalls, 1, "secondary-slot panic trigger should remove Musicbox")
+    assertEquals(player.removeCalls[1].slot, ActiveSlot.SLOT_SECONDARY, "panic trigger should remove Musicbox from the matching active slot")
+end
+
+local function test_panic_musicbox_still_triggers_if_remove_collectible_errors()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        hearts = 1,
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 0 },
+        removeCollectibleThrows = true,
+    })
+    local damage = env.getCallback(ModCallbacks.MC_ENTITY_TAKE_DMG)
+
+    local ok, result = pcall(function()
+        return damage(env.mod, player, 1, 0, nil, 0)
+    end)
+
+    assertEquals(ok, true, "panic Musicbox should not crash if removal fails")
+    assertEquals(result, false, "panic Musicbox should still cancel lethal damage if removal fails")
+    assertTruthy(env.savedStore.snapshot and env.savedStore.snapshot.musicboxDeathDebt, "panic trigger should save death debt even if removal fails")
 end
 
 local function test_musicbox_death_debt_survives_reload()
@@ -516,6 +614,11 @@ end
 
 test_second_use_does_not_extend_death_timer()
 test_uncharged_musicbox_auto_triggers_on_lethal_damage()
+test_uncharged_musicbox_auto_triggers_on_real_half_heart_lethal_damage()
+test_full_charge_musicbox_does_not_auto_trigger_on_lethal_damage()
+test_full_main_charge_ignores_needs_charge_from_secondary_battery()
+test_uncharged_musicbox_in_secondary_slot_auto_triggers()
+test_panic_musicbox_still_triggers_if_remove_collectible_errors()
 test_musicbox_death_debt_survives_reload()
 test_plan_c_during_musicbox_kills_enemies_without_plan_c_death()
 test_musicbox_cancels_pending_plan_c_death()
