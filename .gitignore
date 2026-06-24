@@ -1,4 +1,6 @@
 .agents/
+.codex/
+tmp/
 
 # Local editor and OS files
 .DS_Store
@@ -10,4 +12,3 @@ desktop.ini
 *.tmp
 *.bak
 *.backup
-

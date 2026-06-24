@@ -8,6 +8,8 @@ local ITEM_NAME_CANDIDATES = {
     Musicbox = { "Musicbox", "八音盒" },
     Angelbox = { "Angelbox", "天使盒" },
     Devilbox = { "Devilbox", "恶魔盒" },
+    UncutCord = { "Uncut Cord", "未剪断的脐带" },
+    ShreddedTarot = { "Shredded Tarot", "剪碎的塔罗" },
     DS4 = { "ds4" },
 }
 
@@ -29,6 +31,8 @@ local Items = {
     Musicbox = FindItemIdByNames(ITEM_NAME_CANDIDATES.Musicbox),
     Angelbox = FindItemIdByNames(ITEM_NAME_CANDIDATES.Angelbox),
     Devilbox = FindItemIdByNames(ITEM_NAME_CANDIDATES.Devilbox),
+    UncutCord = FindItemIdByNames(ITEM_NAME_CANDIDATES.UncutCord),
+    ShreddedTarot = FindItemIdByNames(ITEM_NAME_CANDIDATES.ShreddedTarot),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
 
@@ -93,6 +97,26 @@ local EID_DESCRIPTIONS = {
         zh_cn = {
             name = "恶魔盒",
             eidDescription = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满12格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#持有时一半交易房方向转为恶魔房概率",
+        },
+    },
+    [Items.UncutCord] = {
+        en_us = {
+            name = "Uncut Cord",
+            eidDescription = "50% chance to delay incoming damage instead of taking it immediately#Clear 2 rooms without getting hit to take only half of the delayed damage#Getting hit again triggers the full delayed damage immediately",
+        },
+        zh_cn = {
+            name = "未剪断的脐带",
+            eidDescription = "受到伤害时，50%概率将本次伤害变为延迟伤害#连续通过2个房间且未再次受伤后，只承受一半延迟伤害#若期间再次受伤，立即承受全部延迟伤害",
+        },
+    },
+    [Items.ShreddedTarot] = {
+        en_us = {
+            name = "Shredded Tarot",
+            eidDescription = "{{Luck}} +3 Luck while held#Single-use active item#Removes card pickups in the current room#For every 3 cards removed, spawns 1 Treasure Room item#Not consumed if fewer than 3 cards are present#Empty use does not count; disappears after this floor if unused",
+        },
+        zh_cn = {
+            name = "剪碎的塔罗",
+            eidDescription = "持有时 {{Luck}} +3 幸运#一次性使用#移除当前房间内的地上卡牌#每移除3张卡牌，生成1个宝箱房道具#卡牌不足3张时不会消耗#空拍不算使用，本层结束仍会消失",
         },
     },
     [Items.DS4] = {
@@ -987,6 +1011,773 @@ function Neverbirth:PreventMusicboxDamage(entity, amount)
 end
 
 Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.PreventMusicboxDamage)
+
+--------------------------------------------------
+-- 未剪断的脐带
+
+local UNCUT_CORD_TRIGGER_CHANCE = 0.5
+local UNCUT_CORD_ROOMS_REQUIRED = 2
+local UNCUT_CORD_MIN_SETTLED_DAMAGE = 1
+local UNCUT_CORD_SETTLE_FLAGS = DamageFlag.DAMAGE_INVINCIBLE
+local UNCUT_CORD_POPUP_DURATION = 45
+local UNCUT_CORD_DEBT_OFFSET = Vector(0, -44)
+local UNCUT_CORD_POPUP_OFFSET = Vector(0, -58)
+
+local uncutCordDebts = {}
+local uncutCordSettling = {}
+local uncutCordFeedbacks = {}
+
+local function GetUncutCordPlayerKey(player)
+    return tostring(player and player.InitSeed or "")
+end
+
+local function PlayerHasUncutCord(player)
+    return player and player.GetCollectibleNum and player:GetCollectibleNum(Items.UncutCord) > 0
+end
+
+local function GetUncutCordRandomFloat(player)
+    if player and player.GetCollectibleRNG then
+        local ok, rng = pcall(function()
+            return player:GetCollectibleRNG(Items.UncutCord)
+        end)
+        if ok and rng and rng.RandomFloat then
+            local rngOk, value = pcall(function()
+                return rng:RandomFloat()
+            end)
+            if rngOk and type(value) == "number" then
+                return value
+            end
+        end
+    end
+
+    return math.random()
+end
+
+local function IsUncutCordCombatEnemy(entity)
+    if not entity or not entity.IsVulnerableEnemy then
+        return false
+    end
+
+    local ok, isEnemy = pcall(function()
+        return entity:IsVulnerableEnemy()
+    end)
+    return ok and isEnemy == true
+end
+
+local function UncutCordRoomHasEnemies()
+    if not Isaac.GetRoomEntities then
+        return false
+    end
+
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if IsUncutCordCombatEnemy(entity) then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function GetUncutCordGame()
+    if not Game then
+        return nil
+    end
+
+    local ok, game = pcall(Game)
+    if ok then
+        return game
+    end
+
+    return nil
+end
+
+local function GetUncutCordRoom()
+    local game = GetUncutCordGame()
+    if game and game.GetRoom then
+        return game:GetRoom()
+    end
+
+    return nil
+end
+
+local function GetUncutCordRoomKey()
+    local game = GetUncutCordGame()
+    if game and game.GetLevel then
+        local level = game:GetLevel()
+        if level and level.GetCurrentRoomIndex then
+            local ok, roomIndex = pcall(function()
+                return level:GetCurrentRoomIndex()
+            end)
+            if ok and roomIndex ~= nil then
+                return "idx:" .. tostring(roomIndex)
+            end
+        end
+    end
+
+    local room = GetUncutCordRoom()
+    if room and room.GetSpawnSeed then
+        local ok, spawnSeed = pcall(function()
+            return room:GetSpawnSeed()
+        end)
+        if ok and spawnSeed ~= nil then
+            return "seed:" .. tostring(spawnSeed)
+        end
+    end
+
+    return "unknown"
+end
+
+local function IsUncutCordRoomClear()
+    if UncutCordRoomHasEnemies() then
+        return false
+    end
+
+    local room = GetUncutCordRoom()
+    if room and room.IsClear then
+        local ok, isClear = pcall(function()
+            return room:IsClear()
+        end)
+        if ok then
+            return isClear == true
+        end
+    end
+
+    return true
+end
+
+local function AttachUncutCordRoomState(record)
+    record.currentRoomKey = GetUncutCordRoomKey()
+    record.currentRoomHadEnemies = UncutCordRoomHasEnemies()
+    record.currentRoomCounted = false
+end
+
+local function FindUncutCordPlayerByKey(playerKey)
+    for _, player in ipairs(GetPlayers()) do
+        if GetUncutCordPlayerKey(player) == playerKey then
+            return player
+        end
+    end
+
+    return nil
+end
+
+local function FormatUncutCordHeartAmount(amount)
+    return string.format("%.1f", (tonumber(amount) or 0) / 2)
+end
+
+local function SetUncutCordFeedback(playerKey, text, r, g, b, player)
+    if playerKey == nil or playerKey == "" then
+        return
+    end
+
+    uncutCordFeedbacks[playerKey] = {
+        text = text,
+        timer = UNCUT_CORD_POPUP_DURATION,
+        r = r or 1,
+        g = g or 1,
+        b = b or 1,
+        player = player,
+    }
+end
+
+local function SetUncutCordPlayerFeedback(player, text, r, g, b)
+    SetUncutCordFeedback(GetUncutCordPlayerKey(player), text, r, g, b, player)
+end
+
+local function ApplyUncutCordDamage(player, amount)
+    local playerKey = GetUncutCordPlayerKey(player)
+    uncutCordSettling[playerKey] = true
+
+    if player and player.TakeDamage then
+        player:TakeDamage(amount, UNCUT_CORD_SETTLE_FLAGS, EntityRef(player), 0)
+    end
+
+    uncutCordSettling[playerKey] = nil
+end
+
+local function SettleUncutCordDebt(player, playerKey, record, amount, feedbackLabel)
+    local settledAmount = math.max(UNCUT_CORD_MIN_SETTLED_DAMAGE, tonumber(amount) or 0)
+    uncutCordDebts[playerKey] = nil
+    if feedbackLabel then
+        SetUncutCordFeedback(
+            playerKey,
+            feedbackLabel .. " " .. FormatUncutCordHeartAmount(settledAmount),
+            1,
+            feedbackLabel == "HALF PAID" and 0.85 or 0.35,
+            feedbackLabel == "HALF PAID" and 0.25 or 0.2,
+            player
+        )
+    end
+    ApplyUncutCordDamage(player, settledAmount)
+end
+
+local function SettleUncutCordDebtHalf(player, playerKey, record)
+    SettleUncutCordDebt(player, playerKey, record, (tonumber(record.amount) or 0) / 2, "HALF PAID")
+end
+
+local function SettleUncutCordDebtFull(player, playerKey, record)
+    SettleUncutCordDebt(player, playerKey, record, tonumber(record.amount) or 0, "FULL PAID")
+end
+
+local function StoreUncutCordDebt(player, amount)
+    local playerKey = GetUncutCordPlayerKey(player)
+    local record = {
+        amount = tonumber(amount) or 0,
+        roomsCleared = 0,
+        player = player,
+    }
+    AttachUncutCordRoomState(record)
+    uncutCordDebts[playerKey] = record
+    SetUncutCordPlayerFeedback(player, "DELAY " .. FormatUncutCordHeartAmount(record.amount), 0.55, 0.9, 1)
+end
+
+function Neverbirth:HandleUncutCordDamage(entity, amount)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    if not player then
+        return nil
+    end
+
+    local playerKey = GetUncutCordPlayerKey(player)
+    if uncutCordSettling[playerKey] then
+        return nil
+    end
+
+    local record = uncutCordDebts[playerKey]
+    if record then
+        SettleUncutCordDebtFull(player, playerKey, record)
+        return nil
+    end
+
+    local damageAmount = tonumber(amount) or 0
+    if damageAmount <= 0 or not PlayerHasUncutCord(player) then
+        return nil
+    end
+
+    if GetUncutCordRandomFloat(player) >= UNCUT_CORD_TRIGGER_CHANCE then
+        return nil
+    end
+
+    StoreUncutCordDebt(player, damageAmount)
+    return false
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.HandleUncutCordDamage)
+
+function Neverbirth:TrackUncutCordNewRoom()
+    for _, record in pairs(uncutCordDebts) do
+        AttachUncutCordRoomState(record)
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_ROOM then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.TrackUncutCordNewRoom)
+end
+
+function Neverbirth:UpdateUncutCordRooms()
+    if next(uncutCordDebts) == nil or not IsUncutCordRoomClear() then
+        return
+    end
+
+    local currentRoomKey = GetUncutCordRoomKey()
+    for playerKey, record in pairs(uncutCordDebts) do
+        if record.currentRoomKey ~= currentRoomKey then
+            AttachUncutCordRoomState(record)
+        end
+
+        if record.currentRoomHadEnemies and not record.currentRoomCounted then
+            record.currentRoomCounted = true
+            record.roomsCleared = (tonumber(record.roomsCleared) or 0) + 1
+
+            if record.roomsCleared >= UNCUT_CORD_ROOMS_REQUIRED then
+                local player = FindUncutCordPlayerByKey(playerKey) or record.player
+                if player then
+                    SettleUncutCordDebtHalf(player, playerKey, record)
+                else
+                    uncutCordDebts[playerKey] = nil
+                end
+            end
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateUncutCordRooms)
+
+function Neverbirth:UpdateUncutCordFeedbacks()
+    for playerKey, feedback in pairs(uncutCordFeedbacks) do
+        feedback.timer = (tonumber(feedback.timer) or 0) - 1
+        if feedback.timer <= 0 then
+            uncutCordFeedbacks[playerKey] = nil
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateUncutCordFeedbacks)
+
+local function AddUncutCordRenderPlayer(playersByKey, player)
+    if not player or not player.Position then
+        return
+    end
+
+    local playerKey = GetUncutCordPlayerKey(player)
+    if playerKey ~= "" then
+        playersByKey[playerKey] = player
+    end
+end
+
+local function GetUncutCordRenderPlayers()
+    local playersByKey = {}
+    for _, player in ipairs(GetPlayers()) do
+        AddUncutCordRenderPlayer(playersByKey, player)
+    end
+
+    for _, record in pairs(uncutCordDebts) do
+        if record and record.player then
+            AddUncutCordRenderPlayer(playersByKey, record.player)
+        end
+    end
+
+    for _, feedback in pairs(uncutCordFeedbacks) do
+        if feedback and feedback.player then
+            AddUncutCordRenderPlayer(playersByKey, feedback.player)
+        end
+    end
+
+    return playersByKey
+end
+
+local function RenderUncutCordText(text, screenPosition, r, g, b)
+    local x = screenPosition.X - 32
+    local y = screenPosition.Y
+    Isaac.RenderText(text, x + 1, y + 1, 0, 0, 0, 0.75)
+    Isaac.RenderText(text, x, y, r, g, b, 1)
+end
+
+function Neverbirth:RenderUncutCordFeedbacks()
+    for playerKey, player in pairs(GetUncutCordRenderPlayers()) do
+        local record = uncutCordDebts[playerKey]
+        if record then
+            local roomsCleared = math.min(tonumber(record.roomsCleared) or 0, UNCUT_CORD_ROOMS_REQUIRED)
+            local debtText = "DEBT " ..
+                FormatUncutCordHeartAmount(record.amount) ..
+                " " ..
+                tostring(roomsCleared) ..
+                "/" ..
+                tostring(UNCUT_CORD_ROOMS_REQUIRED)
+            local debtPosition = Isaac.WorldToScreen(player.Position + UNCUT_CORD_DEBT_OFFSET)
+            RenderUncutCordText(debtText, debtPosition, 1, 0.75, 0.2)
+        end
+
+        local feedback = uncutCordFeedbacks[playerKey]
+        if feedback and (tonumber(feedback.timer) or 0) > 0 then
+            local popupPosition = Isaac.WorldToScreen(player.Position + UNCUT_CORD_POPUP_OFFSET)
+            RenderUncutCordText(feedback.text, popupPosition, feedback.r or 1, feedback.g or 1, feedback.b or 1)
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_RENDER, Neverbirth.RenderUncutCordFeedbacks)
+
+local function ClearUncutCordState()
+    uncutCordDebts = {}
+    uncutCordSettling = {}
+    uncutCordFeedbacks = {}
+end
+
+function Neverbirth:ResetUncutCordState(isContinued)
+    if isContinued then
+        return
+    end
+
+    ClearUncutCordState()
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetUncutCordState)
+end
+
+--------------------------------------------------
+-- 剪碎的塔罗
+
+do
+local SHREDDED_TAROT_LUCK_BONUS = 3
+local SHREDDED_TAROT_CARDS_PER_REWARD = 3
+local SHREDDED_TAROT_MAX_REWARDS = 3
+local SHREDDED_TAROT_TREASURE_POOL = (ItemPoolType and ItemPoolType.POOL_TREASURE) or 0
+local SHREDDED_TAROT_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
+local SHREDDED_TAROT_COLLECTIBLE_VARIANT = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
+local SHREDDED_TAROT_CARD_VARIANT = (PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300
+local SHREDDED_TAROT_NULL_ITEM = (CollectibleType and CollectibleType.COLLECTIBLE_NULL) or 0
+local SHREDDED_TAROT_RUNE_MIN = (Card and Card.RUNE_HAGALAZ) or 32
+local SHREDDED_TAROT_RUNE_MAX = (Card and Card.RUNE_BLACK) or 41
+local SHREDDED_TAROT_RUNE_SHARD = (Card and Card.RUNE_SHARD) or 55
+local SHREDDED_TAROT_SOUL_MIN = (Card and Card.CARD_SOUL_ISAAC) or 81
+local SHREDDED_TAROT_SOUL_MAX = (Card and Card.CARD_SOUL_JACOB) or 97
+
+local shreddedTarotStates = {}
+
+local function BuildShreddedTarotActiveSlots()
+    if not ActiveSlot then
+        return { 0, 1, 2, 3 }
+    end
+
+    local slots = {}
+    if ActiveSlot.SLOT_PRIMARY ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_PRIMARY
+    end
+    if ActiveSlot.SLOT_SECONDARY ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_SECONDARY
+    end
+    if ActiveSlot.SLOT_POCKET ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_POCKET
+    end
+    if ActiveSlot.SLOT_POCKET2 ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_POCKET2
+    end
+
+    return slots
+end
+
+local SHREDDED_TAROT_ACTIVE_SLOTS = BuildShreddedTarotActiveSlots()
+
+local function GetShreddedTarotGame()
+    if not Game then
+        return nil
+    end
+
+    local ok, game = pcall(Game)
+    if ok then
+        return game
+    end
+
+    return nil
+end
+
+local function GetShreddedTarotLevel()
+    local game = GetShreddedTarotGame()
+    if game and game.GetLevel then
+        return game:GetLevel()
+    end
+
+    return nil
+end
+
+local function GetShreddedTarotRoom()
+    local game = GetShreddedTarotGame()
+    if game and game.GetRoom then
+        return game:GetRoom()
+    end
+
+    return nil
+end
+
+local function GetShreddedTarotFloorKey()
+    local level = GetShreddedTarotLevel()
+    if not level then
+        return "unknown"
+    end
+
+    local stage = "?"
+    if level.GetStage then
+        local ok, value = pcall(function()
+            return level:GetStage()
+        end)
+        if ok and value ~= nil then
+            stage = tostring(value)
+        end
+    end
+
+    local stageType = "?"
+    if level.GetStageType then
+        local ok, value = pcall(function()
+            return level:GetStageType()
+        end)
+        if ok and value ~= nil then
+            stageType = tostring(value)
+        end
+    end
+
+    return stage .. ":" .. stageType
+end
+
+local function GetShreddedTarotPlayerKey(player)
+    return tostring(player and player.InitSeed or "")
+end
+
+local function FindShreddedTarotSlot(player, preferredSlot)
+    if not player or not player.GetActiveItem then
+        return nil
+    end
+
+    if preferredSlot ~= nil and player:GetActiveItem(preferredSlot) == Items.ShreddedTarot then
+        return preferredSlot
+    end
+
+    for _, slot in ipairs(SHREDDED_TAROT_ACTIVE_SLOTS) do
+        if player:GetActiveItem(slot) == Items.ShreddedTarot then
+            return slot
+        end
+    end
+
+    return nil
+end
+
+local function PlayerHasShreddedTarot(player)
+    if not player then
+        return false
+    end
+
+    if FindShreddedTarotSlot(player) ~= nil then
+        return true
+    end
+
+    return player.GetCollectibleNum and player:GetCollectibleNum(Items.ShreddedTarot) > 0
+end
+
+local function EnsureShreddedTarotState(player)
+    local playerKey = GetShreddedTarotPlayerKey(player)
+    if playerKey == "" then
+        return nil
+    end
+
+    local state = shreddedTarotStates[playerKey]
+    if type(state) ~= "table" then
+        state = {
+            floorKey = GetShreddedTarotFloorKey(),
+            successfulUse = false,
+        }
+        shreddedTarotStates[playerKey] = state
+    end
+
+    return state
+end
+
+local function RefreshShreddedTarotLuck(player)
+    if not player then
+        return
+    end
+
+    if player.AddCacheFlags and CacheFlag and CacheFlag.CACHE_LUCK then
+        player:AddCacheFlags(CacheFlag.CACHE_LUCK)
+    end
+    if player.EvaluateItems then
+        player:EvaluateItems()
+    end
+end
+
+local function RemoveShreddedTarot(player, slot)
+    if not player or not player.RemoveCollectible then
+        return
+    end
+
+    local targetSlot = slot or FindShreddedTarotSlot(player) or (ActiveSlot and ActiveSlot.SLOT_PRIMARY) or 0
+    player:RemoveCollectible(Items.ShreddedTarot, false, targetSlot, true)
+    RefreshShreddedTarotLuck(player)
+end
+
+local function IsShreddedTarotRuneOrSoulStone(subType)
+    local cardId = tonumber(subType) or 0
+    if cardId >= SHREDDED_TAROT_RUNE_MIN and cardId <= SHREDDED_TAROT_RUNE_MAX then
+        return true
+    end
+
+    if cardId == SHREDDED_TAROT_RUNE_SHARD then
+        return true
+    end
+
+    return cardId >= SHREDDED_TAROT_SOUL_MIN and cardId <= SHREDDED_TAROT_SOUL_MAX
+end
+
+local function IsShreddedTarotCardPickup(entity)
+    if not entity or entity.Type ~= SHREDDED_TAROT_ENTITY_PICKUP or entity.Variant ~= SHREDDED_TAROT_CARD_VARIANT then
+        return false
+    end
+
+    if IsShreddedTarotRuneOrSoulStone(entity.SubType) then
+        return false
+    end
+
+    if entity.IsDead then
+        local ok, isDead = pcall(function()
+            return entity:IsDead()
+        end)
+        if ok and isDead then
+            return false
+        end
+    end
+
+    return true
+end
+
+local function CollectShreddedTarotCards()
+    local cards = {}
+    if not Isaac.GetRoomEntities then
+        return cards
+    end
+
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if IsShreddedTarotCardPickup(entity) then
+            cards[#cards + 1] = entity
+        end
+    end
+
+    return cards
+end
+
+local function RemoveShreddedTarotCards(cards)
+    for _, card in ipairs(cards) do
+        if card and card.Remove then
+            card:Remove()
+        end
+    end
+end
+
+local function GetShreddedTarotRewardSeed(baseSeed, rewardIndex)
+    return (tonumber(baseSeed) or 0) + (tonumber(rewardIndex) or 1) * 1000003 + 1297
+end
+
+local function SelectShreddedTarotReward(rewardIndex)
+    local game = GetShreddedTarotGame()
+    local itemPool = game and game.GetItemPool and game:GetItemPool()
+    local room = GetShreddedTarotRoom()
+    local seed = room and room.GetSpawnSeed and room:GetSpawnSeed() or 0
+
+    if itemPool and itemPool.GetCollectible then
+        return itemPool:GetCollectible(
+            SHREDDED_TAROT_TREASURE_POOL,
+            false,
+            GetShreddedTarotRewardSeed(seed, rewardIndex),
+            SHREDDED_TAROT_NULL_ITEM
+        )
+    end
+
+    return SHREDDED_TAROT_NULL_ITEM
+end
+
+local function SpawnShreddedTarotRewards(player, rewardCount)
+    local game = GetShreddedTarotGame()
+    local room = GetShreddedTarotRoom()
+    if not game or not game.Spawn then
+        return
+    end
+
+    local center = nil
+    if room and room.GetCenterPos then
+        center = room:GetCenterPos()
+    elseif player and player.Position then
+        center = player.Position
+    else
+        center = Vector(320, 280)
+    end
+
+    local spawnSeed = room and room.GetSpawnSeed and room:GetSpawnSeed() or 0
+    local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
+
+    for index = 1, rewardCount do
+        local position = center
+        if Vector then
+            position = center + Vector((index - (rewardCount + 1) / 2) * 40, 0)
+        end
+
+        if room and room.FindFreePickupSpawnPosition then
+            position = room:FindFreePickupSpawnPosition(position, 40, true, false)
+        end
+
+        game:Spawn(
+            SHREDDED_TAROT_ENTITY_PICKUP,
+            SHREDDED_TAROT_COLLECTIBLE_VARIANT,
+            position,
+            velocity,
+            player,
+            SelectShreddedTarotReward(index),
+            spawnSeed + index
+        )
+    end
+end
+
+function Neverbirth:UseShreddedTarot(_, _, player, _, activeSlot)
+    if not player then
+        return false
+    end
+
+    local slot = FindShreddedTarotSlot(player, activeSlot) or activeSlot or (ActiveSlot and ActiveSlot.SLOT_PRIMARY) or 0
+    local state = EnsureShreddedTarotState(player)
+    local cards = CollectShreddedTarotCards()
+    local rewardCount = math.min(math.floor(#cards / SHREDDED_TAROT_CARDS_PER_REWARD), SHREDDED_TAROT_MAX_REWARDS)
+
+    if rewardCount <= 0 then
+        return false
+    end
+
+    RemoveShreddedTarotCards(cards)
+    SpawnShreddedTarotRewards(player, rewardCount)
+
+    if state then
+        state.successfulUse = true
+    end
+    RemoveShreddedTarot(player, slot)
+    if not PlayerHasShreddedTarot(player) then
+        shreddedTarotStates[GetShreddedTarotPlayerKey(player)] = nil
+    end
+    return true
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseShreddedTarot, Items.ShreddedTarot)
+
+function Neverbirth:EvaluateShreddedTarot(player, cacheFlag)
+    if CacheFlag and CacheFlag.CACHE_LUCK and cacheFlag == CacheFlag.CACHE_LUCK and PlayerHasShreddedTarot(player) then
+        player.Luck = player.Luck + SHREDDED_TAROT_LUCK_BONUS
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateShreddedTarot)
+
+function Neverbirth:TrackShreddedTarotHolders()
+    for _, player in ipairs(GetPlayers()) do
+        local playerKey = GetShreddedTarotPlayerKey(player)
+        if PlayerHasShreddedTarot(player) then
+            EnsureShreddedTarotState(player)
+        elseif playerKey ~= "" then
+            shreddedTarotStates[playerKey] = nil
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackShreddedTarotHolders)
+
+function Neverbirth:RemoveUnusedShreddedTarotOnNewLevel()
+    local currentFloorKey = GetShreddedTarotFloorKey()
+    for _, player in ipairs(GetPlayers()) do
+        local playerKey = GetShreddedTarotPlayerKey(player)
+        if PlayerHasShreddedTarot(player) then
+            local state = shreddedTarotStates[playerKey]
+            if type(state) == "table" and state.floorKey ~= currentFloorKey and not state.successfulUse then
+                RemoveShreddedTarot(player, FindShreddedTarotSlot(player))
+                shreddedTarotStates[playerKey] = nil
+            elseif type(state) ~= "table" then
+                EnsureShreddedTarotState(player)
+            end
+        elseif playerKey ~= "" then
+            shreddedTarotStates[playerKey] = nil
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_LEVEL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.RemoveUnusedShreddedTarotOnNewLevel)
+end
+
+function Neverbirth:ResetShreddedTarotState(isContinued)
+    if isContinued then
+        return
+    end
+
+    shreddedTarotStates = {}
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetShreddedTarotState)
+end
+end
 
 --------------------------------------------------
 -- 天使盒

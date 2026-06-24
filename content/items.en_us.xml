@@ -17,6 +17,25 @@
     quality="4"
     tags="offensive summonable"
   />
+  <!-- 被动道具：未剪断的脐带 -->
+  <passive
+    name="Uncut Cord"
+    cache="all"
+    description="Half now, half later"
+    gfx="UncutCord.png"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 主动道具：剪碎的塔罗 -->
+  <active
+    name="Shredded Tarot"
+    cache="luck"
+    maxcharges="0"
+    description="Cut the deck"
+    gfx="ShreddedTarot.png"
+    quality="3"
+    tags="summonable"
+  />
   <!-- 主动道具：春药 -->
   <active
     name="Aphrodisiac"

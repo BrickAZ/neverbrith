@@ -1,8 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-	<name>neverbrith</name>
-	<directory>neverbrith</directory>
-	<description/>
-	<version>1.0</version>
-	<visibility/>
-</metadata>
+    <name>neverbrith</name>
+    <directory>neverbrith</directory>
+    <description>neverbrith is a The Binding of Isaac: Repentance mod by brick（青春啊砖在he边看月亮）.
 
+This mod adds a growing set of custom items with EID support and Chinese/English text:
+
+[list]
+[*] Musicbox - a powerful timed active item with a deadly debt.
+[*] Angelbox and Devilbox - charge-driven room direction items with extra deal-room rewards.
+[*] Uncut Cord - delays incoming damage and lets skilled play reduce the debt.
+[*] Shredded Tarot - turns card pickups into Treasure Room item pedestals.
+[*] Essential Balm, Wuhu, Aphrodisiac, and more experimental items.
+[/list]
+
+Author:
+brick（青春啊砖在he边看月亮）
+
+Links:
+[url=https://www.youtube.com/@Brickzhou]YouTube: Brickzhou[/url]
+Bilibili: search 青春啊砖在he边看月亮
+[url=https://github.com/BrickAZ/neverbrith]GitHub source[/url]</description>
+    <version>1.0</version>
+    <visibility>Public</visibility>
+    <tag id="Lua"/>
+    <tag id="Items"/>
+    <tag id="Active Items"/>
+    <tag id="Cards"/>
+</metadata>

@@ -17,6 +17,8 @@
 
     <Pool Name="treasure"> <!-- 宝箱 -->
         <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="未剪断的脐带" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="剪碎的塔罗" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="shop"> <!-- 商店 -->
@@ -31,6 +33,10 @@
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
         <Item Name="恶魔盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="craneGame"> <!-- 赌博乞丐 -->
+        <Item Name="剪碎的塔罗" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="goldenChest"> <!-- 金箱子 -->

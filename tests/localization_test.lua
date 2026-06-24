@@ -25,8 +25,19 @@ local function loadNeverbirthWithEID(options)
         Angelbox = 737,
         Devilbox = 738,
         ds4 = 739,
+        UncutCord = 740,
+        ShreddedTarot = 741,
     }
-    local itemIdsByLoadedName = options.itemIdsByLoadedName or logicalItemIds
+    local defaultItemIdsByLoadedName = {}
+    for name, itemId in pairs(logicalItemIds) do
+        defaultItemIdsByLoadedName[name] = itemId
+    end
+    defaultItemIdsByLoadedName["Uncut Cord"] = logicalItemIds.UncutCord
+    defaultItemIdsByLoadedName["未剪断的脐带"] = logicalItemIds.UncutCord
+    defaultItemIdsByLoadedName["Shredded Tarot"] = logicalItemIds.ShreddedTarot
+    defaultItemIdsByLoadedName["剪碎的塔罗"] = logicalItemIds.ShreddedTarot
+
+    local itemIdsByLoadedName = options.itemIdsByLoadedName or defaultItemIdsByLoadedName
     local eidCalls = {}
 
     package.loaded.json = nil
@@ -61,6 +72,7 @@ local function loadNeverbirthWithEID(options)
         CACHE_SPEED = 8,
         CACHE_FIREDELAY = 16,
         CACHE_TEARFLAG = 32,
+        CACHE_LUCK = 1024,
     }
     DamageFlag = {
         DAMAGE_RED_HEARTS = 1,
@@ -70,9 +82,9 @@ local function loadNeverbirthWithEID(options)
     EntityFlag = { FLAG_CHARM = 1 }
     TearFlags = { TEAR_HOMING = 1 }
     EntityType = { ENTITY_PLAYER = 1, ENTITY_PICKUP = 5 }
-    PickupVariant = { PICKUP_HEART = 10, PICKUP_COLLECTIBLE = 100 }
+    PickupVariant = { PICKUP_HEART = 10, PICKUP_PILL = 70, PICKUP_COLLECTIBLE = 100, PICKUP_TAROTCARD = 300 }
     HeartSubType = { HEART_SOUL = 3, HEART_BLACK = 6 }
-    ItemPoolType = { POOL_DEVIL = 3, POOL_ANGEL = 4 }
+    ItemPoolType = { POOL_TREASURE = 0, POOL_DEVIL = 3, POOL_ANGEL = 4 }
     RoomType = { ROOM_DEVIL = 14, ROOM_ANGEL = 15 }
     GameStateFlag = {
         STATE_DEVILROOM_SPAWNED = 5,
@@ -84,6 +96,13 @@ local function loadNeverbirthWithEID(options)
         SLOT_SECONDARY = 1,
         SLOT_POCKET = 2,
         SLOT_POCKET2 = 3,
+    }
+    Card = {
+        RUNE_HAGALAZ = 32,
+        RUNE_BLACK = 41,
+        RUNE_SHARD = 55,
+        CARD_SOUL_ISAAC = 81,
+        CARD_SOUL_JACOB = 97,
     }
 
     function MusicManager()
@@ -236,6 +255,18 @@ local expectedXmlItems = {
         description = "",
         zhDescription = "",
     },
+    UncutCord = {
+        enName = "Uncut Cord",
+        zhName = "未剪断的脐带",
+        description = "Half now, half later",
+        zhDescription = "一半现在，一半以后",
+    },
+    ShreddedTarot = {
+        enName = "Shredded Tarot",
+        zhName = "剪碎的塔罗",
+        description = "Cut the deck",
+        zhDescription = "把命运剪碎",
+    },
 }
 
 local expectedEID = {
@@ -309,6 +340,26 @@ local expectedEID = {
             description = "{{Warning}} 效果尚未实现",
         },
     },
+    UncutCord = {
+        en_us = {
+            name = "Uncut Cord",
+            description = "50% chance to delay incoming damage instead of taking it immediately#Clear 2 rooms without getting hit to take only half of the delayed damage#Getting hit again triggers the full delayed damage immediately",
+        },
+        zh_cn = {
+            name = "未剪断的脐带",
+            description = "受到伤害时，50%概率将本次伤害变为延迟伤害#连续通过2个房间且未再次受伤后，只承受一半延迟伤害#若期间再次受伤，立即承受全部延迟伤害",
+        },
+    },
+    ShreddedTarot = {
+        en_us = {
+            name = "Shredded Tarot",
+            description = "{{Luck}} +3 Luck while held#Single-use active item#Removes card pickups in the current room#For every 3 cards removed, spawns 1 Treasure Room item#Not consumed if fewer than 3 cards are present#Empty use does not count; disappears after this floor if unused",
+        },
+        zh_cn = {
+            name = "剪碎的塔罗",
+            description = "持有时 {{Luck}} +3 幸运#一次性使用#移除当前房间内的地上卡牌#每移除3张卡牌，生成1个宝箱房道具#卡牌不足3张时不会消耗#空拍不算使用，本层结束仍会消失",
+        },
+    },
 }
 
 local function findEIDCall(calls, id, language)
@@ -335,7 +386,7 @@ local function test_eid_registers_explicit_english_and_chinese_descriptions()
         end
     end
 
-    assertEquals(#env.eidCalls, 14, "EID should register exactly two languages for each item")
+    assertEquals(#env.eidCalls, 18, "EID should register exactly two languages for each item")
     for _, call in ipairs(env.eidCalls) do
         assertTruthy(call.language == "en_us" or call.language == "zh_cn", "EID language should be explicit for every registration")
         if call.language == "en_us" then

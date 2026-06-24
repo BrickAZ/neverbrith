@@ -17,6 +17,25 @@
     quality="4"
     tags="offensive summonable"
   />
+  <!-- 被动道具：未剪断的脐带 -->
+  <passive
+    name="未剪断的脐带"
+    cache="all"
+    description="一半现在，一半以后"
+    gfx="UncutCord.png"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 主动道具：剪碎的塔罗 -->
+  <active
+    name="剪碎的塔罗"
+    cache="luck"
+    maxcharges="0"
+    description="把命运剪碎"
+    gfx="ShreddedTarot.png"
+    quality="3"
+    tags="summonable"
+  />
   <!-- 主动道具：春药 -->
   <active
     name="春药"
