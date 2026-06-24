@@ -27,6 +27,9 @@ local function loadNeverbirthWithEID(options)
         ds4 = 739,
         UncutCord = 740,
         ShreddedTarot = 741,
+        SterilizationCertificate = 742,
+        EmptyCradle = 743,
+        BloodSkullGu = 744,
     }
     local defaultItemIdsByLoadedName = {}
     for name, itemId in pairs(logicalItemIds) do
@@ -36,6 +39,12 @@ local function loadNeverbirthWithEID(options)
     defaultItemIdsByLoadedName["未剪断的脐带"] = logicalItemIds.UncutCord
     defaultItemIdsByLoadedName["Shredded Tarot"] = logicalItemIds.ShreddedTarot
     defaultItemIdsByLoadedName["剪碎的塔罗"] = logicalItemIds.ShreddedTarot
+    defaultItemIdsByLoadedName["Sterilization Certificate"] = logicalItemIds.SterilizationCertificate
+    defaultItemIdsByLoadedName["绝育证明"] = logicalItemIds.SterilizationCertificate
+    defaultItemIdsByLoadedName["Empty Cradle"] = logicalItemIds.EmptyCradle
+    defaultItemIdsByLoadedName["空摇篮"] = logicalItemIds.EmptyCradle
+    defaultItemIdsByLoadedName["Blood Skull Gu"] = logicalItemIds.BloodSkullGu
+    defaultItemIdsByLoadedName["血颅蛊"] = logicalItemIds.BloodSkullGu
 
     local itemIdsByLoadedName = options.itemIdsByLoadedName or defaultItemIdsByLoadedName
     local eidCalls = {}
@@ -267,6 +276,24 @@ local expectedXmlItems = {
         description = "Cut the deck",
         zhDescription = "把命运剪碎",
     },
+    SterilizationCertificate = {
+        enName = "Sterilization Certificate",
+        zhName = "绝育证明",
+        description = "No more births",
+        zhDescription = "不许再生",
+    },
+    EmptyCradle = {
+        enName = "Empty Cradle",
+        zhName = "空摇篮",
+        description = "Remembered harm",
+        zhDescription = "伤痕会回应",
+    },
+    BloodSkullGu = {
+        enName = "Blood Skull Gu",
+        zhName = "血颅蛊",
+        description = "Slaughter your kin to purify your aptitude.",
+        zhDescription = "杀亲证道，提纯资质。",
+    },
 }
 
 local expectedEID = {
@@ -313,21 +340,21 @@ local expectedEID = {
     Angelbox = {
         en_us = {
             name = "Angel Box",
-            description = "First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Favors angel rooms while held",
+            description = "{{Luck}} +3 Luck while held#First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Heart drops have a 10% chance to add a soul heart#Favors angel rooms while held",
         },
         zh_cn = {
             name = "天使盒",
-            description = "每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满12格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#持有时一半恶魔房概率转为天使房概率",
+            description = "持有时 {{Luck}} +3 幸运#每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满6格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#地上心掉落有10%额外生成1个完整魂心#持有时一半恶魔房概率转为天使房概率",
         },
     },
     Devilbox = {
         en_us = {
             name = "Devil Box",
-            description = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Favors devil rooms while held",
+            description = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Heart drops have a 20% chance to add a black heart#Favors devil rooms while held",
         },
         zh_cn = {
             name = "恶魔盒",
-            description = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满12格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#持有时一半交易房方向转为恶魔房概率",
+            description = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满6格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#地上心掉落有20%额外生成1个黑心#持有时一半交易房方向转为恶魔房概率",
         },
     },
     ds4 = {
@@ -360,6 +387,36 @@ local expectedEID = {
             description = "持有时 {{Luck}} +3 幸运#一次性使用#移除当前房间内的地上卡牌#每移除3张卡牌，生成1个宝箱房道具#卡牌不足3张时不会消耗#空拍不算使用，本层结束仍会消失",
         },
     },
+    BloodSkullGu = {
+        en_us = {
+            name = "Blood Skull Gu",
+            description = "3-charge active item#Sacrifice one familiar item you own#{{Damage}} Permanently gain +1.5 damage#{{Range}} Permanently gain +1 range#Drops 1-2 black hearts#If no familiar item can be sacrificed, take half a red heart of backlash damage instead",
+        },
+        zh_cn = {
+            name = "血颅蛊",
+            description = "3充能主动道具#献祭1个属于你的跟班类道具#{{Damage}} 永久 +1.5 攻击#{{Range}} 永久 +1 射程#掉落1-2个黑心#没有可献祭跟班类道具时，反噬并受到半颗红心伤害",
+        },
+    },
+    SterilizationCertificate = {
+        en_us = {
+            name = "Sterilization Certificate",
+            description = "Prevents spawning enemies from creating more enemies#Blocked spawns deal backlash damage to the source enemy#Boss summons are only partially weakened",
+        },
+        zh_cn = {
+            name = "绝育证明",
+            description = "阻止会生成敌人的敌人继续生成敌人#每次阻止生成时，对该敌人造成反噬伤害#Boss 召唤效果只会被部分削弱",
+        },
+    },
+    EmptyCradle = {
+        en_us = {
+            name = "Empty Cradle",
+            description = "The first effective damage each floor remembers the lost heart type#Clear that room for a reward: red hearts give hearts, soul hearts give pickups, black hearts give floor damage#Taking another hit before the room is clear downgrades the reward#Black-heart damage bonuses last for this floor only",
+        },
+        zh_cn = {
+            name = "空摇篮",
+            description = "每层第一次有效受伤会记录损失的心形类型#清理当前房间后获得对应奖励：红心给心，魂心给资源，黑心给本层攻击力#清房前再次受伤会降为基础奖励#黑心奖励的攻击力加成换层清除",
+        },
+    },
 }
 
 local function findEIDCall(calls, id, language)
@@ -386,7 +443,7 @@ local function test_eid_registers_explicit_english_and_chinese_descriptions()
         end
     end
 
-    assertEquals(#env.eidCalls, 18, "EID should register exactly two languages for each item")
+    assertEquals(#env.eidCalls, 24, "EID should register exactly two languages for each item")
     for _, call in ipairs(env.eidCalls) do
         assertTruthy(call.language == "en_us" or call.language == "zh_cn", "EID language should be explicit for every registration")
         if call.language == "en_us" then

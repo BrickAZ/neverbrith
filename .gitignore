@@ -1,6 +1,8 @@
 .agents/
 .codex/
 tmp/
+node_modules/
+outputs/
 
 # Local editor and OS files
 .DS_Store

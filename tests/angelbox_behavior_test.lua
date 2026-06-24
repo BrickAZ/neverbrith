@@ -59,6 +59,7 @@ local function loadNeverbirth(savedStore)
         MC_PRE_PICKUP_COLLISION = 7,
         MC_POST_NEW_ROOM = 8,
         MC_POST_NEW_LEVEL = 9,
+        MC_POST_PICKUP_INIT = 10,
     }
 
     CollectibleType = {
@@ -87,6 +88,7 @@ local function loadNeverbirth(savedStore)
         CACHE_SPEED = 8,
         CACHE_FIREDELAY = 16,
         CACHE_TEARFLAG = 32,
+        CACHE_LUCK = 1024,
     }
     DamageFlag = {
         DAMAGE_RED_HEARTS = 1,
@@ -452,7 +454,8 @@ local function loadNeverbirth(savedStore)
             killCount = 0,
             cacheFlags = {},
             activeItems = options.activeItems or { [ActiveSlot.SLOT_PRIMARY] = itemIds.Angelbox },
-            activeCharges = options.activeCharges or { [ActiveSlot.SLOT_PRIMARY] = 12 },
+            activeCharges = options.activeCharges or { [ActiveSlot.SLOT_PRIMARY] = 6 },
+            collectibles = options.collectibles or {},
             maxHearts = options.maxHearts or 6,
             effectiveMaxHearts = options.effectiveMaxHearts,
             soulHearts = options.soulHearts or 0,
@@ -460,6 +463,7 @@ local function loadNeverbirth(savedStore)
             heartLimit = options.heartLimit or 24,
             addedSoulHearts = 0,
             addedBlackHearts = 0,
+            Luck = options.luck or 0,
         }
 
         function player:ToPlayer()
@@ -481,6 +485,9 @@ local function loadNeverbirth(savedStore)
             if itemId == itemIds.Devilbox and self.hasDevilboxCollectibleCount then
                 return self.hasDevilboxCollectibleCount
             end
+            if self.collectibles[itemId] then
+                return self.collectibles[itemId]
+            end
             return 0
         end
 
@@ -501,7 +508,7 @@ local function loadNeverbirth(savedStore)
         end
 
         function player:NeedsCharge(slot)
-            return self:GetActiveCharge(slot) < 12
+            return self:GetActiveCharge(slot) < 6
         end
 
         function player:GetMaxHearts()
@@ -551,11 +558,15 @@ local function loadNeverbirth(savedStore)
         return player
     end
 
-    local function newHeartPickup(subtype)
+    local nextPickupSeed = 1000
+    local function newHeartPickup(subtype, initSeed)
+        nextPickupSeed = nextPickupSeed + 1
         local pickup = {
+            InitSeed = initSeed or nextPickupSeed,
             Type = EntityType.ENTITY_PICKUP,
             Variant = PickupVariant.PICKUP_HEART,
             SubType = subtype or HeartSubType.HEART_SOUL,
+            Position = Vector(40, 40),
             removed = false,
             pickupSounds = 0,
         }
@@ -571,12 +582,12 @@ local function loadNeverbirth(savedStore)
         return pickup
     end
 
-    local function newSoulHeartPickup(subtype)
-        return newHeartPickup(subtype or HeartSubType.HEART_SOUL)
+    local function newSoulHeartPickup(subtype, initSeed)
+        return newHeartPickup(subtype or HeartSubType.HEART_SOUL, initSeed)
     end
 
-    local function newBlackHeartPickup()
-        return newHeartPickup(HeartSubType.HEART_BLACK)
+    local function newBlackHeartPickup(initSeed)
+        return newHeartPickup(HeartSubType.HEART_BLACK, initSeed)
     end
 
     return {
@@ -592,6 +603,7 @@ local function loadNeverbirth(savedStore)
         getCallback = getCallback,
         getCallbacks = getCallbacks,
         newPlayer = newPlayer,
+        newHeartPickup = newHeartPickup,
         newSoulHeartPickup = newSoulHeartPickup,
         newBlackHeartPickup = newBlackHeartPickup,
     }
@@ -623,19 +635,103 @@ local function runPickupCollision(env, pickup, player)
     return nil
 end
 
-local function getItemXmlQuality(itemName)
+local function runPostPickupInit(env, pickup)
+    for _, callback in ipairs(env.getCallbacks(ModCallbacks.MC_POST_PICKUP_INIT, PickupVariant.PICKUP_HEART)) do
+        callback(env.mod, pickup)
+    end
+end
+
+local function getItemXmlAttribute(itemName, attribute)
     local file = assert(io.open("content/items.xml", "r"))
     local text = file:read("*a")
     file:close()
 
     local block = text:match('<active%s+name="' .. itemName .. '"(.-)/>')
     assertTruthy(block, "items.xml should contain active item " .. itemName)
-    return block:match('quality="(%d+)"')
+    return block:match(attribute .. '="([^"]+)"')
+end
+
+local function getItemXmlQuality(itemName)
+    return getItemXmlAttribute(itemName, "quality")
 end
 
 local function test_devilbox_is_quality_four_and_angelbox_stays_quality_three()
     assertEquals(getItemXmlQuality("Devilbox"), "4", "Devilbox should be a quality 4 item")
     assertEquals(getItemXmlQuality("Angelbox"), "3", "Angelbox should remain a quality 3 item")
+end
+
+local function test_angelbox_grants_three_luck_while_held()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ luck = 1 })
+    local evaluateCallbacks = env.getCallbacks(ModCallbacks.MC_EVALUATE_CACHE)
+
+    for _, callback in ipairs(evaluateCallbacks) do
+        callback(env.mod, player, CacheFlag.CACHE_LUCK)
+    end
+    assertEquals(player.Luck, 4, "Angelbox should grant +3 Luck while held")
+
+    player.activeItems[ActiveSlot.SLOT_PRIMARY] = 0
+    player.Luck = 1
+    for _, callback in ipairs(evaluateCallbacks) do
+        callback(env.mod, player, CacheFlag.CACHE_LUCK)
+    end
+    assertEquals(player.Luck, 1, "Angelbox Luck bonus should disappear when not held")
+end
+
+local function test_box_heart_spawn_bonus_rolls_are_independent_and_non_recursive()
+    local env = loadNeverbirth()
+    env.newPlayer({ activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Angelbox } })
+    env.newPlayer({
+        initSeed = 222,
+        activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
+    })
+
+    runPostPickupInit(env, env.newHeartPickup(HeartSubType.HEART_SOUL, 5))
+    assertEquals(#env.spawned, 2, "seed below both thresholds should spawn both bonus hearts")
+    assertEquals(env.spawned[1].Variant, PickupVariant.PICKUP_HEART, "Angelbox bonus should be a heart pickup")
+    assertEquals(env.spawned[1].SubType, HeartSubType.HEART_SOUL, "Angelbox bonus should be a full soul heart")
+    assertEquals(env.spawned[2].SubType, HeartSubType.HEART_BLACK, "Devilbox bonus should be a black heart")
+
+    runPostPickupInit(env, env.spawned[1])
+    runPostPickupInit(env, env.spawned[2])
+    assertEquals(#env.spawned, 2, "bonus hearts should not recursively create more bonus hearts")
+end
+
+local function test_angelbox_heart_bonus_miss_and_devilbox_hit_thresholds()
+    local angelEnv = loadNeverbirth()
+    angelEnv.newPlayer({ activeItems = { [ActiveSlot.SLOT_PRIMARY] = angelEnv.items.Angelbox } })
+    runPostPickupInit(angelEnv, angelEnv.newHeartPickup(HeartSubType.HEART_SOUL, 10))
+    assertEquals(#angelEnv.spawned, 0, "Angelbox 10% bonus should miss at roll 10")
+
+    local devilEnv = loadNeverbirth()
+    devilEnv.newPlayer({
+        activeItems = { [ActiveSlot.SLOT_PRIMARY] = devilEnv.items.Devilbox },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
+    })
+    runPostPickupInit(devilEnv, devilEnv.newHeartPickup(HeartSubType.HEART_SOUL, 12))
+    assertEquals(#devilEnv.spawned, 1, "Devilbox 20% bonus should hit below 20")
+    assertEquals(devilEnv.spawned[1].SubType, HeartSubType.HEART_BLACK, "Devilbox bonus should be a black heart")
+
+    runPostPickupInit(devilEnv, devilEnv.newHeartPickup(HeartSubType.HEART_SOUL, 13))
+    assertEquals(#devilEnv.spawned, 1, "Devilbox 20% bonus should miss at roll 20")
+end
+
+local function test_multiple_same_box_holders_do_not_stack_same_bonus()
+    local env = loadNeverbirth()
+    env.newPlayer({ initSeed = 111, activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Angelbox } })
+    env.newPlayer({ initSeed = 222, activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Angelbox } })
+
+    runPostPickupInit(env, env.newHeartPickup(HeartSubType.HEART_SOUL, 5))
+    assertEquals(#env.spawned, 1, "multiple Angelbox holders should only roll one Angelbox bonus")
+    assertEquals(env.spawned[1].SubType, HeartSubType.HEART_SOUL, "single Angelbox bonus should be a full soul heart")
+end
+
+local function test_box_xml_charges_are_six_and_start_full()
+    assertEquals(getItemXmlAttribute("Angelbox", "maxcharges"), "6", "Angelbox max charge should be 6")
+    assertEquals(getItemXmlAttribute("Angelbox", "initcharge"), "6", "Angelbox initial charge should be full at 6")
+    assertEquals(getItemXmlAttribute("Devilbox", "maxcharges"), "6", "Devilbox max charge should be 6")
+    assertEquals(getItemXmlAttribute("Devilbox", "initcharge"), "6", "Devilbox initial charge should be full at 6")
 end
 
 local function test_first_use_grants_one_full_soul_heart_per_red_container()
@@ -657,7 +753,7 @@ local function test_first_use_is_tracked_per_player()
     local useAngelbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Angelbox)
 
     useAngelbox(env.mod, env.items.Angelbox, nil, playerA, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    playerB:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    playerB:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     local playerBResult = useAngelbox(env.mod, env.items.Angelbox, nil, playerB, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     assertEquals(playerBResult, true, "another player's first Angelbox use should succeed")
@@ -668,7 +764,7 @@ end
 
 local function test_soul_heart_pickups_only_charge_overflow()
     local env = loadNeverbirth()
-    local player = env.newPlayer({ maxHearts = 20, soulHearts = 0, activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 } })
+    local player = env.newPlayer({ maxHearts = 20, soulHearts = 0, activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 } })
     local useAngelbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Angelbox)
     local collide = env.getCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, PickupVariant.PICKUP_HEART)
 
@@ -702,11 +798,16 @@ local function test_soul_heart_pickups_only_charge_overflow()
     assertEquals(player.addedSoulHearts, 0, "full overflow pickup should not add health")
     assertEquals(player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY), 2, "full soul heart overflow should add two Angelbox charges")
     assertEquals(fullOverflowPickup.removed, true, "full overflow pickup should be consumed")
+
+    player.soulHearts = 4
+    player:SetActiveCharge(4, ActiveSlot.SLOT_PRIMARY)
+    collide(env.mod, env.newSoulHeartPickup(HeartSubType.HEART_SOUL), player, false)
+    assertEquals(player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY), 6, "three full overflowing soul hearts should fully charge Angelbox")
 end
 
 local function test_charged_repeat_use_forces_angel_room_and_spawns_one_quality_four_reward()
     local env = loadNeverbirth()
-    local player = env.newPlayer({ maxHearts = 6, activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 } })
+    local player = env.newPlayer({ maxHearts = 6, activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 } })
     local useAngelbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Angelbox)
 
     env.itemPool.angelItems = {
@@ -715,7 +816,7 @@ local function test_charged_repeat_use_forces_angel_room_and_spawns_one_quality_
     }
 
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
 
     local repeatResult = useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     assertEquals(repeatResult, true, "charged repeat Angelbox use should succeed")
@@ -737,6 +838,19 @@ local function test_charged_repeat_use_forces_angel_room_and_spawns_one_quality_
     assertEquals(#env.spawned, 1, "angel room reward should only spawn once per charged use")
 end
 
+local function test_five_charge_repeat_angelbox_use_does_not_fire()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ maxHearts = 6, activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 } })
+    local useAngelbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Angelbox)
+
+    useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
+    player:SetActiveCharge(5, ActiveSlot.SLOT_PRIMARY)
+
+    local repeatResult = useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
+    assertEquals(repeatResult, false, "Angelbox should require all 6 charges for repeat use")
+    assertEquals(#env.level.initializeCalls, 0, "undercharged Angelbox should not force angel room")
+end
+
 local function test_angelbox_reward_fallback_is_not_fixed_to_sacred_heart()
     local env = loadNeverbirth()
     local player = env.newPlayer({ maxHearts = 6 })
@@ -745,7 +859,7 @@ local function test_angelbox_reward_fallback_is_not_fixed_to_sacred_heart()
     env.itemPool.angelItems = {}
     env.itemPool.fallbackItem = 72
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     env.room.roomType = RoomType.ROOM_ANGEL
@@ -767,11 +881,11 @@ local function test_different_players_can_each_add_one_angel_room_reward()
     }
 
     useAngelbox(env.mod, env.items.Angelbox, nil, playerA, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    playerA:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    playerA:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, playerA, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     useAngelbox(env.mod, env.items.Angelbox, nil, playerB, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    playerB:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    playerB:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, playerB, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     env.room.roomType = RoomType.ROOM_ANGEL
@@ -787,9 +901,9 @@ local function test_same_player_only_adds_one_angel_room_reward_per_floor()
     local useAngelbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Angelbox)
 
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     env.room.roomType = RoomType.ROOM_ANGEL
@@ -807,7 +921,7 @@ local function test_repeat_use_after_angel_room_was_entered_does_not_add_reward(
     env.room.roomType = RoomType.ROOM_ANGEL
     runPostNewRoom(env)
 
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     runPostNewRoom(env)
 
@@ -848,7 +962,7 @@ local function test_repeat_use_upgrades_held_chance_to_one_without_stacking()
 
     runPostUpdates(env, 1)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     assertEquals(env.level.angelRoomChanceDelta, 1, "repeat use should upgrade total Angelbox chance modifier to one, not stack to 1.5")
@@ -861,7 +975,7 @@ local function test_repeat_use_keeps_guaranteed_angel_room_after_losing_angelbox
 
     runPostUpdates(env, 1)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     player.activeItems[ActiveSlot.SLOT_PRIMARY] = 0
     runPostUpdates(env, 1)
@@ -874,7 +988,7 @@ local function test_devilbox_first_use_grants_one_full_black_heart_per_red_conta
     local player = env.newPlayer({
         maxHearts = 6,
         activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
-        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
     })
     local useDevilbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Devilbox)
 
@@ -891,7 +1005,7 @@ local function test_black_heart_pickups_only_charge_devilbox_overflow()
         maxHearts = 20,
         soulHearts = 0,
         activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
-        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
     })
     local useDevilbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Devilbox)
 
@@ -922,6 +1036,11 @@ local function test_black_heart_pickups_only_charge_devilbox_overflow()
     assertEquals(fullOverflowResult, true, "full overflow black heart should be handled by Devilbox")
     assertEquals(player.addedBlackHearts, 0, "full overflow black heart should not add health")
     assertEquals(player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY), 2, "full black heart overflow should add two Devilbox charges")
+
+    player.soulHearts = 4
+    player:SetActiveCharge(4, ActiveSlot.SLOT_PRIMARY)
+    runPickupCollision(env, env.newBlackHeartPickup(), player)
+    assertEquals(player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY), 6, "three full overflowing black hearts should fully charge Devilbox")
 end
 
 local function test_devilbox_repeat_use_forces_devil_room_and_spawns_quality_three_reward()
@@ -929,7 +1048,7 @@ local function test_devilbox_repeat_use_forces_devil_room_and_spawns_quality_thr
     local player = env.newPlayer({
         maxHearts = 6,
         activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
-        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
     })
     local useDevilbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Devilbox)
     env.itemPool.devilItems = {
@@ -939,7 +1058,7 @@ local function test_devilbox_repeat_use_forces_devil_room_and_spawns_quality_thr
     }
 
     useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
 
     local repeatResult = useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     assertEquals(repeatResult, true, "charged repeat Devilbox use should succeed")
@@ -960,19 +1079,36 @@ local function test_devilbox_repeat_use_forces_devil_room_and_spawns_quality_thr
     assertEquals(env.itemPool.requests[1].seed == env.itemPool.requests[2].seed, false, "devil quality-three search should vary item pool seeds")
 end
 
+local function test_five_charge_repeat_devilbox_use_does_not_fire()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        maxHearts = 6,
+        activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
+    })
+    local useDevilbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Devilbox)
+
+    useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
+    player:SetActiveCharge(5, ActiveSlot.SLOT_PRIMARY)
+
+    local repeatResult = useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
+    assertEquals(repeatResult, false, "Devilbox should require all 6 charges for repeat use")
+    assertEquals(#env.level.initializeCalls, 0, "undercharged Devilbox should not force devil room")
+end
+
 local function test_different_players_can_each_add_one_devil_room_reward()
     local env = loadNeverbirth()
     local playerA = env.newPlayer({
         initSeed = 111,
         maxHearts = 6,
         activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
-        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
     })
     local playerB = env.newPlayer({
         initSeed = 222,
         maxHearts = 4,
         activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
-        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
     })
     local useDevilbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Devilbox)
 
@@ -982,11 +1118,11 @@ local function test_different_players_can_each_add_one_devil_room_reward()
     }
 
     useDevilbox(env.mod, env.items.Devilbox, nil, playerA, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    playerA:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    playerA:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useDevilbox(env.mod, env.items.Devilbox, nil, playerA, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     useDevilbox(env.mod, env.items.Devilbox, nil, playerB, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    playerB:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    playerB:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useDevilbox(env.mod, env.items.Devilbox, nil, playerB, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
     env.room.roomType = RoomType.ROOM_DEVIL
@@ -1001,7 +1137,7 @@ local function test_devilbox_held_and_forced_chance_do_not_stack_wrong()
     local player = env.newPlayer({
         maxHearts = 6,
         activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Devilbox },
-        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 12 },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 6 },
     })
     local useDevilbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Devilbox)
 
@@ -1009,7 +1145,7 @@ local function test_devilbox_held_and_forced_chance_do_not_stack_wrong()
     assertEquals(env.level.angelRoomChanceDelta, -0.5, "held Devilbox should convert half the deal direction to devil")
 
     useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    player:SetActiveCharge(12, ActiveSlot.SLOT_PRIMARY)
+    player:SetActiveCharge(6, ActiveSlot.SLOT_PRIMARY)
     useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     assertEquals(env.level.angelRoomChanceDelta, -1, "repeat Devilbox use should upgrade total modifier to -1, not stack to -1.5")
 
@@ -1019,10 +1155,16 @@ local function test_devilbox_held_and_forced_chance_do_not_stack_wrong()
 end
 
 test_devilbox_is_quality_four_and_angelbox_stays_quality_three()
+test_angelbox_grants_three_luck_while_held()
+test_box_heart_spawn_bonus_rolls_are_independent_and_non_recursive()
+test_angelbox_heart_bonus_miss_and_devilbox_hit_thresholds()
+test_multiple_same_box_holders_do_not_stack_same_bonus()
+test_box_xml_charges_are_six_and_start_full()
 test_first_use_grants_one_full_soul_heart_per_red_container()
 test_first_use_is_tracked_per_player()
 test_soul_heart_pickups_only_charge_overflow()
 test_charged_repeat_use_forces_angel_room_and_spawns_one_quality_four_reward()
+test_five_charge_repeat_angelbox_use_does_not_fire()
 test_angelbox_reward_fallback_is_not_fixed_to_sacred_heart()
 test_different_players_can_each_add_one_angel_room_reward()
 test_same_player_only_adds_one_angel_room_reward_per_floor()
@@ -1034,6 +1176,7 @@ test_repeat_use_keeps_guaranteed_angel_room_after_losing_angelbox()
 test_devilbox_first_use_grants_one_full_black_heart_per_red_container()
 test_black_heart_pickups_only_charge_devilbox_overflow()
 test_devilbox_repeat_use_forces_devil_room_and_spawns_quality_three_reward()
+test_five_charge_repeat_devilbox_use_does_not_fire()
 test_different_players_can_each_add_one_devil_room_reward()
 test_devilbox_held_and_forced_chance_do_not_stack_wrong()
 

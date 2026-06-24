@@ -10,6 +10,9 @@ local ITEM_NAME_CANDIDATES = {
     Devilbox = { "Devilbox", "恶魔盒" },
     UncutCord = { "Uncut Cord", "未剪断的脐带" },
     ShreddedTarot = { "Shredded Tarot", "剪碎的塔罗" },
+    SterilizationCertificate = { "Sterilization Certificate", "绝育证明" },
+    EmptyCradle = { "Empty Cradle", "空摇篮" },
+    BloodSkullGu = { "Blood Skull Gu", "血颅蛊" },
     DS4 = { "ds4" },
 }
 
@@ -33,10 +36,14 @@ local Items = {
     Devilbox = FindItemIdByNames(ITEM_NAME_CANDIDATES.Devilbox),
     UncutCord = FindItemIdByNames(ITEM_NAME_CANDIDATES.UncutCord),
     ShreddedTarot = FindItemIdByNames(ITEM_NAME_CANDIDATES.ShreddedTarot),
+    SterilizationCertificate = FindItemIdByNames(ITEM_NAME_CANDIDATES.SterilizationCertificate),
+    EmptyCradle = FindItemIdByNames(ITEM_NAME_CANDIDATES.EmptyCradle),
+    BloodSkullGu = FindItemIdByNames(ITEM_NAME_CANDIDATES.BloodSkullGu),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
 
 local DEBUG_PRINT_ITEM_IDS = true
+local bloodSkullGuBacklashDepth = 0
 
 local EID_DESCRIPTIONS = {
     [Items.EssentialBalm] = {
@@ -82,21 +89,21 @@ local EID_DESCRIPTIONS = {
     [Items.Angelbox] = {
         en_us = {
             name = "Angel Box",
-            eidDescription = "First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Favors angel rooms while held",
+            eidDescription = "{{Luck}} +3 Luck while held#First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Heart drops have a 10% chance to add a soul heart#Favors angel rooms while held",
         },
         zh_cn = {
             name = "天使盒",
-            eidDescription = "每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满12格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#持有时一半恶魔房概率转为天使房概率",
+            eidDescription = "持有时 {{Luck}} +3 幸运#每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满6格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#地上心掉落有10%额外生成1个完整魂心#持有时一半恶魔房概率转为天使房概率",
         },
     },
     [Items.Devilbox] = {
         en_us = {
             name = "Devil Box",
-            eidDescription = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Favors devil rooms while held",
+            eidDescription = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Heart drops have a 20% chance to add a black heart#Favors devil rooms while held",
         },
         zh_cn = {
             name = "恶魔盒",
-            eidDescription = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满12格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#持有时一半交易房方向转为恶魔房概率",
+            eidDescription = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满6格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#地上心掉落有20%额外生成1个黑心#持有时一半交易房方向转为恶魔房概率",
         },
     },
     [Items.UncutCord] = {
@@ -117,6 +124,36 @@ local EID_DESCRIPTIONS = {
         zh_cn = {
             name = "剪碎的塔罗",
             eidDescription = "持有时 {{Luck}} +3 幸运#一次性使用#移除当前房间内的地上卡牌#每移除3张卡牌，生成1个宝箱房道具#卡牌不足3张时不会消耗#空拍不算使用，本层结束仍会消失",
+        },
+    },
+    [Items.BloodSkullGu] = {
+        en_us = {
+            name = "Blood Skull Gu",
+            eidDescription = "3-charge active item#Sacrifice one familiar item you own#{{Damage}} Permanently gain +1.5 damage#{{Range}} Permanently gain +1 range#Drops 1-2 black hearts#If no familiar item can be sacrificed, take half a red heart of backlash damage instead",
+        },
+        zh_cn = {
+            name = "血颅蛊",
+            eidDescription = "3充能主动道具#献祭1个属于你的跟班类道具#{{Damage}} 永久 +1.5 攻击#{{Range}} 永久 +1 射程#掉落1-2个黑心#没有可献祭跟班类道具时，反噬并受到半颗红心伤害",
+        },
+    },
+    [Items.SterilizationCertificate] = {
+        en_us = {
+            name = "Sterilization Certificate",
+            eidDescription = "Prevents spawning enemies from creating more enemies#Blocked spawns deal backlash damage to the source enemy#Boss summons are only partially weakened",
+        },
+        zh_cn = {
+            name = "绝育证明",
+            eidDescription = "阻止会生成敌人的敌人继续生成敌人#每次阻止生成时，对该敌人造成反噬伤害#Boss 召唤效果只会被部分削弱",
+        },
+    },
+    [Items.EmptyCradle] = {
+        en_us = {
+            name = "Empty Cradle",
+            eidDescription = "The first effective damage each floor remembers the lost heart type#Clear that room for a reward: red hearts give hearts, soul hearts give pickups, black hearts give floor damage#Taking another hit before the room is clear downgrades the reward#Black-heart damage bonuses last for this floor only",
+        },
+        zh_cn = {
+            name = "空摇篮",
+            eidDescription = "每层第一次有效受伤会记录损失的心形类型#清理当前房间后获得对应奖励：红心给心，魂心给资源，黑心给本层攻击力#清房前再次受伤会降为基础奖励#黑心奖励的攻击力加成换层清除",
         },
     },
     [Items.DS4] = {
@@ -214,6 +251,53 @@ end
 
 PrintItemDebugCommands()
 
+local function GetPlayers()
+    local players = {}
+
+    if Game and Isaac.GetPlayer then
+        local gameOk, game = pcall(Game)
+        if gameOk and game and game.GetNumPlayers then
+            local countOk, playerCount = pcall(function()
+                return game:GetNumPlayers()
+            end)
+            playerCount = countOk and tonumber(playerCount) or 0
+
+            for index = 0, playerCount - 1 do
+                local playerOk, player = pcall(function()
+                    return Isaac.GetPlayer(index)
+                end)
+                if playerOk and player then
+                    if player.ToPlayer then
+                        local toPlayerOk, convertedPlayer = pcall(function()
+                            return player:ToPlayer()
+                        end)
+                        player = toPlayerOk and convertedPlayer or player
+                    end
+
+                    if player then
+                        players[#players + 1] = player
+                    end
+                end
+            end
+
+            if #players > 0 then
+                return players
+            end
+        end
+    end
+
+    if Isaac.FindByType then
+        for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_PLAYER, -1, -1, false, false)) do
+            local player = entity and entity.ToPlayer and entity:ToPlayer()
+            if player then
+                players[#players + 1] = player
+            end
+        end
+    end
+
+    return players
+end
+
 --------------------------------------------------
 -- 风油精
 
@@ -297,8 +381,7 @@ end
 Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseChunyao, Items.Chunyao)
 
 function Neverbirth:UpdateChunyaoEffects()
-    for _, entity in ipairs(Isaac.GetRoomEntities()) do
-        local player = entity:ToPlayer()
+    for _, player in ipairs(GetPlayers()) do
         if player then
             local effects = chunyaoEffects[player.InitSeed]
 
@@ -410,19 +493,6 @@ local function HasActiveMusicboxEffect()
     end
 
     return false
-end
-
-local function GetPlayers()
-    local players = {}
-
-    for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_PLAYER, -1, -1, false, false)) do
-        local player = entity:ToPlayer()
-        if player then
-            players[#players + 1] = player
-        end
-    end
-
-    return players
 end
 
 local function GetCurrentRunSeed()
@@ -1242,6 +1312,10 @@ function Neverbirth:HandleUncutCordDamage(entity, amount)
         return nil
     end
 
+    if bloodSkullGuBacklashDepth > 0 then
+        return nil
+    end
+
     local record = uncutCordDebts[playerKey]
     if record then
         SettleUncutCordDebtFull(player, playerKey, record)
@@ -1780,15 +1854,1440 @@ end
 end
 
 --------------------------------------------------
+-- 血颅蛊
+
+do
+local BLOOD_SKULL_GU_MAX_CHARGE = 3
+local BLOOD_SKULL_GU_DAMAGE_BONUS = 1.5
+local BLOOD_SKULL_GU_RANGE_BONUS = 40
+local BLOOD_SKULL_GU_ENTITY_FAMILIAR = (EntityType and EntityType.ENTITY_FAMILIAR) or 3
+local BLOOD_SKULL_GU_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
+local BLOOD_SKULL_GU_ENTITY_EFFECT = (EntityType and EntityType.ENTITY_EFFECT) or 1000
+local BLOOD_SKULL_GU_HEART_VARIANT = (PickupVariant and PickupVariant.PICKUP_HEART) or 10
+local BLOOD_SKULL_GU_BLACK_HEART = (HeartSubType and HeartSubType.HEART_BLACK) or 6
+local BLOOD_SKULL_GU_POOF_EFFECT = (EffectVariant and (EffectVariant.BLOOD_EXPLOSION or EffectVariant.POOF01)) or 15
+local BLOOD_SKULL_GU_CREEP_EFFECT = (EffectVariant and EffectVariant.CREEP_RED) or 22
+local BLOOD_SKULL_GU_RANGE_CACHE = (CacheFlag and CacheFlag.CACHE_RANGE) or 64
+local BLOOD_SKULL_GU_RED_HEART_DAMAGE = (DamageFlag and DamageFlag.DAMAGE_RED_HEARTS) or 0
+local BLOOD_SKULL_GU_FAMILIAR_ITEM_SCAN_MAX = 1000
+local BLOOD_SKULL_GU_TEMPORARY_FAMILIARS = {
+    [FamiliarVariant and FamiliarVariant.BLUE_FLY or 43] = true,
+    [FamiliarVariant and FamiliarVariant.BLUE_SPIDER or 73] = true,
+    [FamiliarVariant and FamiliarVariant.WISP or 206] = true,
+    [FamiliarVariant and FamiliarVariant.ABYSS_LOCUST or 231] = true,
+}
+
+local function BloodSkullGuFamiliarVariant(name, fallback)
+    return FamiliarVariant and FamiliarVariant[name] or fallback
+end
+
+local function BloodSkullGuCollectibleType(name, fallback)
+    return CollectibleType and CollectibleType[name] or fallback
+end
+
+local function BuildBloodSkullGuFamiliarSourceItems()
+    local mappings = {}
+
+    local function add(variantName, variantFallback, collectibleName, collectibleFallback)
+        local variant = BloodSkullGuFamiliarVariant(variantName, variantFallback)
+        local collectible = BloodSkullGuCollectibleType(collectibleName, collectibleFallback)
+        if variant ~= nil and IsValidItemId(collectible) then
+            mappings[variant] = mappings[variant] or {}
+            mappings[variant][#mappings[variant] + 1] = collectible
+        end
+    end
+
+    add("BROTHER_BOBBY", 1, "COLLECTIBLE_BROTHER_BOBBY", 8)
+    add("SISTER_MAGGY", 7, "COLLECTIBLE_SISTER_MAGGY", 67)
+    add("LITTLE_STEVEN", 5, "COLLECTIBLE_LITTLE_STEVEN", 100)
+    add("ROBO_BABY", 6, "COLLECTIBLE_ROBO_BABY", 95)
+    add("GUARDIAN_ANGEL", 32, "COLLECTIBLE_GUARDIAN_ANGEL", 112)
+    add("DEMON_BABY", 2, "COLLECTIBLE_DEMON_BABY", 113)
+    add("GHOST_BABY", 9, "COLLECTIBLE_GHOST_BABY", 163)
+    add("HARLEQUIN_BABY", 10, "COLLECTIBLE_HARLEQUIN_BABY", 167)
+    add("RAINBOW_BABY", 11, "COLLECTIBLE_RAINBOW_BABY", 174)
+    add("ABEL", 8, "COLLECTIBLE_ABEL", 188)
+    add("DRY_BABY", 51, "COLLECTIBLE_DRY_BABY", 265)
+    add("ROBO_BABY_2", 53, "COLLECTIBLE_ROBO_BABY_2", 267)
+    add("ROTTEN_BABY", 54, "COLLECTIBLE_ROTTEN_BABY", 268)
+    add("HEADLESS_BABY", 55, "COLLECTIBLE_HEADLESS_BABY", 269)
+    add("LIL_BRIMSTONE", 61, "COLLECTIBLE_LIL_BRIMSTONE", 275)
+    add("LIL_HAUNT", 63, "COLLECTIBLE_LIL_HAUNT", 277)
+    add("DARK_BUM", 64, "COLLECTIBLE_DARK_BUM", 278)
+    add("MONGO_BABY", 74, "COLLECTIBLE_MONGO_BABY", 322)
+    add("INCUBUS", 80, "COLLECTIBLE_INCUBUS", 360)
+    add("SWORN_PROTECTOR", 83, "COLLECTIBLE_SWORN_PROTECTOR", 363)
+    add("CHARGED_BABY", 86, "COLLECTIBLE_CHARGED_BABY", 372)
+    add("LIL_GURDY", 87, "COLLECTIBLE_LIL_GURDY", 384)
+    add("BUMBO", 88, "COLLECTIBLE_BUMBO", 385)
+    add("CENSER", 89, "COLLECTIBLE_CENSER", 387)
+    add("SERAPHIM", 92, "COLLECTIBLE_SERAPHIM", 390)
+    add("FARTING_BABY", 95, "COLLECTIBLE_FARTING_BABY", 404)
+    add("SUCCUBUS", 96, "COLLECTIBLE_SUCCUBUS", 417)
+    add("LIL_LOKI", 97, "COLLECTIBLE_LIL_LOKI", 435)
+    add("PAPA_FLY", 99, "COLLECTIBLE_PAPA_FLY", 430)
+    add("MULTIDIMENSIONAL_BABY", 101, "COLLECTIBLE_MULTIDIMENSIONAL_BABY", 431)
+    add("SHADE", 106, "COLLECTIBLE_SHADE", 468)
+    add("LIL_MONSTRO", 108, "COLLECTIBLE_LIL_MONSTRO", 471)
+    add("KING_BABY", 109, "COLLECTIBLE_KING_BABY", 472)
+    add("BIG_CHUBBY", 104, "COLLECTIBLE_BIG_CHUBBY", 473)
+    add("ACID_BABY", 112, "COLLECTIBLE_ACID_BABY", 491)
+    add("BUDDY_IN_A_BOX", 119, "COLLECTIBLE_BUDDY_IN_A_BOX", 518)
+    add("BLOOD_PUPPY", 241, "COLLECTIBLE_BLOOD_PUPPY", 565)
+    add("BOILED_BABY", 208, "COLLECTIBLE_BOILED_BABY", 607)
+    add("FREEZER_BABY", 209, "COLLECTIBLE_FREEZER_BABY", 608)
+    add("LIL_DUMPY", 212, "COLLECTIBLE_LIL_DUMPY", 615)
+    add("BOT_FLY", 218, "COLLECTIBLE_BOT_FLY", 629)
+    add("CUBE_BABY", 239, "COLLECTIBLE_CUBE_BABY", 652)
+    add("MINISAAC", 228, "COLLECTIBLE_QUINTS", 661)
+    add("LIL_ABADDON", 230, "COLLECTIBLE_LIL_ABADDON", 679)
+    add("TWISTED_BABY", 235, "COLLECTIBLE_TWISTED_PAIR", 698)
+
+    return mappings
+end
+
+local BLOOD_SKULL_GU_FAMILIAR_SOURCE_ITEMS = BuildBloodSkullGuFamiliarSourceItems()
+
+local bloodSkullGuGrowth = {}
+local bloodSkullGuFamiliarItemCache = {}
+
+local function BuildBloodSkullGuActiveSlots()
+    if not ActiveSlot then
+        return { 0, 1, 2, 3 }
+    end
+
+    local slots = {}
+    if ActiveSlot.SLOT_PRIMARY ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_PRIMARY
+    end
+    if ActiveSlot.SLOT_SECONDARY ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_SECONDARY
+    end
+    if ActiveSlot.SLOT_POCKET ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_POCKET
+    end
+    if ActiveSlot.SLOT_POCKET2 ~= nil then
+        slots[#slots + 1] = ActiveSlot.SLOT_POCKET2
+    end
+
+    return slots
+end
+
+local BLOOD_SKULL_GU_ACTIVE_SLOTS = BuildBloodSkullGuActiveSlots()
+
+local function GetBloodSkullGuPlayerKey(player)
+    return tostring(player and player.InitSeed or "")
+end
+
+local function GetBloodSkullGuState(player)
+    local playerKey = GetBloodSkullGuPlayerKey(player)
+    if playerKey == "" then
+        return nil
+    end
+
+    local state = bloodSkullGuGrowth[playerKey]
+    if type(state) ~= "table" then
+        state = {
+            damageBonus = 0,
+            rangeBonus = 0,
+        }
+        bloodSkullGuGrowth[playerKey] = state
+    end
+
+    return state
+end
+
+local function FindBloodSkullGuSlot(player, preferredSlot)
+    if not player or not player.GetActiveItem then
+        return nil
+    end
+
+    if preferredSlot ~= nil and player:GetActiveItem(preferredSlot) == Items.BloodSkullGu then
+        return preferredSlot
+    end
+
+    for _, slot in ipairs(BLOOD_SKULL_GU_ACTIVE_SLOTS) do
+        if player:GetActiveItem(slot) == Items.BloodSkullGu then
+            return slot
+        end
+    end
+
+    return nil
+end
+
+local function GetBloodSkullGuCharge(player, slot)
+    if player and player.GetActiveCharge then
+        return tonumber(player:GetActiveCharge(slot)) or 0
+    end
+
+    return BLOOD_SKULL_GU_MAX_CHARGE
+end
+
+local function DischargeBloodSkullGu(player, slot)
+    if not player then
+        return
+    end
+
+    if player.SetActiveCharge then
+        player:SetActiveCharge(0, slot)
+    elseif player.DischargeActiveItem then
+        player:DischargeActiveItem(slot)
+    end
+end
+
+local function GetBloodSkullGuRNG(player)
+    if player and player.GetCollectibleRNG then
+        local ok, rng = pcall(function()
+            return player:GetCollectibleRNG(Items.BloodSkullGu)
+        end)
+        if ok and rng and rng.RandomInt then
+            return rng
+        end
+    end
+
+    return nil
+end
+
+local function BloodSkullGuRandomInt(player, max)
+    max = tonumber(max) or 1
+    if max <= 1 then
+        return 0
+    end
+
+    local rng = GetBloodSkullGuRNG(player)
+    if rng then
+        local ok, value = pcall(function()
+            return rng:RandomInt(max)
+        end)
+        if ok and value ~= nil then
+            return math.max(0, math.min(max - 1, tonumber(value) or 0))
+        end
+    end
+
+    return math.random(max) - 1
+end
+
+local function ExtractBloodSkullGuPlayer(entity)
+    if not entity then
+        return nil
+    end
+
+    if entity.ToPlayer then
+        local ok, player = pcall(function()
+            return entity:ToPlayer()
+        end)
+        if ok and player then
+            return player
+        end
+    end
+
+    return nil
+end
+
+local function IsBloodSkullGuSamePlayer(candidate, player)
+    if not candidate or not player then
+        return false
+    end
+
+    if candidate == player then
+        return true
+    end
+
+    local candidatePlayer = ExtractBloodSkullGuPlayer(candidate) or candidate
+    return tostring(candidatePlayer and candidatePlayer.InitSeed or "") == tostring(player.InitSeed or "")
+end
+
+local function IsBloodSkullGuEntityRemoved(entity)
+    if not entity then
+        return true
+    end
+
+    if entity.IsDead then
+        local ok, dead = pcall(function()
+            return entity:IsDead()
+        end)
+        if ok and dead then
+            return true
+        end
+    end
+
+    if entity.Exists then
+        local ok, exists = pcall(function()
+            return entity:Exists()
+        end)
+        if ok and exists == false then
+            return true
+        end
+    end
+
+    return entity.removed == true
+end
+
+local function IsEligibleBloodSkullFamiliar(entity, player)
+    if not entity or entity.Type ~= BLOOD_SKULL_GU_ENTITY_FAMILIAR or IsBloodSkullGuEntityRemoved(entity) then
+        return false
+    end
+
+    local familiar = entity
+    if entity.ToFamiliar then
+        local ok, converted = pcall(function()
+            return entity:ToFamiliar()
+        end)
+        if ok and converted then
+            familiar = converted
+        end
+    end
+
+    if not familiar then
+        return false
+    end
+
+    if BLOOD_SKULL_GU_TEMPORARY_FAMILIARS[familiar.Variant] then
+        return false
+    end
+
+    if familiar.Player ~= nil then
+        return IsBloodSkullGuSamePlayer(familiar.Player, player)
+    end
+
+    if familiar.SpawnerEntity ~= nil then
+        return IsBloodSkullGuSamePlayer(familiar.SpawnerEntity, player)
+    end
+
+    return false
+end
+
+local function CollectBloodSkullGuFamiliars(player)
+    local familiars = {}
+    if not Isaac.GetRoomEntities then
+        return familiars
+    end
+
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if IsEligibleBloodSkullFamiliar(entity, player) then
+            familiars[#familiars + 1] = entity
+        end
+    end
+
+    return familiars
+end
+
+local function GetBloodSkullGuGame()
+    if not Game then
+        return nil
+    end
+
+    local ok, game = pcall(Game)
+    if ok then
+        return game
+    end
+
+    return nil
+end
+
+local function GetBloodSkullGuRoom()
+    local game = GetBloodSkullGuGame()
+    return game and game.GetRoom and game:GetRoom() or nil
+end
+
+local function GetBloodSkullGuSpawnPosition(position, index)
+    local spawnPosition = position or Vector(320, 280)
+    if Vector then
+        spawnPosition = spawnPosition + Vector(((tonumber(index) or 1) - 1) * 24, 0)
+    end
+
+    local room = GetBloodSkullGuRoom()
+    if room and room.FindFreePickupSpawnPosition then
+        spawnPosition = room:FindFreePickupSpawnPosition(spawnPosition, 40, true, false)
+    end
+
+    return spawnPosition
+end
+
+local function SpawnBloodSkullGuEffects(position, player)
+    if not Isaac.Spawn then
+        return
+    end
+
+    local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
+    pcall(function()
+        Isaac.Spawn(BLOOD_SKULL_GU_ENTITY_EFFECT, BLOOD_SKULL_GU_POOF_EFFECT, 0, position, velocity, player)
+    end)
+    if BLOOD_SKULL_GU_CREEP_EFFECT then
+        pcall(function()
+            Isaac.Spawn(BLOOD_SKULL_GU_ENTITY_EFFECT, BLOOD_SKULL_GU_CREEP_EFFECT, 0, position, velocity, player)
+        end)
+    end
+end
+
+local function SpawnBloodSkullGuBlackHearts(player, position, count)
+    local game = GetBloodSkullGuGame()
+    if not game or not game.Spawn then
+        return
+    end
+
+    local room = GetBloodSkullGuRoom()
+    local seed = room and room.GetSpawnSeed and room:GetSpawnSeed() or 0
+    local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
+
+    for index = 1, count do
+        game:Spawn(
+            BLOOD_SKULL_GU_ENTITY_PICKUP,
+            BLOOD_SKULL_GU_HEART_VARIANT,
+            GetBloodSkullGuSpawnPosition(position, index),
+            velocity,
+            player,
+            BLOOD_SKULL_GU_BLACK_HEART,
+            seed + 900 + index
+        )
+    end
+end
+
+local function RefreshBloodSkullGuCache(player)
+    if not player then
+        return
+    end
+
+    if player.AddCacheFlags and CacheFlag and CacheFlag.CACHE_DAMAGE then
+        player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+    end
+    if player.AddCacheFlags then
+        player:AddCacheFlags(BLOOD_SKULL_GU_RANGE_CACHE)
+    end
+    if player.EvaluateItems then
+        player:EvaluateItems()
+    end
+end
+
+local function RefreshBloodSkullGuFamiliarCache(player)
+    if not player then
+        return
+    end
+
+    if player.AddCacheFlags and CacheFlag and CacheFlag.CACHE_FAMILIARS then
+        player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS)
+    end
+    if player.EvaluateItems then
+        player:EvaluateItems()
+    end
+end
+
+local function GrantBloodSkullGuGrowth(player)
+    local state = GetBloodSkullGuState(player)
+    if not state then
+        return
+    end
+
+    state.damageBonus = (tonumber(state.damageBonus) or 0) + BLOOD_SKULL_GU_DAMAGE_BONUS
+    state.rangeBonus = (tonumber(state.rangeBonus) or 0) + BLOOD_SKULL_GU_RANGE_BONUS
+    RefreshBloodSkullGuCache(player)
+end
+
+local function PlayerHasBloodSkullGuCollectible(player, itemId)
+    return player and player.GetCollectibleNum and IsValidItemId(itemId) and player:GetCollectibleNum(itemId) > 0
+end
+
+local function GetBloodSkullGuCollectibleConfig(itemConfig, itemId)
+    if not itemConfig or not itemConfig.GetCollectible or not IsValidItemId(itemId) then
+        return nil
+    end
+
+    local ok, collectible = pcall(function()
+        return itemConfig:GetCollectible(itemId)
+    end)
+    if ok then
+        return collectible
+    end
+
+    return nil
+end
+
+local function GetBloodSkullGuDirectSourceItem(familiar, player)
+    local candidates = {
+        familiar and familiar.CollectibleType,
+        familiar and familiar.Collectible,
+        familiar and familiar.ItemId,
+        familiar and familiar.SourceCollectible,
+        familiar and familiar.SourceItem,
+    }
+
+    for _, itemId in ipairs(candidates) do
+        if PlayerHasBloodSkullGuCollectible(player, itemId) then
+            return itemId
+        end
+    end
+
+    return nil
+end
+
+local function FindBloodSkullGuSourceCollectible(familiar, player)
+    if not familiar or not player then
+        return nil
+    end
+
+    local directItem = GetBloodSkullGuDirectSourceItem(familiar, player)
+    if directItem then
+        return directItem
+    end
+
+    local variant = familiar.Variant
+    if variant == nil or not Isaac.GetItemConfig then
+        return nil
+    end
+
+    local cached = bloodSkullGuFamiliarItemCache[variant]
+    if type(cached) == "table" then
+        for _, itemId in ipairs(cached) do
+            if PlayerHasBloodSkullGuCollectible(player, itemId) then
+                return itemId
+            end
+        end
+    end
+
+    local staticCandidates = BLOOD_SKULL_GU_FAMILIAR_SOURCE_ITEMS[variant]
+    if type(staticCandidates) == "table" then
+        for _, itemId in ipairs(staticCandidates) do
+            if PlayerHasBloodSkullGuCollectible(player, itemId) then
+                bloodSkullGuFamiliarItemCache[variant] = staticCandidates
+                return itemId
+            end
+        end
+    end
+
+    local itemConfig = Isaac.GetItemConfig()
+    local candidates = {}
+    for itemId = 1, BLOOD_SKULL_GU_FAMILIAR_ITEM_SCAN_MAX do
+        local collectible = GetBloodSkullGuCollectibleConfig(itemConfig, itemId)
+        if collectible and collectible.FamiliarVariant == variant then
+            candidates[#candidates + 1] = itemId
+            if PlayerHasBloodSkullGuCollectible(player, itemId) then
+                bloodSkullGuFamiliarItemCache[variant] = candidates
+                return itemId
+            end
+        end
+    end
+
+    bloodSkullGuFamiliarItemCache[variant] = candidates
+    return nil
+end
+
+local function CollectBloodSkullGuSourceFamiliars(player)
+    local candidates = {}
+    for _, familiar in ipairs(CollectBloodSkullGuFamiliars(player)) do
+        if FindBloodSkullGuSourceCollectible(familiar, player) then
+            candidates[#candidates + 1] = familiar
+        end
+    end
+
+    return candidates
+end
+
+local function RemoveBloodSkullGuFamiliar(player, familiar)
+    local sourceItem = FindBloodSkullGuSourceCollectible(familiar, player)
+    if sourceItem and player and player.RemoveCollectible then
+        local ok, err = pcall(function()
+            player:RemoveCollectible(sourceItem)
+        end)
+        if ok then
+            RefreshBloodSkullGuFamiliarCache(player)
+        else
+            DebugLog("[neverbirth] Blood Skull Gu source item removal failed: " .. tostring(err))
+        end
+    end
+
+    if familiar and familiar.Remove then
+        pcall(function()
+            familiar:Remove()
+        end)
+    end
+end
+
+local function ApplyBloodSkullGuBacklash(player)
+    if not player or not player.TakeDamage then
+        return
+    end
+
+    bloodSkullGuBacklashDepth = bloodSkullGuBacklashDepth + 1
+    local ok, err = pcall(function()
+        player:TakeDamage(1, BLOOD_SKULL_GU_RED_HEART_DAMAGE, EntityRef(player), 0)
+    end)
+    bloodSkullGuBacklashDepth = math.max(0, bloodSkullGuBacklashDepth - 1)
+    if not ok then
+        DebugLog("[neverbirth] Blood Skull Gu backlash failed: " .. tostring(err))
+    end
+end
+
+function Neverbirth:UseBloodSkullGu(_, _, player, _, activeSlot)
+    if not player then
+        return false
+    end
+
+    local slot = FindBloodSkullGuSlot(player, activeSlot) or activeSlot or (ActiveSlot and ActiveSlot.SLOT_PRIMARY) or 0
+    if GetBloodSkullGuCharge(player, slot) < BLOOD_SKULL_GU_MAX_CHARGE then
+        return false
+    end
+
+    local familiars = CollectBloodSkullGuSourceFamiliars(player)
+    DischargeBloodSkullGu(player, slot)
+
+    if #familiars <= 0 then
+        ApplyBloodSkullGuBacklash(player)
+        return true
+    end
+
+    local selected = familiars[BloodSkullGuRandomInt(player, #familiars) + 1]
+    local position = selected and selected.Position or (player.Position or Vector(320, 280))
+    SpawnBloodSkullGuEffects(position, player)
+    RemoveBloodSkullGuFamiliar(player, selected)
+    GrantBloodSkullGuGrowth(player)
+    SpawnBloodSkullGuBlackHearts(player, position, 1 + BloodSkullGuRandomInt(player, 2))
+    return true
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseBloodSkullGu, Items.BloodSkullGu)
+
+function Neverbirth:EvaluateBloodSkullGu(player, cacheFlag)
+    local state = bloodSkullGuGrowth[GetBloodSkullGuPlayerKey(player)]
+    if type(state) ~= "table" then
+        return
+    end
+
+    if CacheFlag and cacheFlag == CacheFlag.CACHE_DAMAGE then
+        player.Damage = player.Damage + (tonumber(state.damageBonus) or 0)
+    elseif cacheFlag == BLOOD_SKULL_GU_RANGE_CACHE then
+        player.TearRange = player.TearRange + (tonumber(state.rangeBonus) or 0)
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateBloodSkullGu)
+
+function Neverbirth:ResetBloodSkullGuState(isContinued)
+    if isContinued then
+        return
+    end
+
+    bloodSkullGuGrowth = {}
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetBloodSkullGuState)
+end
+end
+
+--------------------------------------------------
+-- 绝育证明
+
+do
+local STERILIZATION_NORMAL_BASE_DAMAGE = 10
+local STERILIZATION_NORMAL_MAX_HP_RATIO = 0.05
+local STERILIZATION_BOSS_BASE_DAMAGE = 3
+local STERILIZATION_BOSS_MAX_HP_RATIO = 0.01
+local STERILIZATION_ENTITY_EFFECT = (EntityType and EntityType.ENTITY_EFFECT) or 1000
+local STERILIZATION_POOF_VARIANT = (EffectVariant and EffectVariant.POOF01) or 15
+local STERILIZATION_DAMAGE_FLAGS = 0
+
+local function SterilizationEntityType(name, fallback)
+    if EntityType and EntityType[name] then
+        return EntityType[name]
+    end
+
+    return fallback
+end
+
+local STERILIZATION_SPAWNER_TYPES = {
+    [SterilizationEntityType("ENTITY_MULLIGAN", 16)] = true,
+    [SterilizationEntityType("ENTITY_HIVE", 22)] = true,
+    [SterilizationEntityType("ENTITY_BIGSPIDER", 94)] = true,
+    [SterilizationEntityType("ENTITY_NEST", 205)] = true,
+    [SterilizationEntityType("ENTITY_FAT_SACK", 209)] = true,
+    [SterilizationEntityType("ENTITY_HALF_SACK", 211)] = true,
+    [SterilizationEntityType("ENTITY_PORTAL", 306)] = true,
+    [SterilizationEntityType("ENTITY_DUKE", 67)] = true,
+    [SterilizationEntityType("ENTITY_GURDY", 36)] = true,
+    [SterilizationEntityType("ENTITY_WIDOW", 100)] = true,
+    [SterilizationEntityType("ENTITY_MAMA_GURDY", 266)] = true,
+    [SterilizationEntityType("ENTITY_MATRIARCH", 413)] = true,
+}
+
+local STERILIZATION_ORDINARY_SPAWN_TYPES = {
+    [SterilizationEntityType("ENTITY_FLY", 13)] = true,
+    [SterilizationEntityType("ENTITY_ATTACKFLY", 18)] = true,
+    [SterilizationEntityType("ENTITY_MAGGOT", 21)] = true,
+    [SterilizationEntityType("ENTITY_SPIDER", 85)] = true,
+    [SterilizationEntityType("ENTITY_FLY_L2", 214)] = true,
+    [SterilizationEntityType("ENTITY_SPIDER_L2", 215)] = true,
+    [SterilizationEntityType("ENTITY_DIP", 217)] = true,
+    [SterilizationEntityType("ENTITY_SWARM", 281)] = true,
+    [SterilizationEntityType("ENTITY_SWARM_SPIDER", 884)] = true,
+}
+
+local sterilizationKnownEntities = {}
+local sterilizationBlockedEntities = {}
+local sterilizationTrackedSpawners = {}
+local sterilizationRoomInitialized = false
+
+local function GetSterilizationEntityKey(entity)
+    if not entity then
+        return nil
+    end
+
+    if entity.InitSeed ~= nil then
+        return tostring(entity.InitSeed)
+    end
+
+    return tostring(entity)
+end
+
+local function PlayerHasSterilizationCertificate(player)
+    return player and player.GetCollectibleNum and player:GetCollectibleNum(Items.SterilizationCertificate) > 0
+end
+
+local function AnyPlayerHasSterilizationCertificate()
+    for _, player in ipairs(GetPlayers()) do
+        if PlayerHasSterilizationCertificate(player) then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function IsSterilizationEnemy(entity)
+    if not entity or entity.Type == ((EntityType and EntityType.ENTITY_PICKUP) or 5) then
+        return false
+    end
+
+    if entity.IsVulnerableEnemy then
+        local ok, isEnemy = pcall(function()
+            return entity:IsVulnerableEnemy()
+        end)
+        if ok then
+            return isEnemy == true
+        end
+    end
+
+    return entity.ToNPC and entity:ToNPC() ~= nil
+end
+
+local function IsSterilizationBoss(entity)
+    if not entity or not entity.IsBoss then
+        return false
+    end
+
+    local ok, isBoss = pcall(function()
+        return entity:IsBoss()
+    end)
+    return ok and isBoss == true
+end
+
+local function HasSterilizationFriendlyFlag(entity)
+    if not entity or not entity.HasEntityFlags or not EntityFlag or not EntityFlag.FLAG_FRIENDLY then
+        return false
+    end
+
+    local ok, hasFlag = pcall(function()
+        return entity:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
+    end)
+    return ok and hasFlag == true
+end
+
+local function IsSterilizationSpawner(entity)
+    return IsSterilizationEnemy(entity) and STERILIZATION_SPAWNER_TYPES[entity.Type] == true
+end
+
+local function IsSterilizationOrdinarySpawn(entity)
+    if not IsSterilizationEnemy(entity) then
+        return false
+    end
+
+    if HasSterilizationFriendlyFlag(entity) then
+        return false
+    end
+
+    if IsSterilizationBoss(entity) then
+        return false
+    end
+
+    return STERILIZATION_ORDINARY_SPAWN_TYPES[entity.Type] == true
+end
+
+local function ExtractSterilizationEntity(candidate)
+    if candidate and candidate.Entity then
+        return candidate.Entity
+    end
+
+    return candidate
+end
+
+local function IsSameSterilizationEntity(left, right)
+    left = ExtractSterilizationEntity(left)
+    right = ExtractSterilizationEntity(right)
+
+    if left == nil or right == nil then
+        return false
+    end
+
+    if left == right then
+        return true
+    end
+
+    local leftKey = GetSterilizationEntityKey(left)
+    local rightKey = GetSterilizationEntityKey(right)
+    return leftKey ~= nil and rightKey ~= nil and leftKey == rightKey
+end
+
+local function IsSterilizationSpawnFromSource(spawn, source)
+    if IsSameSterilizationEntity(spawn.SpawnerEntity, source) then
+        return true
+    end
+
+    if IsSameSterilizationEntity(spawn.Parent, source) then
+        return true
+    end
+
+    return false
+end
+
+local function FindSterilizationSpawnSource(spawn)
+    for _, source in pairs(sterilizationTrackedSpawners) do
+        if IsSterilizationSpawnFromSource(spawn, source) then
+            return source
+        end
+    end
+
+    return nil
+end
+
+local function GetSterilizationMaxHitPoints(entity)
+    return tonumber(entity and (entity.MaxHitPoints or entity.HitPoints)) or 0
+end
+
+local function GetSterilizationBacklashDamage(source)
+    local maxHitPoints = GetSterilizationMaxHitPoints(source)
+    if IsSterilizationBoss(source) then
+        return STERILIZATION_BOSS_BASE_DAMAGE + maxHitPoints * STERILIZATION_BOSS_MAX_HP_RATIO
+    end
+
+    return STERILIZATION_NORMAL_BASE_DAMAGE + maxHitPoints * STERILIZATION_NORMAL_MAX_HP_RATIO
+end
+
+local function FlashSterilizationSource(source)
+    if not source or not source.SetColor or not Color then
+        return
+    end
+
+    pcall(function()
+        source:SetColor(Color(1, 0.25, 0.25, 1, 0.25, 0, 0), 8, 1, true, false)
+    end)
+end
+
+local function SpawnSterilizationPoof(spawn, source)
+    local position = spawn and spawn.Position or (source and source.Position) or (Vector and Vector(0, 0))
+    local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
+
+    if Isaac.Spawn then
+        Isaac.Spawn(STERILIZATION_ENTITY_EFFECT, STERILIZATION_POOF_VARIANT, 0, position, velocity, source)
+        return
+    end
+
+    if Game then
+        local ok, game = pcall(Game)
+        if ok and game and game.Spawn then
+            game:Spawn(STERILIZATION_ENTITY_EFFECT, STERILIZATION_POOF_VARIANT, position, velocity, source, 0, 0)
+        end
+    end
+end
+
+local function BlockSterilizationSpawn(spawn, source)
+    local spawnKey = GetSterilizationEntityKey(spawn)
+    if not spawnKey or sterilizationBlockedEntities[spawnKey] then
+        return false
+    end
+
+    sterilizationBlockedEntities[spawnKey] = true
+    SpawnSterilizationPoof(spawn, source)
+
+    if spawn and spawn.Remove then
+        pcall(function()
+            spawn:Remove()
+        end)
+    end
+
+    if source and source.TakeDamage then
+        local damageSource = EntityRef and EntityRef(spawn) or nil
+        pcall(function()
+            source:TakeDamage(GetSterilizationBacklashDamage(source), STERILIZATION_DAMAGE_FLAGS, damageSource, 0)
+        end)
+    end
+
+    FlashSterilizationSource(source)
+    return true
+end
+
+local function GetSterilizationRoomEntities()
+    if not Isaac.GetRoomEntities then
+        return {}
+    end
+
+    return Isaac.GetRoomEntities()
+end
+
+local function RefreshSterilizationTrackedSpawners(entities)
+    sterilizationTrackedSpawners = {}
+    for _, entity in ipairs(entities) do
+        if IsSterilizationSpawner(entity) then
+            local entityKey = GetSterilizationEntityKey(entity)
+            if entityKey then
+                sterilizationTrackedSpawners[entityKey] = entity
+            end
+        end
+    end
+end
+
+local function RememberSterilizationEntity(entity)
+    local entityKey = GetSterilizationEntityKey(entity)
+    if entityKey then
+        sterilizationKnownEntities[entityKey] = true
+    end
+end
+
+local function RememberSterilizationRoomEntities(entities)
+    for _, entity in ipairs(entities or GetSterilizationRoomEntities()) do
+        RememberSterilizationEntity(entity)
+    end
+end
+
+function Neverbirth:TrackSterilizationNewRoom()
+    sterilizationKnownEntities = {}
+    sterilizationBlockedEntities = {}
+    sterilizationTrackedSpawners = {}
+    sterilizationRoomInitialized = false
+
+    if not AnyPlayerHasSterilizationCertificate() then
+        return
+    end
+
+    local entities = GetSterilizationRoomEntities()
+    RefreshSterilizationTrackedSpawners(entities)
+    RememberSterilizationRoomEntities(entities)
+    sterilizationRoomInitialized = true
+end
+
+if ModCallbacks.MC_POST_NEW_ROOM then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.TrackSterilizationNewRoom)
+end
+
+function Neverbirth:UpdateSterilizationCertificate()
+    local hasSterilization = AnyPlayerHasSterilizationCertificate()
+    if not hasSterilization then
+        if sterilizationRoomInitialized then
+            sterilizationKnownEntities = {}
+            sterilizationBlockedEntities = {}
+            sterilizationTrackedSpawners = {}
+            sterilizationRoomInitialized = false
+        end
+        return
+    end
+
+    local entities = GetSterilizationRoomEntities()
+    RefreshSterilizationTrackedSpawners(entities)
+
+    if not sterilizationRoomInitialized then
+        sterilizationRoomInitialized = true
+        RememberSterilizationRoomEntities(entities)
+        return
+    end
+
+    for _, entity in ipairs(entities) do
+        local entityKey = GetSterilizationEntityKey(entity)
+        if entityKey and not sterilizationKnownEntities[entityKey] then
+            if IsSterilizationOrdinarySpawn(entity) then
+                local source = FindSterilizationSpawnSource(entity)
+                if source then
+                    BlockSterilizationSpawn(entity, source)
+                end
+            end
+        end
+    end
+
+    RememberSterilizationRoomEntities(entities)
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateSterilizationCertificate)
+
+function Neverbirth:ResetSterilizationCertificateState(isContinued)
+    if isContinued then
+        return
+    end
+
+    sterilizationKnownEntities = {}
+    sterilizationBlockedEntities = {}
+    sterilizationTrackedSpawners = {}
+    sterilizationRoomInitialized = false
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetSterilizationCertificateState)
+end
+end
+
+--------------------------------------------------
+-- 空摇篮
+
+do
+local EMPTY_CRADLE_DAMAGE_RED = "red"
+local EMPTY_CRADLE_DAMAGE_SOUL = "soul"
+local EMPTY_CRADLE_DAMAGE_BLACK = "black"
+local EMPTY_CRADLE_HEART_VARIANT = (PickupVariant and PickupVariant.PICKUP_HEART) or 10
+local EMPTY_CRADLE_COIN_VARIANT = (PickupVariant and PickupVariant.PICKUP_COIN) or 20
+local EMPTY_CRADLE_KEY_VARIANT = (PickupVariant and PickupVariant.PICKUP_KEY) or 30
+local EMPTY_CRADLE_BOMB_VARIANT = (PickupVariant and PickupVariant.PICKUP_BOMB) or 40
+local EMPTY_CRADLE_HALF_HEART = (HeartSubType and HeartSubType.HEART_HALF) or 2
+local EMPTY_CRADLE_FULL_HEART = (HeartSubType and HeartSubType.HEART_FULL) or 1
+local EMPTY_CRADLE_HALF_SOUL_HEART = (HeartSubType and HeartSubType.HEART_HALF_SOUL) or 8
+local EMPTY_CRADLE_SOUL_HEART = (HeartSubType and HeartSubType.HEART_SOUL) or 3
+local EMPTY_CRADLE_BLACK_HEART = (HeartSubType and HeartSubType.HEART_BLACK) or 6
+local EMPTY_CRADLE_PENNY = (CoinSubType and CoinSubType.COIN_PENNY) or 1
+local EMPTY_CRADLE_KEY = (KeySubType and KeySubType.KEY_NORMAL) or 1
+local EMPTY_CRADLE_BOMB = (BombSubType and BombSubType.BOMB_NORMAL) or 1
+local EMPTY_CRADLE_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
+local EMPTY_CRADLE_ENTITY_SLOT = (EntityType and EntityType.ENTITY_SLOT) or 6
+local EMPTY_CRADLE_ROOM_SACRIFICE = (RoomType and RoomType.ROOM_SACRIFICE) or 13
+local EMPTY_CRADLE_DAMAGE_FLAGS = {
+    DamageFlag and DamageFlag.DAMAGE_IV_BAG,
+    DamageFlag and DamageFlag.DAMAGE_FAKE,
+    DamageFlag and DamageFlag.DAMAGE_CURSED_DOOR,
+    DamageFlag and DamageFlag.DAMAGE_DEVIL,
+}
+
+local emptyCradleStates = {}
+
+local function GetEmptyCradlePlayerKey(player)
+    return tostring(player and player.InitSeed or "")
+end
+
+local function PlayerHasEmptyCradle(player)
+    return player and player.GetCollectibleNum and player:GetCollectibleNum(Items.EmptyCradle) > 0
+end
+
+local function GetEmptyCradleGame()
+    if not Game then
+        return nil
+    end
+
+    local ok, game = pcall(Game)
+    if ok then
+        return game
+    end
+
+    return nil
+end
+
+local function GetEmptyCradleLevel()
+    local game = GetEmptyCradleGame()
+    return game and game.GetLevel and game:GetLevel() or nil
+end
+
+local function GetEmptyCradleRoom()
+    local game = GetEmptyCradleGame()
+    return game and game.GetRoom and game:GetRoom() or nil
+end
+
+local function GetEmptyCradleFloorKey()
+    local level = GetEmptyCradleLevel()
+    local runSeed = GetCurrentRunSeed and GetCurrentRunSeed() or "unknown"
+    if not level then
+        return runSeed .. ":unknown"
+    end
+
+    local stage = "?"
+    if level.GetStage then
+        local ok, value = pcall(function()
+            return level:GetStage()
+        end)
+        if ok and value ~= nil then
+            stage = tostring(value)
+        end
+    end
+
+    local stageType = "?"
+    if level.GetStageType then
+        local ok, value = pcall(function()
+            return level:GetStageType()
+        end)
+        if ok and value ~= nil then
+            stageType = tostring(value)
+        end
+    end
+
+    return runSeed .. ":" .. stage .. ":" .. stageType
+end
+
+local function GetEmptyCradleRoomKey()
+    local level = GetEmptyCradleLevel()
+    if level and level.GetCurrentRoomIndex then
+        local ok, roomIndex = pcall(function()
+            return level:GetCurrentRoomIndex()
+        end)
+        if ok and roomIndex ~= nil then
+            return "idx:" .. tostring(roomIndex)
+        end
+    end
+
+    local room = GetEmptyCradleRoom()
+    if room and room.GetSpawnSeed then
+        local ok, spawnSeed = pcall(function()
+            return room:GetSpawnSeed()
+        end)
+        if ok and spawnSeed ~= nil then
+            return "seed:" .. tostring(spawnSeed)
+        end
+    end
+
+    return "unknown"
+end
+
+local function IsEmptyCradleRoomClear()
+    local room = GetEmptyCradleRoom()
+    if room and room.IsClear then
+        local ok, isClear = pcall(function()
+            return room:IsClear()
+        end)
+        if ok then
+            return isClear == true
+        end
+    end
+
+    return true
+end
+
+local function GetEmptyCradleState(player)
+    local playerKey = GetEmptyCradlePlayerKey(player)
+    if playerKey == "" then
+        return nil
+    end
+
+    local floorKey = GetEmptyCradleFloorKey()
+    local state = emptyCradleStates[playerKey]
+    if type(state) ~= "table" or state.floorKey ~= floorKey then
+        state = {
+            floorKey = floorKey,
+            usedThisFloor = false,
+            pending = false,
+            pendingRoomKey = nil,
+            damageType = nil,
+            upgraded = true,
+            damageBonus = 0,
+        }
+        emptyCradleStates[playerKey] = state
+    end
+
+    return state
+end
+
+local function RefreshEmptyCradleDamageCache(player)
+    if not player then
+        return
+    end
+
+    if player.AddCacheFlags and CacheFlag and CacheFlag.CACHE_DAMAGE then
+        pcall(function()
+            player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+        end)
+    end
+
+    if player.EvaluateItems then
+        pcall(function()
+            player:EvaluateItems()
+        end)
+    end
+end
+
+local function HasEmptyCradleDamageFlag(flags, flag)
+    return flag ~= nil and flag ~= 0 and ((tonumber(flags) or 0) & flag) ~= 0
+end
+
+local function GetEmptyCradleSourceEntity(source)
+    if source and source.Entity then
+        return source.Entity
+    end
+
+    return source
+end
+
+local function IsEmptyCradleCostDamage(flags, source)
+    if bloodSkullGuBacklashDepth > 0 then
+        return true
+    end
+
+    for _, flag in pairs(EMPTY_CRADLE_DAMAGE_FLAGS) do
+        if HasEmptyCradleDamageFlag(flags, flag) then
+            return true
+        end
+    end
+
+    local sourceEntity = GetEmptyCradleSourceEntity(source)
+    if sourceEntity and sourceEntity.Type == EMPTY_CRADLE_ENTITY_SLOT then
+        return true
+    end
+
+    local room = GetEmptyCradleRoom()
+    if room and room.GetType then
+        local ok, roomType = pcall(function()
+            return room:GetType()
+        end)
+        if ok and roomType == EMPTY_CRADLE_ROOM_SACRIFICE then
+            return true
+        end
+    end
+
+    -- Isaac does not expose every paid-damage source uniformly; flags, slot
+    -- entities, and sacrifice rooms cover the stable cases without blocking
+    -- normal combat damage in curse/devil themed rooms.
+    return false
+end
+
+local function InferEmptyCradleDamageType(player, flags)
+    if HasEmptyCradleDamageFlag(flags, DamageFlag and DamageFlag.DAMAGE_RED_HEARTS) then
+        return EMPTY_CRADLE_DAMAGE_RED
+    end
+
+    local soulHearts = 0
+    if player and player.GetSoulHearts then
+        local ok, value = pcall(function()
+            return player:GetSoulHearts()
+        end)
+        soulHearts = ok and (tonumber(value) or 0) or 0
+    end
+
+    if soulHearts <= 0 then
+        return EMPTY_CRADLE_DAMAGE_RED
+    end
+
+    if player and player.GetBlackHearts then
+        local ok, result = pcall(function()
+            return player:GetBlackHearts()
+        end)
+        if ok and (tonumber(result) or 0) > 0 then
+            return EMPTY_CRADLE_DAMAGE_BLACK
+        end
+    end
+
+    return EMPTY_CRADLE_DAMAGE_SOUL
+end
+
+local function GetEmptyCradleRandomInt(player, max)
+    max = tonumber(max) or 1
+    if max <= 1 then
+        return 0
+    end
+
+    if player and player.GetCollectibleRNG then
+        local ok, rng = pcall(function()
+            return player:GetCollectibleRNG(Items.EmptyCradle)
+        end)
+        if ok and rng and rng.RandomInt then
+            local rollOk, value = pcall(function()
+                return rng:RandomInt(max)
+            end)
+            if rollOk and value ~= nil then
+                return math.max(0, math.min(max - 1, tonumber(value) or 0))
+            end
+        end
+    end
+
+    return math.random(max) - 1
+end
+
+local function SpawnEmptyCradlePickup(player, variant, subtype, offsetIndex)
+    local position = player and player.Position or (GetEmptyCradleRoom() and GetEmptyCradleRoom():GetCenterPos()) or Vector(320, 280)
+    local offset = ((tonumber(offsetIndex) or 1) - 1) * 24
+    position = position + Vector(offset, 0)
+
+    local room = GetEmptyCradleRoom()
+    if room and room.FindFreePickupSpawnPosition then
+        position = room:FindFreePickupSpawnPosition(position, 40, true, false)
+    end
+
+    if Isaac.Spawn then
+        Isaac.Spawn(EMPTY_CRADLE_ENTITY_PICKUP, variant, subtype, position, Vector(0, 0), player)
+    elseif Game then
+        local ok, game = pcall(Game)
+        if ok and game and game.Spawn then
+            game:Spawn(EMPTY_CRADLE_ENTITY_PICKUP, variant, position, Vector(0, 0), player, subtype, 0)
+        end
+    end
+end
+
+local function GrantEmptyCradleRedReward(player, upgraded)
+    local subtype
+    if upgraded then
+        local reward = GetEmptyCradleRandomInt(player, 3)
+        subtype = ({ EMPTY_CRADLE_FULL_HEART, EMPTY_CRADLE_SOUL_HEART, EMPTY_CRADLE_BLACK_HEART })[reward + 1]
+    else
+        local reward = GetEmptyCradleRandomInt(player, 2)
+        subtype = ({ EMPTY_CRADLE_HALF_HEART, EMPTY_CRADLE_HALF_SOUL_HEART })[reward + 1]
+    end
+
+    SpawnEmptyCradlePickup(player, EMPTY_CRADLE_HEART_VARIANT, subtype, 1)
+end
+
+local function GrantEmptyCradleResourceReward(player, offsetIndex)
+    local reward = GetEmptyCradleRandomInt(player, 3)
+    if reward == 0 then
+        for index = 1, 3 do
+            SpawnEmptyCradlePickup(player, EMPTY_CRADLE_COIN_VARIANT, EMPTY_CRADLE_PENNY, (offsetIndex or 1) + index - 1)
+        end
+    elseif reward == 1 then
+        SpawnEmptyCradlePickup(player, EMPTY_CRADLE_KEY_VARIANT, EMPTY_CRADLE_KEY, offsetIndex or 1)
+    else
+        SpawnEmptyCradlePickup(player, EMPTY_CRADLE_BOMB_VARIANT, EMPTY_CRADLE_BOMB, offsetIndex or 1)
+    end
+end
+
+local function GrantEmptyCradleSoulReward(player, upgraded)
+    GrantEmptyCradleResourceReward(player, 1)
+    if upgraded then
+        GrantEmptyCradleResourceReward(player, 4)
+    end
+end
+
+local function GrantEmptyCradleReward(player, state)
+    if not player or type(state) ~= "table" then
+        return
+    end
+
+    if state.damageType == EMPTY_CRADLE_DAMAGE_RED then
+        GrantEmptyCradleRedReward(player, state.upgraded)
+    elseif state.damageType == EMPTY_CRADLE_DAMAGE_SOUL then
+        GrantEmptyCradleSoulReward(player, state.upgraded)
+    elseif state.damageType == EMPTY_CRADLE_DAMAGE_BLACK then
+        state.damageBonus = state.upgraded and 1.0 or 0.5
+        RefreshEmptyCradleDamageCache(player)
+    end
+end
+
+local function TrySettleEmptyCradleReward(player)
+    local state = GetEmptyCradleState(player)
+    if not state or not state.pending or state.pendingRoomKey ~= GetEmptyCradleRoomKey() then
+        return
+    end
+
+    if not IsEmptyCradleRoomClear() then
+        return
+    end
+
+    state.pending = false
+    GrantEmptyCradleReward(player, state)
+    state.pendingRoomKey = nil
+    state.damageType = nil
+end
+
+function Neverbirth:HandleEmptyCradleDamage(entity, amount, flags, source)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    local damageAmount = tonumber(amount) or 0
+    if not player or damageAmount <= 0 or not PlayerHasEmptyCradle(player) or IsEmptyCradleCostDamage(flags, source) then
+        return nil
+    end
+
+    local state = GetEmptyCradleState(player)
+    if not state then
+        return nil
+    end
+
+    if state.pending then
+        if state.pendingRoomKey == GetEmptyCradleRoomKey() then
+            state.upgraded = false
+        end
+        return nil
+    end
+
+    if state.usedThisFloor then
+        return nil
+    end
+
+    state.usedThisFloor = true
+    state.pending = true
+    state.pendingRoomKey = GetEmptyCradleRoomKey()
+    state.damageType = InferEmptyCradleDamageType(player, flags)
+    state.upgraded = true
+    return nil
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.HandleEmptyCradleDamage, EntityType.ENTITY_PLAYER)
+
+function Neverbirth:UpdateEmptyCradleRewards()
+    for _, player in ipairs(GetPlayers()) do
+        TrySettleEmptyCradleReward(player)
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateEmptyCradleRewards)
+
+function Neverbirth:EvaluateEmptyCradle(player, cacheFlag)
+    if not CacheFlag or cacheFlag ~= CacheFlag.CACHE_DAMAGE then
+        return
+    end
+
+    local state = GetEmptyCradleState(player)
+    local bonus = tonumber(state and state.damageBonus) or 0
+    if bonus > 0 then
+        player.Damage = player.Damage + bonus
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateEmptyCradle)
+
+function Neverbirth:ResetEmptyCradleOnNewLevel()
+    for _, player in ipairs(GetPlayers()) do
+        local playerKey = GetEmptyCradlePlayerKey(player)
+        local oldState = emptyCradleStates[playerKey]
+        local hadDamageBonus = oldState and (tonumber(oldState.damageBonus) or 0) > 0
+        emptyCradleStates[playerKey] = {
+            floorKey = GetEmptyCradleFloorKey(),
+            usedThisFloor = false,
+            pending = false,
+            pendingRoomKey = nil,
+            damageType = nil,
+            upgraded = true,
+            damageBonus = 0,
+        }
+        if hadDamageBonus then
+            RefreshEmptyCradleDamageCache(player)
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_LEVEL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.ResetEmptyCradleOnNewLevel)
+end
+
+function Neverbirth:ResetEmptyCradleState(isContinued)
+    if isContinued then
+        return
+    end
+
+    emptyCradleStates = {}
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetEmptyCradleState)
+end
+end
+
+--------------------------------------------------
 -- 天使盒
 
-local ANGELBOX_MAX_CHARGE = 12
+local ANGELBOX_MAX_CHARGE = 6
 local ANGELBOX_ANGEL_CHANCE = 0.5
+local ANGELBOX_LUCK_BONUS = 3
+local ANGELBOX_EXTRA_SOUL_HEART_CHANCE = 10
 local ANGELBOX_REWARD_QUALITY = 4
 local ANGELBOX_ANGEL_POOL = (ItemPoolType and ItemPoolType.POOL_ANGEL) or 4
 local ANGELBOX_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
 local ANGELBOX_HEART_VARIANT = (PickupVariant and PickupVariant.PICKUP_HEART) or 10
 local ANGELBOX_COLLECTIBLE_VARIANT = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
+local ANGELBOX_SOUL_HEART_SUBTYPE = (HeartSubType and HeartSubType.HEART_SOUL) or 3
 local ANGELBOX_ROOM_ANGEL = (RoomType and RoomType.ROOM_ANGEL) or 15
 local ANGELBOX_NULL_ITEM = (CollectibleType and CollectibleType.COLLECTIBLE_NULL) or 0
 local ANGELBOX_REWARD_ATTEMPTS = 120
@@ -1930,6 +3429,18 @@ local function AnyPlayerHasAngelbox()
 
     return false
 end
+
+function Neverbirth:EvaluateAngelboxLuck(player, cacheFlag)
+    if not CacheFlag or cacheFlag ~= CacheFlag.CACHE_LUCK then
+        return
+    end
+
+    if PlayerHasAngelbox(player) then
+        player.Luck = player.Luck + ANGELBOX_LUCK_BONUS
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateAngelboxLuck)
 
 local function GetAngelboxCharge(player, slot)
     if player and player.GetActiveCharge then
@@ -2390,8 +3901,9 @@ end
 --------------------------------------------------
 -- 恶魔盒
 
-local DEVILBOX_MAX_CHARGE = 12
+local DEVILBOX_MAX_CHARGE = 6
 local DEVILBOX_DEVIL_CHANCE = -0.5
+local DEVILBOX_EXTRA_BLACK_HEART_CHANCE = 20
 local DEVILBOX_REWARD_QUALITY = 3
 local DEVILBOX_DEVIL_POOL = (ItemPoolType and ItemPoolType.POOL_DEVIL) or 3
 local DEVILBOX_ROOM_DEVIL = (RoomType and RoomType.ROOM_DEVIL) or 14
@@ -2469,6 +3981,101 @@ local function AnyPlayerHasDevilbox()
     end
 
     return false
+end
+
+local boxBonusHeartKeys = {}
+local boxProcessedHeartKeys = {}
+local boxBonusHeartSpawnDepth = 0
+
+local function GetBoxHeartPickupKey(pickup)
+    if not pickup then
+        return nil
+    end
+
+    if pickup.InitSeed ~= nil then
+        return "init:" .. tostring(pickup.InitSeed)
+    end
+
+    if pickup.Seed ~= nil then
+        return "seed:" .. tostring(pickup.Seed)
+    end
+
+    return tostring(pickup)
+end
+
+local function RollBoxHeartBonus(pickup, chancePercent, salt)
+    local seed = tonumber(pickup and (pickup.InitSeed or pickup.Seed)) or 0
+    return ((seed + (salt or 0)) % 100) < chancePercent
+end
+
+local function SpawnBoxBonusHeart(sourcePickup, subtype)
+    local game = GetAngelboxGame()
+    if not game or not game.Spawn then
+        return nil
+    end
+
+    local position = sourcePickup and sourcePickup.Position or nil
+    if not position then
+        local room = GetAngelboxRoom()
+        position = room and room.GetCenterPos and room:GetCenterPos() or Vector(320, 280)
+    end
+
+    local room = GetAngelboxRoom()
+    if room and room.FindFreePickupSpawnPosition then
+        position = room:FindFreePickupSpawnPosition(position, 40, true, false)
+    end
+
+    local seed = (tonumber(sourcePickup and (sourcePickup.InitSeed or sourcePickup.Seed)) or 0) + subtype * 1000
+    boxBonusHeartSpawnDepth = boxBonusHeartSpawnDepth + 1
+    local pickup = game:Spawn(ANGELBOX_ENTITY_PICKUP, ANGELBOX_HEART_VARIANT, position, Vector(0, 0), sourcePickup, subtype, seed)
+    boxBonusHeartSpawnDepth = boxBonusHeartSpawnDepth - 1
+
+    local key = GetBoxHeartPickupKey(pickup)
+    if key then
+        boxBonusHeartKeys[key] = true
+    end
+
+    return pickup
+end
+
+function Neverbirth:HandleBoxHeartPickupInit(pickup)
+    if not pickup or pickup.Type ~= ANGELBOX_ENTITY_PICKUP or pickup.Variant ~= ANGELBOX_HEART_VARIANT then
+        return
+    end
+
+    local key = GetBoxHeartPickupKey(pickup)
+    if key and boxBonusHeartKeys[key] then
+        boxProcessedHeartKeys[key] = true
+        return
+    end
+
+    if boxBonusHeartSpawnDepth > 0 then
+        if key then
+            boxBonusHeartKeys[key] = true
+            boxProcessedHeartKeys[key] = true
+        end
+        return
+    end
+
+    if key and boxProcessedHeartKeys[key] then
+        return
+    end
+
+    if key then
+        boxProcessedHeartKeys[key] = true
+    end
+
+    if AnyPlayerHasAngelbox() and RollBoxHeartBonus(pickup, ANGELBOX_EXTRA_SOUL_HEART_CHANCE, 0) then
+        SpawnBoxBonusHeart(pickup, ANGELBOX_SOUL_HEART_SUBTYPE)
+    end
+
+    if AnyPlayerHasDevilbox() and RollBoxHeartBonus(pickup, DEVILBOX_EXTRA_BLACK_HEART_CHANCE, 7) then
+        SpawnBoxBonusHeart(pickup, DEVILBOX_BLACK_HEART_SUBTYPE)
+    end
+end
+
+if ModCallbacks.MC_POST_PICKUP_INIT then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, Neverbirth.HandleBoxHeartPickupInit, ANGELBOX_HEART_VARIANT)
 end
 
 local function GetDevilboxCharge(player, slot)

@@ -8,16 +8,20 @@
     <Pool Name="devil"> <!-- 恶魔房 -->
         <Item Name="Aphrodisiac" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Angelbox" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="angel"> <!-- 天使 -->
         <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Devilbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Empty Cradle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="treasure"> <!-- 宝箱 -->
         <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Uncut Cord" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Empty Cradle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Shredded Tarot" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
@@ -33,6 +37,8 @@
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
         <Item Name="Devilbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="craneGame"> <!-- 赌博乞丐 -->

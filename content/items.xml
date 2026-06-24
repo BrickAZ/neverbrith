@@ -26,6 +26,24 @@
     quality="3"
     tags="summonable"
   />
+  <!-- 被动道具：绝育证明 -->
+  <passive
+    name="Sterilization Certificate"
+    cache="all"
+    description="No more births"
+    gfx="SterilizationCertificate.png"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：空摇篮 -->
+  <passive
+    name="Empty Cradle"
+    cache="damage"
+    description="Remembered harm"
+    gfx="EmptyCradle.png"
+    quality="3"
+    tags="summonable"
+  />
   <!-- 主动道具：剪碎的塔罗 -->
   <active
     name="Shredded Tarot"
@@ -35,6 +53,16 @@
     gfx="ShreddedTarot.png"
     quality="3"
     tags="summonable"
+  />
+  <!-- 主动道具：血颅蛊 -->
+  <active
+    name="Blood Skull Gu"
+    cache="damage range"
+    maxcharges="3"
+    description="Slaughter your kin to purify your aptitude."
+    gfx="BloodSkullGu.png"
+    quality="3"
+    tags="devil offensive summonable"
   />
   <!-- 主动道具：春药 -->
   <active
@@ -59,8 +87,8 @@
   <active
     name="Angelbox"
     cache="all"
-    maxcharges="12"
-    initcharge="12"
+    maxcharges="6"
+    initcharge="6"
     chargetype="special"
     description="Full hearts, heavenbound"
     gfx="Angelbox.png"
@@ -71,8 +99,8 @@
   <active
     name="Devilbox"
     cache="all"
-    maxcharges="12"
-    initcharge="12"
+    maxcharges="6"
+    initcharge="6"
     chargetype="special"
     description="Black hearts, below"
     gfx="Devilbox.png"

@@ -26,6 +26,24 @@
     quality="3"
     tags="summonable"
   />
+  <!-- 被动道具：绝育证明 -->
+  <passive
+    name="绝育证明"
+    cache="all"
+    description="不许再生"
+    gfx="SterilizationCertificate.png"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：空摇篮 -->
+  <passive
+    name="空摇篮"
+    cache="damage"
+    description="伤痕会回应"
+    gfx="EmptyCradle.png"
+    quality="3"
+    tags="summonable"
+  />
   <!-- 主动道具：剪碎的塔罗 -->
   <active
     name="剪碎的塔罗"
@@ -35,6 +53,16 @@
     gfx="ShreddedTarot.png"
     quality="3"
     tags="summonable"
+  />
+  <!-- 主动道具：血颅蛊 -->
+  <active
+    name="血颅蛊"
+    cache="damage range"
+    maxcharges="3"
+    description="杀亲证道，提纯资质。"
+    gfx="BloodSkullGu.png"
+    quality="3"
+    tags="devil offensive summonable"
   />
   <!-- 主动道具：春药 -->
   <active
@@ -59,8 +87,8 @@
   <active
     name="天使盒"
     cache="all"
-    maxcharges="12"
-    initcharge="12"
+    maxcharges="6"
+    initcharge="6"
     chargetype="special"
     description="盈魂引向天国"
     gfx="Angelbox.png"
@@ -71,8 +99,8 @@
   <active
     name="恶魔盒"
     cache="all"
-    maxcharges="12"
-    initcharge="12"
+    maxcharges="6"
+    initcharge="6"
     chargetype="special"
     description="暗血引向深渊"
     gfx="Devilbox.png"
