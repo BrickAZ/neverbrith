@@ -13,6 +13,7 @@ local ITEM_NAME_CANDIDATES = {
     SterilizationCertificate = { "Sterilization Certificate", "绝育证明" },
     EmptyCradle = { "Empty Cradle", "空摇篮" },
     BloodSkullGu = { "Blood Skull Gu", "血颅蛊" },
+    BetweenDeathAndLife = { "Between Death and Life", "生死一念间" },
     DS4 = { "ds4" },
 }
 
@@ -39,6 +40,7 @@ local Items = {
     SterilizationCertificate = FindItemIdByNames(ITEM_NAME_CANDIDATES.SterilizationCertificate),
     EmptyCradle = FindItemIdByNames(ITEM_NAME_CANDIDATES.EmptyCradle),
     BloodSkullGu = FindItemIdByNames(ITEM_NAME_CANDIDATES.BloodSkullGu),
+    BetweenDeathAndLife = FindItemIdByNames(ITEM_NAME_CANDIDATES.BetweenDeathAndLife),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
 
@@ -89,21 +91,21 @@ local EID_DESCRIPTIONS = {
     [Items.Angelbox] = {
         en_us = {
             name = "Angel Box",
-            eidDescription = "{{Luck}} +3 Luck while held#First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Heart drops have a 10% chance to add a soul heart#Favors angel rooms while held",
+            eidDescription = "{{Luck}} +3 Luck while held#First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Heart drops have a 60% chance to add a soul heart#Favors angel rooms while held",
         },
         zh_cn = {
             name = "天使盒",
-            eidDescription = "持有时 {{Luck}} +3 幸运#每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满6格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#地上心掉落有10%额外生成1个完整魂心#持有时一半恶魔房概率转为天使房概率",
+            eidDescription = "持有时 {{Luck}} +3 幸运#每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满4格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#地上心掉落有60%额外生成1个完整魂心#持有时一半恶魔房概率转为天使房概率",
         },
     },
     [Items.Devilbox] = {
         en_us = {
             name = "Devil Box",
-            eidDescription = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Heart drops have a 20% chance to add a black heart#Favors devil rooms while held",
+            eidDescription = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Heart drops have an 80% chance to add a black heart#Favors devil rooms while held",
         },
         zh_cn = {
             name = "恶魔盒",
-            eidDescription = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满6格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#地上心掉落有20%额外生成1个黑心#持有时一半交易房方向转为恶魔房概率",
+            eidDescription = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满4格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#地上心掉落有80%额外生成1个黑心#持有时一半交易房方向转为恶魔房概率",
         },
     },
     [Items.UncutCord] = {
@@ -134,6 +136,16 @@ local EID_DESCRIPTIONS = {
         zh_cn = {
             name = "血颅蛊",
             eidDescription = "3充能主动道具#献祭1个属于你的跟班类道具#{{Damage}} 永久 +1.5 攻击#{{Range}} 永久 +1 射程#掉落1-2个黑心#没有可献祭跟班类道具时，反噬并受到半颗红心伤害",
+        },
+    },
+    [Items.BetweenDeathAndLife] = {
+        en_us = {
+            name = "Between Death and Life",
+            eidDescription = "On pickup, activates Death Trial for the rest of the run:#Enemies become champions whenever possible#Bosses are championed or empowered#Defeating each floor boss spawns Death Certificate#Once per floor",
+        },
+        zh_cn = {
+            name = "生死一念间",
+            eidDescription = "拾取后，本局进入死证试炼：#所有敌人尽可能变为精英怪#Boss也会被精英化或强化#每层击败楼层Boss后，生成一个死亡证明#每层最多触发一次",
         },
     },
     [Items.SterilizationCertificate] = {
@@ -591,6 +603,26 @@ local function EnsureMusicboxDataLoaded()
     if type(musicboxSaveData.devilbox.forcedDevilFloors) ~= "table" then
         musicboxSaveData.devilbox.forcedDevilFloors = {}
     end
+
+    if type(musicboxSaveData.deathTrial) ~= "table" then
+        musicboxSaveData.deathTrial = {}
+    end
+
+    if type(musicboxSaveData.deathTrial.spawnedByFloor) ~= "table" then
+        musicboxSaveData.deathTrial.spawnedByFloor = {}
+    end
+
+    if type(musicboxSaveData.deathTrial.preActivationBossClearedFloors) ~= "table" then
+        musicboxSaveData.deathTrial.preActivationBossClearedFloors = {}
+    end
+
+    if type(musicboxSaveData.diceSet) ~= "table" then
+        musicboxSaveData.diceSet = {}
+    end
+
+    if type(musicboxSaveData.diceSet.players) ~= "table" then
+        musicboxSaveData.diceSet.players = {}
+    end
 end
 
 local function SaveMusicboxData()
@@ -621,6 +653,824 @@ end
 local function GetDevilboxData()
     EnsureMusicboxDataLoaded()
     return musicboxSaveData.devilbox
+end
+
+local function ResetDeathTrialDataForRun()
+    EnsureMusicboxDataLoaded()
+    musicboxSaveData.deathTrial = {
+        active = false,
+        runSeed = GetCurrentRunSeed(),
+        activatedFloorKey = nil,
+        activatedRoomKey = nil,
+        spawnedByFloor = {},
+        preActivationBossClearedFloors = {},
+    }
+    return musicboxSaveData.deathTrial
+end
+
+local function GetDeathTrialData()
+    EnsureMusicboxDataLoaded()
+
+    local data = musicboxSaveData.deathTrial
+    if type(data) ~= "table" or data.runSeed ~= GetCurrentRunSeed() then
+        data = ResetDeathTrialDataForRun()
+    end
+
+    if type(data.spawnedByFloor) ~= "table" then
+        data.spawnedByFloor = {}
+    end
+
+    if type(data.preActivationBossClearedFloors) ~= "table" then
+        data.preActivationBossClearedFloors = {}
+    end
+
+    return data
+end
+
+--------------------------------------------------
+-- 骰子套装
+
+do
+local DICE_SET_REQUIRED_UNIQUE_ITEMS = 3
+local DICE_SET_ACTIVE_ITEM_TYPE = (ItemType and ItemType.ITEM_ACTIVE) or 3
+local DICE_SET_D7_FALLBACK_ID = 437
+local DICE_SET_D1_FALLBACK_ID = 476
+local DICE_SET_ACTIVE_SLOTS = {
+    ActiveSlot.SLOT_PRIMARY,
+    ActiveSlot.SLOT_SECONDARY,
+    ActiveSlot.SLOT_POCKET,
+    ActiveSlot.SLOT_POCKET2,
+}
+local DICE_SET_NAME_KEYWORDS = {
+    "Dice",
+    "Die",
+    "D1",
+    "D6",
+    "D7",
+    "D8",
+    "D10",
+    "D12",
+    "D20",
+    "D100",
+    "骰",
+    "骰子",
+}
+local diceSetRegisteredItems = {}
+local diceSetPreUse = {}
+local diceSetStatProtectionPending = {}
+local diceSetStatBaselines = {}
+local diceSetEidModifierRegistered = false
+local diceSetEidTransformationSupportRegistered = false
+local DICE_SET_EID_TRANSFORMATION = "neverbirthDiceSet"
+local DICE_SET_EID_ICON_MARKUP = "{{neverbirthDiceSet}}"
+local DICE_SET_EID_FALLBACK_ICON_MARKUP = "{{Collectible105}}"
+local DICE_SET_EID_ICON_ANM2 = "gfx/eid/DiceSetIcon.anm2"
+local DICE_SET_EID_ICON_ANIMATION = "Transformation"
+local diceSetEidIconSprite = nil
+
+local function AddOriginalDiceItem(itemId)
+    if IsValidItemId(itemId) then
+        diceSetRegisteredItems[itemId] = {
+            name = "vanilla dice",
+            protectStats = true,
+            original = true,
+        }
+    end
+end
+
+if CollectibleType then
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D6)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D4)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D8)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D7 or DICE_SET_D7_FALLBACK_ID)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D1 or DICE_SET_D1_FALLBACK_ID)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D10)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D12)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D20)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D100)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_D_INFINITY)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_ETERNAL_D6)
+    AddOriginalDiceItem(CollectibleType.COLLECTIBLE_SPINDOWN_DICE)
+end
+
+local function GetDiceSetData()
+    EnsureMusicboxDataLoaded()
+    if type(musicboxSaveData.diceSet) ~= "table" or musicboxSaveData.diceSet.runSeed ~= GetCurrentRunSeed() then
+        musicboxSaveData.diceSet = {
+            runSeed = GetCurrentRunSeed(),
+            players = {},
+        }
+    end
+
+    if type(musicboxSaveData.diceSet.players) ~= "table" then
+        musicboxSaveData.diceSet.players = {}
+    end
+
+    return musicboxSaveData.diceSet
+end
+
+local function ResetDiceSetDataForRun()
+    EnsureMusicboxDataLoaded()
+    musicboxSaveData.diceSet = {
+        runSeed = GetCurrentRunSeed(),
+        players = {},
+    }
+    diceSetPreUse = {}
+    diceSetStatProtectionPending = {}
+    diceSetStatBaselines = {}
+end
+
+local function GetDiceSetPlayerKey(player)
+    return tostring(player and player.InitSeed or "")
+end
+
+local function GetDiceSetPlayerState(player)
+    local data = GetDiceSetData()
+    local playerKey = GetDiceSetPlayerKey(player)
+    data.players[playerKey] = data.players[playerKey] or {
+        seen = {},
+        unlocked = false,
+    }
+
+    if type(data.players[playerKey].seen) ~= "table" then
+        data.players[playerKey].seen = {}
+    end
+
+    return data.players[playerKey]
+end
+
+local function CaptureDiceSetStatBaseline(player)
+    if not player then
+        return nil
+    end
+
+    return {
+        beforeDamage = player.Damage,
+        beforeMaxFireDelay = player.MaxFireDelay,
+        beforeTearRange = player.TearRange,
+    }
+end
+
+local function StoreDiceSetStatBaseline(player, force)
+    if not player then
+        return nil
+    end
+
+    local playerKey = GetDiceSetPlayerKey(player)
+    if not force and diceSetStatProtectionPending[playerKey] then
+        return diceSetStatBaselines[playerKey]
+    end
+
+    local baseline = CaptureDiceSetStatBaseline(player)
+    diceSetStatBaselines[playerKey] = baseline
+    return baseline
+end
+
+local function GetDiceSetStatBaseline(player)
+    return diceSetStatBaselines[GetDiceSetPlayerKey(player)]
+end
+
+local function GetCollectibleConfig(itemId)
+    if not Isaac.GetItemConfig then
+        return nil
+    end
+
+    local ok, itemConfig = pcall(function()
+        return Isaac.GetItemConfig()
+    end)
+    if not ok or not itemConfig or not itemConfig.GetCollectible then
+        return nil
+    end
+
+    local configOk, config = pcall(function()
+        return itemConfig:GetCollectible(itemId)
+    end)
+    if configOk then
+        return config
+    end
+
+    return nil
+end
+
+local function IsActiveCollectibleConfig(config)
+    if not config then
+        return false
+    end
+
+    return config.Type == DICE_SET_ACTIVE_ITEM_TYPE
+        or config.Type == "active"
+        or config.Type == "Active"
+end
+
+local function GetCollectibleMaxChargeFromConfig(config)
+    if not config then
+        return 0
+    end
+
+    return tonumber(config.MaxCharges or config.MaxCharge or config.Charge or config.MaxChargeCount) or 0
+end
+
+local function GetDiceSetItemOptions(itemId)
+    return diceSetRegisteredItems[itemId]
+end
+
+function Neverbirth:RegisterDiceItem(itemId, options)
+    if not IsValidItemId(itemId) then
+        return false
+    end
+
+    options = options or {}
+    diceSetRegisteredItems[itemId] = {
+        name = options.name,
+        protectStats = options.protectStats ~= false,
+        registered = true,
+    }
+    return true
+end
+
+function Neverbirth:IsDiceActiveItem(itemId)
+    if not IsValidItemId(itemId) then
+        return false
+    end
+
+    if CollectibleType then
+        if itemId == CollectibleType.COLLECTIBLE_CROOKED_PENNY
+            or itemId == CollectibleType.COLLECTIBLE_GLITCHED_CROWN then
+            return false
+        end
+    end
+
+    if diceSetRegisteredItems[itemId] then
+        return true
+    end
+
+    local config = GetCollectibleConfig(itemId)
+    if not IsActiveCollectibleConfig(config) or GetCollectibleMaxChargeFromConfig(config) <= 0 then
+        return false
+    end
+
+    local name = tostring(config.Name or config.NameLocalization or "")
+    for _, keyword in ipairs(DICE_SET_NAME_KEYWORDS) do
+        if name:find(keyword, 1, true) then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Neverbirth:PlayerHasDiceSet(player)
+    if not player then
+        return false
+    end
+
+    return GetDiceSetPlayerState(player).unlocked == true
+end
+
+local function CountDiceSetSeenItems(state)
+    local count = 0
+    for _, seen in pairs(state.seen or {}) do
+        if seen then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+function Neverbirth:GetDiceSetProgress(player)
+    if not player then
+        return 0, DICE_SET_REQUIRED_UNIQUE_ITEMS, false
+    end
+
+    local state = GetDiceSetPlayerState(player)
+    local count = math.min(CountDiceSetSeenItems(state), DICE_SET_REQUIRED_UNIQUE_ITEMS)
+    return count, DICE_SET_REQUIRED_UNIQUE_ITEMS, state.unlocked == true
+end
+
+local ShowDiceSetUnlockBanner
+local PlayDiceSetUnlockSound
+
+local function PlayDiceSetUnlockFeedback(player)
+    if ShowDiceSetUnlockBanner then
+        ShowDiceSetUnlockBanner()
+    end
+    if PlayDiceSetUnlockSound then
+        PlayDiceSetUnlockSound()
+    end
+    if player and player.SetColor then
+        pcall(function()
+            player:SetColor(Color(0.7, 0.9, 1, 1, 0.2, 0.2, 0.4), 30, 1, true, false)
+        end)
+    end
+    if Isaac.Spawn and EntityType and EntityType.ENTITY_EFFECT and EffectVariant and EffectVariant.POOF01 and player and player.Position then
+        pcall(function()
+            Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, player.Position, Vector(0, 0), player)
+        end)
+    end
+end
+
+local function MarkDiceItemSeen(player, itemId)
+    if not player or not Neverbirth:IsDiceActiveItem(itemId) then
+        return false
+    end
+
+    local state = GetDiceSetPlayerState(player)
+    local key = tostring(itemId)
+    if state.seen[key] then
+        return false
+    end
+
+    state.seen[key] = true
+    if not state.unlocked and CountDiceSetSeenItems(state) >= DICE_SET_REQUIRED_UNIQUE_ITEMS then
+        state.unlocked = true
+        StoreDiceSetStatBaseline(player, true)
+        PlayDiceSetUnlockFeedback(player)
+    end
+
+    SaveMusicboxData()
+    return true
+end
+
+local function GetDiceSetUseKey(player, slot)
+    return GetDiceSetPlayerKey(player) .. ":" .. tostring(slot or ActiveSlot.SLOT_PRIMARY)
+end
+
+local function StartDiceSetStatProtection(player, preUseState, itemId)
+    if not Neverbirth:PlayerHasDiceSet(player) then
+        return
+    end
+
+    local protectedItemId = (preUseState and preUseState.itemId) or itemId
+    local options = GetDiceSetItemOptions(protectedItemId)
+    if options and options.protectStats == false then
+        return
+    end
+
+    local baseline = preUseState or GetDiceSetStatBaseline(player)
+    if not baseline then
+        baseline = StoreDiceSetStatBaseline(player, true)
+    end
+    if not baseline then
+        return
+    end
+
+    local playerKey = GetDiceSetPlayerKey(player)
+    diceSetStatProtectionPending[playerKey] = {
+        beforeDamage = baseline.beforeDamage,
+        beforeMaxFireDelay = baseline.beforeMaxFireDelay,
+        beforeTearRange = baseline.beforeTearRange,
+        remaining = {
+            damage = true,
+            fireDelay = true,
+            range = true,
+        },
+        timer = 5,
+    }
+
+    if player.AddCacheFlags then
+        local flags = 0
+        if CacheFlag and CacheFlag.CACHE_DAMAGE then
+            flags = flags | CacheFlag.CACHE_DAMAGE
+        end
+        if CacheFlag and CacheFlag.CACHE_FIREDELAY then
+            flags = flags | CacheFlag.CACHE_FIREDELAY
+        end
+        if CacheFlag and CacheFlag.CACHE_RANGE then
+            flags = flags | CacheFlag.CACHE_RANGE
+        end
+        if flags ~= 0 then
+            player:AddCacheFlags(flags)
+        end
+    end
+
+    if player.EvaluateItems then
+        player:EvaluateItems()
+    end
+end
+
+local function ParseDiceSetPickupPlayer(...)
+    local args = { ... }
+    local maybePlayer = args[6]
+    if type(maybePlayer) == "table" and maybePlayer.ToPlayer then
+        local player = maybePlayer:ToPlayer()
+        if player then
+            return player
+        end
+    elseif type(maybePlayer) == "table" then
+        return maybePlayer
+    end
+
+    for _, argument in ipairs(args) do
+        if type(argument) == "table" and argument.ToPlayer then
+            local player = argument:ToPlayer()
+            if player then
+                return player
+            end
+        elseif type(argument) == "table" and argument.InitSeed then
+            return argument
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth:TrackDiceSetPickup(itemId, ...)
+    local player = ParseDiceSetPickupPlayer(...)
+    MarkDiceItemSeen(player, itemId)
+end
+
+function Neverbirth:TrackHeldDiceItems()
+    for _, player in ipairs(GetPlayers()) do
+        for _, slot in ipairs(DICE_SET_ACTIVE_SLOTS) do
+            if player.GetActiveItem then
+                local ok, itemId = pcall(function()
+                    return player:GetActiveItem(slot)
+                end)
+                if ok and Neverbirth:IsDiceActiveItem(itemId) then
+                    MarkDiceItemSeen(player, itemId)
+                end
+            end
+        end
+        if Neverbirth:PlayerHasDiceSet(player) then
+            StoreDiceSetStatBaseline(player)
+        end
+    end
+end
+
+function Neverbirth:RecordDiceSetPreUse(itemId, _, player, _, activeSlot)
+    if not player or not Neverbirth:IsDiceActiveItem(itemId) then
+        return nil
+    end
+
+    MarkDiceItemSeen(player, itemId)
+    local slot = activeSlot or ActiveSlot.SLOT_PRIMARY
+    diceSetPreUse[GetDiceSetUseKey(player, slot)] = {
+        itemId = itemId,
+        slot = slot,
+        beforeDamage = player.Damage,
+        beforeMaxFireDelay = player.MaxFireDelay,
+        beforeTearRange = player.TearRange,
+    }
+
+    return nil
+end
+
+function Neverbirth:HandleDiceSetUse(itemId, _, player, _, activeSlot)
+    if not player or not Neverbirth:IsDiceActiveItem(itemId) then
+        return nil
+    end
+
+    MarkDiceItemSeen(player, itemId)
+    local slot = activeSlot or ActiveSlot.SLOT_PRIMARY
+    local useKey = GetDiceSetUseKey(player, slot)
+    local preUseState = diceSetPreUse[useKey]
+    diceSetPreUse[useKey] = nil
+
+    StartDiceSetStatProtection(player, preUseState, itemId)
+
+    return nil
+end
+
+function Neverbirth:EvaluateDiceSetStatProtection(player, cacheFlag)
+    local pending = diceSetStatProtectionPending[GetDiceSetPlayerKey(player)]
+    if not pending then
+        return
+    end
+
+    if CacheFlag and cacheFlag == CacheFlag.CACHE_DAMAGE and pending.beforeDamage and player.Damage < pending.beforeDamage then
+        player.Damage = pending.beforeDamage
+        pending.remaining.damage = nil
+    elseif CacheFlag and cacheFlag == CacheFlag.CACHE_FIREDELAY and pending.beforeMaxFireDelay and player.MaxFireDelay > pending.beforeMaxFireDelay then
+        player.MaxFireDelay = pending.beforeMaxFireDelay
+        pending.remaining.fireDelay = nil
+    elseif CacheFlag and cacheFlag == CacheFlag.CACHE_RANGE and pending.beforeTearRange and player.TearRange < pending.beforeTearRange then
+        player.TearRange = pending.beforeTearRange
+        pending.remaining.range = nil
+    end
+
+    if not pending.remaining.damage and not pending.remaining.fireDelay and not pending.remaining.range then
+        diceSetStatProtectionPending[GetDiceSetPlayerKey(player)] = nil
+    end
+end
+
+function Neverbirth:UpdateDiceSetPendingState()
+    for playerKey, pending in pairs(diceSetStatProtectionPending) do
+        pending.timer = (tonumber(pending.timer) or 0) - 1
+        if pending.timer <= 0 then
+            diceSetStatProtectionPending[playerKey] = nil
+        end
+    end
+end
+
+function Neverbirth:ResetDiceSetState(isContinued)
+    if isContinued then
+        GetDiceSetData()
+        return
+    end
+
+    ResetDiceSetDataForRun()
+    SaveMusicboxData()
+end
+
+local function GetDiceSetEIDLanguage()
+    local language = "en_us"
+    if EID and EID.getLanguage then
+        local ok, currentLanguage = pcall(function()
+            return EID:getLanguage()
+        end)
+        if ok and type(currentLanguage) == "string" then
+            language = currentLanguage
+        end
+    end
+
+    return language
+end
+
+local function GetDiceSetUnlockText()
+    local language = GetDiceSetEIDLanguage()
+    if language == "zh_cn" or language == "zh" then
+        return "骰子套装", "命运不再低于起点"
+    end
+
+    return "Dice Set", "Fate no longer falls below its origin"
+end
+
+ShowDiceSetUnlockBanner = function()
+    if not Game then
+        return
+    end
+
+    local gameOk, game = pcall(Game)
+    if not gameOk or not game or type(game.GetHUD) ~= "function" then
+        return
+    end
+
+    local hudOk, hud = pcall(function()
+        return game:GetHUD()
+    end)
+    if not hudOk or not hud or type(hud.ShowItemText) ~= "function" then
+        return
+    end
+
+    local title, subtitle = GetDiceSetUnlockText()
+    pcall(function()
+        hud:ShowItemText(title, subtitle)
+    end)
+end
+
+PlayDiceSetUnlockSound = function()
+    if not SoundEffect or not SFXManager then
+        return
+    end
+
+    local soundId = SoundEffect.SOUND_CHOIR_UNLOCK or SoundEffect.SOUND_POWERUP2 or SoundEffect.SOUND_HOLY
+    if not soundId then
+        return
+    end
+
+    local managerOk, manager = pcall(SFXManager)
+    if not managerOk or not manager or type(manager.Play) ~= "function" then
+        return
+    end
+
+    pcall(function()
+        manager:Play(soundId, 1, 0, false, 1)
+    end)
+end
+
+local function GetDiceSetEIDPlayer(descObj)
+    if descObj then
+        if descObj.Player then
+            return descObj.Player
+        end
+        if descObj.PlayerEntity then
+            return descObj.PlayerEntity
+        end
+    end
+
+    if EID and EID.player then
+        return EID.player
+    end
+
+    if Isaac.GetPlayer then
+        local ok, player = pcall(function()
+            return Isaac.GetPlayer(0)
+        end)
+        if ok and player then
+            return player
+        end
+    end
+
+    local players = GetPlayers()
+    return players[1]
+end
+
+local function GetDiceSetEIDTitle(player)
+    local count, required = Neverbirth:GetDiceSetProgress(player)
+    local language = GetDiceSetEIDLanguage()
+
+    if language == "zh_cn" or language == "zh" then
+        return "骰子套装 (" .. tostring(count) .. "/" .. tostring(required) .. ")"
+    end
+
+    return "Dice Set (" .. tostring(count) .. "/" .. tostring(required) .. ")"
+end
+
+local function GetDiceSetEIDTransformationName()
+    local language = GetDiceSetEIDLanguage()
+
+    if language == "zh_cn" or language == "zh" then
+        return "骰子套装"
+    end
+
+    return "Dice Set"
+end
+
+local function GetDiceSetEIDBody(player)
+    local _, _, unlocked = Neverbirth:GetDiceSetProgress(player)
+    local language = GetDiceSetEIDLanguage()
+
+    if language == "zh_cn" or language == "zh" then
+        if unlocked then
+            return "{{Damage}} {{Tears}} {{Range}} 当骰子更改伤害、射速、射程时，倍率不小于1.0"
+        end
+        return DICE_SET_EID_ICON_MARKUP .. " 收集或使用过3个不同骰子类主动道具后激活"
+    end
+
+    if unlocked then
+        return "{{Damage}} {{Tears}} {{Range}} When dice change damage, fire rate, or range, their multipliers cannot be lower than 1.0"
+    end
+    return DICE_SET_EID_ICON_MARKUP .. " Collect or use 3 different dice active items to activate"
+end
+
+function Neverbirth:FormatDiceSetEID(player)
+    return DICE_SET_EID_ICON_MARKUP .. " {{ColorPurple}}" .. GetDiceSetEIDTitle(player) .. "{{CR}}#" .. GetDiceSetEIDBody(player)
+end
+
+local function AppendDiceSetTransformation(descObj)
+    if not descObj then
+        return
+    end
+
+    local current = tostring(descObj.Transformation or "")
+    if current == "" or current == "0" then
+        descObj.Transformation = DICE_SET_EID_TRANSFORMATION
+        return
+    end
+
+    for transform in string.gmatch(current, "([^,]+)") do
+        if transform == DICE_SET_EID_TRANSFORMATION then
+            return
+        end
+    end
+
+    descObj.Transformation = current .. "," .. DICE_SET_EID_TRANSFORMATION
+end
+
+local function RegisterDiceSetEIDTransformationSupport()
+    if diceSetEidTransformationSupportRegistered or not EID then
+        return
+    end
+
+    if type(EID.createTransformation) == "function" then
+        pcall(function()
+            EID:createTransformation(DICE_SET_EID_TRANSFORMATION, "Dice Set", "en_us")
+            EID:createTransformation(DICE_SET_EID_TRANSFORMATION, "骰子套装", "zh_cn")
+        end)
+    elseif type(EID.CustomTransformations) == "table" then
+        EID.CustomTransformations[DICE_SET_EID_TRANSFORMATION] = EID.CustomTransformations[DICE_SET_EID_TRANSFORMATION] or {}
+        EID.CustomTransformations[DICE_SET_EID_TRANSFORMATION].en_us = "Dice Set"
+        EID.CustomTransformations[DICE_SET_EID_TRANSFORMATION].zh_cn = "骰子套装"
+    end
+
+    if type(EID.TransformationData) == "table" then
+        EID.TransformationData[DICE_SET_EID_TRANSFORMATION] = EID.TransformationData[DICE_SET_EID_TRANSFORMATION] or {}
+        EID.TransformationData[DICE_SET_EID_TRANSFORMATION].NumNeeded = DICE_SET_REQUIRED_UNIQUE_ITEMS
+    end
+
+    if type(EID.InlineIcons) == "table" then
+        local iconRegistered = false
+        if Sprite then
+            local ok, sprite = pcall(function()
+                local loadedSprite = Sprite()
+                loadedSprite:Load(DICE_SET_EID_ICON_ANM2, true)
+                loadedSprite:Play(DICE_SET_EID_ICON_ANIMATION, true)
+                return loadedSprite
+            end)
+            if ok and sprite then
+                diceSetEidIconSprite = sprite
+                if type(EID.addIcon) == "function" then
+                    pcall(function()
+                        EID:addIcon(DICE_SET_EID_TRANSFORMATION, DICE_SET_EID_ICON_ANIMATION, 0, 16, 16, 0, 0, diceSetEidIconSprite)
+                    end)
+                    iconRegistered = EID.InlineIcons[DICE_SET_EID_TRANSFORMATION] ~= nil
+                end
+                if not iconRegistered then
+                    EID.InlineIcons[DICE_SET_EID_TRANSFORMATION] = { DICE_SET_EID_ICON_ANIMATION, 0, 16, 16, 0, 0, diceSetEidIconSprite }
+                    iconRegistered = true
+                end
+            end
+        end
+
+        if not iconRegistered and type(EID.createItemIconObject) == "function" then
+            pcall(function()
+                local icon = EID:createItemIconObject(DICE_SET_EID_FALLBACK_ICON_MARKUP)
+                if icon then
+                    EID.InlineIcons[DICE_SET_EID_TRANSFORMATION] = icon
+                end
+            end)
+        end
+    end
+
+    if type(EID.evaluateTransformationProgress) == "function" and not EID.__neverbirthDiceSetEvaluateProgress then
+        local originalEvaluateTransformationProgress = EID.evaluateTransformationProgress
+        EID.__neverbirthDiceSetEvaluateProgress = originalEvaluateTransformationProgress
+        EID.evaluateTransformationProgress = function(self, transformation)
+            if transformation ~= DICE_SET_EID_TRANSFORMATION then
+                return originalEvaluateTransformationProgress(self, transformation)
+            end
+
+            self.TransformationProgress = self.TransformationProgress or {}
+            local players = self.coopAllPlayers
+            if type(players) ~= "table" or #players == 0 then
+                players = GetPlayers()
+            end
+
+            for _, player in ipairs(players) do
+                local playerId
+                if type(self.getPlayerID) == "function" then
+                    local ok, id = pcall(function()
+                        return self:getPlayerID(player, true)
+                    end)
+                    if ok then
+                        playerId = id
+                    end
+                end
+                playerId = playerId or GetDiceSetPlayerKey(player)
+                self.TransformationProgress[playerId] = self.TransformationProgress[playerId] or {}
+                local count = Neverbirth:GetDiceSetProgress(player)
+                self.TransformationProgress[playerId][DICE_SET_EID_TRANSFORMATION] = count
+            end
+        end
+    end
+
+    if type(EID.getTransformationName) == "function" and not EID.__neverbirthDiceSetGetTransformationName then
+        local originalGetTransformationName = EID.getTransformationName
+        EID.__neverbirthDiceSetGetTransformationName = originalGetTransformationName
+        EID.getTransformationName = function(self, transformId)
+            if transformId == DICE_SET_EID_TRANSFORMATION then
+                return GetDiceSetEIDTransformationName(GetDiceSetEIDPlayer())
+            end
+            return originalGetTransformationName(self, transformId)
+        end
+    end
+
+    diceSetEidTransformationSupportRegistered = true
+end
+
+local function RegisterDiceSetEIDModifier()
+    if diceSetEidModifierRegistered or not EID or type(EID.addDescriptionModifier) ~= "function" then
+        return false
+    end
+
+    RegisterDiceSetEIDTransformationSupport()
+
+    EID:addDescriptionModifier(
+        "neverbirth Dice Set",
+        function(descObj)
+            local itemId = descObj and (descObj.ObjSubType or descObj.SubType or descObj.ItemID or descObj.ItemId)
+            return Neverbirth:IsDiceActiveItem(itemId)
+        end,
+        function(descObj)
+            if not descObj then
+                return descObj
+            end
+
+            local player = GetDiceSetEIDPlayer(descObj)
+            local originalDescription = tostring(descObj.Description or "")
+            if EID.Config and (EID.Config["TransformationIcons"] or EID.Config["TransformationText"] or EID.Config["TransformationProgress"]) then
+                AppendDiceSetTransformation(descObj)
+                descObj.Description = GetDiceSetEIDBody(player)
+                if originalDescription ~= "" then
+                    descObj.Description = descObj.Description .. "#" .. originalDescription
+                end
+            else
+                descObj.Description = Neverbirth:FormatDiceSetEID(player)
+                if originalDescription ~= "" then
+                    descObj.Description = descObj.Description .. "#" .. originalDescription
+                end
+            end
+            return descObj
+        end
+    )
+
+    diceSetEidModifierRegistered = true
+    return true
+end
+
+function Neverbirth:TryRegisterDiceSetEIDModifier()
+    RegisterDiceSetEIDModifier()
+end
 end
 
 local function GetPlayerMusicboxKey(player)
@@ -2475,6 +3325,489 @@ end
 end
 
 --------------------------------------------------
+-- 生死一念间
+
+do
+local BETWEEN_DEATH_LIFE_MAX_CHARGE = 12
+local BETWEEN_DEATH_LIFE_ACTIVE_SLOTS = {
+    ActiveSlot and ActiveSlot.SLOT_PRIMARY or 0,
+    ActiveSlot and ActiveSlot.SLOT_SECONDARY or 1,
+    ActiveSlot and ActiveSlot.SLOT_POCKET or 2,
+    ActiveSlot and ActiveSlot.SLOT_POCKET2 or 3,
+}
+local BETWEEN_DEATH_LIFE_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
+local BETWEEN_DEATH_LIFE_COLLECTIBLE_VARIANT = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
+local BETWEEN_DEATH_LIFE_ROOM_BOSS = (RoomType and RoomType.ROOM_BOSS) or 5
+local BETWEEN_DEATH_LIFE_DEATH_CERTIFICATE = (CollectibleType and CollectibleType.COLLECTIBLE_DEATH_CERTIFICATE) or nil
+local BETWEEN_DEATH_LIFE_CHAMPION_COLOR = -1
+local BETWEEN_DEATH_LIFE_NORMAL_HP_MULTIPLIER = 1.35
+local BETWEEN_DEATH_LIFE_BOSS_HP_MULTIPLIER = 1.5
+local BETWEEN_DEATH_LIFE_NORMAL_SPEED_MULTIPLIER = 1.05
+local BETWEEN_DEATH_LIFE_BOSS_SPEED_MULTIPLIER = 1.08
+local betweenDeathLifeDeathCertificateId = nil
+
+local function GetBetweenDeathLifeGame()
+    if not Game then
+        return nil
+    end
+
+    local ok, game = pcall(Game)
+    if ok then
+        return game
+    end
+
+    return nil
+end
+
+local function GetBetweenDeathLifeLevel()
+    local game = GetBetweenDeathLifeGame()
+    return game and game.GetLevel and game:GetLevel() or nil
+end
+
+local function GetBetweenDeathLifeRoom()
+    local game = GetBetweenDeathLifeGame()
+    return game and game.GetRoom and game:GetRoom() or nil
+end
+
+local function GetBetweenDeathLifeFloorKey()
+    local level = GetBetweenDeathLifeLevel()
+    if not level then
+        return GetCurrentRunSeed() .. ":unknown"
+    end
+
+    local stage = level.GetStage and level:GetStage() or "unknown"
+    local stageType = level.GetStageType and level:GetStageType() or "unknown"
+    return GetCurrentRunSeed() .. ":" .. tostring(stage) .. ":" .. tostring(stageType)
+end
+
+local function GetBetweenDeathLifeRoomKey()
+    local level = GetBetweenDeathLifeLevel()
+    local room = GetBetweenDeathLifeRoom()
+    local roomIndex = nil
+
+    if level and level.GetCurrentRoomIndex then
+        local ok, index = pcall(function()
+            return level:GetCurrentRoomIndex()
+        end)
+        if ok then
+            roomIndex = index
+        end
+    end
+
+    if roomIndex == nil and room and room.GetSpawnSeed then
+        local ok, seed = pcall(function()
+            return room:GetSpawnSeed()
+        end)
+        if ok then
+            roomIndex = "seed:" .. tostring(seed)
+        end
+    end
+
+    return GetBetweenDeathLifeFloorKey() .. ":" .. tostring(roomIndex or "unknown")
+end
+
+local function FindBetweenDeathLifeSlot(player, preferredSlot)
+    if not player or not player.GetActiveItem then
+        return nil
+    end
+
+    if preferredSlot ~= nil and player:GetActiveItem(preferredSlot) == Items.BetweenDeathAndLife then
+        return preferredSlot
+    end
+
+    for _, slot in ipairs(BETWEEN_DEATH_LIFE_ACTIVE_SLOTS) do
+        if player:GetActiveItem(slot) == Items.BetweenDeathAndLife then
+            return slot
+        end
+    end
+
+    return nil
+end
+
+local function GetBetweenDeathLifeCharge(player, slot)
+    if player and player.GetActiveCharge then
+        local ok, charge = pcall(function()
+            return player:GetActiveCharge(slot)
+        end)
+        if ok then
+            return tonumber(charge) or 0
+        end
+    end
+
+    return BETWEEN_DEATH_LIFE_MAX_CHARGE
+end
+
+local function RemoveBetweenDeathLifeItem(player, slot)
+    if player and player.RemoveCollectible then
+        local ok, err = pcall(function()
+            player:RemoveCollectible(Items.BetweenDeathAndLife, false, slot or FindBetweenDeathLifeSlot(player) or 0, true)
+        end)
+        if not ok then
+            DebugLog("[neverbirth] Between Death and Life removal failed: " .. tostring(err))
+        end
+    elseif player and player.SetActiveCharge then
+        player:SetActiveCharge(0, slot or 0)
+    end
+end
+
+local function IsBetweenDeathLifeBossRoomClear()
+    local room = GetBetweenDeathLifeRoom()
+    if not room or not room.GetType or not room.IsClear then
+        return false
+    end
+
+    local okType, roomType = pcall(function()
+        return room:GetType()
+    end)
+    local okClear, isClear = pcall(function()
+        return room:IsClear()
+    end)
+
+    return okType and okClear and roomType == BETWEEN_DEATH_LIFE_ROOM_BOSS and isClear == true
+end
+
+local function GetBetweenDeathLifeDeathCertificateId()
+    if IsValidItemId(betweenDeathLifeDeathCertificateId) then
+        return betweenDeathLifeDeathCertificateId
+    end
+
+    if IsValidItemId(BETWEEN_DEATH_LIFE_DEATH_CERTIFICATE) then
+        betweenDeathLifeDeathCertificateId = BETWEEN_DEATH_LIFE_DEATH_CERTIFICATE
+        return betweenDeathLifeDeathCertificateId
+    end
+
+    if Isaac.GetItemIdByName then
+        local ok, itemId = pcall(function()
+            return Isaac.GetItemIdByName("Death Certificate")
+        end)
+        if ok and IsValidItemId(itemId) then
+            betweenDeathLifeDeathCertificateId = itemId
+            return betweenDeathLifeDeathCertificateId
+        end
+    end
+
+    return nil
+end
+
+local function SpawnBetweenDeathLifeDeathCertificate()
+    local deathCertificateId = GetBetweenDeathLifeDeathCertificateId()
+    if not IsValidItemId(deathCertificateId) then
+        DebugLog("[neverbirth] Death Certificate id not found for Between Death and Life")
+        return false
+    end
+
+    local room = GetBetweenDeathLifeRoom()
+    local position = room and room.GetCenterPos and room:GetCenterPos() or Vector(320, 280)
+    if room and room.FindFreePickupSpawnPosition then
+        position = room:FindFreePickupSpawnPosition(position, 40, true, false)
+    end
+
+    local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
+    local seed = room and room.GetSpawnSeed and room:GetSpawnSeed() or 0
+    local game = GetBetweenDeathLifeGame()
+
+    if game and game.Spawn then
+        game:Spawn(BETWEEN_DEATH_LIFE_ENTITY_PICKUP, BETWEEN_DEATH_LIFE_COLLECTIBLE_VARIANT, position, velocity, nil, deathCertificateId, seed + 628)
+        return true
+    elseif Isaac.Spawn then
+        Isaac.Spawn(BETWEEN_DEATH_LIFE_ENTITY_PICKUP, BETWEEN_DEATH_LIFE_COLLECTIBLE_VARIANT, deathCertificateId, position, velocity, nil, seed + 628)
+        return true
+    end
+
+    return false
+end
+
+local function IsBetweenDeathLifeEntityRemoved(entity)
+    if not entity then
+        return true
+    end
+
+    if entity.Exists then
+        local ok, exists = pcall(function()
+            return entity:Exists()
+        end)
+        if ok and exists == false then
+            return true
+        end
+    end
+
+    if entity.IsDead then
+        local ok, dead = pcall(function()
+            return entity:IsDead()
+        end)
+        if ok and dead then
+            return true
+        end
+    end
+
+    return entity.removed == true
+end
+
+local function GetBetweenDeathLifeNpcData(npc)
+    if npc and npc.GetData then
+        local ok, data = pcall(function()
+            return npc:GetData()
+        end)
+        if ok and type(data) == "table" then
+            return data
+        end
+    end
+
+    return nil
+end
+
+local function IsBetweenDeathLifeBoss(npc)
+    if not npc or not npc.IsBoss then
+        return false
+    end
+
+    local ok, isBoss = pcall(function()
+        return npc:IsBoss()
+    end)
+    return ok and isBoss == true
+end
+
+local function IsBetweenDeathLifeChampion(npc)
+    if not npc or not npc.IsChampion then
+        return false
+    end
+
+    local ok, isChampion = pcall(function()
+        return npc:IsChampion()
+    end)
+    return ok and isChampion == true
+end
+
+local function IsBetweenDeathLifeEligibleNpc(entity)
+    if not entity or IsBetweenDeathLifeEntityRemoved(entity) then
+        return false
+    end
+
+    local npc = entity
+    if entity.ToNPC then
+        local ok, converted = pcall(function()
+            return entity:ToNPC()
+        end)
+        if ok and converted then
+            npc = converted
+        end
+    end
+
+    if not npc then
+        return false
+    end
+
+    if npc.ToPlayer then
+        local ok, player = pcall(function()
+            return npc:ToPlayer()
+        end)
+        if ok and player then
+            return false
+        end
+    end
+
+    if npc.HasEntityFlags and EntityFlag and EntityFlag.FLAG_FRIENDLY then
+        local ok, friendly = pcall(function()
+            return npc:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
+        end)
+        if ok and friendly then
+            return false
+        end
+    end
+
+    if npc.IsVulnerableEnemy then
+        local ok, vulnerable = pcall(function()
+            return npc:IsVulnerableEnemy()
+        end)
+        if ok and vulnerable == false then
+            return false
+        end
+    end
+
+    return true
+end
+
+local function TryBetweenDeathLifeMakeChampion(npc)
+    if not npc or not npc.MakeChampion or IsBetweenDeathLifeChampion(npc) then
+        return false
+    end
+
+    local room = GetBetweenDeathLifeRoom()
+    local seed = npc.InitSeed or (room and room.GetSpawnSeed and room:GetSpawnSeed()) or 0
+    local ok = pcall(function()
+        npc:MakeChampion(seed, BETWEEN_DEATH_LIFE_CHAMPION_COLOR, true)
+    end)
+
+    return ok and IsBetweenDeathLifeChampion(npc)
+end
+
+local function EmpowerBetweenDeathLifeNpc(npc)
+    local isBoss = IsBetweenDeathLifeBoss(npc)
+    local hpMultiplier = isBoss and BETWEEN_DEATH_LIFE_BOSS_HP_MULTIPLIER or BETWEEN_DEATH_LIFE_NORMAL_HP_MULTIPLIER
+    local speedMultiplier = isBoss and BETWEEN_DEATH_LIFE_BOSS_SPEED_MULTIPLIER or BETWEEN_DEATH_LIFE_NORMAL_SPEED_MULTIPLIER
+    local oldMaxHp = tonumber(npc.MaxHitPoints) or 0
+    local oldHp = tonumber(npc.HitPoints) or oldMaxHp
+
+    if oldMaxHp > 0 then
+        local newMaxHp = math.max(oldMaxHp + 1, math.floor(oldMaxHp * hpMultiplier + 0.5))
+        npc.MaxHitPoints = newMaxHp
+        npc.HitPoints = math.max(oldHp + (newMaxHp - oldMaxHp), oldHp)
+    end
+
+    if npc.MoveSpeed ~= nil then
+        npc.MoveSpeed = npc.MoveSpeed * speedMultiplier
+    end
+
+    if npc.SetColor then
+        local color = isBoss and Color(1, 0.35, 0.35, 1, 0.2, 0, 0) or Color(0.75, 0.75, 0.75, 1, 0.1, 0.1, 0.1)
+        pcall(function()
+            npc:SetColor(color, 90, 1, false, false)
+        end)
+    end
+end
+
+local function ShouldBetweenDeathLifeAffectCurrentRoom(data)
+    return type(data) == "table"
+        and data.active == true
+        and data.activatedRoomKey ~= GetBetweenDeathLifeRoomKey()
+end
+
+local function ActivateBetweenDeathLifeTrial(player, activeSlot, requireCharge)
+    if not player then
+        return false
+    end
+
+    local slot = FindBetweenDeathLifeSlot(player, activeSlot) or activeSlot or (ActiveSlot and ActiveSlot.SLOT_PRIMARY) or 0
+    if requireCharge ~= false and GetBetweenDeathLifeCharge(player, slot) < BETWEEN_DEATH_LIFE_MAX_CHARGE then
+        return false
+    end
+
+    local data = GetDeathTrialData()
+    if data.active ~= true then
+        data.active = true
+        data.runSeed = GetCurrentRunSeed()
+        data.activatedFloorKey = GetBetweenDeathLifeFloorKey()
+        data.activatedRoomKey = GetBetweenDeathLifeRoomKey()
+        if IsBetweenDeathLifeBossRoomClear() then
+            data.preActivationBossClearedFloors[GetBetweenDeathLifeFloorKey()] = true
+        end
+        SaveMusicboxData()
+    end
+
+    RemoveBetweenDeathLifeItem(player, slot)
+    return true
+end
+
+function Neverbirth:UseBetweenDeathAndLife(_, _, player, _, activeSlot)
+    return ActivateBetweenDeathLifeTrial(player, activeSlot, true)
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseBetweenDeathAndLife, Items.BetweenDeathAndLife)
+
+local function FindBetweenDeathLifePickupPlayer(...)
+    for index = 1, select("#", ...) do
+        local value = select(index, ...)
+        if type(value) == "table" then
+            if value.ToPlayer then
+                local ok, player = pcall(function()
+                    return value:ToPlayer()
+                end)
+                if ok and player then
+                    return player
+                end
+            end
+
+            if value.RemoveCollectible or value.GetActiveItem then
+                return value
+            end
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth:ActivateBetweenDeathAndLifeOnPickup(...)
+    local slot = nil
+    if select("#", ...) >= 4 then
+        slot = select(4, ...)
+    end
+
+    local player = FindBetweenDeathLifePickupPlayer(...)
+    if not player then
+        return
+    end
+
+    ActivateBetweenDeathLifeTrial(player, slot, false)
+end
+
+if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.ActivateBetweenDeathAndLifeOnPickup, Items.BetweenDeathAndLife)
+end
+
+function Neverbirth:InitBetweenDeathLifeNpc(npc)
+    local data = GetDeathTrialData()
+    if not ShouldBetweenDeathLifeAffectCurrentRoom(data) or not IsBetweenDeathLifeEligibleNpc(npc) then
+        return
+    end
+
+    local npcData = GetBetweenDeathLifeNpcData(npc)
+    if npcData and npcData.neverbirthDeathTrialElite then
+        return
+    end
+
+    if not TryBetweenDeathLifeMakeChampion(npc) then
+        EmpowerBetweenDeathLifeNpc(npc)
+    end
+
+    if npcData then
+        npcData.neverbirthDeathTrialElite = true
+    end
+end
+
+if ModCallbacks.MC_POST_NPC_INIT then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_INIT, Neverbirth.InitBetweenDeathLifeNpc)
+end
+
+function Neverbirth:UpdateBetweenDeathLifeBossReward()
+    local floorKey = GetBetweenDeathLifeFloorKey()
+    local data = GetDeathTrialData()
+
+    if not IsBetweenDeathLifeBossRoomClear() then
+        return
+    end
+
+    if data.active ~= true then
+        data.preActivationBossClearedFloors[floorKey] = true
+        return
+    end
+
+    if data.preActivationBossClearedFloors[floorKey] or data.spawnedByFloor[floorKey] then
+        return
+    end
+
+    if SpawnBetweenDeathLifeDeathCertificate() then
+        data.spawnedByFloor[floorKey] = true
+        SaveMusicboxData()
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateBetweenDeathLifeBossReward)
+
+function Neverbirth:ResetBetweenDeathLifeState(isContinued)
+    if isContinued then
+        return
+    end
+
+    ResetDeathTrialDataForRun()
+    SaveMusicboxData()
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetBetweenDeathLifeState)
+end
+end
+
+--------------------------------------------------
 -- 绝育证明
 
 do
@@ -3278,10 +4611,10 @@ end
 --------------------------------------------------
 -- 天使盒
 
-local ANGELBOX_MAX_CHARGE = 6
+local ANGELBOX_MAX_CHARGE = 4
 local ANGELBOX_ANGEL_CHANCE = 0.5
 local ANGELBOX_LUCK_BONUS = 3
-local ANGELBOX_EXTRA_SOUL_HEART_CHANCE = 10
+local ANGELBOX_EXTRA_SOUL_HEART_CHANCE = 60
 local ANGELBOX_REWARD_QUALITY = 4
 local ANGELBOX_ANGEL_POOL = (ItemPoolType and ItemPoolType.POOL_ANGEL) or 4
 local ANGELBOX_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
@@ -3901,9 +5234,9 @@ end
 --------------------------------------------------
 -- 恶魔盒
 
-local DEVILBOX_MAX_CHARGE = 6
+local DEVILBOX_MAX_CHARGE = 4
 local DEVILBOX_DEVIL_CHANCE = -0.5
-local DEVILBOX_EXTRA_BLACK_HEART_CHANCE = 20
+local DEVILBOX_EXTRA_BLACK_HEART_CHANCE = 80
 local DEVILBOX_REWARD_QUALITY = 3
 local DEVILBOX_DEVIL_POOL = (ItemPoolType and ItemPoolType.POOL_DEVIL) or 3
 local DEVILBOX_ROOM_DEVIL = (RoomType and RoomType.ROOM_DEVIL) or 14
@@ -4500,4 +5833,25 @@ Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateDevilboxDea
 
 if ModCallbacks.MC_POST_NEW_LEVEL then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.UpdateDevilboxDealChance)
+end
+
+--------------------------------------------------
+-- 骰子套装回调登记放在文件末尾，避免影响现有主动道具测试按顺序取回调。
+
+if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.TrackDiceSetPickup)
+end
+
+if ModCallbacks.MC_PRE_USE_ITEM then
+    Neverbirth:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Neverbirth.RecordDiceSetPreUse)
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.HandleDiceSetUse)
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateDiceSetStatProtection)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackHeldDiceItems)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateDiceSetPendingState)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TryRegisterDiceSetEIDModifier)
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetDiceSetState)
 end

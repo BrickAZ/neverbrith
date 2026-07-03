@@ -64,6 +64,16 @@
     quality="3"
     tags="devil offensive summonable"
   />
+  <!-- 主动道具：生死一念间 -->
+  <active
+    name="Between Death and Life"
+    cache="all"
+    maxcharges="12"
+    description="Every life becomes testimony."
+    gfx="BetweenDeathAndLife.png"
+    quality="4"
+    tags="dead devil noeden nochallenge offensive"
+  />
   <!-- 主动道具：春药 -->
   <active
     name="Aphrodisiac"
@@ -87,8 +97,8 @@
   <active
     name="Angelbox"
     cache="all"
-    maxcharges="6"
-    initcharge="6"
+    maxcharges="4"
+    initcharge="4"
     chargetype="special"
     description="Full hearts, heavenbound"
     gfx="Angelbox.png"
@@ -99,8 +109,8 @@
   <active
     name="Devilbox"
     cache="all"
-    maxcharges="6"
-    initcharge="6"
+    maxcharges="4"
+    initcharge="4"
     chargetype="special"
     description="Black hearts, below"
     gfx="Devilbox.png"

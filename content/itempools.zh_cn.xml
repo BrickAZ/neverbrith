@@ -9,6 +9,7 @@
         <Item Name="春药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="天使盒" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="血颅蛊" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="生死一念间" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="angel"> <!-- 天使 -->
@@ -33,12 +34,14 @@
         <Item Name="八音盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="天使盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="恶魔盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="生死一念间" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
         <Item Name="恶魔盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="绝育证明" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="血颅蛊" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="生死一念间" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="craneGame"> <!-- 赌博乞丐 -->

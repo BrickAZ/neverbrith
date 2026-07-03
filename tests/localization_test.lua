@@ -30,6 +30,7 @@ local function loadNeverbirthWithEID(options)
         SterilizationCertificate = 742,
         EmptyCradle = 743,
         BloodSkullGu = 744,
+        BetweenDeathAndLife = 745,
     }
     local defaultItemIdsByLoadedName = {}
     for name, itemId in pairs(logicalItemIds) do
@@ -45,6 +46,8 @@ local function loadNeverbirthWithEID(options)
     defaultItemIdsByLoadedName["空摇篮"] = logicalItemIds.EmptyCradle
     defaultItemIdsByLoadedName["Blood Skull Gu"] = logicalItemIds.BloodSkullGu
     defaultItemIdsByLoadedName["血颅蛊"] = logicalItemIds.BloodSkullGu
+    defaultItemIdsByLoadedName["Between Death and Life"] = logicalItemIds.BetweenDeathAndLife
+    defaultItemIdsByLoadedName["生死一念间"] = logicalItemIds.BetweenDeathAndLife
 
     local itemIdsByLoadedName = options.itemIdsByLoadedName or defaultItemIdsByLoadedName
     local eidCalls = {}
@@ -294,6 +297,12 @@ local expectedXmlItems = {
         description = "Slaughter your kin to purify your aptitude.",
         zhDescription = "杀亲证道，提纯资质。",
     },
+    BetweenDeathAndLife = {
+        enName = "Between Death and Life",
+        zhName = "生死一念间",
+        description = "Every life becomes testimony.",
+        zhDescription = "众生皆证。",
+    },
 }
 
 local expectedEID = {
@@ -340,21 +349,21 @@ local expectedEID = {
     Angelbox = {
         en_us = {
             name = "Angel Box",
-            description = "{{Luck}} +3 Luck while held#First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Heart drops have a 10% chance to add a soul heart#Favors angel rooms while held",
+            description = "{{Luck}} +3 Luck while held#First use converts red heart containers into full soul hearts#Overflow soul hearts recharge it#At full charge, forces an angel room this floor and adds 1 quality 4 angel item on first entry#Heart drops have a 60% chance to add a soul heart#Favors angel rooms while held",
         },
         zh_cn = {
             name = "天使盒",
-            description = "持有时 {{Luck}} +3 幸运#每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满6格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#地上心掉落有10%额外生成1个完整魂心#持有时一半恶魔房概率转为天使房概率",
+            description = "持有时 {{Luck}} +3 幸运#每名玩家首次使用：每个红心容器生成1个完整魂心#之后只吸收装不下的魂心充能，满4格可再次使用#非首次使用：本层尽力必定开启天使房#若使用前本层未进入过天使房，该玩家使首次进入本层天使房时额外生成1个4级天使房道具#地上心掉落有60%额外生成1个完整魂心#持有时一半恶魔房概率转为天使房概率",
         },
     },
     Devilbox = {
         en_us = {
             name = "Devil Box",
-            description = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Heart drops have a 20% chance to add a black heart#Favors devil rooms while held",
+            description = "First use converts red heart containers into full black hearts#Overflow black hearts recharge it#At full charge, forces a devil room this floor and adds 1 quality 3 devil item on first entry#Heart drops have an 80% chance to add a black heart#Favors devil rooms while held",
         },
         zh_cn = {
             name = "恶魔盒",
-            description = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满6格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#地上心掉落有20%额外生成1个黑心#持有时一半交易房方向转为恶魔房概率",
+            description = "每名玩家首次使用：每个红心容器生成1个完整黑心#之后只吸收装不下的黑心充能，满4格可再次使用#非首次使用：本层尽力必定开启恶魔房#若使用前本层未进入过恶魔房，该玩家使首次进入本层恶魔房时额外生成1个3级恶魔房道具#地上心掉落有80%额外生成1个黑心#持有时一半交易房方向转为恶魔房概率",
         },
     },
     ds4 = {
@@ -395,6 +404,16 @@ local expectedEID = {
         zh_cn = {
             name = "血颅蛊",
             description = "3充能主动道具#献祭1个属于你的跟班类道具#{{Damage}} 永久 +1.5 攻击#{{Range}} 永久 +1 射程#掉落1-2个黑心#没有可献祭跟班类道具时，反噬并受到半颗红心伤害",
+        },
+    },
+    BetweenDeathAndLife = {
+        en_us = {
+            name = "Between Death and Life",
+            description = "On pickup, activates Death Trial for the rest of the run:#Enemies become champions whenever possible#Bosses are championed or empowered#Defeating each floor boss spawns Death Certificate#Once per floor",
+        },
+        zh_cn = {
+            name = "生死一念间",
+            description = "拾取后，本局进入死证试炼：#所有敌人尽可能变为精英怪#Boss也会被精英化或强化#每层击败楼层Boss后，生成一个死亡证明#每层最多触发一次",
         },
     },
     SterilizationCertificate = {
@@ -443,7 +462,13 @@ local function test_eid_registers_explicit_english_and_chinese_descriptions()
         end
     end
 
-    assertEquals(#env.eidCalls, 24, "EID should register exactly two languages for each item")
+    local expectedCallCount = 0
+    for _, languageExpectations in pairs(expectedEID) do
+        for _ in pairs(languageExpectations) do
+            expectedCallCount = expectedCallCount + 1
+        end
+    end
+    assertEquals(#env.eidCalls, expectedCallCount, "EID should register exactly two languages for each item")
     for _, call in ipairs(env.eidCalls) do
         assertTruthy(call.language == "en_us" or call.language == "zh_cn", "EID language should be explicit for every registration")
         if call.language == "en_us" then

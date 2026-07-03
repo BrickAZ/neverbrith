@@ -9,6 +9,7 @@
         <Item Name="Aphrodisiac" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Angelbox" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="angel"> <!-- 天使 -->
@@ -33,12 +34,14 @@
         <Item Name="Musicbox" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Angelbox" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Devilbox" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
         <Item Name="Devilbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="craneGame"> <!-- 赌博乞丐 -->

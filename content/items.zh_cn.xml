@@ -64,6 +64,16 @@
     quality="3"
     tags="devil offensive summonable"
   />
+  <!-- 主动道具：生死一念间 -->
+  <active
+    name="生死一念间"
+    cache="all"
+    maxcharges="12"
+    description="众生皆证。"
+    gfx="BetweenDeathAndLife.png"
+    quality="4"
+    tags="dead devil noeden nochallenge offensive"
+  />
   <!-- 主动道具：春药 -->
   <active
     name="春药"
@@ -87,8 +97,8 @@
   <active
     name="天使盒"
     cache="all"
-    maxcharges="6"
-    initcharge="6"
+    maxcharges="4"
+    initcharge="4"
     chargetype="special"
     description="盈魂引向天国"
     gfx="Angelbox.png"
@@ -99,8 +109,8 @@
   <active
     name="恶魔盒"
     cache="all"
-    maxcharges="6"
-    initcharge="6"
+    maxcharges="4"
+    initcharge="4"
     chargetype="special"
     description="暗血引向深渊"
     gfx="Devilbox.png"
