@@ -74,6 +74,59 @@
     quality="4"
     tags="dead devil noeden nochallenge offensive"
   />
+  <!-- 主动道具：铜钱剑 -->
+  <active
+    name="Coin-Sewn Sword"
+    maxcharges="3"
+    description="Coin and blade share the same edge."
+    gfx="CoinSewnSword.png"
+    quality="2"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：铜钱面具 -->
+  <passive
+    name="Coin-Faced Mask"
+    cache="luck"
+    description="Buy yourself another face."
+    gfx="CoinFacedMask.png"
+    quality="2"
+    tags="summonable"
+  />
+  <!-- 被动道具：黑太岁 -->
+  <passive
+    name="Black Taisui"
+    cache="all"
+    description="Feeds on blood and lets you see clearly."
+    gfx="BlackTaisui.png"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：巴比伦好女孩 -->
+  <passive
+    name="Good Girl of Babylon"
+    cache="all"
+    description="Don't stain the dress."
+    gfx="GoodGirlOfBabylon.png"
+    quality="3"
+    tags="angel summonable"
+  />
+  <!-- 主动道具：避孕套 -->
+  <active
+    name="Condom"
+    maxcharges="3"
+    description="It does not count"
+    gfx="Condom.png"
+    quality="0"
+  />
+  <!-- 被动道具：美工刀 -->
+  <passive
+    name="Utility Knife"
+    cache="damage"
+    description="Painful scars"
+    gfx="UtilityKnife.png"
+    quality="2"
+    tags="offensive summonable"
+  />
   <!-- 主动道具：春药 -->
   <active
     name="Aphrodisiac"

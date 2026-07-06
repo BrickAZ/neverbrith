@@ -74,6 +74,59 @@
     quality="4"
     tags="dead devil noeden nochallenge offensive"
   />
+  <!-- 主动道具：铜钱剑 -->
+  <active
+    name="铜钱剑"
+    maxcharges="3"
+    description="钱是香火，也是剑刃。"
+    gfx="CoinSewnSword.png"
+    quality="2"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：铜钱面具 -->
+  <passive
+    name="铜钱面具"
+    cache="luck"
+    description="买一张脸。"
+    gfx="CoinFacedMask.png"
+    quality="2"
+    tags="summonable"
+  />
+  <!-- 被动道具：黑太岁 -->
+  <passive
+    name="黑太岁"
+    cache="all"
+    description="以血为食，替你看清世界。"
+    gfx="BlackTaisui.png"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：巴比伦好女孩 -->
+  <passive
+    name="巴比伦好女孩"
+    cache="all"
+    description="别弄脏裙子。"
+    gfx="GoodGirlOfBabylon.png"
+    quality="3"
+    tags="angel summonable"
+  />
+  <!-- 主动道具：避孕套 -->
+  <active
+    name="避孕套"
+    maxcharges="3"
+    description="她说戴了不算给"
+    gfx="Condom.png"
+    quality="0"
+  />
+  <!-- 被动道具：美工刀 -->
+  <passive
+    name="美工刀"
+    cache="damage"
+    description="苦痛伤痕"
+    gfx="UtilityKnife.png"
+    quality="2"
+    tags="offensive summonable"
+  />
   <!-- 主动道具：春药 -->
   <active
     name="春药"

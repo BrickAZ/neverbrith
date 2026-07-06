@@ -31,6 +31,12 @@ local function loadNeverbirthWithEID(options)
         EmptyCradle = 743,
         BloodSkullGu = 744,
         BetweenDeathAndLife = 745,
+        Condom = 746,
+        UtilityKnife = 747,
+        CoinSewnSword = 748,
+        CoinFacedMask = 749,
+        BlackTaisui = 750,
+        GoodGirlOfBabylon = 751,
     }
     local defaultItemIdsByLoadedName = {}
     for name, itemId in pairs(logicalItemIds) do
@@ -48,6 +54,18 @@ local function loadNeverbirthWithEID(options)
     defaultItemIdsByLoadedName["血颅蛊"] = logicalItemIds.BloodSkullGu
     defaultItemIdsByLoadedName["Between Death and Life"] = logicalItemIds.BetweenDeathAndLife
     defaultItemIdsByLoadedName["生死一念间"] = logicalItemIds.BetweenDeathAndLife
+    defaultItemIdsByLoadedName["Condom"] = logicalItemIds.Condom
+    defaultItemIdsByLoadedName["避孕套"] = logicalItemIds.Condom
+    defaultItemIdsByLoadedName["Utility Knife"] = logicalItemIds.UtilityKnife
+    defaultItemIdsByLoadedName["美工刀"] = logicalItemIds.UtilityKnife
+    defaultItemIdsByLoadedName["Coin-Sewn Sword"] = logicalItemIds.CoinSewnSword
+    defaultItemIdsByLoadedName["铜钱剑"] = logicalItemIds.CoinSewnSword
+    defaultItemIdsByLoadedName["Coin-Faced Mask"] = logicalItemIds.CoinFacedMask
+    defaultItemIdsByLoadedName["铜钱面具"] = logicalItemIds.CoinFacedMask
+    defaultItemIdsByLoadedName["Black Taisui"] = logicalItemIds.BlackTaisui
+    defaultItemIdsByLoadedName["黑太岁"] = logicalItemIds.BlackTaisui
+    defaultItemIdsByLoadedName["Good Girl of Babylon"] = logicalItemIds.GoodGirlOfBabylon
+    defaultItemIdsByLoadedName["巴比伦好女孩"] = logicalItemIds.GoodGirlOfBabylon
 
     local itemIdsByLoadedName = options.itemIdsByLoadedName or defaultItemIdsByLoadedName
     local eidCalls = {}
@@ -303,6 +321,42 @@ local expectedXmlItems = {
         description = "Every life becomes testimony.",
         zhDescription = "众生皆证。",
     },
+    Condom = {
+        enName = "Condom",
+        zhName = "避孕套",
+        description = "It does not count",
+        zhDescription = "她说戴了不算给",
+    },
+    UtilityKnife = {
+        enName = "Utility Knife",
+        zhName = "美工刀",
+        description = "Painful scars",
+        zhDescription = "苦痛伤痕",
+    },
+    CoinSewnSword = {
+        enName = "Coin-Sewn Sword",
+        zhName = "铜钱剑",
+        description = "Coin and blade share the same edge.",
+        zhDescription = "钱是香火，也是剑刃。",
+    },
+    CoinFacedMask = {
+        enName = "Coin-Faced Mask",
+        zhName = "铜钱面具",
+        description = "Buy yourself another face.",
+        zhDescription = "买一张脸。",
+    },
+    BlackTaisui = {
+        enName = "Black Taisui",
+        zhName = "黑太岁",
+        description = "Feeds on blood and lets you see clearly.",
+        zhDescription = "以血为食，替你看清世界。",
+    },
+    GoodGirlOfBabylon = {
+        enName = "Good Girl of Babylon",
+        zhName = "巴比伦好女孩",
+        description = "Don't stain the dress.",
+        zhDescription = "别弄脏裙子。",
+    },
 }
 
 local expectedEID = {
@@ -426,6 +480,66 @@ local expectedEID = {
             description = "阻止会生成敌人的敌人继续生成敌人#每次阻止生成时，对该敌人造成反噬伤害#Boss 召唤效果只会被部分削弱",
         },
     },
+    Condom = {
+        en_us = {
+            name = "Condom",
+            description = "On use, randomly bans up to 2 future baby-tag items#Does not remove items you already own",
+        },
+        zh_cn = {
+            name = "避孕套",
+            description = "使用后，随机禁用最多2个未来可生成的宝宝标签道具#不会移除已经拥有的道具",
+        },
+    },
+    UtilityKnife = {
+        en_us = {
+            name = "Utility Knife",
+            description = "{{Damage}} +1 damage#Gain 1 broken heart on pickup",
+        },
+        zh_cn = {
+            name = "美工刀",
+            description = "↑ +1攻击力#获得一颗碎心",
+        },
+    },
+    CoinSewnSword = {
+        en_us = {
+            name = "Coin-Sewn Sword",
+            description = "Spend up to 6 coins and fire that many coin sword qi in a 150-degree fan#Each qi deals your damage x2.0#Spending 6 coins also fires a piercing empowered qi that deals x6.0#With no coins, take half a red heart of damage and fire 1 blood qi that deals x4.0",
+        },
+        zh_cn = {
+            name = "铜钱剑",
+            description = "消耗至多6枚硬币，向前方150度释放等量铜钱剑气#每道剑气造成攻击力 x2.0 伤害#消耗满6枚时，额外释放造成 x6.0 伤害的贯穿剑气#没有硬币时，受到半红心伤害并释放1道造成 x4.0 伤害的血色剑气",
+        },
+    },
+    CoinFacedMask = {
+        en_us = {
+            name = "Coin-Faced Mask",
+            description = "Enter a room with at least 5 coins to gain a mask#The mask disturbs enemies#When hit, spend 5 coins to reduce the hit to half a red heart#Without enough coins, the mask breaks and lowers luck for the room",
+        },
+        zh_cn = {
+            name = "铜钱面具",
+            description = "拥有至少5枚硬币时，进房获得假面#假面会扰乱敌人#受伤时消耗5枚硬币，将伤害降为半红心#硬币不足时，假面破裂，本房间幸运下降",
+        },
+    },
+    BlackTaisui = {
+        en_us = {
+            name = "Black Taisui",
+            description = "Feeds on blood to gain parasite value#0-7: heavy damage, speed, and luck penalties#8-15: reveals hidden items and suppresses Blind, Lost, Unknown, and Wavy Cap side effects#16+: inherits stage 2, grants fixed damage per copy, and prevents one lethal hit per floor#The stage 3 death save shows an x1 marker beside the HUD each floor#Multiple copies share parasite value, but the death save is once per floor",
+        },
+        zh_cn = {
+            name = "黑太岁",
+            description = "以红心治疗、红心容器和红心伤害积累寄生值#0-7：大幅降低伤害、移速和幸运#8-15：揭示问号道具，免疫致盲/迷途/未知诅咒表现，并压制波浪帽副作用#16+：继承二阶段效果，每个黑太岁提供修正伤害，每层抵挡一次致命伤害#三阶段抵死可用时，血量旁会显示 x1 提示#多个黑太岁共享寄生值；阶段效果按规则叠加，但抵死每层只有一次",
+        },
+    },
+    GoodGirlOfBabylon = {
+        en_us = {
+            name = "Good Girl of Babylon",
+            description = "At full red hearts, enter a presentable state:#{{Tears}} +0.6 tears#{{Luck}} +2 luck#Enemies may be charmed#Clearing a room without red heart damage may grant an extra reward#Taking red heart damage breaks the state:#{{Luck}} -2 luck for the room#Fears nearby enemies#Briefly gain an echo of Babylon",
+        },
+        zh_cn = {
+            name = "巴比伦好女孩",
+            description = "满红心时进入端正状态：#{{Tears}} +0.6射速#{{Luck}} +2幸运#敌人有概率被魅惑#无红心伤害清房时，可能获得额外奖励#受到红心伤害时端正破裂：#{{Luck}} 本房间幸运下降#恐惧附近敌人#短暂获得巴比伦回声",
+        },
+    },
     EmptyCradle = {
         en_us = {
             name = "Empty Cradle",
@@ -506,8 +620,9 @@ local function readFile(path)
 end
 
 local function getItemXmlBlockFromText(text, xmlName)
-    local block = text:match('<active%s+name="' .. xmlName .. '"(.-)/>')
-        or text:match('<passive%s+name="' .. xmlName .. '"(.-)/>')
+    local patternName = xmlName:gsub("([^%w])", "%%%1")
+    local block = text:match('<active%s+name="' .. patternName .. '"(.-)/>')
+        or text:match('<passive%s+name="' .. patternName .. '"(.-)/>')
     assertTruthy(block, "items.xml should contain item " .. xmlName)
     return block
 end

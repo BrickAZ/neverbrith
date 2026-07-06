@@ -1,5 +1,8 @@
 -- 注册模组
 local Neverbirth = RegisterMod("neverbirth", 1)
+if _G then
+    _G.Neverbirth = Neverbirth
+end
 
 local ITEM_NAME_CANDIDATES = {
     EssentialBalm = { "EssentialBalm", "风油精" },
@@ -14,6 +17,12 @@ local ITEM_NAME_CANDIDATES = {
     EmptyCradle = { "Empty Cradle", "空摇篮" },
     BloodSkullGu = { "Blood Skull Gu", "血颅蛊" },
     BetweenDeathAndLife = { "Between Death and Life", "生死一念间" },
+    CoinSewnSword = { "Coin-Sewn Sword", "铜钱剑" },
+    CoinFacedMask = { "Coin-Faced Mask", "铜钱面具" },
+    BlackTaisui = { "Black Taisui", "黑太岁" },
+    GoodGirlOfBabylon = { "Good Girl of Babylon", "巴比伦好女孩" },
+    Condom = { "Condom", "避孕套" },
+    UtilityKnife = { "Utility Knife", "美工刀" },
     DS4 = { "ds4" },
 }
 
@@ -41,6 +50,12 @@ local Items = {
     EmptyCradle = FindItemIdByNames(ITEM_NAME_CANDIDATES.EmptyCradle),
     BloodSkullGu = FindItemIdByNames(ITEM_NAME_CANDIDATES.BloodSkullGu),
     BetweenDeathAndLife = FindItemIdByNames(ITEM_NAME_CANDIDATES.BetweenDeathAndLife),
+    CoinSewnSword = FindItemIdByNames(ITEM_NAME_CANDIDATES.CoinSewnSword),
+    CoinFacedMask = FindItemIdByNames(ITEM_NAME_CANDIDATES.CoinFacedMask),
+    BlackTaisui = FindItemIdByNames(ITEM_NAME_CANDIDATES.BlackTaisui),
+    GoodGirlOfBabylon = FindItemIdByNames(ITEM_NAME_CANDIDATES.GoodGirlOfBabylon),
+    Condom = FindItemIdByNames(ITEM_NAME_CANDIDATES.Condom),
+    UtilityKnife = FindItemIdByNames(ITEM_NAME_CANDIDATES.UtilityKnife),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
 
@@ -148,6 +163,46 @@ local EID_DESCRIPTIONS = {
             eidDescription = "拾取后，本局进入死证试炼：#所有敌人尽可能变为精英怪#Boss也会被精英化或强化#每层击败楼层Boss后，生成一个死亡证明#每层最多触发一次",
         },
     },
+    [Items.CoinSewnSword] = {
+        en_us = {
+            name = "Coin-Sewn Sword",
+            eidDescription = "Spend up to 6 coins and fire that many coin sword qi in a 150-degree fan#Each qi deals your damage x2.0#Spending 6 coins also fires a piercing empowered qi that deals x6.0#With no coins, take half a red heart of damage and fire 1 blood qi that deals x4.0",
+        },
+        zh_cn = {
+            name = "铜钱剑",
+            eidDescription = "消耗至多6枚硬币，向前方150度释放等量铜钱剑气#每道剑气造成攻击力 x2.0 伤害#消耗满6枚时，额外释放造成 x6.0 伤害的贯穿剑气#没有硬币时，受到半红心伤害并释放1道造成 x4.0 伤害的血色剑气",
+        },
+    },
+    [Items.CoinFacedMask] = {
+        en_us = {
+            name = "Coin-Faced Mask",
+            eidDescription = "Enter a room with at least 5 coins to gain a mask#The mask disturbs enemies#When hit, spend 5 coins to reduce the hit to half a red heart#Without enough coins, the mask breaks and lowers luck for the room",
+        },
+        zh_cn = {
+            name = "铜钱面具",
+            eidDescription = "拥有至少5枚硬币时，进房获得假面#假面会扰乱敌人#受伤时消耗5枚硬币，将伤害降为半红心#硬币不足时，假面破裂，本房间幸运下降",
+        },
+    },
+    [Items.BlackTaisui] = {
+        en_us = {
+            name = "Black Taisui",
+            eidDescription = "Feeds on blood to gain parasite value#0-7: heavy damage, speed, and luck penalties#8-15: reveals hidden items and suppresses Blind, Lost, Unknown, and Wavy Cap side effects#16+: inherits stage 2, grants fixed damage per copy, and prevents one lethal hit per floor#The stage 3 death save shows an x1 marker beside the HUD each floor#Multiple copies share parasite value, but the death save is once per floor",
+        },
+        zh_cn = {
+            name = "黑太岁",
+            eidDescription = "以红心治疗、红心容器和红心伤害积累寄生值#0-7：大幅降低伤害、移速和幸运#8-15：揭示问号道具，免疫致盲/迷途/未知诅咒表现，并压制波浪帽副作用#16+：继承二阶段效果，每个黑太岁提供修正伤害，每层抵挡一次致命伤害#三阶段抵死可用时，血量旁会显示 x1 提示#多个黑太岁共享寄生值；阶段效果按规则叠加，但抵死每层只有一次",
+        },
+    },
+    [Items.GoodGirlOfBabylon] = {
+        en_us = {
+            name = "Good Girl of Babylon",
+            eidDescription = "At full red hearts, enter a presentable state:#{{Tears}} +0.6 tears#{{Luck}} +2 luck#Enemies may be charmed#Clearing a room without red heart damage may grant an extra reward#Taking red heart damage breaks the state:#{{Luck}} -2 luck for the room#Fears nearby enemies#Briefly gain an echo of Babylon",
+        },
+        zh_cn = {
+            name = "巴比伦好女孩",
+            eidDescription = "满红心时进入端正状态：#{{Tears}} +0.6射速#{{Luck}} +2幸运#敌人有概率被魅惑#无红心伤害清房时，可能获得额外奖励#受到红心伤害时端正破裂：#{{Luck}} 本房间幸运下降#恐惧附近敌人#短暂获得巴比伦回声",
+        },
+    },
     [Items.SterilizationCertificate] = {
         en_us = {
             name = "Sterilization Certificate",
@@ -156,6 +211,26 @@ local EID_DESCRIPTIONS = {
         zh_cn = {
             name = "绝育证明",
             eidDescription = "阻止会生成敌人的敌人继续生成敌人#每次阻止生成时，对该敌人造成反噬伤害#Boss 召唤效果只会被部分削弱",
+        },
+    },
+    [Items.Condom] = {
+        en_us = {
+            name = "Condom",
+            eidDescription = "On use, randomly bans up to 2 future baby-tag items#Does not remove items you already own",
+        },
+        zh_cn = {
+            name = "避孕套",
+            eidDescription = "使用后，随机禁用最多2个未来可生成的宝宝标签道具#不会移除已经拥有的道具",
+        },
+    },
+    [Items.UtilityKnife] = {
+        en_us = {
+            name = "Utility Knife",
+            eidDescription = "{{Damage}} +1 damage#Gain 1 broken heart on pickup",
+        },
+        zh_cn = {
+            name = "美工刀",
+            eidDescription = "↑ +1攻击力#获得一颗碎心",
         },
     },
     [Items.EmptyCradle] = {
@@ -622,6 +697,30 @@ local function EnsureMusicboxDataLoaded()
 
     if type(musicboxSaveData.diceSet.players) ~= "table" then
         musicboxSaveData.diceSet.players = {}
+    end
+
+    if type(musicboxSaveData.condom) ~= "table" then
+        musicboxSaveData.condom = {}
+    end
+
+    if type(musicboxSaveData.condom.banned) ~= "table" then
+        musicboxSaveData.condom.banned = {}
+    end
+
+    if type(musicboxSaveData.utilityKnife) ~= "table" then
+        musicboxSaveData.utilityKnife = {}
+    end
+
+    if type(musicboxSaveData.utilityKnife.players) ~= "table" then
+        musicboxSaveData.utilityKnife.players = {}
+    end
+
+    if type(musicboxSaveData.blackTaisui) ~= "table" then
+        musicboxSaveData.blackTaisui = {}
+    end
+
+    if type(musicboxSaveData.blackTaisui.players) ~= "table" then
+        musicboxSaveData.blackTaisui.players = {}
     end
 end
 
@@ -3808,6 +3907,2192 @@ end
 end
 
 --------------------------------------------------
+-- 铜钱剑 / 铜钱面具 / 黑太岁
+
+do
+local COIN_SWORD_MAX_SPEND = 6
+local COIN_SWORD_NORMAL_DAMAGE_MULT = 2.0
+local COIN_SWORD_EMPOWERED_DAMAGE_MULT = 6.0
+local COIN_SWORD_BLOOD_DAMAGE_MULT = 4.0
+local COIN_SWORD_SPEED = 12
+local COIN_SWORD_LIFE = 18
+local COIN_SWORD_MODE_CONFIGS = {
+    normal = { length = 76, width = 64, back = 48, scatter = 75, scale = 1, spawnOffset = 28 },
+    blood = { length = 84, width = 72, back = 52, scatter = 0, scale = 1, spawnOffset = 28 },
+    empowered = { length = 144, width = 64, back = 56, scale = 1.45, spawnOffset = 54 },
+}
+local COIN_SWORD_DISAPPEAR_LIFE = 4
+local COIN_SWORD_BACKLASH_FLAGS = (DamageFlag and DamageFlag.DAMAGE_RED_HEARTS) or 0
+local COIN_SWORD_DAMAGE_FLAGS = (DamageFlag and DamageFlag.DAMAGE_NO_MODIFIERS) or 0
+local COIN_SWORD_ENTITY_EFFECT = (EntityType and EntityType.ENTITY_EFFECT) or 1000
+local COIN_SWORD_FALLBACK_EFFECT = (EffectVariant and EffectVariant.POOF01) or 1
+local COIN_SWORD_NO_DISCHARGE_RESULT = { Discharge = false, Remove = false, ShowAnim = true }
+Neverbirth.CoinSwordEntityProjectile = (EntityType and EntityType.ENTITY_PROJECTILE) or 9
+Neverbirth.CoinSwordSpoonBender = (CollectibleType and CollectibleType.COLLECTIBLE_SPOON_BENDER) or 3
+Neverbirth.CoinSwordLostContact = (CollectibleType and CollectibleType.COLLECTIBLE_LOST_CONTACT) or 213
+Neverbirth.CoinSwordHomingTurnRate = 0.18
+local coinSwordQiVariant = nil
+local coinSwordHoldStates = {}
+Neverbirth.__coinSwordReleaseTearSuppressions = Neverbirth.__coinSwordReleaseTearSuppressions or {}
+
+local MASK_REQUIRED_COINS = 5
+local MASK_CONFUSION_DURATION = 90
+local MASK_LUCK_PENALTY = -2
+local COIN_MASK_COSTUME_PATH = "gfx/characters/neverbirth_coin_faced_mask.anm2"
+local COIN_MASK_BROKEN_COSTUME_PATH = "gfx/characters/neverbirth_coin_faced_mask_broken.anm2"
+local COIN_MASK_VISUAL_NONE = "none"
+local COIN_MASK_VISUAL_ACTIVE = "active"
+local COIN_MASK_VISUAL_BROKEN = "broken"
+local coinFacedMaskStates = {}
+local coinFacedMaskCostumeStates = {}
+local coinFacedMaskCostumeIds = {}
+local coinFacedMaskSettling = 0
+
+local blackTaisuiStates = {}
+
+local FOLK_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
+local FOLK_PICKUP_HEART = (PickupVariant and PickupVariant.PICKUP_HEART) or 10
+local FOLK_HALF_BLACK_HEART = (HeartSubType and (HeartSubType.HEART_HALF_BLACK or HeartSubType.HEART_BLACK)) or 6
+local FOLK_BLACK_HEART = (HeartSubType and HeartSubType.HEART_BLACK) or 6
+local FOLK_BLACK_CREEP = (EffectVariant and (EffectVariant.PLAYER_CREEP_BLACK or EffectVariant.CREEP_RED or EffectVariant.POOF01)) or 1
+local FOLK_RED_CREEP = (EffectVariant and (EffectVariant.CREEP_RED or EffectVariant.POOF01)) or 1
+
+local function GetCoinSwordQiVariant()
+    if coinSwordQiVariant ~= nil then
+        return coinSwordQiVariant
+    end
+
+    coinSwordQiVariant = -1
+    if Isaac.GetEntityVariantByName then
+        local ok, variant = pcall(function()
+            return Isaac.GetEntityVariantByName("Coin Sword Qi")
+        end)
+        if ok and type(variant) == "number" and variant > 0 then
+            coinSwordQiVariant = variant
+        end
+    end
+
+    if coinSwordQiVariant <= 0 then
+        DebugLog("[neverbirth] Coin Sword Qi variant not found; falling back to default effect")
+    end
+
+    return coinSwordQiVariant
+end
+
+local function GetFolkGame()
+    if not Game then
+        return nil
+    end
+
+    local ok, game = pcall(Game)
+    return ok and game or nil
+end
+
+local function GetFolkRoom()
+    local game = GetFolkGame()
+    if game and game.GetRoom then
+        local ok, room = pcall(function()
+            return game:GetRoom()
+        end)
+        if ok then
+            return room
+        end
+    end
+
+    return nil
+end
+
+local function GetFolkRoomKey()
+    local game = GetFolkGame()
+    if not game or not game.GetLevel then
+        return "0:0:0"
+    end
+
+    local ok, level = pcall(function()
+        return game:GetLevel()
+    end)
+    if not ok or not level then
+        return "0:0:0"
+    end
+
+    local stage = level.GetStage and level:GetStage() or 0
+    local stageType = level.GetStageType and level:GetStageType() or 0
+    local roomIndex = level.GetCurrentRoomIndex and level:GetCurrentRoomIndex() or 0
+    return tostring(stage) .. ":" .. tostring(stageType) .. ":" .. tostring(roomIndex)
+end
+
+local function GetFolkFloorKey()
+    local game = GetFolkGame()
+    if not game or not game.GetLevel then
+        return "0:0"
+    end
+
+    local ok, level = pcall(function()
+        return game:GetLevel()
+    end)
+    if not ok or not level then
+        return "0:0"
+    end
+
+    local stage = level.GetStage and level:GetStage() or 0
+    local stageType = level.GetStageType and level:GetStageType() or 0
+    return tostring(stage) .. ":" .. tostring(stageType)
+end
+
+local function GetFolkPlayerKey(player)
+    return tostring((player and player.InitSeed) or "0")
+end
+
+local function PlayerHasCollectible(player, itemId)
+    if not player or not IsValidItemId(itemId) then
+        return false
+    end
+
+    if player.HasCollectible then
+        local ok, result = pcall(function()
+            return player:HasCollectible(itemId)
+        end)
+        if ok then
+            return result == true
+        end
+    end
+
+    if player.GetCollectibleNum then
+        local ok, count = pcall(function()
+            return player:GetCollectibleNum(itemId)
+        end)
+        return ok and (tonumber(count) or 0) > 0
+    end
+
+    return false
+end
+
+local function GetPlayerCoins(player)
+    if player and player.GetNumCoins then
+        local ok, coins = pcall(function()
+            return player:GetNumCoins()
+        end)
+        if ok then
+            return tonumber(coins) or 0
+        end
+    end
+
+    return tonumber(player and player.coins) or 0
+end
+
+local function AddPlayerCoins(player, amount)
+    if player and player.AddCoins then
+        pcall(function()
+            player:AddCoins(amount)
+        end)
+    end
+end
+
+local function GetFolkRandomInt(player, itemId, max)
+    max = tonumber(max) or 1
+    if max <= 1 then
+        return 0
+    end
+
+    if player and player.GetCollectibleRNG then
+        local ok, rng = pcall(function()
+            return player:GetCollectibleRNG(itemId)
+        end)
+        if ok and rng and rng.RandomInt then
+            local rollOk, value = pcall(function()
+                return rng:RandomInt(max)
+            end)
+            if rollOk and value ~= nil then
+                return math.max(0, math.min(max - 1, tonumber(value) or 0))
+            end
+        end
+    end
+
+    return math.random(max) - 1
+end
+
+local function IsVulnerableEnemy(entity)
+    if not entity or entity.Type == ((EntityType and EntityType.ENTITY_PLAYER) or 1) then
+        return false
+    end
+
+    if entity.IsVulnerableEnemy then
+        local ok, result = pcall(function()
+            return entity:IsVulnerableEnemy()
+        end)
+        if ok then
+            return result == true
+        end
+    end
+
+    return false
+end
+
+local function GetNearestEnemyDirection(player)
+    local origin = player and player.Position or Vector(0, 0)
+    local nearest
+    local nearestDistance
+
+    if Isaac.GetRoomEntities then
+        for _, entity in ipairs(Isaac.GetRoomEntities()) do
+            if IsVulnerableEnemy(entity) and entity.Position then
+                local distance = (entity.Position - origin):Length()
+                if not nearestDistance or distance < nearestDistance then
+                    nearest = entity
+                    nearestDistance = distance
+                end
+            end
+        end
+    end
+
+    if nearest and nearest.Position then
+        return (nearest.Position - origin):Normalized()
+    end
+
+    return nil
+end
+
+function Neverbirth.GetNearestEnemyDirectionFromPosition(origin)
+    origin = origin or Vector(0, 0)
+    local nearest
+    local nearestDistance
+
+    if Isaac.GetRoomEntities then
+        for _, entity in ipairs(Isaac.GetRoomEntities()) do
+            if IsVulnerableEnemy(entity) and entity.Position then
+                local distance = (entity.Position - origin):Length()
+                if not nearestDistance or distance < nearestDistance then
+                    nearest = entity
+                    nearestDistance = distance
+                end
+            end
+        end
+    end
+
+    if nearest and nearest.Position then
+        return (nearest.Position - origin):Normalized()
+    end
+
+    return nil
+end
+
+local function VectorFromInput(value)
+    if type(value) == "table" and value.X and value.Y then
+        local vector = Vector(tonumber(value.X) or 0, tonumber(value.Y) or 0)
+        if vector:Length() > 0 then
+            return vector:Normalized()
+        end
+    end
+
+    return nil
+end
+
+local function DirectionToVector(value)
+    local vector = VectorFromInput(value)
+    if vector then
+        return vector
+    end
+
+    if type(value) ~= "number" then
+        return nil
+    end
+
+    if Direction then
+        if value == Direction.LEFT then
+            return Vector(-1, 0)
+        elseif value == Direction.UP then
+            return Vector(0, -1)
+        elseif value == Direction.RIGHT then
+            return Vector(1, 0)
+        elseif value == Direction.DOWN then
+            return Vector(0, 1)
+        end
+    end
+
+    if value == 0 then
+        return Vector(-1, 0)
+    elseif value == 1 then
+        return Vector(0, -1)
+    elseif value == 2 then
+        return Vector(1, 0)
+    elseif value == 3 then
+        return Vector(0, 1)
+    end
+
+    return nil
+end
+
+local function GetCoinSwordBaseDirection(player)
+    if player and player.GetShootingInput then
+        local ok, input = pcall(function()
+            return player:GetShootingInput()
+        end)
+        local vector = ok and VectorFromInput(input) or nil
+        if vector then
+            return vector
+        end
+    end
+
+    if player and player.GetFireDirection then
+        local ok, input = pcall(function()
+            return player:GetFireDirection()
+        end)
+        local vector = ok and DirectionToVector(input) or nil
+        if vector then
+            return vector
+        end
+    end
+
+    if player and player.GetMovementInput then
+        local ok, input = pcall(function()
+            return player:GetMovementInput()
+        end)
+        local vector = ok and VectorFromInput(input) or nil
+        if vector then
+            return vector
+        end
+    end
+
+    if player and player.GetMovementDirection then
+        local ok, input = pcall(function()
+            return player:GetMovementDirection()
+        end)
+        local vector = ok and DirectionToVector(input) or nil
+        if vector then
+            return vector
+        end
+    end
+
+    local targetDirection = GetNearestEnemyDirection(player)
+    if targetDirection and targetDirection:Length() > 0 then
+        return targetDirection:Normalized()
+    end
+
+    return Vector(1, 0)
+end
+
+local function GetCoinSwordReleaseDirection(player)
+    if player and player.GetShootingInput then
+        local ok, input = pcall(function()
+            return player:GetShootingInput()
+        end)
+        local vector = ok and VectorFromInput(input) or nil
+        if vector then
+            return vector
+        end
+    end
+
+    if player and player.GetFireDirection then
+        local ok, input = pcall(function()
+            return player:GetFireDirection()
+        end)
+        local vector = ok and DirectionToVector(input) or nil
+        if vector then
+            return vector
+        end
+    end
+
+    return nil
+end
+
+local function RotateVector(vector, degrees)
+    local radians = (degrees or 0) * math.pi / 180
+    local cosValue = math.cos(radians)
+    local sinValue = math.sin(radians)
+    return Vector(vector.X * cosValue - vector.Y * sinValue, vector.X * sinValue + vector.Y * cosValue)
+end
+
+local function AngleFromVector(vector)
+    return math.atan(vector.Y, vector.X) * 180 / math.pi
+end
+
+local function GetCoinSwordAnimationName(mode)
+    if mode == "blood" then
+        return "BloodSlash"
+    elseif mode == "empowered" then
+        return "EmpoweredSlash"
+    end
+
+    return "Slash"
+end
+
+local function GetCoinSwordHitboxConfig(mode)
+    local config = COIN_SWORD_MODE_CONFIGS[mode or "normal"] or COIN_SWORD_MODE_CONFIGS.normal
+    return config.length, config.width, config.back
+end
+
+function Neverbirth.SafeSetCoinSwordField(target, field, value)
+    if not target then
+        return false
+    end
+
+    local ok = pcall(function()
+        target[field] = value
+    end)
+    return ok == true
+end
+
+local function PlayCoinSwordAnimation(effect, mode, direction)
+    if not effect or not effect.GetSprite then
+        return
+    end
+
+    local sprite = effect:GetSprite()
+    if not sprite then
+        return
+    end
+
+    local animation = GetCoinSwordAnimationName(mode)
+
+    if sprite.Play then
+        pcall(function()
+            sprite:Play(animation, true)
+        end)
+    end
+    local angle = AngleFromVector(direction or Vector(1, 0))
+    local config = COIN_SWORD_MODE_CONFIGS[mode or "normal"] or COIN_SWORD_MODE_CONFIGS.normal
+    local scaleValue = config.scale or 1
+    local scale = Vector(scaleValue, scaleValue)
+    Neverbirth.SafeSetCoinSwordField(sprite, "Rotation", angle)
+    Neverbirth.SafeSetCoinSwordField(effect, "SpriteRotation", angle)
+    Neverbirth.SafeSetCoinSwordField(sprite, "Scale", scale)
+    Neverbirth.SafeSetCoinSwordField(effect, "SpriteScale", scale)
+end
+
+function Neverbirth.UpdateCoinSwordVisualDirection(effect, direction)
+    if not effect or not direction then
+        return
+    end
+
+    local angle = AngleFromVector(direction)
+    if effect.GetSprite then
+        local sprite = effect:GetSprite()
+        Neverbirth.SafeSetCoinSwordField(sprite, "Rotation", angle)
+    end
+    Neverbirth.SafeSetCoinSwordField(effect, "SpriteRotation", angle)
+end
+
+local function SpawnCoinSwordQi(player, damageMultiplier, mode, direction, forwardOffset)
+    direction = (direction and direction:Length() > 0) and direction:Normalized() or GetCoinSwordBaseDirection(player)
+    local velocity = direction * COIN_SWORD_SPEED
+    local config = COIN_SWORD_MODE_CONFIGS[mode or "normal"] or COIN_SWORD_MODE_CONFIGS.normal
+    local spawnOffset = config.spawnOffset or 28
+    spawnOffset = spawnOffset + (tonumber(forwardOffset) or 0)
+    local position = (player and player.Position or Vector(320, 280)) + direction * spawnOffset
+    local variant = GetCoinSwordQiVariant()
+    local spawnVariant = variant > 0 and variant or COIN_SWORD_FALLBACK_EFFECT
+    local effect = Isaac.Spawn and Isaac.Spawn(COIN_SWORD_ENTITY_EFFECT, spawnVariant, 0, position, velocity, player) or nil
+
+    if not effect then
+        return nil
+    end
+
+    local data = effect.GetData and effect:GetData() or {}
+    data.NeverbirthCoinSwordQi = true
+    data.Owner = player
+    data.OwnerSeed = player and player.InitSeed
+    data.Direction = direction
+    data.Velocity = velocity
+    data.Damage = (tonumber(player and player.Damage) or 3.5) * damageMultiplier
+    data.Mode = mode or "normal"
+    data.Life = COIN_SWORD_LIFE + (mode == "empowered" and 8 or 0)
+    data.HitEnemies = {}
+    data.BlockedProjectiles = {}
+    data.Piercing = mode == "empowered"
+    data.Homing = PlayerHasCollectible(player, Neverbirth.CoinSwordSpoonBender)
+    data.Shielded = PlayerHasCollectible(player, Neverbirth.CoinSwordLostContact)
+    data.Length, data.Width, data.BackLength = GetCoinSwordHitboxConfig(data.Mode)
+
+    PlayCoinSwordAnimation(effect, data.Mode, direction)
+    Neverbirth.SafeSetCoinSwordField(effect, "DepthOffset", data.Piercing and 160 or 80)
+    Neverbirth.SafeSetCoinSwordField(effect, "RenderZOffset", data.Piercing and 14000 or 10000)
+    DebugLog("[neverbirth] Coin Sword Qi spawn variant=" .. tostring(variant) ..
+        " spawnVariant=" .. tostring(spawnVariant) ..
+        " mode=" .. tostring(data.Mode) ..
+        " animation=" .. tostring(GetCoinSwordAnimationName(data.Mode)))
+
+    return effect
+end
+
+local function EnemyHitKey(entity)
+    return tostring((entity and entity.InitSeed) or entity)
+end
+
+function Neverbirth.IsCoinSwordEnemyProjectile(entity, data)
+    if not entity or entity.Type ~= Neverbirth.CoinSwordEntityProjectile or not entity.Position then
+        return false
+    end
+
+    if data and data.Owner and entity.SpawnerEntity and entity.SpawnerEntity.InitSeed == data.Owner.InitSeed then
+        return false
+    end
+
+    if entity.HasEntityFlags and EntityFlag and EntityFlag.FLAG_FRIENDLY then
+        local ok, friendly = pcall(function()
+            return entity:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
+        end)
+        if ok and friendly then
+            return false
+        end
+    end
+
+    return true
+end
+
+function Neverbirth.RemoveCoinSwordBlockedProjectile(projectile)
+    if not projectile then
+        return
+    end
+
+    if projectile.Die then
+        local ok = pcall(function()
+            projectile:Die()
+        end)
+        if ok then
+            return
+        end
+    end
+
+    if projectile.Remove then
+        pcall(function()
+            projectile:Remove()
+        end)
+    end
+end
+
+local function IsEnemyInsideCoinSwordHitbox(effect, enemy, data)
+    if not effect or not enemy or not enemy.Position or not data or not data.Direction then
+        return false
+    end
+
+    local relative = enemy.Position - effect.Position
+    local direction = data.Direction
+    local forward = relative.X * direction.X + relative.Y * direction.Y
+    local backLength = tonumber(data.BackLength) or 36
+    local length = tonumber(data.Length) or COIN_SWORD_MODE_CONFIGS.normal.length
+    local width = tonumber(data.Width) or COIN_SWORD_MODE_CONFIGS.normal.width
+    local radius = width / 2
+    if forward < -backLength - radius or forward > length + radius then
+        return false
+    end
+
+    local perpendicular = math.abs(relative.X * -direction.Y + relative.Y * direction.X)
+    if forward >= -backLength and forward <= length then
+        return perpendicular <= radius
+    end
+
+    local capCenter = forward < -backLength and -backLength or length
+    local capForward = forward - capCenter
+    return (capForward * capForward + perpendicular * perpendicular) <= (radius * radius)
+end
+
+local function RemoveCoinSwordEffect(effect)
+    if effect and effect.Remove then
+        effect:Remove()
+    end
+end
+
+local function StartCoinSwordDisappear(effect, data)
+    if not effect then
+        return
+    end
+
+    data = data or (effect.GetData and effect:GetData()) or {}
+    if data.Disappearing then
+        return
+    end
+
+    data.Disappearing = true
+    data.Life = COIN_SWORD_DISAPPEAR_LIFE
+    data.Velocity = Vector(0, 0)
+    effect.Velocity = Vector(0, 0)
+
+    if effect.GetSprite then
+        local sprite = effect:GetSprite()
+        if sprite and sprite.Play then
+            pcall(function()
+                sprite:Play("Disappear", true)
+            end)
+        end
+    end
+end
+
+function Neverbirth:UpdateCoinSwordQi(effect)
+    if not effect then
+        return
+    end
+
+    local data = effect.GetData and effect:GetData() or nil
+    if type(data) ~= "table" or not data.NeverbirthCoinSwordQi then
+        return
+    end
+
+    if data.Disappearing then
+        data.Life = (tonumber(data.Life) or 0) - 1
+        if data.Life <= 0 then
+            RemoveCoinSwordEffect(effect)
+        end
+        return
+    end
+
+    data.Life = (tonumber(data.Life) or 0) - 1
+    if data.Life <= 0 then
+        RemoveCoinSwordEffect(effect)
+        return
+    end
+
+    if data.Homing then
+        local targetDirection = Neverbirth.GetNearestEnemyDirectionFromPosition(effect.Position)
+        if targetDirection and targetDirection:Length() > 0 then
+            local currentDirection = data.Direction
+            if not currentDirection or currentDirection:Length() <= 0 then
+                currentDirection = Vector(1, 0)
+            else
+                currentDirection = currentDirection:Normalized()
+            end
+
+            local blended = (currentDirection * (1 - Neverbirth.CoinSwordHomingTurnRate)) + (targetDirection * Neverbirth.CoinSwordHomingTurnRate)
+            if blended:Length() > 0 then
+                data.Direction = blended:Normalized()
+                data.Velocity = data.Direction * COIN_SWORD_SPEED
+                effect.Velocity = data.Velocity
+                Neverbirth.UpdateCoinSwordVisualDirection(effect, data.Direction)
+            end
+        end
+    end
+
+    if data.Velocity then
+        effect.Position = effect.Position + data.Velocity
+    end
+
+    local room = GetFolkRoom()
+    if room and room.IsPositionInRoom then
+        local ok, inRoom = pcall(function()
+            return room:IsPositionInRoom(effect.Position, 16)
+        end)
+        if ok and not inRoom then
+            RemoveCoinSwordEffect(effect)
+            return
+        end
+    end
+
+    if not Isaac.GetRoomEntities then
+        return
+    end
+
+    local owner = data.Owner
+    local source = EntityRef(owner or effect)
+    if data.Shielded then
+        for _, entity in ipairs(Isaac.GetRoomEntities()) do
+            if entity ~= effect and Neverbirth.IsCoinSwordEnemyProjectile(entity, data) and IsEnemyInsideCoinSwordHitbox(effect, entity, data) then
+                local key = EnemyHitKey(entity)
+                data.BlockedProjectiles = data.BlockedProjectiles or {}
+                if not data.BlockedProjectiles[key] then
+                    data.BlockedProjectiles[key] = true
+                    Neverbirth.RemoveCoinSwordBlockedProjectile(entity)
+                    if not data.Piercing then
+                        StartCoinSwordDisappear(effect, data)
+                        return
+                    end
+                end
+            end
+        end
+    end
+
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if entity ~= effect and IsVulnerableEnemy(entity) and IsEnemyInsideCoinSwordHitbox(effect, entity, data) then
+            local key = EnemyHitKey(entity)
+            data.HitEnemies = data.HitEnemies or {}
+            if not data.HitEnemies[key] then
+                data.HitEnemies[key] = true
+                if entity.TakeDamage then
+                    entity:TakeDamage(tonumber(data.Damage) or 0, COIN_SWORD_DAMAGE_FLAGS, source, 0)
+                end
+                if not data.Piercing then
+                    StartCoinSwordDisappear(effect, data)
+                    return
+                end
+            end
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_EFFECT_UPDATE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, Neverbirth.UpdateCoinSwordQi)
+end
+
+local function RenderCoinSwordQiDebugText(text, position, red, green, blue, alpha)
+    if not position or not Isaac.WorldToScreen or not Isaac.RenderText then
+        return
+    end
+
+    local ok, screen = pcall(function()
+        return Isaac.WorldToScreen(position)
+    end)
+    if not ok or not screen then
+        return
+    end
+
+    pcall(function()
+        Isaac.RenderText(text, screen.X, screen.Y, red, green, blue, alpha)
+    end)
+end
+
+function Neverbirth:RenderCoinSwordQiDebug()
+    if not self.DebugCoinSwordHitbox then
+        return
+    end
+    if not Isaac.GetRoomEntities then
+        return
+    end
+
+    for _, effect in ipairs(Isaac.GetRoomEntities()) do
+        local data = effect and effect.GetData and effect:GetData() or nil
+        if type(data) == "table" and data.NeverbirthCoinSwordQi and effect.Position and data.Direction then
+            local direction = data.Direction
+            if not direction.Length or direction:Length() <= 0 then
+                direction = Vector(1, 0)
+            else
+                direction = direction:Normalized()
+            end
+
+            local length = tonumber(data.Length) or COIN_SWORD_MODE_CONFIGS.normal.length
+            local width = tonumber(data.Width) or COIN_SWORD_MODE_CONFIGS.normal.width
+            local backLength = tonumber(data.BackLength) or COIN_SWORD_MODE_CONFIGS.normal.back
+            local radius = width / 2
+            local side = Vector(-direction.Y, direction.X)
+            local red, green, blue = 0.2, 1, 0.2
+            if data.Mode == "blood" then
+                red, green, blue = 1, 0.15, 0.15
+            elseif data.Mode == "empowered" then
+                red, green, blue = 1, 0.85, 0.15
+            end
+
+            RenderCoinSwordQiDebugText("CSQ " .. tostring(data.Mode or "normal"), effect.Position, red, green, blue, 1)
+            for index = 0, 4 do
+                local forward = -backLength + ((length + backLength) * index / 4)
+                local center = effect.Position + direction * forward
+                RenderCoinSwordQiDebugText(".", center, red, green, blue, 0.9)
+                RenderCoinSwordQiDebugText(".", center + side * radius, red, green, blue, 0.9)
+                RenderCoinSwordQiDebugText(".", center - side * radius, red, green, blue, 0.9)
+            end
+            RenderCoinSwordQiDebugText("o", effect.Position + direction * length, red, green, blue, 0.9)
+            RenderCoinSwordQiDebugText("o", effect.Position - direction * backLength, red, green, blue, 0.9)
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_RENDER then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_RENDER, Neverbirth.RenderCoinSwordQiDebug)
+end
+
+local function SpawnFolkEffect(variant, position, spawner)
+    if Isaac.Spawn then
+        return Isaac.Spawn((EntityType and EntityType.ENTITY_EFFECT) or 1000, variant, 0, position or Vector(320, 280), Vector(0, 0), spawner)
+    end
+
+    return nil
+end
+
+local function DischargeCoinSewnSword(player, slot)
+    if player and player.DischargeActiveItem then
+        pcall(function()
+            player:DischargeActiveItem(slot or (ActiveSlot and ActiveSlot.SLOT_PRIMARY) or 0)
+        end)
+    end
+end
+
+local function GetCoinSwordActiveItem(player, slot)
+    if not player or not player.GetActiveItem then
+        return Items.CoinSewnSword
+    end
+
+    local ok, itemId = pcall(function()
+        return player:GetActiveItem(slot or (ActiveSlot and ActiveSlot.SLOT_PRIMARY) or 0)
+    end)
+    if ok then
+        return itemId
+    end
+
+    return Items.CoinSewnSword
+end
+
+local function FireCoinSewnSword(player, direction, slot)
+    if not player then
+        return false
+    end
+
+    local baseDirection = (direction and direction:Length() > 0) and direction:Normalized() or GetCoinSwordBaseDirection(player)
+    Neverbirth.SuppressNextCoinSwordReleaseTear(player)
+    local coins = GetPlayerCoins(player)
+    if coins <= 0 then
+        if player.TakeDamage then
+            player:TakeDamage(1, COIN_SWORD_BACKLASH_FLAGS, EntityRef(player), 0)
+        end
+        SpawnFolkEffect(FOLK_RED_CREEP, player.Position, player)
+        SpawnCoinSwordQi(player, COIN_SWORD_BLOOD_DAMAGE_MULT, "blood", baseDirection)
+        DischargeCoinSewnSword(player, slot)
+        return true
+    end
+
+    local spent = math.min(coins, COIN_SWORD_MAX_SPEND)
+    AddPlayerCoins(player, -spent)
+    for index = 1, spent do
+        local angle = 0
+        if spent > 1 then
+            angle = -COIN_SWORD_MODE_CONFIGS.normal.scatter + ((index - 1) * COIN_SWORD_MODE_CONFIGS.normal.scatter * 2 / (spent - 1))
+        end
+        local forwardOffset = (index - 1) * 3
+        SpawnCoinSwordQi(player, COIN_SWORD_NORMAL_DAMAGE_MULT, "normal", RotateVector(baseDirection, angle), forwardOffset)
+    end
+    if spent >= COIN_SWORD_MAX_SPEND then
+        SpawnCoinSwordQi(player, COIN_SWORD_EMPOWERED_DAMAGE_MULT, "empowered", baseDirection)
+    end
+
+    DischargeCoinSewnSword(player, slot)
+    return true
+end
+
+local function GetCoinSwordHoldKey(player)
+    return tostring((player and player.InitSeed) or "")
+end
+
+function Neverbirth.GetCoinSwordTearOwnerKey(tear)
+    if not tear then
+        return nil
+    end
+
+    local candidates = { tear.SpawnerEntity, tear.Parent }
+    for _, entity in ipairs(candidates) do
+        if entity then
+            local player = nil
+            if entity.ToPlayer then
+                local ok, value = pcall(function()
+                    return entity:ToPlayer()
+                end)
+                if ok then
+                    player = value
+                end
+            end
+            player = player or (entity.Type == ((EntityType and EntityType.ENTITY_PLAYER) or 1) and entity or nil)
+            if player and player.InitSeed then
+                return GetCoinSwordHoldKey(player)
+            end
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth.SuppressNextCoinSwordReleaseTear(player)
+    local key = GetCoinSwordHoldKey(player)
+    if key == "" then
+        return
+    end
+
+    Neverbirth.__coinSwordReleaseTearSuppressions[key] = {
+        shots = 1,
+        frames = 3,
+    }
+end
+
+function Neverbirth.RemoveCoinSwordTear(tear)
+    if tear and tear.Remove then
+        pcall(function()
+            tear:Remove()
+        end)
+    end
+end
+
+function Neverbirth.ShouldSuppressCoinSwordTear(tear)
+    if not tear or tear.Type ~= ((EntityType and EntityType.ENTITY_TEAR) or 2) then
+        return false
+    end
+
+    local key = Neverbirth.GetCoinSwordTearOwnerKey(tear)
+    if not key then
+        return false
+    end
+
+    if coinSwordHoldStates[key] then
+        return true
+    end
+
+    local suppression = Neverbirth.__coinSwordReleaseTearSuppressions[key]
+    if suppression and (suppression.shots or 0) > 0 then
+        suppression.shots = suppression.shots - 1
+        if suppression.shots <= 0 then
+            Neverbirth.__coinSwordReleaseTearSuppressions[key] = nil
+        end
+        return true
+    end
+
+    return false
+end
+
+function Neverbirth:SuppressCoinSewnSwordTear(tear)
+    if Neverbirth.ShouldSuppressCoinSwordTear(tear) then
+        Neverbirth.RemoveCoinSwordTear(tear)
+    end
+end
+
+function Neverbirth.UpdateCoinSwordReleaseTearSuppressions()
+    for key, suppression in pairs(Neverbirth.__coinSwordReleaseTearSuppressions) do
+        suppression.frames = (tonumber(suppression.frames) or 0) - 1
+        if suppression.frames <= 0 or (suppression.shots or 0) <= 0 then
+            Neverbirth.__coinSwordReleaseTearSuppressions[key] = nil
+        end
+    end
+end
+
+function Neverbirth.SuppressCoinSwordTearsInRoomFallback()
+    if not Isaac.GetRoomEntities then
+        return
+    end
+    if not next(coinSwordHoldStates) and not next(Neverbirth.__coinSwordReleaseTearSuppressions) then
+        return
+    end
+
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if Neverbirth.ShouldSuppressCoinSwordTear(entity) then
+            Neverbirth.RemoveCoinSwordTear(entity)
+        end
+    end
+end
+
+local function CancelCoinSewnSwordHold(player)
+    coinSwordHoldStates[GetCoinSwordHoldKey(player)] = nil
+end
+
+local function StartCoinSewnSwordHold(player, slot)
+    coinSwordHoldStates[GetCoinSwordHoldKey(player)] = {
+        player = player,
+        slot = slot or (ActiveSlot and ActiveSlot.SLOT_PRIMARY) or 0,
+    }
+end
+
+function Neverbirth:UseCoinSewnSword(_, _, player, _, activeSlot)
+    if not player then
+        return false
+    end
+
+    local key = GetCoinSwordHoldKey(player)
+    if coinSwordHoldStates[key] then
+        local direction = GetCoinSwordReleaseDirection(player)
+        if direction then
+            local state = coinSwordHoldStates[key]
+            coinSwordHoldStates[key] = nil
+            FireCoinSewnSword(player, direction, state.slot or activeSlot)
+        else
+            coinSwordHoldStates[key] = nil
+        end
+        return COIN_SWORD_NO_DISCHARGE_RESULT
+    end
+
+    StartCoinSewnSwordHold(player, activeSlot)
+    return COIN_SWORD_NO_DISCHARGE_RESULT
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseCoinSewnSword, Items.CoinSewnSword)
+
+function Neverbirth:UpdateCoinSewnSwordHold()
+    for key, state in pairs(coinSwordHoldStates) do
+        local player = state and state.player
+        if not player or GetCoinSwordActiveItem(player, state.slot) ~= Items.CoinSewnSword then
+            coinSwordHoldStates[key] = nil
+        else
+            local direction = GetCoinSwordReleaseDirection(player)
+            if direction then
+                coinSwordHoldStates[key] = nil
+                FireCoinSewnSword(player, direction, state.slot)
+            end
+        end
+    end
+    Neverbirth.SuppressCoinSwordTearsInRoomFallback()
+    Neverbirth.UpdateCoinSwordReleaseTearSuppressions()
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateCoinSewnSwordHold)
+
+if ModCallbacks.MC_POST_FIRE_TEAR then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Neverbirth.SuppressCoinSewnSwordTear)
+end
+
+function Neverbirth:CancelCoinSewnSwordHolds()
+    coinSwordHoldStates = {}
+    Neverbirth.__coinSwordReleaseTearSuppressions = {}
+end
+
+if ModCallbacks.MC_POST_NEW_ROOM then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.CancelCoinSewnSwordHolds)
+end
+
+if ModCallbacks.MC_POST_NEW_LEVEL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.CancelCoinSewnSwordHolds)
+end
+
+local function GetMaskState(player)
+    local key = GetFolkPlayerKey(player)
+    local state = coinFacedMaskStates[key]
+    if type(state) ~= "table" or state.roomKey ~= GetFolkRoomKey() then
+        state = {
+            roomKey = GetFolkRoomKey(),
+            active = false,
+            consumed = false,
+            luckPenalty = 0,
+        }
+        coinFacedMaskStates[key] = state
+    end
+    return state
+end
+
+local function GetCoinMaskCostumeId(path)
+    if not Isaac or not Isaac.GetCostumeIdByPath then
+        return nil
+    end
+
+    if coinFacedMaskCostumeIds[path] ~= nil then
+        return coinFacedMaskCostumeIds[path]
+    end
+
+    local ok, costumeId = pcall(function()
+        return Isaac.GetCostumeIdByPath(path)
+    end)
+    if ok and type(costumeId) == "number" and costumeId > 0 then
+        coinFacedMaskCostumeIds[path] = costumeId
+    else
+        coinFacedMaskCostumeIds[path] = false
+    end
+
+    return coinFacedMaskCostumeIds[path] or nil
+end
+
+local function TryRemoveCoinMaskCostume(player, costumeId)
+    if player and costumeId and player.TryRemoveNullCostume then
+        pcall(function()
+            player:TryRemoveNullCostume(costumeId)
+        end)
+    end
+end
+
+local function TryAddCoinMaskCostume(player, costumeId)
+    if player and costumeId and player.AddNullCostume then
+        pcall(function()
+            player:AddNullCostume(costumeId)
+        end)
+    end
+end
+
+local function ApplyCoinFacedMaskCostume(player, visualState)
+    if not player then
+        return
+    end
+
+    local key = GetFolkPlayerKey(player)
+    visualState = visualState or COIN_MASK_VISUAL_NONE
+    if coinFacedMaskCostumeStates[key] == visualState then
+        return
+    end
+
+    local activeCostume = GetCoinMaskCostumeId(COIN_MASK_COSTUME_PATH)
+    local brokenCostume = GetCoinMaskCostumeId(COIN_MASK_BROKEN_COSTUME_PATH)
+    if activeCostume then
+        TryRemoveCoinMaskCostume(player, activeCostume)
+    end
+    if brokenCostume then
+        TryRemoveCoinMaskCostume(player, brokenCostume)
+    end
+
+    if visualState == COIN_MASK_VISUAL_ACTIVE then
+        TryAddCoinMaskCostume(player, activeCostume)
+    elseif visualState == COIN_MASK_VISUAL_BROKEN then
+        TryAddCoinMaskCostume(player, brokenCostume)
+    end
+
+    coinFacedMaskCostumeStates[key] = visualState
+end
+
+local function GetCoinFacedMaskVisualState(state)
+    if state and state.active then
+        return COIN_MASK_VISUAL_ACTIVE
+    end
+    if state and (tonumber(state.luckPenalty) or 0) ~= 0 then
+        return COIN_MASK_VISUAL_BROKEN
+    end
+    return COIN_MASK_VISUAL_NONE
+end
+
+local function RefreshMaskLuck(player)
+    if player and player.AddCacheFlags and CacheFlag then
+        player:AddCacheFlags(CacheFlag.CACHE_LUCK)
+        if player.EvaluateItems then
+            player:EvaluateItems()
+        end
+    end
+end
+
+local function DisturbMaskEnemies(player)
+    if not Isaac.GetRoomEntities then
+        return
+    end
+
+    local ref = EntityRef(player)
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if IsVulnerableEnemy(entity) and entity.AddConfusion then
+            pcall(function()
+                entity:AddConfusion(ref, MASK_CONFUSION_DURATION, false)
+            end)
+        end
+    end
+end
+
+local function RefreshCoinFacedMaskForPlayer(player)
+    local previous = coinFacedMaskStates[GetFolkPlayerKey(player)]
+    local hadPenalty = previous and (tonumber(previous.luckPenalty) or 0) ~= 0
+    local state = {
+        roomKey = GetFolkRoomKey(),
+        active = PlayerHasCollectible(player, Items.CoinFacedMask) and GetPlayerCoins(player) >= MASK_REQUIRED_COINS,
+        consumed = false,
+        luckPenalty = 0,
+    }
+    coinFacedMaskStates[GetFolkPlayerKey(player)] = state
+    if state.active then
+        DisturbMaskEnemies(player)
+    end
+    ApplyCoinFacedMaskCostume(player, GetCoinFacedMaskVisualState(state))
+    if hadPenalty then
+        RefreshMaskLuck(player)
+    end
+end
+
+function Neverbirth:RefreshCoinFacedMaskRoom()
+    for _, player in ipairs(GetPlayers()) do
+        RefreshCoinFacedMaskForPlayer(player)
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_ROOM then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.RefreshCoinFacedMaskRoom)
+end
+
+function Neverbirth:ClearCoinFacedMaskCostumes()
+    for _, player in ipairs(GetPlayers()) do
+        ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_NONE)
+    end
+    coinFacedMaskStates = {}
+end
+
+if ModCallbacks.MC_POST_NEW_LEVEL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.ClearCoinFacedMaskCostumes)
+end
+
+function Neverbirth:UpdateCoinFacedMaskCostumes()
+    for _, player in ipairs(GetPlayers()) do
+        if not PlayerHasCollectible(player, Items.CoinFacedMask) then
+            coinFacedMaskStates[GetFolkPlayerKey(player)] = nil
+            ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_NONE)
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_UPDATE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateCoinFacedMaskCostumes)
+end
+
+function Neverbirth:HandleCoinFacedMaskDamage(entity, amount)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    if coinFacedMaskSettling > 0 or not player or (tonumber(amount) or 0) <= 0 or not PlayerHasCollectible(player, Items.CoinFacedMask) then
+        return nil
+    end
+
+    local state = GetMaskState(player)
+    if not state.active or state.consumed then
+        return nil
+    end
+
+    state.consumed = true
+    state.active = false
+    if GetPlayerCoins(player) >= MASK_REQUIRED_COINS then
+        AddPlayerCoins(player, -MASK_REQUIRED_COINS)
+        ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_NONE)
+        if player.TakeDamage then
+            coinFacedMaskSettling = coinFacedMaskSettling + 1
+            local ok, err = pcall(function()
+                player:TakeDamage(1, COIN_SWORD_BACKLASH_FLAGS, EntityRef(player), 0)
+            end)
+            coinFacedMaskSettling = math.max(0, coinFacedMaskSettling - 1)
+            if not ok then
+                DebugLog("[neverbirth] Coin-Faced Mask half-hit failed: " .. tostring(err))
+            end
+        end
+        return false
+    end
+
+    state.luckPenalty = MASK_LUCK_PENALTY
+    ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_BROKEN)
+    RefreshMaskLuck(player)
+    DisturbMaskEnemies(player)
+    return nil
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.HandleCoinFacedMaskDamage, EntityType.ENTITY_PLAYER)
+
+function Neverbirth:EvaluateCoinFacedMask(player, cacheFlag)
+    if not CacheFlag or cacheFlag ~= CacheFlag.CACHE_LUCK then
+        return
+    end
+
+    local state = coinFacedMaskStates[GetFolkPlayerKey(player)]
+    local penalty = tonumber(state and state.roomKey == GetFolkRoomKey() and state.luckPenalty) or 0
+    if penalty ~= 0 then
+        player.Luck = player.Luck + penalty
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateCoinFacedMask)
+
+Neverbirth.BlackTaisuiStageTwoThreshold = 8
+Neverbirth.BlackTaisuiStageThreeThreshold = 16
+Neverbirth.BlackTaisuiStageOneDamagePenalty = 0.5
+Neverbirth.BlackTaisuiStageOneSpeedPenalty = 0.2
+Neverbirth.BlackTaisuiStageOneLuckPenalty = 3
+Neverbirth.BlackTaisuiStageTwoDamagePenalty = 0.5
+Neverbirth.BlackTaisuiStageThreeDamageBonus = 1.5
+Neverbirth.BlackTaisuiDamageFloor = 1
+Neverbirth.BlackTaisuiSpeedFloor = 0.5
+Neverbirth.BlackTaisuiFearDuration = 90
+Neverbirth.BlackTaisuiFearRadius = 180
+Neverbirth.BlackTaisuiWavyCap = (CollectibleType and CollectibleType.COLLECTIBLE_WAVY_CAP) or 582
+Neverbirth.BlackTaisuiOfficialLifeItem = (CollectibleType and CollectibleType.COLLECTIBLE_1UP) or 11
+Neverbirth.BlackTaisuiLifeHudText = "x1"
+Neverbirth.BlackTaisuiLifeHudX = 132
+Neverbirth.BlackTaisuiLifeHudY = 28
+
+function Neverbirth.GetBlackTaisuiData()
+    EnsureMusicboxDataLoaded()
+    local data = musicboxSaveData.blackTaisui
+    if type(data) ~= "table" or data.runSeed ~= GetCurrentRunSeed() then
+        data = { runSeed = GetCurrentRunSeed(), players = {} }
+        musicboxSaveData.blackTaisui = data
+    end
+    if type(data.players) ~= "table" then
+        data.players = {}
+    end
+    return data
+end
+
+function Neverbirth:GetBlackTaisuiSavedPlayer(player)
+    local key = GetFolkPlayerKey(player)
+    local data = Neverbirth.GetBlackTaisuiData()
+    local saved = data.players[key]
+    if type(saved) ~= "table" then
+        saved = { parasite = 0 }
+        data.players[key] = saved
+    end
+    saved.parasite = math.max(0, tonumber(saved.parasite) or 0)
+    return saved
+end
+
+function Neverbirth:GetBlackTaisuiRuntimeState(player)
+    local key = GetFolkPlayerKey(player)
+    local state = blackTaisuiStates[key]
+    if type(state) ~= "table" then
+        state = { floorKey = GetFolkFloorKey(), sporeKeys = {} }
+        blackTaisuiStates[key] = state
+    end
+    if state.floorKey ~= GetFolkFloorKey() then
+        state.floorKey = GetFolkFloorKey()
+        state.deathSavedFloorKey = nil
+        state.sporeKeys = {}
+    end
+    if type(state.sporeKeys) ~= "table" then
+        state.sporeKeys = {}
+    end
+    return state
+end
+
+function Neverbirth:GetBlackTaisuiParasiteValue(player)
+    return tonumber(Neverbirth:GetBlackTaisuiSavedPlayer(player).parasite) or 0
+end
+
+function Neverbirth:SetBlackTaisuiParasiteValue(player, value)
+    Neverbirth:GetBlackTaisuiSavedPlayer(player).parasite = math.max(0, tonumber(value) or 0)
+    SaveMusicboxData()
+    Neverbirth:RefreshBlackTaisuiCache(player)
+    if Neverbirth:GetBlackTaisuiStage(player) >= 2 then
+        Neverbirth:RevealBlackTaisuiRoomCollectibles(player, "stage-set")
+    end
+end
+
+function Neverbirth:GetBlackTaisuiStage(player)
+    local parasite = Neverbirth:GetBlackTaisuiParasiteValue(player)
+    if parasite >= Neverbirth.BlackTaisuiStageThreeThreshold then
+        return 3
+    elseif parasite >= Neverbirth.BlackTaisuiStageTwoThreshold then
+        return 2
+    end
+    return 1
+end
+
+function Neverbirth:RefreshBlackTaisuiCache(player)
+    if not player or not player.AddCacheFlags or not CacheFlag then
+        return
+    end
+    local flags = 0
+    if CacheFlag.CACHE_DAMAGE then flags = flags | CacheFlag.CACHE_DAMAGE end
+    if CacheFlag.CACHE_SPEED then flags = flags | CacheFlag.CACHE_SPEED end
+    if CacheFlag.CACHE_LUCK then flags = flags | CacheFlag.CACHE_LUCK end
+    player:AddCacheFlags(flags)
+    if player.EvaluateItems then
+        player:EvaluateItems()
+    end
+end
+
+function Neverbirth:AddBlackTaisuiParasite(player, amount, reason)
+    if not player or not PlayerHasCollectible(player, Items.BlackTaisui) then
+        return
+    end
+    amount = tonumber(amount) or 0
+    if amount <= 0 then
+        return
+    end
+    local saved = Neverbirth:GetBlackTaisuiSavedPlayer(player)
+    local oldStage = Neverbirth:GetBlackTaisuiStage(player)
+    saved.parasite = math.max(0, (tonumber(saved.parasite) or 0) + amount)
+    SaveMusicboxData()
+    Neverbirth:RefreshBlackTaisuiCache(player)
+    if Neverbirth:GetBlackTaisuiStage(player) > oldStage then
+        Neverbirth:TriggerBlackTaisuiSpores(player, "stage:" .. tostring(reason or saved.parasite), true)
+    end
+end
+
+function Neverbirth:GetBlackTaisuiHealthSnapshot(player)
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    state.maxHearts = player and player.GetMaxHearts and player:GetMaxHearts() or tonumber(player and player.maxHearts) or 0
+    state.hearts = player and player.GetHearts and player:GetHearts() or tonumber(player and player.hearts) or 0
+    state.soulHearts = player and player.GetSoulHearts and player:GetSoulHearts() or tonumber(player and player.soulHearts) or 0
+    state.blackHearts = player and player.GetBlackHearts and player:GetBlackHearts() or tonumber(player and player.blackHearts) or 0
+    state.snapshotReady = true
+    return state
+end
+
+function Neverbirth:UpdateBlackTaisuiParasiteFromHealth(player)
+    if not player or not PlayerHasCollectible(player, Items.BlackTaisui) then
+        return
+    end
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    local maxHearts = player.GetMaxHearts and player:GetMaxHearts() or tonumber(player.maxHearts) or 0
+    local hearts = player.GetHearts and player:GetHearts() or tonumber(player.hearts) or 0
+    local soulHearts = player.GetSoulHearts and player:GetSoulHearts() or tonumber(player.soulHearts) or 0
+    if not state.snapshotReady then
+        Neverbirth:GetBlackTaisuiHealthSnapshot(player)
+        return
+    end
+
+    local gainedContainers = math.max(0, maxHearts - (tonumber(state.maxHearts) or 0))
+    if gainedContainers > 0 then
+        Neverbirth:AddBlackTaisuiParasite(player, (gainedContainers / 2) * 4, "container")
+    end
+
+    if maxHearts > 0 then
+        local redHealing = math.max(0, hearts - (tonumber(state.hearts) or 0))
+        if redHealing > 0 then
+            Neverbirth:AddBlackTaisuiParasite(player, redHealing, "red-heal")
+        end
+    else
+        -- In Repentance, GetBlackHearts is a bitmask, while GetSoulHearts is
+        -- the real soul/black layer amount. Use the layer amount to avoid
+        -- treating black-heart masks as extra health.
+        local soulHealing = math.max(0, soulHearts - (tonumber(state.soulHearts) or 0))
+        if soulHealing > 0 then
+            Neverbirth:AddBlackTaisuiParasite(player, soulHealing * 0.5, "soul-heal")
+        end
+    end
+
+    Neverbirth:GetBlackTaisuiHealthSnapshot(player)
+end
+
+function Neverbirth:IsBlackTaisuiIgnoredDamage(flags)
+    flags = tonumber(flags) or 0
+    if DamageFlag and DamageFlag.DAMAGE_FAKE and (flags & DamageFlag.DAMAGE_FAKE) ~= 0 then
+        return true
+    end
+    if DamageFlag and DamageFlag.DAMAGE_IV_BAG and (flags & DamageFlag.DAMAGE_IV_BAG) ~= 0 then
+        return true
+    end
+    return false
+end
+
+function Neverbirth:BlackTaisuiDamageIsLethal(player, amount)
+    amount = tonumber(amount) or 0
+    local maxHearts = player and player.GetMaxHearts and player:GetMaxHearts() or tonumber(player and player.maxHearts) or 0
+    local hearts = player and player.GetHearts and player:GetHearts() or tonumber(player and player.hearts) or 0
+    local soulHearts = player and player.GetSoulHearts and player:GetSoulHearts() or tonumber(player and player.soulHearts) or 0
+    return (hearts + soulHearts) <= amount
+end
+
+function Neverbirth:TriggerBlackTaisuiSpores(player, reason, strong)
+    if not player then
+        return
+    end
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    local key = tostring(reason or "spore") .. ":" .. tostring(GetFolkRoomKey())
+    if state.sporeKeys[key] then
+        return
+    end
+    state.sporeKeys[key] = true
+    SpawnFolkEffect(FOLK_BLACK_CREEP, player.Position or Vector(320, 280), player)
+    if player.SetColor then
+        pcall(function()
+            player:SetColor(Color(0.22, 0.22, 0.22, 1, 0, 0, 0.08), strong and 45 or 20, 1, true, false)
+        end)
+    end
+    if not Isaac.GetRoomEntities then
+        return
+    end
+    local ref = EntityRef(player)
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if IsVulnerableEnemy(entity) and entity.AddFear then
+            pcall(function()
+                entity:AddFear(ref, Neverbirth.BlackTaisuiFearDuration, false)
+            end)
+        end
+    end
+end
+
+function Neverbirth:BlackTaisuiDeathSaveAvailable(player)
+    return player
+        and PlayerHasCollectible(player, Items.BlackTaisui)
+        and Neverbirth:GetBlackTaisuiStage(player) >= 3
+        and Neverbirth:GetBlackTaisuiRuntimeState(player).deathSavedFloorKey ~= GetFolkFloorKey()
+end
+
+function Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    if not player or not player.GetEffects then
+        return nil
+    end
+    local ok, effects = pcall(function()
+        return player:GetEffects()
+    end)
+    if ok then
+        return effects
+    end
+    return nil
+end
+
+function Neverbirth:GetBlackTaisuiOfficialLifeCount(player)
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    if not effects then
+        return nil
+    end
+    local itemId = Neverbirth.BlackTaisuiOfficialLifeItem
+    if effects.GetCollectibleEffectNum then
+        local ok, count = pcall(function()
+            return effects:GetCollectibleEffectNum(itemId)
+        end)
+        if ok then
+            return tonumber(count) or 0
+        end
+    end
+    if effects.HasCollectibleEffect then
+        local ok, has = pcall(function()
+            return effects:HasCollectibleEffect(itemId)
+        end)
+        if ok then
+            return has and 1 or 0
+        end
+    end
+    return nil
+end
+
+function Neverbirth:AddBlackTaisuiOfficialLifeEffect(player)
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    if state.officialLifeEffectActive then
+        return true
+    end
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    if not effects or not effects.AddCollectibleEffect then
+        return false
+    end
+    local ok = pcall(function()
+        effects:AddCollectibleEffect(Neverbirth.BlackTaisuiOfficialLifeItem, false, 1)
+    end)
+    if ok then
+        state.officialLifeEffectActive = true
+        local count = Neverbirth:GetBlackTaisuiOfficialLifeCount(player)
+        state.officialLifeEffectConfirmed = count ~= nil and count > 0
+        return true
+    end
+    return false
+end
+
+function Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    if not state.officialLifeEffectActive then
+        return
+    end
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    if effects and effects.RemoveCollectibleEffect then
+        pcall(function()
+            effects:RemoveCollectibleEffect(Neverbirth.BlackTaisuiOfficialLifeItem, 1)
+        end)
+    end
+    state.officialLifeEffectActive = nil
+    state.officialLifeEffectConfirmed = nil
+end
+
+function Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    if Neverbirth:BlackTaisuiDeathSaveAvailable(player) then
+        if state.officialLifeEffectActive then
+            local count = Neverbirth:GetBlackTaisuiOfficialLifeCount(player)
+            if count ~= nil and count > 0 then
+                state.officialLifeEffectConfirmed = true
+            elseif count ~= nil and count <= 0 and state.officialLifeEffectConfirmed then
+                state.officialLifeEffectActive = nil
+                state.officialLifeEffectConfirmed = nil
+                Neverbirth:ApplyBlackTaisuiDeathSave(player, false)
+                return
+            end
+        end
+        Neverbirth:AddBlackTaisuiOfficialLifeEffect(player)
+    else
+        Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
+    end
+end
+
+function Neverbirth:RestoreBlackTaisuiDeathSaveHealth(player)
+    if player.GetMaxHearts and player:GetMaxHearts() > 0 then
+        if player.GetHearts and player.AddHearts then
+            local current = tonumber(player:GetHearts()) or 0
+            player:AddHearts(1 - current)
+        end
+    elseif player.AddBlackHearts then
+        player:AddBlackHearts(2)
+    end
+end
+
+function Neverbirth:ApplyBlackTaisuiDeathSave(player, reviveDeadPlayer)
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
+    state.deathSavedFloorKey = GetFolkFloorKey()
+    if reviveDeadPlayer and player.Revive then
+        pcall(function()
+            player:Revive()
+        end)
+    end
+    Neverbirth:RestoreBlackTaisuiDeathSaveHealth(player)
+    Neverbirth:TriggerBlackTaisuiSpores(player, "death-save:" .. tostring(GetFolkFloorKey()), true)
+end
+
+function Neverbirth:HandleBlackTaisuiDamage(entity, amount, flags)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    if not player or (tonumber(amount) or 0) <= 0 or not PlayerHasCollectible(player, Items.BlackTaisui) then
+        return nil
+    end
+    if Neverbirth:IsBlackTaisuiIgnoredDamage(flags) then
+        return nil
+    end
+
+    local maxHearts = player.GetMaxHearts and player:GetMaxHearts() or tonumber(player.maxHearts) or 0
+    if maxHearts > 0 and DamageFlag and DamageFlag.DAMAGE_RED_HEARTS and ((tonumber(flags) or 0) & DamageFlag.DAMAGE_RED_HEARTS) ~= 0 then
+        Neverbirth:AddBlackTaisuiParasite(player, (tonumber(amount) or 0) * 2, "red-damage")
+    elseif maxHearts <= 0 then
+        Neverbirth:AddBlackTaisuiParasite(player, (tonumber(amount) or 0), "soul-damage")
+    end
+
+    local stage = Neverbirth:GetBlackTaisuiStage(player)
+    if stage >= 3 and Neverbirth:BlackTaisuiDeathSaveAvailable(player) and Neverbirth:BlackTaisuiDamageIsLethal(player, amount) then
+        Neverbirth:ApplyBlackTaisuiDeathSave(player, false)
+        return false
+    end
+    return nil
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.HandleBlackTaisuiDamage, EntityType.ENTITY_PLAYER)
+
+function Neverbirth:EvaluateBlackTaisui(player, cacheFlag)
+    if not player or not CacheFlag or not PlayerHasCollectible(player, Items.BlackTaisui) then
+        return
+    end
+    local copies = player.GetCollectibleNum and (tonumber(player:GetCollectibleNum(Items.BlackTaisui)) or 0) or 1
+    if copies <= 0 then
+        return
+    end
+
+    local stage = Neverbirth:GetBlackTaisuiStage(player)
+    if cacheFlag == CacheFlag.CACHE_DAMAGE then
+        if stage >= 3 then
+            player.Damage = player.Damage + (Neverbirth.BlackTaisuiStageThreeDamageBonus * copies)
+        else
+            local penalty = stage >= 2 and Neverbirth.BlackTaisuiStageTwoDamagePenalty or (Neverbirth.BlackTaisuiStageOneDamagePenalty * copies)
+            if player.Damage > Neverbirth.BlackTaisuiDamageFloor then
+                player.Damage = math.max(Neverbirth.BlackTaisuiDamageFloor, player.Damage - penalty)
+            end
+        end
+    elseif cacheFlag == CacheFlag.CACHE_SPEED then
+        if stage == 1 and player.MoveSpeed and player.MoveSpeed > Neverbirth.BlackTaisuiSpeedFloor then
+            player.MoveSpeed = math.max(Neverbirth.BlackTaisuiSpeedFloor, player.MoveSpeed - Neverbirth.BlackTaisuiStageOneSpeedPenalty * copies)
+        end
+    elseif cacheFlag == CacheFlag.CACHE_LUCK then
+        if stage == 1 then
+            player.Luck = player.Luck - Neverbirth.BlackTaisuiStageOneLuckPenalty * copies
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateBlackTaisui)
+
+function Neverbirth:FilterBlackTaisuiCurses(curses)
+    local result = tonumber(curses) or 0
+    local mask = 0
+    if LevelCurse then
+        mask = ((LevelCurse.CURSE_OF_BLIND or 0) | (LevelCurse.CURSE_OF_LOST or 0) | (LevelCurse.CURSE_OF_UNKNOWN or 0))
+    end
+    if mask == 0 or (result & mask) == 0 then
+        return result
+    end
+    for _, player in ipairs(GetPlayers()) do
+        if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 2 then
+            Neverbirth:TriggerBlackTaisuiSpores(player, "curse:" .. tostring(result), false)
+            return result & (~mask)
+        end
+    end
+    return result
+end
+
+if ModCallbacks.MC_POST_CURSE_EVAL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_CURSE_EVAL, Neverbirth.FilterBlackTaisuiCurses)
+end
+
+function Neverbirth:AnyBlackTaisuiStageAtLeast(stage)
+    for _, player in ipairs(GetPlayers()) do
+        if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= stage then
+            return true, player
+        end
+    end
+    return false, nil
+end
+
+function Neverbirth:GetBlackTaisuiCollectibleGfx(subtype)
+    if not Isaac or not Isaac.GetItemConfig then
+        return nil
+    end
+    local ok, config = pcall(function()
+        return Isaac.GetItemConfig()
+    end)
+    if not ok or not config or not config.GetCollectible then
+        return nil
+    end
+    local itemOk, collectible = pcall(function()
+        return config:GetCollectible(subtype)
+    end)
+    if itemOk and collectible and collectible.GfxFileName and collectible.GfxFileName ~= "" then
+        return collectible.GfxFileName
+    end
+    return nil
+end
+
+function Neverbirth:ApplyBlackTaisuiCollectibleSprite(pickup, subtype)
+    if not pickup or not pickup.GetSprite then
+        return false
+    end
+    local gfx = Neverbirth:GetBlackTaisuiCollectibleGfx(subtype)
+    if not gfx then
+        return false
+    end
+    local ok, sprite = pcall(function()
+        return pickup:GetSprite()
+    end)
+    if not ok or not sprite then
+        return false
+    end
+    local animation = "Idle"
+    if sprite.GetAnimation then
+        local animOk, currentAnimation = pcall(function()
+            return sprite:GetAnimation()
+        end)
+        if animOk and currentAnimation == "ShopIdle" then
+            animation = "ShopIdle"
+        end
+    end
+    local replaced = false
+    if sprite.ReplaceSpritesheet then
+        local replaceOk = pcall(function()
+            sprite:ReplaceSpritesheet(1, gfx)
+        end)
+        replaced = replaced or replaceOk
+    end
+    if sprite.LoadGraphics then
+        pcall(function()
+            sprite:LoadGraphics()
+        end)
+    end
+    if sprite.SetFrame then
+        pcall(function()
+            sprite:SetFrame(animation, 0)
+        end)
+    end
+    if replaced then
+        if pickup.hidden ~= nil then
+            pickup.hidden = false
+        end
+        if pickup.Hidden ~= nil then
+            pickup.Hidden = false
+        end
+        local data = pickup.GetData and pickup:GetData() or nil
+        if type(data) == "table" then
+            data.NeverbirthBlackTaisuiSpriteApplied = true
+            data.NeverbirthBlackTaisuiSpriteSubtype = subtype
+        end
+    end
+    return replaced
+end
+
+function Neverbirth:RevealBlackTaisuiCollectiblePickup(pickup, player, reason)
+    if not pickup or not PickupVariant or pickup.Variant ~= PickupVariant.PICKUP_COLLECTIBLE then
+        return false
+    end
+
+    local subtype = tonumber(pickup.SubType) or 0
+    if subtype <= 0 then
+        local data = pickup.GetData and pickup:GetData() or nil
+        if type(data) == "table" and not data.NeverbirthBlackTaisuiUnknownLogged then
+            data.NeverbirthBlackTaisuiUnknownLogged = true
+            DebugLog("[neverbirth] Black Taisui skipped unknown collectible pedestal without subtype")
+        end
+        return false
+    end
+
+    local data = pickup.GetData and pickup:GetData() or nil
+    local firstReveal = true
+    if type(data) == "table" then
+        local key = tostring(GetFolkFloorKey()) .. ":" .. tostring(GetFolkRoomKey()) .. ":" .. tostring(subtype)
+        if data.NeverbirthBlackTaisuiRevealedKey == key then
+            firstReveal = false
+        else
+            data.NeverbirthBlackTaisuiRevealedKey = key
+        end
+    end
+
+    local refreshed = false
+
+    refreshed = Neverbirth:ApplyBlackTaisuiCollectibleSprite(pickup, subtype) or refreshed
+
+    if refreshed and firstReveal and player then
+        Neverbirth:TriggerBlackTaisuiSpores(player, "reveal:" .. tostring(reason or GetFolkRoomKey()), false)
+    end
+    if refreshed and firstReveal then
+        DebugLog("[neverbirth] Black Taisui refreshed collectible pedestal subtype=" .. tostring(subtype))
+    end
+    return refreshed
+end
+
+function Neverbirth:RevealBlackTaisuiRoomCollectibles(player, reason)
+    if not Isaac.GetRoomEntities then
+        return 0
+    end
+    local count = 0
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        local pickup = entity
+        if entity and entity.ToPickup then
+            local ok, converted = pcall(function()
+                return entity:ToPickup()
+            end)
+            if ok and converted then
+                pickup = converted
+            end
+        end
+        if Neverbirth:RevealBlackTaisuiCollectiblePickup(pickup, player, reason) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+function Neverbirth:RevealBlackTaisuiPickupOnInit(pickup)
+    local active, player = Neverbirth:AnyBlackTaisuiStageAtLeast(2)
+    if active then
+        Neverbirth:RevealBlackTaisuiCollectiblePickup(pickup, player, "pickup-init")
+    end
+end
+
+if ModCallbacks.MC_POST_PICKUP_INIT and PickupVariant then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, Neverbirth.RevealBlackTaisuiPickupOnInit, PickupVariant.PICKUP_COLLECTIBLE)
+end
+
+function Neverbirth:SuppressBlackTaisuiWavyCapSideEffects(player)
+    if MusicManager then
+        local ok, music = pcall(MusicManager)
+        if ok and music then
+            if music.PitchSlide then
+                pcall(function()
+                    music:PitchSlide(1)
+                end)
+            elseif music.SetPitch then
+                pcall(function()
+                    music:SetPitch(1)
+                end)
+            end
+        end
+    end
+
+    local game = GetFolkGame()
+    if game and game.ShakeScreen then
+        pcall(function()
+            game:ShakeScreen(0)
+        end)
+    end
+
+    Neverbirth:TriggerBlackTaisuiSpores(player, "wavy:" .. tostring(GetFolkRoomKey()), false)
+end
+
+function Neverbirth:UpdateBlackTaisui()
+    for _, player in ipairs(GetPlayers()) do
+        Neverbirth:UpdateBlackTaisuiParasiteFromHealth(player)
+        if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 2 and PlayerHasCollectible(player, Neverbirth.BlackTaisuiWavyCap) then
+            Neverbirth:SuppressBlackTaisuiWavyCapSideEffects(player)
+        end
+        if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 2 then
+            local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+            local revealKey = tostring(GetFolkFloorKey()) .. ":" .. tostring(GetFolkRoomKey())
+            if state.revealRoomKey ~= revealKey then
+                state.revealRoomKey = revealKey
+                Neverbirth:RevealBlackTaisuiRoomCollectibles(player, "room")
+            end
+        end
+        Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
+        if Neverbirth:BlackTaisuiDeathSaveAvailable(player) and player.IsDead then
+            local deadOk, isDead = pcall(function()
+                return player:IsDead()
+            end)
+            if deadOk and isDead then
+                Neverbirth:ApplyBlackTaisuiDeathSave(player, true)
+            end
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateBlackTaisui)
+
+function Neverbirth:RenderBlackTaisuiLifeHud()
+    if not Isaac or not Isaac.RenderText then
+        return
+    end
+    local slot = 0
+    for _, player in ipairs(GetPlayers()) do
+        local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+        if Neverbirth:BlackTaisuiDeathSaveAvailable(player) and not state.officialLifeEffectActive then
+            local x = Neverbirth.BlackTaisuiLifeHudX + slot * 24
+            local y = Neverbirth.BlackTaisuiLifeHudY
+            Isaac.RenderText(Neverbirth.BlackTaisuiLifeHudText, x + 1, y + 1, 0, 0, 0, 0.75)
+            Isaac.RenderText(Neverbirth.BlackTaisuiLifeHudText, x, y, 1, 1, 1, 1)
+            slot = slot + 1
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_RENDER, Neverbirth.RenderBlackTaisuiLifeHud)
+
+function Neverbirth:ResetBlackTaisuiOnNewLevel()
+    for _, player in ipairs(GetPlayers()) do
+        local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+        state.floorKey = GetFolkFloorKey()
+        state.deathSavedFloorKey = nil
+        state.sporeKeys = {}
+        state.revealRoomKey = nil
+        state.snapshotReady = false
+        state.officialLifeEffectActive = nil
+        Neverbirth:RefreshBlackTaisuiCache(player)
+        Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_LEVEL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.ResetBlackTaisuiOnNewLevel)
+end
+
+local GOOD_GIRL_TEARS_BONUS = 0.6
+local GOOD_GIRL_LUCK_BONUS = 2
+local GOOD_GIRL_BROKEN_LUCK_PENALTY = -2
+local GOOD_GIRL_ECHO_DAMAGE_BONUS = 1.2
+local GOOD_GIRL_ECHO_SPEED_BONUS = 0.15
+local GOOD_GIRL_ECHO_FRAMES = 5 * 30
+local GOOD_GIRL_FEAR_RADIUS = 120
+local GOOD_GIRL_FEAR_DURATION = 2 * 30
+local GOOD_GIRL_CHARM_CHANCE = 15
+local GOOD_GIRL_CHARM_DURATION = 90
+local GOOD_GIRL_REWARD_CHANCE = 33
+local GOOD_GIRL_HALF_SOUL = (HeartSubType and HeartSubType.HEART_HALF_SOUL) or 8
+local GOOD_GIRL_COIN = (CoinSubType and CoinSubType.COIN_PENNY) or 1
+local GOOD_GIRL_CARD = (Card and Card.CARD_RANDOM) or 0
+local goodGirlStates = {}
+
+local function GetGoodGirlState(player)
+    local key = GetFolkPlayerKey(player)
+    local roomKey = GetFolkRoomKey()
+    local state = goodGirlStates[key]
+    if type(state) ~= "table" or state.roomKey ~= roomKey then
+        state = {
+            roomKey = roomKey,
+            broken = false,
+            redDamaged = false,
+            rewarded = false,
+            echoFrames = 0,
+        }
+        goodGirlStates[key] = state
+    end
+    return state
+end
+
+local function PlayerHasGoodGirl(player)
+    return PlayerHasCollectible(player, Items.GoodGirlOfBabylon)
+end
+
+local function GoodGirlHasFullRedHearts(player)
+    if not player or not player.GetMaxHearts or not player.GetHearts then
+        return false
+    end
+
+    local maxRed = tonumber(player:GetMaxHearts()) or 0
+    local currentRed = tonumber(player:GetHearts()) or 0
+    return maxRed > 0 and currentRed >= maxRed
+end
+
+local function IsGoodGirlPresentable(player, state)
+    return PlayerHasGoodGirl(player) and GoodGirlHasFullRedHearts(player) and not (state and state.broken)
+end
+
+local function RefreshGoodGirlCache(player)
+    if not player or not player.AddCacheFlags or not CacheFlag then
+        return
+    end
+
+    local flags = 0
+    if CacheFlag.CACHE_FIREDELAY then flags = flags | CacheFlag.CACHE_FIREDELAY end
+    if CacheFlag.CACHE_LUCK then flags = flags | CacheFlag.CACHE_LUCK end
+    if CacheFlag.CACHE_DAMAGE then flags = flags | CacheFlag.CACHE_DAMAGE end
+    if CacheFlag.CACHE_SPEED then flags = flags | CacheFlag.CACHE_SPEED end
+    if flags ~= 0 then
+        player:AddCacheFlags(flags)
+        if player.EvaluateItems then
+            player:EvaluateItems()
+        end
+    end
+end
+
+local function IsGoodGirlRedHeartDamage(player, amount, flags)
+    if (tonumber(amount) or 0) <= 0 then
+        return false
+    end
+    if flags and DamageFlag and DamageFlag.DAMAGE_FAKE and (flags & DamageFlag.DAMAGE_FAKE) ~= 0 then
+        return false
+    end
+    if flags and DamageFlag and DamageFlag.DAMAGE_IV_BAG and (flags & DamageFlag.DAMAGE_IV_BAG) ~= 0 then
+        return false
+    end
+    if flags and DamageFlag and DamageFlag.DAMAGE_RED_HEARTS and (flags & DamageFlag.DAMAGE_RED_HEARTS) ~= 0 then
+        return true
+    end
+
+    local soulHearts = 0
+    if player and player.GetSoulHearts then
+        soulHearts = tonumber(player:GetSoulHearts()) or 0
+    end
+    local redHearts = 0
+    if player and player.GetHearts then
+        redHearts = tonumber(player:GetHearts()) or 0
+    end
+
+    -- MC_ENTITY_TAKE_DMG fires before health changes. Without an explicit red
+    -- heart flag, we only treat the hit as red damage when no soul/black layer
+    -- is available to absorb it.
+    return soulHearts <= 0 and redHearts > 0
+end
+
+local function FearGoodGirlEnemies(player)
+    if not Isaac.GetRoomEntities then
+        return
+    end
+
+    local origin = player and player.Position or Vector(320, 280)
+    local ref = EntityRef(player)
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if IsVulnerableEnemy(entity) and entity.Position and (entity.Position - origin):Length() <= GOOD_GIRL_FEAR_RADIUS and entity.AddFear then
+            pcall(function()
+                entity:AddFear(ref, GOOD_GIRL_FEAR_DURATION)
+            end)
+        end
+    end
+end
+
+local function CharmGoodGirlRoomEnemies(player)
+    if not Isaac.GetRoomEntities or not IsGoodGirlPresentable(player, GetGoodGirlState(player)) then
+        return
+    end
+
+    local ref = EntityRef(player)
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if IsVulnerableEnemy(entity) then
+            local data = entity.GetData and entity:GetData() or nil
+            local key = "NeverbirthGoodGirlCharmChecked" .. tostring(GetFolkPlayerKey(player))
+            if not data or data[key] ~= true then
+                if data then
+                    data[key] = true
+                end
+                if GetFolkRandomInt(player, Items.GoodGirlOfBabylon, 100) < GOOD_GIRL_CHARM_CHANCE then
+                    if entity.AddCharmed then
+                        pcall(function()
+                            entity:AddCharmed(ref, GOOD_GIRL_CHARM_DURATION)
+                        end)
+                    elseif entity.AddConfusion then
+                        pcall(function()
+                            entity:AddConfusion(ref, GOOD_GIRL_CHARM_DURATION, false)
+                        end)
+                    elseif entity.AddEntityFlags and EntityFlag and EntityFlag.FLAG_CHARM then
+                        entity:AddEntityFlags(EntityFlag.FLAG_CHARM)
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function SpawnGoodGirlReward(player)
+    local position = player and player.Position or Vector(320, 280)
+    local room = GetFolkRoom()
+    if room and room.FindFreePickupSpawnPosition then
+        position = room:FindFreePickupSpawnPosition(position, 40, true, false)
+    end
+
+    local reward = GetFolkRandomInt(player, Items.GoodGirlOfBabylon, 3)
+    if reward == 0 then
+        Isaac.Spawn(FOLK_ENTITY_PICKUP, (PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300, GOOD_GIRL_CARD, position, Vector(0, 0), player)
+    elseif reward == 1 then
+        Isaac.Spawn(FOLK_ENTITY_PICKUP, FOLK_PICKUP_HEART, GOOD_GIRL_HALF_SOUL, position, Vector(0, 0), player)
+    else
+        Isaac.Spawn(FOLK_ENTITY_PICKUP, (PickupVariant and PickupVariant.PICKUP_COIN) or 20, GOOD_GIRL_COIN, position, Vector(0, 0), player)
+    end
+end
+
+function Neverbirth:EvaluateGoodGirlOfBabylon(player, cacheFlag)
+    if not PlayerHasGoodGirl(player) then
+        return
+    end
+
+    local state = GetGoodGirlState(player)
+    local presentable = IsGoodGirlPresentable(player, state)
+
+    if cacheFlag == CacheFlag.CACHE_FIREDELAY and presentable then
+        player.MaxFireDelay = player.MaxFireDelay - GOOD_GIRL_TEARS_BONUS
+    elseif cacheFlag == CacheFlag.CACHE_LUCK then
+        if presentable then
+            player.Luck = player.Luck + GOOD_GIRL_LUCK_BONUS
+        end
+        if state.broken then
+            player.Luck = player.Luck + GOOD_GIRL_BROKEN_LUCK_PENALTY
+        end
+    elseif cacheFlag == CacheFlag.CACHE_DAMAGE and (tonumber(state.echoFrames) or 0) > 0 then
+        player.Damage = player.Damage + GOOD_GIRL_ECHO_DAMAGE_BONUS
+    elseif cacheFlag == CacheFlag.CACHE_SPEED and (tonumber(state.echoFrames) or 0) > 0 then
+        player.MoveSpeed = player.MoveSpeed + GOOD_GIRL_ECHO_SPEED_BONUS
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateGoodGirlOfBabylon)
+
+function Neverbirth:HandleGoodGirlOfBabylonDamage(entity, amount, flags)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    if not player or not PlayerHasGoodGirl(player) then
+        return nil
+    end
+
+    local state = GetGoodGirlState(player)
+    if not IsGoodGirlPresentable(player, state) or not IsGoodGirlRedHeartDamage(player, amount, flags) then
+        return nil
+    end
+
+    state.broken = true
+    state.redDamaged = true
+    state.echoFrames = GOOD_GIRL_ECHO_FRAMES
+    FearGoodGirlEnemies(player)
+    if player.SetColor then
+        player:SetColor(Color(0.65, 0.05, 0.05, 1, 0.15, 0, 0), 45, 1, true, false)
+    end
+    RefreshGoodGirlCache(player)
+    return nil
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.HandleGoodGirlOfBabylonDamage, EntityType.ENTITY_PLAYER)
+
+function Neverbirth:RefreshGoodGirlOfBabylonRoom()
+    for _, player in ipairs(GetPlayers()) do
+        if PlayerHasGoodGirl(player) then
+            local key = GetFolkPlayerKey(player)
+            goodGirlStates[key] = {
+                roomKey = GetFolkRoomKey(),
+                broken = false,
+                redDamaged = false,
+                rewarded = false,
+                echoFrames = 0,
+            }
+            CharmGoodGirlRoomEnemies(player)
+            RefreshGoodGirlCache(player)
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_ROOM then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.RefreshGoodGirlOfBabylonRoom)
+end
+
+function Neverbirth:UpdateGoodGirlOfBabylon()
+    local room = GetFolkRoom()
+    local isClear = room and room.IsClear and room:IsClear()
+
+    for _, player in ipairs(GetPlayers()) do
+        if PlayerHasGoodGirl(player) then
+            local state = GetGoodGirlState(player)
+            local echoFrames = tonumber(state.echoFrames) or 0
+            if echoFrames > 0 then
+                state.echoFrames = echoFrames - 1
+                if state.echoFrames <= 0 then
+                    state.echoFrames = 0
+                    RefreshGoodGirlCache(player)
+                end
+            end
+
+            if isClear and not state.rewarded then
+                state.rewarded = true
+                if IsGoodGirlPresentable(player, state) and not state.redDamaged and GetFolkRandomInt(player, Items.GoodGirlOfBabylon, 100) < GOOD_GIRL_REWARD_CHANCE then
+                    SpawnGoodGirlReward(player)
+                end
+            end
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateGoodGirlOfBabylon)
+
+function Neverbirth:ResetFolkHorrorItemState(isContinued)
+    if isContinued then
+        return
+    end
+    for _, player in ipairs(GetPlayers()) do
+        ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_NONE)
+    end
+    coinFacedMaskStates = {}
+    coinFacedMaskCostumeStates = {}
+    blackTaisuiStates = {}
+    goodGirlStates = {}
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetFolkHorrorItemState)
+end
+end
+
+--------------------------------------------------
 -- 绝育证明
 
 do
@@ -5833,6 +8118,380 @@ Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateDevilboxDea
 
 if ModCallbacks.MC_POST_NEW_LEVEL then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.UpdateDevilboxDealChance)
+end
+
+--------------------------------------------------
+-- 避孕套 / 美工刀
+
+do
+Neverbirth.CondomBanCount = 2
+Neverbirth.CondomReplacementAttempts = 20
+Neverbirth.CondomEntityPickup = (EntityType and EntityType.ENTITY_PICKUP) or 5
+Neverbirth.CondomCollectibleVariant = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
+Neverbirth.UtilityKnifeDamageUp = 1
+
+function Neverbirth:GetCondomData()
+    EnsureMusicboxDataLoaded()
+
+    local data = musicboxSaveData.condom
+    if type(data) ~= "table" or data.runSeed ~= GetCurrentRunSeed() then
+        data = {
+            runSeed = GetCurrentRunSeed(),
+            banned = {},
+        }
+        musicboxSaveData.condom = data
+    end
+
+    if type(data.banned) ~= "table" then
+        data.banned = {}
+    end
+
+    return data
+end
+
+function Neverbirth:GetUtilityKnifeData()
+    EnsureMusicboxDataLoaded()
+
+    local data = musicboxSaveData.utilityKnife
+    if type(data) ~= "table" or data.runSeed ~= GetCurrentRunSeed() then
+        data = {
+            runSeed = GetCurrentRunSeed(),
+            playerCounts = {},
+        }
+        musicboxSaveData.utilityKnife = data
+    end
+
+    if type(data.playerCounts) ~= "table" then
+        data.playerCounts = {}
+    end
+
+    return data
+end
+
+function Neverbirth:GetItemConfigObject()
+    if Isaac.GetItemConfig then
+        return Isaac.GetItemConfig()
+    end
+
+    return nil
+end
+
+function Neverbirth:GetCollectibleConfig(itemId)
+    local config = self:GetItemConfigObject()
+    if config and config.GetCollectible then
+        return config:GetCollectible(itemId)
+    end
+
+    return nil
+end
+
+function Neverbirth:IsBabyTaggedCollectible(itemId)
+    local config = self:GetCollectibleConfig(itemId)
+    local babyTag = ItemConfig and ItemConfig.TAG_BABY
+    if config and babyTag and type(config.Tags) == "number" then
+        return (config.Tags & babyTag) ~= 0
+    end
+
+    return false
+end
+
+function Neverbirth:AddFallbackBabyItem(targets, collectibleName)
+    if CollectibleType and CollectibleType[collectibleName] then
+        targets[CollectibleType[collectibleName]] = true
+    end
+end
+
+function Neverbirth:CollectBabyTaggedItems()
+    local ids = {}
+    local seen = {}
+    local config = self:GetItemConfigObject()
+
+    if config and config.GetCollectibles then
+        local ok, collectibles = pcall(function()
+            return config:GetCollectibles()
+        end)
+        if ok and type(collectibles) == "table" then
+            for _, collectible in pairs(collectibles) do
+                local itemId = collectible and (collectible.ID or collectible.Id)
+                if type(itemId) == "number" and itemId > 0 and self:IsBabyTaggedCollectible(itemId) and not seen[itemId] then
+                    ids[#ids + 1] = itemId
+                    seen[itemId] = true
+                end
+            end
+        end
+    end
+
+    if #ids == 0 then
+        local fallback = {}
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_BROTHER_BOBBY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_SISTER_MAGGY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LITTLE_CHUBBY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_ROBO_BABY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LITTLE_GISH")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LITTLE_STEVEN")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_DEMON_BABY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_GHOST_BABY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_HARLEQUIN_BABY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_RAINBOW_BABY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_ROBO_BABY_2")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_ROTTEN_BABY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_HEADLESS_BABY")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LEECH")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LIL_BRIMSTONE")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_INCUBUS")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LIL_LOKI")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_BBF")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_SERAPHIM")
+        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_SWORN_PROTECTOR")
+
+        for itemId in pairs(fallback) do
+            if not seen[itemId] then
+                ids[#ids + 1] = itemId
+                seen[itemId] = true
+            end
+        end
+    end
+
+    table.sort(ids)
+    return ids
+end
+
+function Neverbirth:AnyPlayerOwnsCollectible(itemId)
+    for _, player in ipairs(GetPlayers()) do
+        if player.GetCollectibleNum and player:GetCollectibleNum(itemId) > 0 then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Neverbirth:GetCondomEligibleItems()
+    local data = self:GetCondomData()
+    local eligible = {}
+
+    for _, itemId in ipairs(self:CollectBabyTaggedItems()) do
+        if not data.banned[tostring(itemId)] and not self:AnyPlayerOwnsCollectible(itemId) then
+            eligible[#eligible + 1] = itemId
+        end
+    end
+
+    return eligible
+end
+
+function Neverbirth:ShowCondomFeedback(bannedCount)
+    local game = Game()
+    local hud = game and game.GetHUD and game:GetHUD()
+    if not hud or not hud.ShowItemText then
+        return
+    end
+
+    if bannedCount > 0 then
+        hud:ShowItemText("Condom", tostring(bannedCount) .. " baby items banned")
+    else
+        hud:ShowItemText("Condom", "No baby items left")
+    end
+end
+
+function Neverbirth:PickCondomTarget(eligible, rng)
+    if #eligible <= 0 then
+        return nil
+    end
+
+    local index = 1
+    if rng and rng.RandomInt then
+        index = rng:RandomInt(#eligible) + 1
+    end
+
+    local itemId = eligible[index]
+    table.remove(eligible, index)
+    return itemId
+end
+
+function Neverbirth:UseCondom(itemId, rng, player)
+    local data = self:GetCondomData()
+    local eligible = self:GetCondomEligibleItems()
+    local playerRng = rng
+    if (not playerRng or not playerRng.RandomInt) and player and player.GetCollectibleRNG then
+        playerRng = player:GetCollectibleRNG(Items.Condom)
+    end
+
+    local bannedCount = 0
+    for _ = 1, self.CondomBanCount do
+        local target = self:PickCondomTarget(eligible, playerRng)
+        if not target then
+            break
+        end
+
+        data.banned[tostring(target)] = true
+        bannedCount = bannedCount + 1
+    end
+
+    self:ShowCondomFeedback(bannedCount)
+    if bannedCount > 0 then
+        SaveMusicboxData()
+    end
+
+    return true
+end
+
+function Neverbirth:IsCondomBanned(itemId)
+    local data = self:GetCondomData()
+    return data.banned[tostring(itemId)] == true
+end
+
+function Neverbirth:IsCondomBannedCollectible(itemId)
+    return itemId and self:IsCondomBanned(itemId)
+end
+
+function Neverbirth:RollCondomReplacement(originalItemId)
+    local game = Game()
+    local itemPool = game and game.GetItemPool and game:GetItemPool()
+    if not itemPool or not itemPool.GetCollectible then
+        return nil
+    end
+
+    for _ = 1, self.CondomReplacementAttempts do
+        local candidate = itemPool:GetCollectible(ItemPoolType and ItemPoolType.POOL_TREASURE or 0, true, 0, 0)
+        if type(candidate) == "number"
+            and candidate > 0
+            and candidate ~= originalItemId
+            and not self:IsCondomBannedCollectible(candidate) then
+            return candidate
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth:ReplaceCondomBannedPickup(pickup)
+    if not pickup or pickup.Variant ~= self.CondomCollectibleVariant then
+        return
+    end
+
+    local currentSubtype = pickup.SubType
+    if not self:IsCondomBannedCollectible(currentSubtype) then
+        return
+    end
+
+    local pickupData = pickup.GetData and pickup:GetData() or nil
+    if pickupData and pickupData.neverbirthCondomReplacing then
+        return
+    end
+    if pickupData then
+        pickupData.neverbirthCondomReplacing = true
+    end
+
+    local replacement = self:RollCondomReplacement(currentSubtype)
+    if replacement then
+        if pickup.Morph then
+            pickup:Morph(self.CondomEntityPickup, self.CondomCollectibleVariant, replacement, true, true, false)
+        else
+            pickup.SubType = replacement
+        end
+    elseif pickup.Remove then
+        pickup:Remove()
+    end
+
+    if pickupData then
+        pickupData.neverbirthCondomReplacing = nil
+    end
+end
+
+function Neverbirth:EvaluateUtilityKnife(player, cacheFlag)
+    if cacheFlag ~= CacheFlag.CACHE_DAMAGE then
+        return
+    end
+
+    if not player or not player.GetCollectibleNum then
+        return
+    end
+
+    local count = player:GetCollectibleNum(Items.UtilityKnife)
+    if count <= 0 then
+        return
+    end
+
+    player.Damage = player.Damage + self.UtilityKnifeDamageUp * count
+end
+
+function Neverbirth:FindUtilityKnifePickupPlayer(...)
+    for index = 1, select("#", ...) do
+        local value = select(index, ...)
+        if type(value) == "table" then
+            if value.ToPlayer then
+                local ok, player = pcall(function()
+                    return value:ToPlayer()
+                end)
+                if ok and player then
+                    return player
+                end
+            end
+
+            if value.AddBrokenHearts or value.GetCollectibleNum then
+                return value
+            end
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth:GrantUtilityKnifeBrokenHeart(...)
+    local player = self:FindUtilityKnifePickupPlayer(...)
+    if not player or not player.AddBrokenHearts then
+        return
+    end
+
+    local data = self:GetUtilityKnifeData()
+    local key = tostring(player.InitSeed or "")
+    local count = 0
+    if player.GetCollectibleNum then
+        count = tonumber(player:GetCollectibleNum(Items.UtilityKnife)) or 0
+    end
+
+    if count > 0 then
+        data.playerCounts[key] = math.max(tonumber(data.playerCounts[key]) or 0, count)
+    end
+    player:AddBrokenHearts(1)
+    SaveMusicboxData()
+end
+
+function Neverbirth:TrackUtilityKnifeCopies()
+    local data = self:GetUtilityKnifeData()
+
+    for _, player in ipairs(GetPlayers()) do
+        if player and player.GetCollectibleNum then
+            local key = tostring(player.InitSeed or "")
+            local currentCount = tonumber(player:GetCollectibleNum(Items.UtilityKnife)) or 0
+            local previousCount = tonumber(data.playerCounts[key]) or 0
+
+            if currentCount > previousCount then
+                local gained = currentCount - previousCount
+                if player.AddBrokenHearts then
+                    player:AddBrokenHearts(gained)
+                end
+                data.playerCounts[key] = currentCount
+                SaveMusicboxData()
+            elseif currentCount < previousCount then
+                data.playerCounts[key] = currentCount
+                SaveMusicboxData()
+            end
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseCondom, Items.Condom)
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateUtilityKnife)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackUtilityKnifeCopies)
+
+if ModCallbacks.MC_POST_PICKUP_INIT then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, Neverbirth.ReplaceCondomBannedPickup, Neverbirth.CondomCollectibleVariant)
+end
+
+if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.GrantUtilityKnifeBrokenHeart, Items.UtilityKnife)
+end
 end
 
 --------------------------------------------------

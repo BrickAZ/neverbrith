@@ -3,26 +3,90 @@
     <name>neverbrith</name>
     <directory>neverbrith</directory>
     <id>3750823785</id>
-    <description>neverbrith is a The Binding of Isaac: Repentance mod by brick（青春啊砖在he边看月亮）.
+    <description>[h1]未生 / neverbrith[/h1]
 
-This mod adds a growing set of custom items with EID support and Chinese/English text:
+《未生》是 青春啊砖在he边看月亮 制作的 The Binding of Isaac: Repentance 道具 Mod。
+
+它添加了一组持续扩展中的自定义道具，支持 EID，并提供中文 / 英文道具文本。
+
+[list]
+[*] 自定义被动道具与主动道具
+[*] 围绕延迟伤害、交易房、卡牌、跟班和死亡代价的风险收益机制
+[*] 中文 / 英文道具文本
+[*] External Item Descriptions 支持
+[/list]
+
+[h1]当前内容[/h1]
+
+[list]
+[*] 八音盒 - 强力的限时主动道具，但倒计时结束会收取致命代价。
+[*] 天使盒与恶魔盒 - 围绕充能、心和交易房方向运作，并追加房间奖励。
+[*] 未剪断的脐带 - 延迟本该承受的伤害，清理房间表现越好，代价越低。
+[*] 剪碎的塔罗 - 将房间内的卡牌转化为宝箱房道具。
+[*] 空摇篮 - 记住每层第一次受伤，并在清房后给出对应回报。
+[*] 绝育证明 - 阻止敌人继续生成敌人，并反噬源头。
+[*] 血颅蛊 - 献祭跟班类道具，换取永久成长。
+[*] 生死一念间 - 开启整局死证试炼。
+[*] 以及更多实验性道具。
+[/list]
+
+[h1]兼容性[/h1]
+
+[list]
+[*] External Item Descriptions：支持中文与英文说明。
+[/list]
+
+[h1]作者[/h1]
+
+brick（青春啊砖在he边看月亮）
+
+[url=https://www.youtube.com/@Brickzhou]YouTube: Brickzhou[/url]
+Bilibili：搜索 青春啊砖在he边看月亮
+[url=https://github.com/BrickAZ/neverbrith]GitHub source[/url]
+
+------------------------------
+
+[h1]English[/h1]
+
+neverbrith, titled 未生 in Chinese, is a The Binding of Isaac: Repentance item mod by brick.
+
+It adds a growing set of custom items with EID support and Chinese / English item text.
+
+[list]
+[*] Custom passive and active items
+[*] Risk-reward effects around delayed damage, deal rooms, cards, familiars, and death
+[*] Chinese / English item text
+[*] External Item Descriptions support
+[/list]
+
+[h1]Current Content[/h1]
 
 [list]
 [*] Musicbox - a powerful timed active item with a deadly debt.
-[*] Angelbox and Devilbox - charge-driven room direction items with extra deal-room rewards.
+[*] Angelbox and Devilbox - charge-driven deal-room direction items with extra rewards.
 [*] Uncut Cord - delays incoming damage and lets skilled play reduce the debt.
 [*] Shredded Tarot - turns card pickups into Treasure Room item pedestals.
+[*] Empty Cradle - remembers the first hurt of each floor and pays it back after the room is cleared.
+[*] Sterilization Certificate - suppresses enemy-spawning enemies and punishes the source.
+[*] Blood Skull Gu - sacrifices familiar items for permanent growth.
+[*] Between Death and Life - starts a Death Certificate trial for the rest of the run.
 [*] Essential Balm, Wuhu, Aphrodisiac, and more experimental items.
 [/list]
 
-Author:
+[h1]Compatibility[/h1]
+
+[list]
+[*] External Item Descriptions: supported in Chinese and English.
+[/list]
+
+[h1]Author[/h1]
+
 brick（青春啊砖在he边看月亮）
 
-Links:
 [url=https://www.youtube.com/@Brickzhou]YouTube: Brickzhou[/url]
 Bilibili: search 青春啊砖在he边看月亮
 [url=https://github.com/BrickAZ/neverbrith]GitHub source[/url]</description>
-    <version>1.1</version>
+    <version>1.2</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>

@@ -1,0 +1,8 @@
+<entities anm2root="gfx/" version="1">
+  <entity
+    id="1000"
+    variant="3001"
+    name="Coin Sword Qi"
+    anm2path="Effects/CoinSwordQi/CoinSwordQi.anm2"
+  />
+</entities>
