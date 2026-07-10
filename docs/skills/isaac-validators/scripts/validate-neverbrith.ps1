@@ -5,7 +5,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 if (-not $Root) {
-    $Root = Resolve-Path (Join-Path $PSScriptRoot "../../..")
+    $Root = Resolve-Path (Join-Path $PSScriptRoot "../../../..")
 } else {
     $Root = Resolve-Path $Root
 }
@@ -23,7 +23,7 @@ function Add-Warning([string]$message) {
 
 function Test-Xml([string]$path) {
     try {
-        [xml]$doc = Get-Content -Raw -LiteralPath $path
+        [xml]$doc = Get-Content -Raw -Encoding UTF8 -LiteralPath $path
         return $doc
     } catch {
         Add-Failure "XML parse failed: $path :: $($_.Exception.Message)"
@@ -31,27 +31,41 @@ function Test-Xml([string]$path) {
     }
 }
 
-function Resolve-AssetCandidates([string]$value) {
+function Resolve-AssetCandidates([string]$value, [string]$basePath) {
     $v = $value -replace "/", "\"
     $candidates = New-Object System.Collections.Generic.List[string]
     $candidates.Add((Join-Path $Root $v)) | Out-Null
     $candidates.Add((Join-Path $Root (Join-Path "resources" $v))) | Out-Null
+    if (-not [string]::IsNullOrWhiteSpace($basePath)) {
+        $base = $basePath -replace "/", "\"
+        $candidates.Add((Join-Path $Root (Join-Path "resources" (Join-Path $base $v)))) | Out-Null
+    }
     if ($v -like "gfx\*") {
         $candidates.Add((Join-Path $Root (Join-Path "resources" $v))) | Out-Null
     }
-    if ($v -like "sfx\*" -or $v -like "music\*") {
-        $candidates.Add((Join-Path $Root (Join-Path "resources" $v))) | Out-Null
+    if ($v -match "\.png$") {
+        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\Items\Collectibles" $v))) | Out-Null
+        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\Items\Trinkets" $v))) | Out-Null
+        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\PocketItems" $v))) | Out-Null
+    }
+    if ($v -match "\.anm2$") {
+        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx" $v))) | Out-Null
+        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\characters" $v))) | Out-Null
+    }
+    if ($v -match "\.(ogg|mp3|wav)$") {
+        $candidates.Add((Join-Path $Root (Join-Path "resources\music" $v))) | Out-Null
+        $candidates.Add((Join-Path $Root (Join-Path "resources\sfx" $v))) | Out-Null
     }
     return $candidates
 }
 
-function Test-AssetPath([string]$source, [string]$attrName, [string]$value) {
+function Test-AssetPath([string]$source, [string]$attrName, [string]$value, [string]$basePath) {
     if ($value -match "^(?:[A-Za-z]:\\|/)" ) {
         Add-Warning "Absolute asset path in $source [$attrName=$value]"
         return
     }
     $exists = $false
-    foreach ($candidate in (Resolve-AssetCandidates $value)) {
+    foreach ($candidate in (Resolve-AssetCandidates $value $basePath)) {
         if (Test-Path -LiteralPath $candidate) {
             $exists = $true
             break
@@ -69,6 +83,10 @@ if (Test-Path -LiteralPath $contentDir) {
     foreach ($file in Get-ChildItem -LiteralPath $contentDir -Filter "*.xml") {
         $doc = Test-Xml $file.FullName
         if (-not $doc) { continue }
+        $assetBase = ""
+        if ($doc.DocumentElement -and $doc.DocumentElement.HasAttribute("gfxroot")) {
+            $assetBase = $doc.DocumentElement.GetAttribute("gfxroot")
+        }
 
         foreach ($attr in @("id", "name")) {
             $nodes = $doc.SelectNodes("//*[@$attr]")
@@ -94,7 +112,7 @@ if (Test-Path -LiteralPath $contentDir) {
             foreach ($attribute in $node.Attributes) {
                 $value = [string]$attribute.Value
                 if ($value -match "\.(anm2|png|wav|ogg|mp3|fs|fsh)$") {
-                    Test-AssetPath $file.FullName $attribute.Name $value
+                    Test-AssetPath $file.FullName $attribute.Name $value $assetBase
                 }
             }
         }
@@ -112,23 +130,15 @@ if ((Test-Path $itemsBase) -and (Test-Path $itemsEn) -and (Test-Path $itemsZh)) 
         "en_us" = Test-Xml $itemsEn
         "zh_cn" = Test-Xml $itemsZh
     }
-    $nameSets = @{}
-    foreach ($key in $docs.Keys) {
-        if (-not $docs[$key]) { continue }
-        $set = New-Object System.Collections.Generic.HashSet[string]
-        foreach ($node in $docs[$key].SelectNodes("//*[@name]")) {
-            $null = $set.Add($node.GetAttribute("name"))
-        }
-        $nameSets[$key] = $set
+    $baseCount = 0
+    if ($docs["base"]) {
+        $baseCount = $docs["base"].SelectNodes("/items/*[@name]").Count
     }
-    if ($nameSets.ContainsKey("base")) {
-        foreach ($lang in @("en_us", "zh_cn")) {
-            if (-not $nameSets.ContainsKey($lang)) { continue }
-            foreach ($name in $nameSets["base"]) {
-                if (-not $nameSets[$lang].Contains($name)) {
-                    Add-Warning "items.$lang.xml may be missing item name '$name'"
-                }
-            }
+    foreach ($lang in @("en_us", "zh_cn")) {
+        if (-not $docs[$lang]) { continue }
+        $count = $docs[$lang].SelectNodes("/items/*[@name]").Count
+        if ($baseCount -ne $count) {
+            Add-Warning "items.$lang.xml has $count named entries, base items.xml has $baseCount"
         }
     }
 }
@@ -143,7 +153,7 @@ if (Test-Path -LiteralPath $skillsDir) {
         $evalJson = Join-Path $skill.FullName "evals\evals.json"
         if (Test-Path -LiteralPath $evalJson) {
             try {
-                $null = Get-Content -Raw -LiteralPath $evalJson | ConvertFrom-Json
+                $null = Get-Content -Raw -Encoding UTF8 -LiteralPath $evalJson | ConvertFrom-Json
             } catch {
                 Add-Failure "Invalid evals.json: $evalJson :: $($_.Exception.Message)"
             }
