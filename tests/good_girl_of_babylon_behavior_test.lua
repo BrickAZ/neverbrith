@@ -74,7 +74,7 @@ local function loadNeverbirth(options)
     PickupVariant = { PICKUP_HEART = 10, PICKUP_COIN = 20, PICKUP_KEY = 30, PICKUP_BOMB = 40, PICKUP_COLLECTIBLE = 100, PICKUP_TAROTCARD = 300 }
     HeartSubType = { HEART_HALF = 1, HEART_FULL = 2, HEART_SOUL = 3, HEART_BLACK = 6, HEART_HALF_SOUL = 8, HEART_HALF_BLACK = 10 }
     CoinSubType = { COIN_PENNY = 1 }
-    Card = { CARD_RANDOM = 0 }
+    Card = { CARD_RANDOM = 0, CARD_FOOL = 1, RUNE_HAGALAZ = 32 }
     ItemPoolType = { POOL_TREASURE = 0, POOL_DEVIL = 3, POOL_ANGEL = 4 }
     RoomType = { ROOM_DEFAULT = 1, ROOM_BOSS = 5, ROOM_DEVIL = 14, ROOM_ANGEL = 15, ROOM_SACRIFICE = 17 }
     GameStateFlag = { STATE_DEVILROOM_SPAWNED = 5, STATE_DEVILROOM_VISITED = 6 }
@@ -86,6 +86,8 @@ local function loadNeverbirth(options)
     local roomClear = options.roomClear == true
     local roomIndex = options.roomIndex or 1
     local stage = options.stage or 1
+    local cardPoolSequence = options.cardPoolSequence or {}
+    local cardPoolIndex = 0
 
     function MusicManager()
         return { GetCurrentMusicID = function() return 1 end, Play = function() end, Fadeout = function() end }
@@ -98,7 +100,14 @@ local function loadNeverbirth(options)
             end,
             GetNumPlayers = function() return #players end,
             GetItemPool = function()
-                return { GetCollectible = function() return 1 end }
+                local pool = { GetCollectible = function() return 1 end }
+                if options.cardPoolSequence then
+                    pool.GetCard = function()
+                        cardPoolIndex = cardPoolIndex + 1
+                        return cardPoolSequence[cardPoolIndex] or Card.CARD_FOOL
+                    end
+                end
+                return pool
             end,
             GetHUD = function()
                 return { ShowItemText = function() end }
@@ -177,20 +186,69 @@ local function loadNeverbirth(options)
         end,
         GetRoomEntities = function() return roomEntities end,
         DebugString = function() end,
-        GetEntityVariantByName = function() return 3001 end,
+        GetEntityVariantByName = function(name)
+            local variants = {
+                ["Good Girl Halo"] = 3002,
+                ["Good Girl Charm"] = 3003,
+                ["Good Girl Reward"] = 3004,
+                ["Good Girl Break"] = 3005,
+                ["Good Girl Echo"] = 3006,
+            }
+            return variants[name] or -1
+        end,
+        GetCostumeIdByPath = function(path)
+            if path == "gfx/characters/costume_good_girl_of_babylon.anm2" then
+                return 17494
+            end
+            return -1
+        end,
         Spawn = function(entityType, variant, subtype, position, velocity, spawner)
-            local spawn = { Type = entityType, Variant = variant, SubType = subtype, Position = position, Velocity = velocity, SpawnerEntity = spawner, data = {} }
+            local spawn = {
+                Type = entityType,
+                Variant = variant,
+                SubType = subtype,
+                Position = position,
+                PositionOffset = Vector(0, 0),
+                SpriteOffset = Vector(0, 0),
+                DepthOffset = 0,
+                Velocity = velocity,
+                SpawnerEntity = spawner,
+                data = {},
+            }
             function spawn:GetData() return self.data end
             function spawn:GetSprite() return { Play = function() end, IsFinished = function() return false end } end
             function spawn:ToEffect() return self end
+            function spawn:FollowParent(parent) self.followedParent = parent end
             function spawn:Remove() self.removed = true end
             spawns[#spawns + 1] = spawn
             return spawn
         end,
         GetItemConfig = function()
-            return { GetCollectible = function() return { Tags = 0, Type = 3, MaxCharges = 3, Name = "Mock" } end, GetCollectibles = function() return {} end }
+            return {
+                GetCollectible = function() return { Tags = 0, Type = 3, MaxCharges = 3, Name = "Mock" } end,
+                GetCollectibles = function() return {} end,
+                GetCard = function(_, subtype)
+                    if options.cardConfigs and options.cardConfigs[subtype] ~= nil then
+                        return options.cardConfigs[subtype]
+                    end
+                    return { ID = subtype, Name = "Card " .. tostring(subtype), Description = "Defined card" }
+                end,
+            }
         end,
     }
+
+    EID = nil
+    if options.eidDescriptions then
+        EID = {
+            getDescriptionObjByID = function(_, entityType, variant, subtype)
+                local desc = options.eidDescriptions[subtype]
+                if desc == false then
+                    return { Name = tostring(entityType) .. "." .. tostring(variant) .. "." .. tostring(subtype), Description = "(no description available)" }
+                end
+                return desc
+            end,
+        }
+    end
 
     Color = setmetatable({}, { __call = function(_, r, g, b, a, ro, go, bo) return { R = r, G = g, B = b, A = a, RO = ro, GO = go, BO = bo } end })
     Color.Default = Color(1, 1, 1, 1, 0, 0, 0)
@@ -257,6 +315,12 @@ local function loadNeverbirth(options)
         end
     end
 
+    local function runEffectUpdate(effect, times)
+        for _ = 1, times or 1 do
+            for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_EFFECT_UPDATE)) do callback(mod, effect) end
+        end
+    end
+
     local function runNewRoom()
         roomIndex = roomIndex + 1
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_NEW_ROOM)) do callback(mod) end
@@ -279,6 +343,9 @@ local function loadNeverbirth(options)
             cacheFlags = {},
             rngSequence = opts.rngSequence or { 0, 0, 0, 0, 0 },
             rngIndex = 0,
+            PositionOffset = opts.positionOffset or Vector(0, 0),
+            addedNullCostumes = {},
+            removedNullCostumes = {},
         }
         function player:ToPlayer() return self end
         function player:GetCollectibleNum(itemId) return self.collectibles[itemId] or 0 end
@@ -289,6 +356,9 @@ local function loadNeverbirth(options)
         function player:AddCacheFlags(flag) self.cacheFlags[#self.cacheFlags + 1] = flag end
         function player:EvaluateItems() end
         function player:SetColor(color) self.lastColor = color end
+        function player:GetFlyingOffset() return opts.flyingOffset or Vector(0, 0) end
+        function player:AddNullCostume(costumeId) self.addedNullCostumes[#self.addedNullCostumes + 1] = costumeId end
+        function player:TryRemoveNullCostume(costumeId) self.removedNullCostumes[#self.removedNullCostumes + 1] = costumeId end
         function player:GetCollectibleRNG()
             return {
                 RandomInt = function(_, max)
@@ -322,19 +392,166 @@ local function loadNeverbirth(options)
         runEvaluate = runEvaluate,
         runDamage = runDamage,
         runPostUpdate = runPostUpdate,
+        runEffectUpdate = runEffectUpdate,
         runNewRoom = runNewRoom,
         setRoomClear = function(value) roomClear = value end,
     }
 end
 
+local function countEffectSpawns(env, variant)
+    local count = 0
+    for _, spawn in ipairs(env.spawns) do
+        if spawn.Type == EntityType.ENTITY_EFFECT and spawn.Variant == variant then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function countPickupSpawns(env)
+    local count = 0
+    for _, spawn in ipairs(env.spawns) do
+        if spawn.Type == EntityType.ENTITY_PICKUP then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function findEffectSpawn(env, variant)
+    for _, spawn in ipairs(env.spawns) do
+        if spawn.Type == EntityType.ENTITY_EFFECT and spawn.Variant == variant then
+            return spawn
+        end
+    end
+    return nil
+end
+
 local function test_xml_registers_good_girl_and_pools()
     local items = readFile("content/items.xml")
     local pools = readFile("content/itempools.xml")
+    local costumes = readFile("content/costumes2.xml")
 
     assertTruthy(items:find('<passive%s+name="Good Girl of Babylon".-description="Don\'t stain the dress%."', 1), "Good Girl of Babylon should be registered as passive")
     assertTruthy(pools:find('<Pool Name="angel".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in angel pool")
     assertTruthy(pools:find('<Pool Name="library".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in library pool")
     assertTruthy(pools:find('<Pool Name="curse".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in curse pool")
+    assertTruthy(costumes:find('anm2path="costume_good_girl_of_babylon%.anm2"%s+type="none"', 1), "Good Girl body visual should be registered as a null costume")
+end
+
+local function test_good_girl_effect_resources_are_registered()
+    local entities = readFile("content/entities2.xml")
+    local expected = {
+        { variant = "3002", file = "GoodGirlHalo", anim = "Idle", loop = "true", width = "64", height = "24", pivot = "32" },
+        { variant = "3003", file = "GoodGirlCharm", anim = "Charm", loop = "true", width = "32", height = "32", pivot = "16" },
+        { variant = "3004", file = "GoodGirlReward", anim = "Reward", loop = "false", width = "64", height = "64", pivot = "32" },
+        { variant = "3005", file = "GoodGirlBreak", anim = "Break", loop = "false", width = "96", height = "96", pivot = "48" },
+        { variant = "3006", file = "GoodGirlEcho", anim = "Echo", loop = "true", width = "96", height = "96", pivot = "48" },
+    }
+
+    assertTruthy(entities:find('<entities anm2root="gfx/" version="5"', 1, true), "Good Girl effects should use the Repentance entities2 registry version")
+
+    for _, effect in ipairs(expected) do
+        local relativePath = "Effects/GoodGirlOfBabylon/" .. effect.file .. ".anm2"
+        local prefixedPath = "gfx/" .. relativePath
+        assertTruthy(entities:find('variant="' .. effect.variant .. '"', 1, true), effect.file .. " should reserve its effect variant")
+        assertTruthy(entities:find('anm2path="' .. relativePath .. '"', 1, true), effect.file .. " should use an anm2 path relative to gfx/")
+        assertTruthy(not entities:find('anm2path="' .. prefixedPath .. '"', 1, true), effect.file .. " should not double-prefix gfx in entities2.xml")
+
+        local anm2Path = "resources/gfx/Effects/GoodGirlOfBabylon/" .. effect.file .. ".anm2"
+        local anm2 = readFile(anm2Path)
+        assertTruthy(anm2:find('<Spritesheet Id="0" Path="' .. effect.file .. '.png" />', 1, true), effect.file .. " should reference its spritesheet relative to the anm2 file")
+        assertTruthy(anm2:find('<Animations DefaultAnimation="' .. effect.anim .. '">', 1, true), effect.file .. " should define the expected default animation")
+        assertTruthy(anm2:find('<Animation Name="' .. effect.anim .. '" FrameNum=', 1, true), effect.file .. " should define its main animation")
+        assertTruthy(anm2:find('Loop="' .. effect.loop .. '"', 1, true), effect.file .. " should use the expected loop setting")
+        assertTruthy(anm2:find('<LayerAnimation LayerId="0" Visible="true">', 1, true), effect.file .. " should have a visible layer animation")
+        assertTruthy(anm2:find('XPivot="' .. effect.pivot .. '" YPivot="' .. effect.pivot .. '" XCrop="0" YCrop="0" Width="' .. effect.width .. '" Height="' .. effect.height .. '"', 1, true), effect.file .. " should crop its first frame correctly")
+        assertTruthy(not anm2:find('AlphaTint="0"', 1, true), effect.file .. " should not hide frames with zero alpha tint")
+    end
+end
+
+local function test_good_girl_body_costume_uses_body_layer()
+    local anm2 = readFile("resources/gfx/characters/costume_good_girl_of_babylon.anm2")
+
+    assertTruthy(anm2:find('<Spritesheet Id="0" Path="costumes\\costume_good_girl_of_babylon.png" />', 1, true), "Good Girl costume should use the body costume spritesheet")
+    assertTruthy(anm2:find('<Layer Name="body0" Id="0" SpritesheetId="0" />', 1, true), "Good Girl dress should attach to the body layer")
+    assertTruthy(not anm2:find('Layer Name="head2"', 1, true), "Good Girl dress should not be attached to the head layer")
+    assertTruthy(anm2:find('<Animations DefaultAnimation="WalkDown">', 1, true), "Good Girl body costume should default to a body walk animation")
+    assertTruthy(anm2:find('<Animation Name="WalkDown" FrameNum="4" Loop="true">', 1, true), "Good Girl costume should define WalkDown")
+    assertTruthy(anm2:find('<Animation Name="WalkRight" FrameNum="4" Loop="true">', 1, true), "Good Girl costume should define WalkRight")
+    assertTruthy(anm2:find('<Animation Name="WalkUp" FrameNum="4" Loop="true">', 1, true), "Good Girl costume should define WalkUp")
+    assertTruthy(anm2:find('<Animation Name="WalkLeft" FrameNum="4" Loop="true">', 1, true), "Good Girl costume should define WalkLeft")
+end
+
+local function test_good_girl_effects_spawn_from_mechanics()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ hearts = 6, maxHearts = 6, rngSequence = { 0, 0, 0, 1 } })
+    local enemy = env.newEnemy(120, 100)
+
+    env.runPostUpdate()
+    assertEquals(countEffectSpawns(env, 3002), 1, "presentable Good Girl should show the halo effect")
+
+    env.runNewRoom()
+    assertTruthy(enemy.charmed > 0, "new room should charm when the charm roll succeeds")
+    assertEquals(countEffectSpawns(env, 3003), 1, "successful Good Girl charm should spawn the charm effect")
+
+    env.setRoomClear(true)
+    env.runPostUpdate()
+    assertEquals(countEffectSpawns(env, 3004), 1, "successful Good Girl clear reward should spawn the reward effect")
+
+    env.runDamage(player, 1, DamageFlag.DAMAGE_RED_HEARTS)
+    assertEquals(countEffectSpawns(env, 3005), 1, "breaking Good Girl should spawn the break effect")
+
+    env.runPostUpdate()
+    assertEquals(countEffectSpawns(env, 3006), 1, "Babylon echo should spawn the echo effect while active")
+end
+
+local function test_good_girl_halo_follows_owner_position()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ hearts = 6, maxHearts = 6, position = Vector(100, 100) })
+
+    env.runPostUpdate()
+    local halo = findEffectSpawn(env, 3002)
+
+    assertTruthy(halo, "presentable Good Girl should spawn a halo effect")
+    assertEquals(halo:GetData().NeverbirthFolkVisualEffectOwnerSeed, player.InitSeed, "halo should bind to the player that spawned it")
+
+    player.Position = Vector(180, 140)
+    env.runEffectUpdate(halo)
+
+    assertEquals(halo.Position.X, 180, "halo should follow owner X position")
+    assertEquals(halo.Position.Y, 140, "halo should follow owner ground position")
+    assertEquals(halo.PositionOffset.Y, 0, "halo should leave vertical alignment to FollowParent and the anm2 pivot")
+    assertEquals(halo.SpriteOffset.Y, -24, "halo should float above Isaac's head instead of sitting on the face")
+    assertEquals(halo.DepthOffset, 300000, "halo should render over the player like attached halo effects")
+    assertEquals(halo.Parent, player, "halo should set the player as parent")
+    assertEquals(halo.followedParent, player, "halo should use engine FollowParent behavior")
+end
+
+local function test_good_girl_presentable_state_applies_body_costume()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ hearts = 6, maxHearts = 6 })
+
+    env.runPostUpdate()
+
+    assertEquals(player.addedNullCostumes[1], 17494, "presentable Good Girl should apply its body costume to Isaac")
+
+    env.runDamage(player, 1, DamageFlag.DAMAGE_RED_HEARTS)
+
+    assertEquals(player.removedNullCostumes[#player.removedNullCostumes], 17494, "breaking Good Girl should remove the body costume")
+end
+
+local function test_good_girl_instant_effects_do_not_follow_owner()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ hearts = 6, maxHearts = 6, rngSequence = { 0 } })
+    local enemy = env.newEnemy(120, 100)
+
+    env.runNewRoom()
+    local charm = findEffectSpawn(env, 3003)
+
+    assertTruthy(enemy.charmed > 0, "new room should charm when the charm roll succeeds")
+    assertTruthy(charm, "successful charm should spawn a charm effect")
+    assertEquals(charm:GetData().NeverbirthFolkVisualEffectOwnerSeed, nil, "instant charm effect should not bind to the player")
 end
 
 local function test_full_red_hearts_grant_presentable_cache_bonuses()
@@ -407,12 +624,39 @@ end
 
 local function test_clear_room_without_red_damage_can_spawn_reward()
     local env = loadNeverbirth()
-    local player = env.newPlayer({ hearts = 6, maxHearts = 6, rngSequence = { 0, 1 } })
+    local player = env.newPlayer({ hearts = 6, maxHearts = 6, rngSequence = { 0, 0 } })
 
     env.setRoomClear(true)
     env.runPostUpdate()
 
-    assertEquals(#env.spawns, 1, "clear-room reward should spawn once when reward roll succeeds")
+    assertEquals(countPickupSpawns(env), 1, "clear-room reward should spawn one pickup when reward roll succeeds")
+end
+
+local function test_clear_room_reward_skips_unknown_random_cards()
+    local env = loadNeverbirth({
+        cardPoolSequence = { 230967295, 1 },
+        cardConfigs = {
+            [230967295] = { ID = 230967295, Name = "5.300.0230967295", Description = "(no description available)" },
+            [1] = { ID = 1, Name = "The Fool", Description = "Defined card" },
+        },
+        eidDescriptions = {
+            [230967295] = false,
+            [1] = { Name = "The Fool", Description = "Defined card" },
+        },
+    })
+    local player = env.newPlayer({ hearts = 6, maxHearts = 6, rngSequence = { 0, 0 } })
+
+    env.setRoomClear(true)
+    env.runPostUpdate()
+
+    local card = nil
+    for _, spawn in ipairs(env.spawns) do
+        if spawn.Type == EntityType.ENTITY_PICKUP and spawn.Variant == PickupVariant.PICKUP_TAROTCARD then
+            card = spawn
+        end
+    end
+    assertTruthy(card, "clear-room reward should spawn a card")
+    assertEquals(card.SubType, 1, "Good Girl card reward should reject unknown random card subtypes")
 end
 
 local function test_multi_player_states_are_independent()
@@ -434,12 +678,19 @@ local function test_does_not_reference_original_whore_of_babylon()
 end
 
 test_xml_registers_good_girl_and_pools()
+test_good_girl_effect_resources_are_registered()
+test_good_girl_body_costume_uses_body_layer()
+test_good_girl_effects_spawn_from_mechanics()
+test_good_girl_halo_follows_owner_position()
+test_good_girl_presentable_state_applies_body_costume()
+test_good_girl_instant_effects_do_not_follow_owner()
 test_full_red_hearts_grant_presentable_cache_bonuses()
 test_missing_red_hearts_or_red_containers_disable_presentable_state()
 test_red_heart_damage_breaks_state_and_starts_babylon_echo()
 test_soul_heart_damage_does_not_break_presentable_state()
 test_new_room_rechecks_state_after_break()
 test_clear_room_without_red_damage_can_spawn_reward()
+test_clear_room_reward_skips_unknown_random_cards()
 test_multi_player_states_are_independent()
 test_does_not_reference_original_whore_of_babylon()
 

@@ -64,6 +64,16 @@
     quality="3"
     tags="devil offensive summonable"
   />
+  <!-- 主动道具：老大的指令 -->
+  <active
+    name="老大的指令"
+    maxcharges="3"
+    initcharge="3"
+    description="兄弟，想抓杀你"
+    gfx="BossOrder.png"
+    quality="2"
+    tags="nochallenge nolostbr"
+  />
   <!-- 主动道具：生死一念间 -->
   <active
     name="生死一念间"
@@ -101,6 +111,25 @@
     quality="3"
     tags="offensive summonable"
   />
+  <!-- 被动道具：肉块 -->
+  <passive
+    name="肉块"
+    cache="all"
+    description="再活一口"
+    gfx="BlackTaisuiMeat.png"
+    quality="2"
+    tags="dead summonable"
+  />
+  <!-- 主动道具：净化迷幻菇，黑太岁内部替换道具 -->
+  <active
+    name="净化迷幻菇"
+    maxcharges="900"
+    chargetype="timed"
+    description="被净化的迷幻蘑菇。"
+    gfx="PurifiedMushroom.png"
+    quality="0"
+    tags="summonable"
+  />
   <!-- 被动道具：巴比伦好女孩 -->
   <passive
     name="巴比伦好女孩"
@@ -117,6 +146,31 @@
     description="她说戴了不算给"
     gfx="Condom.png"
     quality="0"
+  />
+  <!-- 主动道具：调试控制器 -->
+  <active
+    name="调试控制器"
+    maxcharges="0"
+    description="调试命令菜单"
+    gfx="DebugController.png"
+    quality="0"
+    tags="noeden nochallenge"
+  />
+  <!-- 被动道具：强力泻药 -->
+  <passive
+    name="强力泻药"
+    description="一泻千里"
+    gfx="StrongLaxative.png"
+    quality="0"
+    tags="summonable"
+  />
+  <!-- 被动道具：虚空针尖 -->
+  <passive
+    name="虚空针尖"
+    description="下次请吐在垃圾桶里……"
+    gfx="Needletick.png"
+    quality="3"
+    tags="offensive summonable"
   />
   <!-- 被动道具：美工刀 -->
   <passive

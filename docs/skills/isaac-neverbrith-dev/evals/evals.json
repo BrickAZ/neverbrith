@@ -1,0 +1,48 @@
+{
+  "skill_name": "isaac-neverbrith-dev",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "在 neverbrith 里新增一个被动道具，拾取后 +1 伤害、-0.1 移速，并且支持多份叠加。请给出代码实现和需要改的 XML。",
+      "expected_output": "应该路由到 item registration + stat cache，使用 MC_EVALUATE_CACHE，说明 items.xml/en_us/zh_cn 同步，并要求行为测试覆盖 CACHE_DAMAGE 和 CACHE_SPEED。",
+      "files": [
+        "main.lua",
+        "content/items.xml",
+        "content/items.en_us.xml",
+        "content/items.zh_cn.xml",
+        "tests/"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "设计一个道具：玩家受到普通战斗伤害时有 50% 几率取消这次伤害，但献血机、恶魔交易、诅咒房门不能触发。帮我写给代码 Codex 的实现提示词。",
+      "expected_output": "应该路由到 damage interception，明确 MC_ENTITY_TAKE_DMG、EntityType.ENTITY_PLAYER、return false、DAMAGE_IV_BAG/DAMAGE_DEVIL/DAMAGE_CURSED_DOOR/DAMAGE_FAKE 过滤，以及测试矩阵。",
+      "files": [
+        "main.lua",
+        "tests/uncut_cord_behavior_test.lua",
+        "tests/empty_cradle_behavior_test.lua"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "把一个主动道具注册进项目：0 充能，按下后如果条件满足就触发一次效果，不满足就不消耗。先别写复杂效果，只写正确的注册方式和回调边界。",
+      "expected_output": "应该路由到 item registration，说明 active XML、MC_USE_ITEM 按 item id 注册、返回 true/false 的边界，并提醒主动效果本身要另按机制分类。",
+      "files": [
+        "main.lua",
+        "content/items.xml",
+        "tests/shredded_tarot_behavior_test.lua"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "帮我写给代码 Codex 的提示词：新增一个叫“胎盘邮票”的道具，我只说了它大概和受伤后回血有关，其他还没定。你不要替我脑补。",
+      "expected_output": "应该先输出 Item Basic Spec，列出中文名、英文名、内部名、主动/被动、品质、池子、tags、pickup text、EID、贴图、触发时机、叠加规则、视觉载体等基础字段；未给出的字段必须标 TBD，不能默认 treasure/quality 3/占位贴图；然后再说明可能需要 item registration + damage interception 或其他路线。",
+      "files": [
+        "docs/skills/isaac-neverbrith-dev/references/item-basic-spec.md",
+        "main.lua",
+        "content/items.xml",
+        "content/itempools.xml"
+      ]
+    }
+  ]
+}

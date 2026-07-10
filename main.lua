@@ -16,11 +16,17 @@ local ITEM_NAME_CANDIDATES = {
     SterilizationCertificate = { "Sterilization Certificate", "绝育证明" },
     EmptyCradle = { "Empty Cradle", "空摇篮" },
     BloodSkullGu = { "Blood Skull Gu", "血颅蛊" },
+    BossOrder = { "Boss's Order", "老大的指令" },
     BetweenDeathAndLife = { "Between Death and Life", "生死一念间" },
     CoinSewnSword = { "Coin-Sewn Sword", "铜钱剑" },
     CoinFacedMask = { "Coin-Faced Mask", "铜钱面具" },
     BlackTaisui = { "Black Taisui", "黑太岁" },
+    MeatLump = { "Meat Lump", "肉块" },
+    CleansedWavyCap = { "Cleansed Wavy Cap", "净化迷幻菇" },
     GoodGirlOfBabylon = { "Good Girl of Babylon", "巴比伦好女孩" },
+    DebugController = { "Debug Controller", "调试控制器" },
+    StrongLaxative = { "Strong Laxative", "强力泻药" },
+    Needletick = { "Needletick", "虚空针尖" },
     Condom = { "Condom", "避孕套" },
     UtilityKnife = { "Utility Knife", "美工刀" },
     DS4 = { "ds4" },
@@ -49,11 +55,17 @@ local Items = {
     SterilizationCertificate = FindItemIdByNames(ITEM_NAME_CANDIDATES.SterilizationCertificate),
     EmptyCradle = FindItemIdByNames(ITEM_NAME_CANDIDATES.EmptyCradle),
     BloodSkullGu = FindItemIdByNames(ITEM_NAME_CANDIDATES.BloodSkullGu),
+    BossOrder = FindItemIdByNames(ITEM_NAME_CANDIDATES.BossOrder),
     BetweenDeathAndLife = FindItemIdByNames(ITEM_NAME_CANDIDATES.BetweenDeathAndLife),
     CoinSewnSword = FindItemIdByNames(ITEM_NAME_CANDIDATES.CoinSewnSword),
     CoinFacedMask = FindItemIdByNames(ITEM_NAME_CANDIDATES.CoinFacedMask),
     BlackTaisui = FindItemIdByNames(ITEM_NAME_CANDIDATES.BlackTaisui),
+    MeatLump = FindItemIdByNames(ITEM_NAME_CANDIDATES.MeatLump),
+    CleansedWavyCap = FindItemIdByNames(ITEM_NAME_CANDIDATES.CleansedWavyCap),
     GoodGirlOfBabylon = FindItemIdByNames(ITEM_NAME_CANDIDATES.GoodGirlOfBabylon),
+    DebugController = FindItemIdByNames(ITEM_NAME_CANDIDATES.DebugController),
+    StrongLaxative = FindItemIdByNames(ITEM_NAME_CANDIDATES.StrongLaxative),
+    Needletick = FindItemIdByNames(ITEM_NAME_CANDIDATES.Needletick),
     Condom = FindItemIdByNames(ITEM_NAME_CANDIDATES.Condom),
     UtilityKnife = FindItemIdByNames(ITEM_NAME_CANDIDATES.UtilityKnife),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
@@ -153,6 +165,16 @@ local EID_DESCRIPTIONS = {
             eidDescription = "3充能主动道具#献祭1个属于你的跟班类道具#{{Damage}} 永久 +1.5 攻击#{{Range}} 永久 +1 射程#掉落1-2个黑心#没有可献祭跟班类道具时，反噬并受到半颗红心伤害",
         },
     },
+    [Items.BossOrder] = {
+        en_us = {
+            name = "Boss's Order",
+            eidDescription = "Spawns a hostile target#Small enemies come from the current floor#Bosses come from the Boss Rush pool#Small enemies may become champions after spawning#Killing it drops cards: 1 normal, 2 champion, 3 boss",
+        },
+        zh_cn = {
+            name = "老大的指令",
+            eidDescription = "生成一个敌对目标#小怪来源于当前层小怪池#头目来源于Boss Rush池#小怪生成后有概率变为精英#击杀后掉落卡牌：普通1张，精英2张，头目3张",
+        },
+    },
     [Items.BetweenDeathAndLife] = {
         en_us = {
             name = "Between Death and Life",
@@ -176,21 +198,41 @@ local EID_DESCRIPTIONS = {
     [Items.CoinFacedMask] = {
         en_us = {
             name = "Coin-Faced Mask",
-            eidDescription = "Enter a room with at least 5 coins to gain a mask#The mask disturbs enemies#When hit, spend 5 coins to reduce the hit to half a red heart#Without enough coins, the mask breaks and lowers luck for the room",
+            eidDescription = "Enter a room with at least 5 coins to gain a mask#The mask disturbs enemies#When hit by a monster, spend 5 coins to block that hit#Without enough coins, the mask breaks and lowers luck for the room",
         },
         zh_cn = {
             name = "铜钱面具",
-            eidDescription = "拥有至少5枚硬币时，进房获得假面#假面会扰乱敌人#受伤时消耗5枚硬币，将伤害降为半红心#硬币不足时，假面破裂，本房间幸运下降",
+            eidDescription = "拥有至少5枚硬币时，进房获得假面#假面会扰乱敌人#被怪物伤害时消耗5枚硬币，免疫本次伤害#硬币不足时，假面破裂，本房间幸运下降",
         },
     },
     [Items.BlackTaisui] = {
         en_us = {
             name = "Black Taisui",
-            eidDescription = "Feeds on blood to gain parasite value#0-7: heavy damage, speed, and luck penalties#8-15: reveals hidden items and suppresses Blind, Lost, Unknown, and Wavy Cap side effects#16+: inherits stage 2, grants fixed damage per copy, and prevents one lethal hit per floor#The stage 3 death save shows an x1 marker beside the HUD each floor#Multiple copies share parasite value, but the death save is once per floor",
+            eidDescription = "Feeds on blood to gain parasite value#0-7: heavy damage, speed, and luck penalties#8-15: reveals hidden items and suppresses Blind, Lost, Unknown, and Wavy Cap side effects#16+: inherits stage 2, grants fixed damage per copy, and creates Meat Lump once#Multiple copies share parasite value; Meat Lump still appears only once",
         },
         zh_cn = {
             name = "黑太岁",
-            eidDescription = "以红心治疗、红心容器和红心伤害积累寄生值#0-7：大幅降低伤害、移速和幸运#8-15：揭示问号道具，免疫致盲/迷途/未知诅咒表现，并压制波浪帽副作用#16+：继承二阶段效果，每个黑太岁提供修正伤害，每层抵挡一次致命伤害#三阶段抵死可用时，血量旁会显示 x1 提示#多个黑太岁共享寄生值；阶段效果按规则叠加，但抵死每层只有一次",
+            eidDescription = "以红心治疗、红心容器和红心伤害积累寄生值#0-7：大幅降低伤害、移速和幸运#8-15：揭示问号道具，免疫致盲/迷途/未知诅咒表现，并压制波浪帽副作用#16+：继承二阶段效果，每个黑太岁提供修正伤害，并生成一次肉块#多个黑太岁共享寄生值；阶段效果按规则叠加，但肉块只生成一次",
+        },
+    },
+    [Items.MeatLump] = {
+        en_us = {
+            name = "Meat Lump",
+            eidDescription = "Conditionally blocks one lethal hit from enemies#This item does not exist in any item pool",
+        },
+        zh_cn = {
+            name = "肉块",
+            eidDescription = "有条件抵挡一次来自敌人的致死伤害#这个道具不存在于任何道具池里",
+        },
+    },
+    [Items.CleansedWavyCap] = {
+        en_us = {
+            name = "Cleansed Wavy Cap",
+            eidDescription = "A Black Taisui-safe Wavy Cap#On use: {{Speed}} -0.03 speed, {{Tears}} +0.75 fire rate#Leaving the room converts this room's speed loss to x2 and fire-rate gain to x0.4#Clearing a room removes one use worth of lingering changes",
+        },
+        zh_cn = {
+            name = "净化迷幻菇",
+            eidDescription = "被黑太岁净化的迷幻蘑菇#使用后：{{Speed}} -0.03移速，{{Tears}} +0.75射速修正#离开房间时，本房间增减益转化：移速减益x2，射速增益x0.4#清理房间后，移除相当于1次使用的残留增减益",
         },
     },
     [Items.GoodGirlOfBabylon] = {
@@ -201,6 +243,36 @@ local EID_DESCRIPTIONS = {
         zh_cn = {
             name = "巴比伦好女孩",
             eidDescription = "满红心时进入端正状态：#{{Tears}} +0.6射速#{{Luck}} +2幸运#敌人有概率被魅惑#无红心伤害清房时，可能获得额外奖励#受到红心伤害时端正破裂：#{{Luck}} 本房间幸运下降#恐惧附近敌人#短暂获得巴比伦回声",
+        },
+    },
+    [Items.DebugController] = {
+        en_us = {
+            name = "Debug Controller",
+            eidDescription = "Opens a directional debug command menu#Use again to close#Directional input selects entries instead of firing while open#Runs debug 1 through debug 10",
+        },
+        zh_cn = {
+            name = "调试控制器",
+            eidDescription = "打开四向调试命令菜单#再次使用关闭菜单#菜单打开时方向输入用于选择，不会发射眼泪#可执行 debug 1 至 debug 10",
+        },
+    },
+    [Items.StrongLaxative] = {
+        en_us = {
+            name = "Strong Laxative",
+            eidDescription = "All creep is treated as friendly#Leave slippery creep while moving#Slippery creep slows enemies and deals 10% of your damage every 10 frames#5% chance per second to spawn random poop#Up to 15 poops per room#Extra copies increase poop chance",
+        },
+        zh_cn = {
+            name = "强力泻药",
+            eidDescription = "所有水迹视为己方水迹#移动时留下打滑水迹#打滑水迹使敌人减速，并每10帧造成10%角色伤害#每秒5%概率生成随机大便#每个房间最多生成15个大便#多拿提高生成概率",
+        },
+    },
+    [Items.Needletick] = {
+        en_us = {
+            name = "Needletick",
+            eidDescription = "5% chance to fire a void needle tear#At 10 Luck: 15%#Void needle tears instantly kill nearby normal enemies",
+        },
+        zh_cn = {
+            name = "虚空针尖",
+            eidDescription = "5%概率发射虚空针尖泪弹#10幸运时：15%#虚空泪弹秒杀附近普通敌人",
         },
     },
     [Items.SterilizationCertificate] = {
@@ -383,6 +455,722 @@ local function GetPlayers()
     end
 
     return players
+end
+
+--------------------------------------------------
+-- Debug Controller
+
+Neverbirth.DebugController = {
+    anm2 = "gfx/UI/DebugController/DebugControllerKeys.anm2",
+    states = {},
+    sprites = {},
+    directions = { "left", "up", "right", "down" },
+    offsets = {
+        left = Vector(-24, 0),
+        up = Vector(0, -24),
+        right = Vector(24, 0),
+        down = Vector(0, 24),
+    },
+    actions = {
+        left = { "ACTION_SHOOTLEFT", "ACTION_LEFT" },
+        up = { "ACTION_SHOOTUP", "ACTION_UP" },
+        right = { "ACTION_SHOOTRIGHT", "ACTION_RIGHT" },
+        down = { "ACTION_SHOOTDOWN", "ACTION_DOWN" },
+    },
+    layouts = {
+        root = {
+            left = { page = "left", animation = "Left", label = "<" },
+            up = { page = "up", animation = "Up", label = "^" },
+            right = { page = "right", animation = "Right", label = ">" },
+            down = { page = "down", animation = "Down", label = "v" },
+        },
+        left = {
+            down = { command = 1, animation = "Num1", label = "1" },
+            left = { command = 2, animation = "Num2", label = "2" },
+            up = { command = 3, animation = "Num3", label = "3" },
+            right = { page = "root", animation = "Back", label = "B" },
+        },
+        up = {
+            down = { page = "root", animation = "Back", label = "B" },
+            left = { command = 4, animation = "Num4", label = "4" },
+            up = { command = 5, animation = "Num5", label = "5" },
+            right = { command = 6, animation = "Num6", label = "6" },
+        },
+        right = {
+            left = { page = "root", animation = "Back", label = "B" },
+            up = { command = 7, animation = "Num7", label = "7" },
+            right = { command = 8, animation = "Num8", label = "8" },
+            down = { command = 9, animation = "Num9", label = "9" },
+        },
+        down = {
+            up = { page = "root", animation = "Back", label = "B" },
+            down = { command = 10, animation = "Num10", label = "10" },
+        },
+    },
+}
+
+function Neverbirth.DebugController.GetPlayerKey(player)
+    return tostring((player and player.InitSeed) or "0")
+end
+
+function Neverbirth.DebugController.IsPlayerDead(player)
+    if not player then
+        return true
+    end
+
+    if player.IsDead then
+        local ok, result = pcall(function()
+            return player:IsDead()
+        end)
+        if ok then
+            return result == true
+        end
+    end
+
+    return player.dead == true or player.Dead == true
+end
+
+function Neverbirth.DebugController.PlayerHasItem(player)
+    if not player or not IsValidItemId(Items.DebugController) then
+        return false
+    end
+
+    if player.HasCollectible then
+        local ok, hasItem = pcall(function()
+            return player:HasCollectible(Items.DebugController)
+        end)
+        if ok and hasItem then
+            return true
+        end
+    end
+
+    if player.GetActiveItem then
+        for slot = 0, 3 do
+            local ok, activeItem = pcall(function()
+                return player:GetActiveItem(slot)
+            end)
+            if ok and activeItem == Items.DebugController then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function Neverbirth.DebugController.Close(player)
+    Neverbirth.DebugController.states[Neverbirth.DebugController.GetPlayerKey(player)] = nil
+end
+
+function Neverbirth.DebugController.IsOpen(player)
+    return Neverbirth.DebugController.states[Neverbirth.DebugController.GetPlayerKey(player)] ~= nil
+end
+
+function Neverbirth.DebugController.Open(player)
+    Neverbirth.DebugController.states[Neverbirth.DebugController.GetPlayerKey(player)] = {
+        player = player,
+        page = "root",
+        previous = {},
+    }
+end
+
+function Neverbirth.DebugController.GetCommand(number)
+    return "debug " .. tostring(number)
+end
+
+function Neverbirth.DebugController.ExecuteCommand(number)
+    if Isaac and Isaac.ExecuteCommand then
+        local command = Neverbirth.DebugController.GetCommand(number)
+        pcall(function()
+            Isaac.ExecuteCommand(command)
+        end)
+    end
+end
+
+function Neverbirth.DebugController.GetControllerIndex(player)
+    if not player then
+        return 0
+    end
+    return player.ControllerIndex or player.ControllerId or player.Controller or 0
+end
+
+function Neverbirth.DebugController.IsDirectionPressed(player, direction)
+    if not (Input and Input.IsActionPressed and ButtonAction) then
+        return false
+    end
+
+    local controllerIndex = Neverbirth.DebugController.GetControllerIndex(player)
+    for _, actionName in ipairs(Neverbirth.DebugController.actions[direction] or {}) do
+        local action = ButtonAction[actionName]
+        if action ~= nil then
+            local ok, pressed = pcall(function()
+                return Input.IsActionPressed(action, controllerIndex)
+            end)
+            if ok and pressed then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function Neverbirth.DebugController.HandleDirection(player, state, direction)
+    local page = state.page or "root"
+    local entry = Neverbirth.DebugController.layouts[page] and Neverbirth.DebugController.layouts[page][direction]
+    if not entry then
+        return
+    end
+
+    if entry.page then
+        state.page = entry.page
+        return
+    end
+
+    if entry.command then
+        Neverbirth.DebugController.ExecuteCommand(entry.command)
+        Neverbirth.DebugController.Close(player)
+    end
+end
+
+function Neverbirth.DebugController.GetSprite(animation)
+    if not Sprite then
+        return nil
+    end
+
+    local sprite = Neverbirth.DebugController.sprites[animation]
+    if sprite then
+        return sprite
+    end
+
+    local ok, newSprite = pcall(function()
+        return Sprite()
+    end)
+    if not ok or not newSprite then
+        return nil
+    end
+
+    if newSprite.Load then
+        pcall(function()
+            newSprite:Load(Neverbirth.DebugController.anm2, true)
+        end)
+    end
+    if newSprite.Play then
+        pcall(function()
+            newSprite:Play(animation, true)
+        end)
+    end
+
+    Neverbirth.DebugController.sprites[animation] = newSprite
+    return newSprite
+end
+
+function Neverbirth.DebugController.RenderIcon(entry, position)
+    local animation = entry.animation
+    local sprite = animation and Neverbirth.DebugController.GetSprite(animation)
+    if sprite and sprite.Render then
+        pcall(function()
+            if sprite.Play then
+                sprite:Play(animation, true)
+            end
+            sprite:Render(position)
+        end)
+        return
+    end
+
+    if Isaac and Isaac.RenderText then
+        Isaac.RenderText(entry.label or "?", position.X - 4, position.Y - 4, 1, 1, 1, 1)
+    end
+end
+
+function Neverbirth:UseDebugController(_, _, player)
+    if not player then
+        return { Discharge = false, Remove = false, ShowAnim = true }
+    end
+
+    if Neverbirth.DebugController.IsOpen(player) then
+        Neverbirth.DebugController.Close(player)
+    else
+        Neverbirth.DebugController.Open(player)
+    end
+
+    return { Discharge = false, Remove = false, ShowAnim = true }
+end
+
+function Neverbirth:UpdateDebugControllerMenus()
+    for key, state in pairs(Neverbirth.DebugController.states) do
+        local player = state.player
+        if not player or Neverbirth.DebugController.IsPlayerDead(player) or not Neverbirth.DebugController.PlayerHasItem(player) then
+            Neverbirth.DebugController.states[key] = nil
+        else
+            state.previous = state.previous or {}
+            for _, direction in ipairs(Neverbirth.DebugController.directions) do
+                local pressed = Neverbirth.DebugController.IsDirectionPressed(player, direction)
+                if pressed and not state.previous[direction] then
+                    Neverbirth.DebugController.HandleDirection(player, state, direction)
+                    if not Neverbirth.DebugController.states[key] then
+                        break
+                    end
+                end
+                state.previous[direction] = pressed
+            end
+        end
+    end
+end
+
+function Neverbirth:RenderDebugControllerMenus()
+    if not (Isaac and Isaac.WorldToScreen) then
+        return
+    end
+
+    for _, state in pairs(Neverbirth.DebugController.states) do
+        local player = state.player
+        if player and player.Position then
+            local base = Isaac.WorldToScreen(player.Position + Vector(0, -54))
+            local layout = Neverbirth.DebugController.layouts[state.page or "root"] or Neverbirth.DebugController.layouts.root
+            for direction, entry in pairs(layout) do
+                local offset = Neverbirth.DebugController.offsets[direction] or Vector(0, 0)
+                Neverbirth.DebugController.RenderIcon(entry, base + offset)
+            end
+        end
+    end
+end
+
+function Neverbirth:SuppressDebugControllerTear(tear)
+    if not tear then
+        return
+    end
+
+    local spawner = tear.SpawnerEntity or tear.Spawner or tear.Parent
+    local player = spawner
+    if player and player.ToPlayer then
+        local ok, converted = pcall(function()
+            return player:ToPlayer()
+        end)
+        player = ok and converted or player
+    end
+
+    if player and Neverbirth.DebugController.IsOpen(player) then
+        if tear.Remove then
+            pcall(function()
+                tear:Remove()
+            end)
+        end
+    end
+end
+
+function Neverbirth:CloseDebugControllerMenus()
+    Neverbirth.DebugController.states = {}
+end
+
+--------------------------------------------------
+-- 虚空针尖
+
+Neverbirth.NeedletickRadius = 80
+Neverbirth.NeedletickDataKey = "NeverbirthNeedletickTear"
+Neverbirth.NeedletickResolvedKey = "NeverbirthNeedletickResolved"
+Neverbirth.NeedletickBaseChance = 0.05
+Neverbirth.NeedletickMaxChance = 0.15
+Neverbirth.NeedletickLuckCap = 10
+Neverbirth.NeedletickKillDamage = 999999
+Neverbirth.NeedletickTearEntityName = "Needletick Tear"
+Neverbirth.NeedletickTearVariant = nil
+Neverbirth.NeedletickImpactEffectVariant = (EffectVariant and EffectVariant.POOF01) or 1
+Neverbirth.NeedletickTearAnimation = "RegularTear6"
+Neverbirth.NeedletickVisualSpriteScale = 1.6
+
+function Neverbirth.NeedletickPcallBoolean(entity, methodName)
+    if not entity or not entity[methodName] then
+        return false
+    end
+
+    local ok, result = pcall(function()
+        return entity[methodName](entity)
+    end)
+    return ok and result == true
+end
+
+function Neverbirth.GetNeedletickTearData(tear)
+    if tear and tear.GetData then
+        local ok, data = pcall(function()
+            return tear:GetData()
+        end)
+        if ok and type(data) == "table" then
+            return data
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth.GetNeedletickPlayerFromTear(tear)
+    local spawner = tear and (tear.SpawnerEntity or tear.Spawner or tear.Parent)
+    local player = spawner
+    if player and player.ToPlayer then
+        local ok, converted = pcall(function()
+            return player:ToPlayer()
+        end)
+        if ok and converted then
+            player = converted
+        end
+    end
+
+    if player and player.GetCollectibleNum then
+        return player
+    end
+
+    return nil
+end
+
+function Neverbirth.NeedletickPlayerHasItem(player)
+    if not player or not IsValidItemId(Items.Needletick) then
+        return false
+    end
+
+    if player.HasCollectible then
+        local ok, result = pcall(function()
+            return player:HasCollectible(Items.Needletick)
+        end)
+        if ok then
+            return result == true
+        end
+    end
+
+    if player.GetCollectibleNum then
+        local ok, count = pcall(function()
+            return player:GetCollectibleNum(Items.Needletick)
+        end)
+        return ok and (tonumber(count) or 0) > 0
+    end
+
+    return false
+end
+
+function Neverbirth.GetNeedletickRandomFloat(player)
+    if player and player.GetCollectibleRNG and IsValidItemId(Items.Needletick) then
+        local ok, rng = pcall(function()
+            return player:GetCollectibleRNG(Items.Needletick)
+        end)
+        if ok and rng then
+            if rng.RandomFloat then
+                local rollOk, value = pcall(function()
+                    return rng:RandomFloat()
+                end)
+                if rollOk and value ~= nil then
+                    return math.max(0, math.min(1, tonumber(value) or 0))
+                end
+            elseif rng.RandomInt then
+                local rollOk, value = pcall(function()
+                    return rng:RandomInt(1000000)
+                end)
+                if rollOk and value ~= nil then
+                    return math.max(0, math.min(999999, tonumber(value) or 0)) / 1000000
+                end
+            end
+        end
+    end
+
+    return math.random()
+end
+
+function Neverbirth.NeedletickDistance(a, b)
+    if not a or not b then
+        return nil
+    end
+
+    if a.X and b.X and a.Y and b.Y then
+        local dx = a.X - b.X
+        local dy = a.Y - b.Y
+        return math.sqrt(dx * dx + dy * dy)
+    end
+
+    local ok, delta = pcall(function()
+        return a - b
+    end)
+    if ok and delta and delta.Length then
+        local lengthOk, length = pcall(function()
+            return delta:Length()
+        end)
+        if lengthOk then
+            return tonumber(length) or nil
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth.GetNeedletickChance(luck)
+    local value = tonumber(luck) or 0
+    local scaled = Neverbirth.NeedletickBaseChance + ((math.max(0, value) / Neverbirth.NeedletickLuckCap) * (Neverbirth.NeedletickMaxChance - Neverbirth.NeedletickBaseChance))
+    return math.max(Neverbirth.NeedletickBaseChance, math.min(Neverbirth.NeedletickMaxChance, scaled))
+end
+
+function Neverbirth:GetNeedletickTearVariant()
+    if Neverbirth.NeedletickTearVariant ~= nil then
+        return Neverbirth.NeedletickTearVariant
+    end
+
+    Neverbirth.NeedletickTearVariant = -1
+    if Isaac and Isaac.GetEntityVariantByName then
+        local ok, variant = pcall(function()
+            return Isaac.GetEntityVariantByName(Neverbirth.NeedletickTearEntityName)
+        end)
+        if ok and type(variant) == "number" and variant > 0 then
+            Neverbirth.NeedletickTearVariant = variant
+        end
+    end
+
+    return Neverbirth.NeedletickTearVariant
+end
+
+function Neverbirth:IsNeedletickTear(tear)
+    local data = Neverbirth.GetNeedletickTearData(tear)
+    return data and data[Neverbirth.NeedletickDataKey] == true
+end
+
+function Neverbirth:CanNeedletickKillEntity(entity)
+    if not entity or entity.Type == ((EntityType and EntityType.ENTITY_PLAYER) or 1) then
+        return false
+    end
+    if entity.ToPlayer then
+        local ok, player = pcall(function()
+            return entity:ToPlayer()
+        end)
+        if ok and player then
+            return false
+        end
+    end
+    if entity.IsVulnerableEnemy then
+        local ok, vulnerable = pcall(function()
+            return entity:IsVulnerableEnemy()
+        end)
+        if ok and vulnerable ~= true then
+            return false
+        end
+    end
+    if Neverbirth.NeedletickPcallBoolean(entity, "IsInvincible") or Neverbirth.NeedletickPcallBoolean(entity, "IsInvulnerable") then
+        return false
+    end
+    if entity.HasEntityFlags and EntityFlag then
+        local friendlyFlag = EntityFlag.FLAG_FRIENDLY or 0
+        local charmFlag = EntityFlag.FLAG_CHARM or 0
+        local ok, hasFriendly = pcall(function()
+            return entity:HasEntityFlags(friendlyFlag)
+        end)
+        if ok and hasFriendly then
+            return false
+        end
+        ok, hasFriendly = pcall(function()
+            return entity:HasEntityFlags(charmFlag)
+        end)
+        if ok and hasFriendly then
+            return false
+        end
+    end
+
+    local npc = entity
+    if entity.ToNPC then
+        local ok, converted = pcall(function()
+            return entity:ToNPC()
+        end)
+        if ok and converted then
+            npc = converted
+        end
+    end
+    if Neverbirth.NeedletickPcallBoolean(npc, "IsBoss") or Neverbirth.NeedletickPcallBoolean(npc, "IsChampion") then
+        return false
+    end
+
+    return true
+end
+
+function Neverbirth:KillNeedletickTarget(entity, source)
+    if entity.TakeDamage then
+        local flags = (DamageFlag and (DamageFlag.DAMAGE_IGNORE_ARMOR or DamageFlag.DAMAGE_INVINCIBLE)) or 0
+        local ref = source and EntityRef and EntityRef(source) or nil
+        local damage = (tonumber(entity.HitPoints) or tonumber(entity.MaxHitPoints) or Neverbirth.NeedletickKillDamage) + 999
+        local ok = pcall(function()
+            entity:TakeDamage(damage, flags, ref, 0)
+        end)
+        if ok then
+            return true
+        end
+    end
+
+    if entity.Die then
+        local ok = pcall(function()
+            entity:Die()
+        end)
+        if ok then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Neverbirth:ApplyNeedletickTearVariant(tear)
+    if not tear or not tear.ChangeVariant then
+        return false
+    end
+
+    local variant = Neverbirth:GetNeedletickTearVariant()
+    if not variant or variant <= 0 then
+        return false
+    end
+
+    local ok = pcall(function()
+        tear:ChangeVariant(variant)
+    end)
+    if ok then
+        Neverbirth:PlayNeedletickTearAnimation(tear, true)
+        Neverbirth:ApplyNeedletickTearVisuals(tear)
+    end
+    return ok
+end
+
+function Neverbirth:ApplyNeedletickTearVisuals(tear)
+    if not tear then
+        return
+    end
+
+    local velocity = tear.Velocity
+    if velocity then
+        if velocity.GetAngleDegrees then
+            pcall(function()
+                tear.SpriteRotation = velocity:GetAngleDegrees()
+            end)
+        elseif velocity.X and velocity.Y then
+            pcall(function()
+                tear.SpriteRotation = math.deg(math.atan(velocity.Y, velocity.X))
+            end)
+        end
+    end
+
+    if Vector then
+        pcall(function()
+            tear.SpriteScale = Vector(Neverbirth.NeedletickVisualSpriteScale, Neverbirth.NeedletickVisualSpriteScale)
+        end)
+    end
+end
+
+function Neverbirth:PlayNeedletickTearAnimation(tear, force)
+    if not tear or not tear.GetSprite then
+        return false
+    end
+
+    local spriteOk, sprite = pcall(function()
+        return tear:GetSprite()
+    end)
+    if not spriteOk or not sprite or not sprite.Play then
+        return false
+    end
+
+    local ok = pcall(function()
+        sprite:Play(Neverbirth.NeedletickTearAnimation, force == true)
+    end)
+    return ok
+end
+
+function Neverbirth:SpawnNeedletickImpactEffect(position, source)
+    if not (Isaac and Isaac.Spawn and position) then
+        return nil
+    end
+
+    local effect = Isaac.Spawn((EntityType and EntityType.ENTITY_EFFECT) or 1000, Neverbirth.NeedletickImpactEffectVariant, 0, position, Vector(0, 0), source)
+    if effect and effect.SetColor and Color then
+        pcall(function()
+            effect:SetColor(Color(0.55, 0.05, 0.9, 1, 0.08, 0, 0.18), 18, 1, false, false)
+        end)
+    end
+    return effect
+end
+
+function Neverbirth:MarkNeedletickTearOnFire(tear)
+    local player = Neverbirth.GetNeedletickPlayerFromTear(tear)
+    if not Neverbirth.NeedletickPlayerHasItem(player) then
+        return
+    end
+
+    local chance = Neverbirth.GetNeedletickChance(player.Luck)
+    if Neverbirth.GetNeedletickRandomFloat(player) >= chance then
+        return
+    end
+
+    local data = Neverbirth.GetNeedletickTearData(tear)
+    if data then
+        data[Neverbirth.NeedletickDataKey] = true
+    end
+    Neverbirth:ApplyNeedletickTearVariant(tear)
+end
+
+function Neverbirth:ResolveNeedletickImpact(tear, position)
+    local data = Neverbirth.GetNeedletickTearData(tear)
+    if not data or data[Neverbirth.NeedletickDataKey] ~= true or data[Neverbirth.NeedletickResolvedKey] == true then
+        return 0
+    end
+
+    local origin = position or tear.Position
+    if not origin or not Isaac.GetRoomEntities then
+        return 0
+    end
+
+    data[Neverbirth.NeedletickResolvedKey] = true
+    local killed = 0
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if entity and entity.Position and Neverbirth:CanNeedletickKillEntity(entity) then
+            local distance = Neverbirth.NeedletickDistance(entity.Position, origin)
+            if distance and distance <= Neverbirth.NeedletickRadius and Neverbirth:KillNeedletickTarget(entity, tear) then
+                killed = killed + 1
+            end
+        end
+    end
+    if killed > 0 then
+        Neverbirth:SpawnNeedletickImpactEffect(origin, tear)
+    end
+
+    return killed
+end
+
+function Neverbirth:HandleNeedletickTearCollision(tear, collider)
+    if not Neverbirth:IsNeedletickTear(tear) or not collider or collider.Type == ((EntityType and EntityType.ENTITY_PLAYER) or 1) then
+        return nil
+    end
+
+    if collider.IsVulnerableEnemy or collider.ToNPC then
+        Neverbirth:ResolveNeedletickImpact(tear, collider.Position or tear.Position)
+    end
+
+    return nil
+end
+
+function Neverbirth:UpdateNeedletickTear(tear)
+    if not Neverbirth:IsNeedletickTear(tear) then
+        return
+    end
+    Neverbirth:PlayNeedletickTearAnimation(tear, false)
+    Neverbirth:ApplyNeedletickTearVisuals(tear)
+
+    if tear.IsDead then
+        local ok, dead = pcall(function()
+            return tear:IsDead()
+        end)
+        if ok and dead then
+            Neverbirth:ResolveNeedletickImpact(tear, tear.Position)
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_FIRE_TEAR then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Neverbirth.MarkNeedletickTearOnFire)
+end
+
+if ModCallbacks.MC_PRE_TEAR_COLLISION then
+    Neverbirth:AddCallback(ModCallbacks.MC_PRE_TEAR_COLLISION, Neverbirth.HandleNeedletickTearCollision)
+end
+
+if ModCallbacks.MC_POST_TEAR_UPDATE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, Neverbirth.UpdateNeedletickTear)
 end
 
 --------------------------------------------------
@@ -3424,6 +4212,662 @@ end
 end
 
 --------------------------------------------------
+-- 老大的指令
+
+do
+local BOSS_ORDER_ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
+local BOSS_ORDER_CARD_VARIANT = (PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300
+local BOSS_ORDER_MIN_CARD_SUBTYPE = 1
+local BOSS_ORDER_MAX_CARD_SUBTYPE = (Card and type(Card.RUNE_HAGALAZ) == "number" and Card.RUNE_HAGALAZ > 1) and (Card.RUNE_HAGALAZ - 1) or 31
+local BOSS_ORDER_MAX_REASONABLE_CARD_SUBTYPE = 10000
+local BOSS_ORDER_CARD_PICK_RETRIES = 16
+local BOSS_ORDER_MIN_SPAWN_DISTANCE = 80
+local BOSS_ORDER_SPAWN_OFFSET = 120
+local BOSS_ORDER_CHAMPION_CHANCE = 15
+local BOSS_ORDER_CHAMPION_COLOR = -1
+
+local function BossOrderTarget(entityType, variant, subtype, rewardCategory)
+    return {
+        entityType = entityType,
+        variant = variant or 0,
+        subtype = subtype or 0,
+        rewardCategory = rewardCategory or "normal",
+    }
+end
+
+local BOSS_ORDER_TARGET_ROLLS = {
+    "normal",
+    "normal",
+    "boss",
+    "boss",
+    "boss",
+}
+
+local BOSS_ORDER_NORMAL_TARGETS_BY_STAGE_GROUP = {
+    {
+        BossOrderTarget(EntityType and EntityType.ENTITY_GAPER or 10),
+        BossOrderTarget(EntityType and EntityType.ENTITY_HORF or 12),
+        BossOrderTarget(EntityType and EntityType.ENTITY_POOTER or 14),
+        BossOrderTarget(EntityType and EntityType.ENTITY_ATTACKFLY or 13),
+    },
+    {
+        BossOrderTarget(EntityType and EntityType.ENTITY_CLOTTY or 21),
+        BossOrderTarget(EntityType and EntityType.ENTITY_MULLIGAN or 22),
+        BossOrderTarget(EntityType and EntityType.ENTITY_CHARGER or 23),
+        BossOrderTarget(EntityType and EntityType.ENTITY_SPITTY or 31),
+    },
+    {
+        BossOrderTarget(EntityType and EntityType.ENTITY_VIS or 39),
+        BossOrderTarget(EntityType and EntityType.ENTITY_LEECH or 55),
+        BossOrderTarget(EntityType and EntityType.ENTITY_KNIGHT or 32),
+        BossOrderTarget(EntityType and EntityType.ENTITY_HOST or 44),
+    },
+    {
+        BossOrderTarget(EntityType and EntityType.ENTITY_VIS or 39),
+        BossOrderTarget(EntityType and EntityType.ENTITY_LEECH or 55),
+        BossOrderTarget(EntityType and EntityType.ENTITY_BONY or 227),
+        BossOrderTarget(EntityType and EntityType.ENTITY_NULLS or 282),
+    },
+    {
+        BossOrderTarget(EntityType and EntityType.ENTITY_GAPER or 10),
+        BossOrderTarget(EntityType and EntityType.ENTITY_HORF or 12),
+        BossOrderTarget(EntityType and EntityType.ENTITY_LEECH or 55),
+        BossOrderTarget(EntityType and EntityType.ENTITY_VIS or 39),
+    },
+}
+
+local BOSS_ORDER_BOSS_RUSH_TARGETS = {
+    BossOrderTarget(EntityType and EntityType.ENTITY_MONSTRO or 20, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_LARRYJR or 19, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_DUKE or 30, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_GURDY or 36, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_CHUB or 28, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_PIN or 62, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_FAMINE or 63, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_PESTILENCE or 64, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_WAR or 65, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_DEATH or 66, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_LOKI or 81, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_MONSTRO2 or 43, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_GURDYJR or 97, 0, 0, "boss"),
+}
+
+local function GetBossOrderGame()
+    if not Game then
+        return nil
+    end
+
+    local ok, game = pcall(Game)
+    return ok and game or nil
+end
+
+local function GetBossOrderRoom()
+    local game = GetBossOrderGame()
+    if not game or not game.GetRoom then
+        return nil
+    end
+
+    local ok, room = pcall(function()
+        return game:GetRoom()
+    end)
+    return ok and room or nil
+end
+
+local function GetBossOrderItemPool()
+    local game = GetBossOrderGame()
+    if not game or not game.GetItemPool then
+        return nil
+    end
+
+    local ok, itemPool = pcall(function()
+        return game:GetItemPool()
+    end)
+    return ok and itemPool or nil
+end
+
+local function GetBossOrderItemConfig()
+    if not Isaac or not Isaac.GetItemConfig then
+        return nil
+    end
+
+    local ok, itemConfig = pcall(function()
+        return Isaac.GetItemConfig()
+    end)
+    return ok and itemConfig or nil
+end
+
+local function GetBossOrderLevel()
+    local game = GetBossOrderGame()
+    if not game or not game.GetLevel then
+        return nil
+    end
+
+    local ok, level = pcall(function()
+        return game:GetLevel()
+    end)
+    return ok and level or nil
+end
+
+local function GetBossOrderRandomInt(player, max)
+    if max <= 0 then
+        return 0
+    end
+
+    if player and player.GetCollectibleRNG and IsValidItemId(Items.BossOrder) then
+        local okRng, rng = pcall(function()
+            return player:GetCollectibleRNG(Items.BossOrder)
+        end)
+        if okRng and rng and rng.RandomInt then
+            local okRoll, value = pcall(function()
+                return rng:RandomInt(max)
+            end)
+            if okRoll and type(value) == "number" then
+                return math.max(0, math.min(max - 1, math.floor(value)))
+            end
+        end
+    end
+
+    local room = GetBossOrderRoom()
+    local seed = room and room.GetSpawnSeed and room:GetSpawnSeed() or 0
+    return math.max(0, math.floor(seed) % max)
+end
+
+local function GetBossOrderStageGroup()
+    local level = GetBossOrderLevel()
+    local stage = 1
+    if level and level.GetStage then
+        local ok, value = pcall(function()
+            return level:GetStage()
+        end)
+        if ok and type(value) == "number" then
+            stage = math.max(1, math.floor(value))
+        end
+    end
+
+    if stage <= 2 then
+        return 1
+    end
+    if stage <= 4 then
+        return 2
+    end
+    if stage <= 6 then
+        return 3
+    end
+    if stage <= 8 then
+        return 4
+    end
+    return 5
+end
+
+local function CollectBossOrderTargetsFromPool(pool)
+    local targets = {}
+    for _, target in ipairs(pool or {}) do
+        if type(target.entityType) == "number" and target.entityType > 0 then
+            targets[#targets + 1] = target
+        end
+    end
+    return targets
+end
+
+local function CollectBossOrderNormalTargets()
+    local stageGroup = GetBossOrderStageGroup()
+    local targets = CollectBossOrderTargetsFromPool(BOSS_ORDER_NORMAL_TARGETS_BY_STAGE_GROUP[stageGroup])
+    if #targets <= 0 then
+        targets = CollectBossOrderTargetsFromPool(BOSS_ORDER_NORMAL_TARGETS_BY_STAGE_GROUP[1])
+    end
+    return targets
+end
+
+local function CollectBossOrderBossRushTargets()
+    return CollectBossOrderTargetsFromPool(BOSS_ORDER_BOSS_RUSH_TARGETS)
+end
+
+local function GetBossOrderOffsetPosition(position, x, y)
+    if not position then
+        return nil
+    end
+
+    local newX = (position.X or 0) + x
+    local newY = (position.Y or 0) + y
+    return (Vector and Vector(newX, newY)) or { X = newX, Y = newY }
+end
+
+local function IsBossOrderSpawnFarEnough(position, player)
+    if not position or not player or not player.Position then
+        return true
+    end
+
+    local dx = (position.X or 0) - (player.Position.X or 0)
+    local dy = (position.Y or 0) - (player.Position.Y or 0)
+    return dx * dx + dy * dy >= BOSS_ORDER_MIN_SPAWN_DISTANCE * BOSS_ORDER_MIN_SPAWN_DISTANCE
+end
+
+local function TryBossOrderSpawnPosition(room, candidate, player)
+    if not candidate then
+        return nil
+    end
+
+    if room and room.FindFreeTilePosition then
+        local ok, freePosition = pcall(function()
+            return room:FindFreeTilePosition(candidate, BOSS_ORDER_MIN_SPAWN_DISTANCE)
+        end)
+        if ok and freePosition and IsBossOrderSpawnFarEnough(freePosition, player) then
+            return freePosition
+        end
+    end
+
+    if room and room.FindFreePickupSpawnPosition then
+        local ok, freePosition = pcall(function()
+            return room:FindFreePickupSpawnPosition(candidate, BOSS_ORDER_MIN_SPAWN_DISTANCE, true, false)
+        end)
+        if ok and freePosition and IsBossOrderSpawnFarEnough(freePosition, player) then
+            return freePosition
+        end
+    end
+
+    if IsBossOrderSpawnFarEnough(candidate, player) then
+        return candidate
+    end
+
+    return nil
+end
+
+local function GetBossOrderSpawnPosition(player)
+    local room = GetBossOrderRoom()
+    local fallbackPosition = player and player.Position or (Vector and Vector(320, 280)) or { X = 320, Y = 280 }
+    local candidates = {}
+
+    if room and room.GetCenterPos then
+        local ok, center = pcall(function()
+            return room:GetCenterPos()
+        end)
+        if ok and center then
+            candidates[#candidates + 1] = center
+        end
+    end
+
+    if player and player.Position then
+        local offsets = {
+            { x = BOSS_ORDER_SPAWN_OFFSET, y = 0 },
+            { x = -BOSS_ORDER_SPAWN_OFFSET, y = 0 },
+            { x = 0, y = BOSS_ORDER_SPAWN_OFFSET },
+            { x = 0, y = -BOSS_ORDER_SPAWN_OFFSET },
+        }
+        for _, offset in ipairs(offsets) do
+            candidates[#candidates + 1] = GetBossOrderOffsetPosition(player.Position, offset.x, offset.y)
+        end
+    end
+
+    candidates[#candidates + 1] = fallbackPosition
+
+    for _, candidate in ipairs(candidates) do
+        local position = TryBossOrderSpawnPosition(room, candidate, player)
+        if position then
+            return position
+        end
+    end
+
+    return fallbackPosition
+end
+
+local function SelectBossOrderTarget(player)
+    local targetType = BOSS_ORDER_TARGET_ROLLS[GetBossOrderRandomInt(player, #BOSS_ORDER_TARGET_ROLLS) + 1] or "normal"
+    local targets = targetType == "boss" and CollectBossOrderBossRushTargets() or CollectBossOrderNormalTargets()
+
+    if #targets <= 0 and targetType == "boss" then
+        targets = CollectBossOrderNormalTargets()
+    elseif #targets <= 0 then
+        targets = CollectBossOrderBossRushTargets()
+    end
+
+    if #targets <= 0 then
+        return nil
+    end
+
+    return targets[GetBossOrderRandomInt(player, #targets) + 1]
+end
+
+local function GetBossOrderEntityData(entity)
+    if entity and entity.GetData then
+        local ok, data = pcall(function()
+            return entity:GetData()
+        end)
+        if ok and type(data) == "table" then
+            return data
+        end
+    end
+
+    return nil
+end
+
+local function GetBossOrderNpc(entity)
+    if entity and entity.ToNPC then
+        local ok, npc = pcall(function()
+            return entity:ToNPC()
+        end)
+        if ok and npc then
+            return npc
+        end
+    end
+
+    return entity
+end
+
+local function IsBossOrderChampion(npc)
+    if npc and npc.IsChampion then
+        local ok, isChampion = pcall(function()
+            return npc:IsChampion()
+        end)
+        return ok and isChampion == true
+    end
+
+    return false
+end
+
+local function MarkBossOrderTarget(entity, target)
+    local data = GetBossOrderEntityData(entity)
+    if not data then
+        return false
+    end
+
+    data.neverbirthBossOrderTarget = true
+    data.neverbirthBossOrderRewarded = false
+    data.neverbirthBossOrderRewardCategory = target and target.rewardCategory or "normal"
+    return true
+end
+
+local function TryBossOrderMakeChampion(entity, player, target)
+    if not target or target.rewardCategory ~= "normal" then
+        return false
+    end
+
+    local npc = GetBossOrderNpc(entity)
+    if not npc or not npc.MakeChampion or IsBossOrderChampion(npc) then
+        return false
+    end
+
+    if GetBossOrderRandomInt(player, 100) >= BOSS_ORDER_CHAMPION_CHANCE then
+        return false
+    end
+
+    local room = GetBossOrderRoom()
+    local seed = npc.InitSeed or (room and room.GetSpawnSeed and room:GetSpawnSeed()) or 0
+    local ok = pcall(function()
+        npc:MakeChampion(seed, BOSS_ORDER_CHAMPION_COLOR, true)
+    end)
+
+    return ok and IsBossOrderChampion(npc)
+end
+
+local function SpawnBossOrderTarget(player, target)
+    if not Isaac or not Isaac.Spawn or not target then
+        return nil
+    end
+
+    local position = GetBossOrderSpawnPosition(player)
+    local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
+    local ok, entity = pcall(function()
+        return Isaac.Spawn(target.entityType, target.variant or 0, target.subtype or 0, position, velocity, player)
+    end)
+    if not ok or not entity then
+        return nil
+    end
+
+    if not MarkBossOrderTarget(entity, target) then
+        return nil
+    end
+
+    TryBossOrderMakeChampion(entity, player, target)
+    return entity
+end
+
+function Neverbirth:UseBossOrder(_, _, player)
+    local target = SelectBossOrderTarget(player)
+    return SpawnBossOrderTarget(player, target) ~= nil
+end
+
+local function IsBossOrderBoss(npc, data)
+    if data and data.neverbirthBossOrderRewardCategory == "boss" then
+        return true
+    end
+
+    if npc and npc.IsBoss then
+        local ok, isBoss = pcall(function()
+            return npc:IsBoss()
+        end)
+        return ok and isBoss == true
+    end
+
+    return false
+end
+
+local function GetBossOrderRewardCount(npc, data)
+    if IsBossOrderBoss(npc, data) then
+        return 3
+    end
+
+    if IsBossOrderChampion(npc) then
+        return 2
+    end
+
+    return 1
+end
+
+local function GetBossOrderRewardSeed(npc, index, attempt)
+    local seed = npc and type(npc.InitSeed) == "number" and npc.InitSeed or 0
+    if seed == 0 then
+        local room = GetBossOrderRoom()
+        if room and room.GetSpawnSeed then
+            local ok, roomSeed = pcall(function()
+                return room:GetSpawnSeed()
+            end)
+            if ok and type(roomSeed) == "number" then
+                seed = roomSeed
+            end
+        end
+    end
+
+    return math.abs(math.floor(seed + (index or 1) * 37 + (attempt or 0) * 101))
+end
+
+local function IsBossOrderKnownCardSubtype(subtype)
+    subtype = math.floor(tonumber(subtype) or 0)
+    if subtype < BOSS_ORDER_MIN_CARD_SUBTYPE then
+        return false
+    end
+    if subtype > BOSS_ORDER_MAX_REASONABLE_CARD_SUBTYPE then
+        return false
+    end
+
+    local itemConfig = GetBossOrderItemConfig()
+    if itemConfig and itemConfig.GetCard then
+        local ok, cardConfig = pcall(function()
+            return itemConfig:GetCard(subtype)
+        end)
+        if not ok or cardConfig == nil then
+            return false
+        end
+
+        local displayFields = { "Name", "Description", "GfxFileName", "HudAnim" }
+        local hasDisplayData = false
+        for _, field in ipairs(displayFields) do
+            local fieldOk, value = pcall(function()
+                return cardConfig[field]
+            end)
+            if fieldOk and value ~= nil and tostring(value) ~= "" then
+                hasDisplayData = true
+                break
+            end
+        end
+
+        if not hasDisplayData then
+            return false
+        end
+    end
+
+    if EID then
+        local eidChecked = false
+        local descObj = nil
+        local eidCalls = {
+            function() return EID.getDescriptionObjByID and EID:getDescriptionObjByID(BOSS_ORDER_ENTITY_PICKUP, BOSS_ORDER_CARD_VARIANT, subtype) end,
+            function() return EID.getDescriptionObj and EID:getDescriptionObj(BOSS_ORDER_ENTITY_PICKUP, BOSS_ORDER_CARD_VARIANT, subtype) end,
+        }
+        for _, call in ipairs(eidCalls) do
+            local ok, result = pcall(call)
+            if ok and result ~= nil then
+                descObj = result
+                eidChecked = true
+                break
+            elseif ok then
+                eidChecked = true
+            end
+        end
+        if descObj == nil and EID.getObjectName then
+            local ok, name = pcall(function()
+                return EID:getObjectName(BOSS_ORDER_ENTITY_PICKUP, BOSS_ORDER_CARD_VARIANT, subtype)
+            end)
+            if ok then
+                eidChecked = true
+                if name ~= nil then
+                    descObj = { Name = name }
+                end
+            end
+        end
+
+        if eidChecked then
+            if type(descObj) ~= "table" then
+                return false
+            end
+            local name = tostring(descObj.Name or descObj.ObjName or "")
+            local description = tostring(descObj.Description or "")
+            local combined = string.lower(name .. " " .. description)
+            if combined == " " then
+                return false
+            end
+            if combined:find("no description available", 1, true) then
+                return false
+            end
+            if combined:find(tostring(BOSS_ORDER_ENTITY_PICKUP) .. "." .. tostring(BOSS_ORDER_CARD_VARIANT) .. ".", 1, true) then
+                return false
+            end
+        end
+    end
+
+    return true
+end
+
+local function AddBossOrderCardCandidate(candidates, seen, subtype)
+    subtype = math.floor(tonumber(subtype) or 0)
+    if subtype >= BOSS_ORDER_MIN_CARD_SUBTYPE and not seen[subtype] and IsBossOrderKnownCardSubtype(subtype) then
+        seen[subtype] = true
+        candidates[#candidates + 1] = subtype
+    end
+end
+
+local function CollectBossOrderRewardCardCandidates()
+    local candidates = {}
+    local seen = {}
+
+    for subtype = BOSS_ORDER_MIN_CARD_SUBTYPE, BOSS_ORDER_MAX_CARD_SUBTYPE do
+        AddBossOrderCardCandidate(candidates, seen, subtype)
+    end
+
+    if type(Card) == "table" then
+        for _, subtype in pairs(Card) do
+            AddBossOrderCardCandidate(candidates, seen, subtype)
+        end
+    end
+
+    table.sort(candidates)
+    return candidates
+end
+
+local function GetBossOrderPoolCardSubtype(npc, index, attempt)
+    local itemPool = GetBossOrderItemPool()
+    if not itemPool or not itemPool.GetCard then
+        return nil
+    end
+
+    local seed = GetBossOrderRewardSeed(npc, index, attempt)
+    local attempts = {
+        function() return itemPool:GetCard(seed, true, true, false) end,
+        function() return itemPool:GetCard(seed, true, false, false) end,
+    }
+    for _, roll in ipairs(attempts) do
+        local ok, subtype = pcall(roll)
+        if ok and IsBossOrderKnownCardSubtype(subtype) then
+            return math.floor(subtype)
+        end
+    end
+    return nil
+end
+
+local function GetBossOrderRewardCardSubtype(npc, index)
+    for attempt = 0, BOSS_ORDER_CARD_PICK_RETRIES - 1 do
+        local subtype = GetBossOrderPoolCardSubtype(npc, index, attempt)
+        if subtype then
+            return subtype
+        end
+    end
+
+    local candidates = CollectBossOrderRewardCardCandidates()
+    if #candidates <= 0 then
+        return BOSS_ORDER_MIN_CARD_SUBTYPE
+    end
+
+    local seed = GetBossOrderRewardSeed(npc, index, 0)
+    return candidates[(seed % #candidates) + 1]
+end
+
+local function SpawnBossOrderCards(npc, count)
+    if not Isaac or not Isaac.Spawn then
+        return
+    end
+
+    local origin = npc and npc.Position or (Vector and Vector(320, 280)) or { X = 320, Y = 280 }
+    local room = GetBossOrderRoom()
+    local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
+
+    for index = 1, count do
+        local position = origin
+        if room and room.FindFreePickupSpawnPosition then
+            local ok, freePosition = pcall(function()
+                return room:FindFreePickupSpawnPosition(origin, 20 + index * 5, true, false)
+            end)
+            if ok and freePosition then
+                position = freePosition
+            end
+        end
+
+        local cardSubtype = GetBossOrderRewardCardSubtype(npc, index)
+        pcall(function()
+            Isaac.Spawn(BOSS_ORDER_ENTITY_PICKUP, BOSS_ORDER_CARD_VARIANT, cardSubtype, position, velocity, npc)
+        end)
+    end
+end
+
+function Neverbirth:RewardBossOrderTarget(npc)
+    local data = GetBossOrderEntityData(npc)
+    if not data or data.neverbirthBossOrderTarget ~= true or data.neverbirthBossOrderRewarded == true then
+        return
+    end
+
+    data.neverbirthBossOrderRewarded = true
+    SpawnBossOrderCards(npc, GetBossOrderRewardCount(npc, data))
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseBossOrder, Items.BossOrder)
+
+if ModCallbacks.MC_POST_NPC_DEATH then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, Neverbirth.RewardBossOrderTarget)
+end
+
+if ModCallbacks.MC_POST_ENTITY_KILL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, Neverbirth.RewardBossOrderTarget)
+end
+end
+
+--------------------------------------------------
 -- 生死一念间
 
 do
@@ -3938,8 +5382,12 @@ Neverbirth.__coinSwordReleaseTearSuppressions = Neverbirth.__coinSwordReleaseTea
 local MASK_REQUIRED_COINS = 5
 local MASK_CONFUSION_DURATION = 90
 local MASK_LUCK_PENALTY = -2
-local COIN_MASK_COSTUME_PATH = "gfx/characters/neverbirth_coin_faced_mask.anm2"
-local COIN_MASK_BROKEN_COSTUME_PATH = "gfx/characters/neverbirth_coin_faced_mask_broken.anm2"
+local COIN_MASK_COSTUME_PATHS = {
+    "gfx/characters/costume_coin_faced_mask.anm2",
+}
+local COIN_MASK_BROKEN_COSTUME_PATHS = {
+    "gfx/characters/costume_coin_faced_mask_broken.anm2",
+}
 local COIN_MASK_VISUAL_NONE = "none"
 local COIN_MASK_VISUAL_ACTIVE = "active"
 local COIN_MASK_VISUAL_BROKEN = "broken"
@@ -3947,6 +5395,35 @@ local coinFacedMaskStates = {}
 local coinFacedMaskCostumeStates = {}
 local coinFacedMaskCostumeIds = {}
 local coinFacedMaskSettling = 0
+
+local StrongLaxativeConfig = {
+    CreepLifetime = 150,
+    CreepInterval = 6,
+    CreepRadius = 44,
+    CreepDamageInterval = 10,
+    SlowDuration = 30,
+    PoopRollInterval = 60,
+    PoopChancePerCopy = 5,
+    RoomPoopCap = 15,
+    PoopDistance = 56,
+    CostumePath = "gfx/characters/costume_strong_laxative.anm2",
+    EntityEffect = (EntityType and EntityType.ENTITY_EFFECT) or 1000,
+    GridPoop = (GridEntityType and GridEntityType.GRID_POOP) or 14,
+    CreepVariant = (EffectVariant and (EffectVariant.PLAYER_CREEP_GREEN or EffectVariant.CREEP_GREEN or EffectVariant.PLAYER_CREEP_BLACK or EffectVariant.CREEP_RED or EffectVariant.POOF01)) or 1,
+    CreepVariants = {
+        (EffectVariant and (EffectVariant.PLAYER_CREEP_GREEN or EffectVariant.CREEP_GREEN or EffectVariant.PLAYER_CREEP_BLACK or EffectVariant.CREEP_RED or EffectVariant.POOF01)) or 1,
+        EffectVariant and EffectVariant.PLAYER_CREEP_GREEN,
+        EffectVariant and EffectVariant.CREEP_GREEN,
+        EffectVariant and EffectVariant.PLAYER_CREEP_BLACK,
+        EffectVariant and EffectVariant.CREEP_RED,
+    },
+}
+Neverbirth.StrongLaxativePoopVariants = Neverbirth.StrongLaxativePoopVariants or { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }
+Neverbirth.StrongLaxative = Neverbirth.StrongLaxative or {}
+local strongLaxativeStates = {}
+local strongLaxativeCostumeStates = {}
+local strongLaxativeCostumeId = nil
+local strongLaxativeRoomPoopCounts = {}
 
 local blackTaisuiStates = {}
 
@@ -4694,6 +6171,669 @@ local function SpawnFolkEffect(variant, position, spawner)
     return nil
 end
 
+Neverbirth.FolkVisualEffects = Neverbirth.FolkVisualEffects or {
+    GoodGirlHalo = { name = "Good Girl Halo", fallback = 3002, animation = "Idle", timeout = 45, followOwner = true, followOffset = Vector(0, 0), spriteOffset = Vector(0, -24), depthOffset = 300000 },
+    GoodGirlCharm = { name = "Good Girl Charm", fallback = 3003, animation = "Charm", timeout = 45 },
+    GoodGirlReward = { name = "Good Girl Reward", fallback = 3004, animation = "Reward", timeout = 60 },
+    GoodGirlBreak = { name = "Good Girl Break", fallback = 3005, animation = "Break", timeout = 75 },
+    GoodGirlEcho = { name = "Good Girl Echo", fallback = 3006, animation = "Echo", timeout = 45, followOwner = true },
+    BlackTaisuiSpore = { name = "Black Taisui Spore", fallback = 3007, animation = "Spore", timeout = 45 },
+    BlackTaisuiPulse = { name = "Black Taisui Pulse", fallback = 3008, animation = "Pulse", timeout = 45 },
+    BlackTaisuiCurseDevour = { name = "Black Taisui Curse Devour", fallback = 3009, animation = "Devour", timeout = 60 },
+    BlackTaisuiReveal = { name = "Black Taisui Reveal", fallback = 3010, animation = "Reveal", timeout = 60 },
+    BlackTaisuiFearPulse = { name = "Black Taisui Fear Pulse", fallback = 3011, animation = "FearPulse", timeout = 60 },
+    BlackTaisuiDeathDeny = { name = "Black Taisui Death Deny", fallback = 3012, animation = "DeathDeny", timeout = 90 },
+    BlackTaisuiMatureCore = { name = "Black Taisui Mature Core", fallback = 3013, animation = "MatureCore", timeout = 45 },
+    BlackTaisuiHallucinationEat = { name = "Black Taisui Hallucination Eat", fallback = 3014, animation = "HallucinationEat", timeout = 75 },
+}
+
+function Neverbirth:GetFolkVisualEffectVariant(key)
+    local spec = Neverbirth.FolkVisualEffects and Neverbirth.FolkVisualEffects[key]
+    if not spec then
+        return -1
+    end
+    if spec.variant ~= nil then
+        return spec.variant
+    end
+
+    spec.variant = spec.fallback or -1
+    if Isaac and Isaac.GetEntityVariantByName and spec.name then
+        local ok, variant = pcall(function()
+            return Isaac.GetEntityVariantByName(spec.name)
+        end)
+        if ok and type(variant) == "number" and variant > 0 then
+            spec.variant = variant
+        end
+    end
+
+    return spec.variant
+end
+
+function Neverbirth:GetFolkVisualEffectOwnerSeed(owner)
+    return owner and owner.InitSeed or nil
+end
+
+function Neverbirth:GetFolkVisualEffectFollowOffset(spec)
+    if spec and spec.followOffset then
+        return spec.followOffset
+    end
+    return Vector(0, 0)
+end
+
+function Neverbirth:GetFolkVisualEffectPositionOffset(spec, owner)
+    local offset = (spec and spec.positionOffset) or Vector(0, 0)
+    if owner and owner.PositionOffset then
+        offset = owner.PositionOffset + offset
+    end
+    if owner and owner.GetFlyingOffset then
+        local ok, flyingOffset = pcall(function()
+            return owner:GetFlyingOffset()
+        end)
+        if ok and flyingOffset then
+            offset = offset + flyingOffset
+        end
+    end
+    return offset
+end
+
+function Neverbirth:ApplyFolkVisualEffectFollowPosition(effect, owner, spec)
+    if not effect or not owner or not owner.Position then
+        return false
+    end
+
+    local followOffset = Neverbirth:GetFolkVisualEffectFollowOffset(spec)
+    pcall(function()
+        effect.Position = owner.Position + followOffset
+    end)
+    if spec and spec.positionOffset then
+        pcall(function()
+            effect.PositionOffset = Neverbirth:GetFolkVisualEffectPositionOffset(spec, owner)
+        end)
+    end
+    if spec and spec.spriteOffset then
+        pcall(function()
+            effect.SpriteOffset = spec.spriteOffset
+        end)
+    end
+    if spec and spec.depthOffset then
+        pcall(function()
+            effect.DepthOffset = spec.depthOffset
+        end)
+    end
+    if effect.FollowParent then
+        pcall(function()
+            effect.Parent = owner
+            effect:FollowParent(owner)
+        end)
+    else
+        pcall(function()
+            effect.Parent = owner
+        end)
+    end
+    return true
+end
+
+function Neverbirth:BindFolkVisualEffectOwner(effect, key, owner)
+    if not effect or not owner then
+        return false
+    end
+
+    local spec = Neverbirth.FolkVisualEffects and Neverbirth.FolkVisualEffects[key]
+    if not spec or not spec.followOwner then
+        return false
+    end
+
+    local data = effect.GetData and effect:GetData() or nil
+    if type(data) ~= "table" then
+        return false
+    end
+
+    local offset = Neverbirth:GetFolkVisualEffectFollowOffset(spec)
+    data.NeverbirthFolkVisualEffectOwner = owner
+    data.NeverbirthFolkVisualEffectOwnerSeed = Neverbirth:GetFolkVisualEffectOwnerSeed(owner)
+    data.NeverbirthFolkVisualEffectFollowOffset = offset
+    Neverbirth:ApplyFolkVisualEffectFollowPosition(effect, owner, spec)
+    return true
+end
+
+function Neverbirth:GetFolkVisualEffectOwner(data)
+    if type(data) ~= "table" then
+        return nil
+    end
+
+    local owner = data.NeverbirthFolkVisualEffectOwner
+    if owner and owner.Position then
+        return owner
+    end
+
+    local ownerSeed = data.NeverbirthFolkVisualEffectOwnerSeed
+    if ownerSeed == nil then
+        return nil
+    end
+
+    for _, player in ipairs(GetPlayers()) do
+        if tostring(Neverbirth:GetFolkVisualEffectOwnerSeed(player)) == tostring(ownerSeed) then
+            data.NeverbirthFolkVisualEffectOwner = player
+            return player
+        end
+    end
+
+    return nil
+end
+
+function Neverbirth:RefreshFolkVisualEffectTimeout(effect, key, timeout)
+    local spec = Neverbirth.FolkVisualEffects and Neverbirth.FolkVisualEffects[key]
+    local data = effect and effect.GetData and effect:GetData() or nil
+    if type(data) ~= "table" then
+        return
+    end
+    data.NeverbirthFolkVisualEffectTimeout = math.max(1, math.floor(tonumber(timeout or (spec and spec.timeout)) or 45))
+end
+
+function Neverbirth:IsFolkVisualEffectActive(effect)
+    if not effect then
+        return false
+    end
+    if effect.Exists then
+        local ok, exists = pcall(function()
+            return effect:Exists()
+        end)
+        if ok then
+            return exists == true
+        end
+    end
+    return effect.removed ~= true and effect.Removed ~= true
+end
+
+function Neverbirth:SpawnFolkVisualEffect(key, position, spawner, timeout)
+    if not Isaac or not Isaac.Spawn then
+        return nil
+    end
+
+    local spec = Neverbirth.FolkVisualEffects and Neverbirth.FolkVisualEffects[key]
+    local variant = Neverbirth:GetFolkVisualEffectVariant(key)
+    if not spec or not variant or variant <= 0 then
+        return nil
+    end
+
+    local effect = SpawnFolkEffect(variant, position, spawner)
+    local data = effect and effect.GetData and effect:GetData() or nil
+    if type(data) == "table" then
+        data.NeverbirthFolkVisualEffect = true
+        data.NeverbirthFolkVisualEffectKey = key
+        data.NeverbirthFolkVisualEffectTimeout = math.max(1, math.floor(tonumber(timeout or spec.timeout) or 45))
+    end
+    if spec.followOwner and spawner then
+        Neverbirth:BindFolkVisualEffectOwner(effect, key, spawner)
+    end
+
+    local sprite = effect and effect.GetSprite and effect:GetSprite() or nil
+    if sprite and sprite.Play and spec.animation then
+        pcall(function()
+            sprite:Play(spec.animation, true)
+        end)
+    end
+
+    return effect
+end
+
+function Neverbirth:UpdateFolkVisualEffect(effect)
+    local data = effect and effect.GetData and effect:GetData() or nil
+    if type(data) ~= "table" or data.NeverbirthFolkVisualEffect ~= true then
+        return
+    end
+
+    if data.NeverbirthFolkVisualEffectOwnerSeed ~= nil then
+        local owner = Neverbirth:GetFolkVisualEffectOwner(data)
+        local spec = Neverbirth.FolkVisualEffects and Neverbirth.FolkVisualEffects[data.NeverbirthFolkVisualEffectKey]
+        if not Neverbirth:ApplyFolkVisualEffectFollowPosition(effect, owner, spec) then
+            if effect.Remove then
+                effect:Remove()
+            end
+            return
+        end
+    end
+
+    local sprite = effect.GetSprite and effect:GetSprite() or nil
+    if sprite and sprite.IsFinished then
+        local ok, finished = pcall(function()
+            return sprite:IsFinished()
+        end)
+        if ok and finished then
+            if effect.Remove then
+                effect:Remove()
+            end
+            return
+        end
+    end
+
+    data.NeverbirthFolkVisualEffectTimeout = (tonumber(data.NeverbirthFolkVisualEffectTimeout) or 1) - 1
+    if data.NeverbirthFolkVisualEffectTimeout <= 0 and effect.Remove then
+        effect:Remove()
+    end
+end
+
+if ModCallbacks.MC_POST_EFFECT_UPDATE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, Neverbirth.UpdateFolkVisualEffect)
+end
+
+function Neverbirth.StrongLaxative.PlayerHas(player)
+    return PlayerHasCollectible(player, Items.StrongLaxative)
+end
+
+function Neverbirth.StrongLaxative.GetCopyCount(player)
+    if not player or not IsValidItemId(Items.StrongLaxative) then
+        return 0
+    end
+
+    if player.GetCollectibleNum then
+        local ok, count = pcall(function()
+            return player:GetCollectibleNum(Items.StrongLaxative)
+        end)
+        if ok then
+            return math.max(0, tonumber(count) or 0)
+        end
+    end
+
+    return Neverbirth.StrongLaxative.PlayerHas(player) and 1 or 0
+end
+
+function Neverbirth.StrongLaxative.GetCostumeId()
+    if strongLaxativeCostumeId ~= nil then
+        return strongLaxativeCostumeId or nil
+    end
+
+    strongLaxativeCostumeId = false
+    if Isaac and Isaac.GetCostumeIdByPath then
+        local ok, costumeId = pcall(function()
+            return Isaac.GetCostumeIdByPath(StrongLaxativeConfig.CostumePath)
+        end)
+        if ok and type(costumeId) == "number" and costumeId > 0 then
+            strongLaxativeCostumeId = costumeId
+        end
+    end
+
+    return strongLaxativeCostumeId or nil
+end
+
+function Neverbirth.StrongLaxative.RemoveCostume(player, costumeId)
+    if player and costumeId and player.TryRemoveNullCostume then
+        pcall(function()
+            player:TryRemoveNullCostume(costumeId)
+        end)
+    end
+end
+
+function Neverbirth.StrongLaxative.AddCostume(player, costumeId)
+    if player and costumeId and player.AddNullCostume then
+        pcall(function()
+            player:AddNullCostume(costumeId)
+        end)
+    end
+end
+
+function Neverbirth.StrongLaxative.ApplyCostume(player, active)
+    if not player then
+        return
+    end
+
+    local key = GetFolkPlayerKey(player)
+    local visualState = active and "active" or "none"
+    if strongLaxativeCostumeStates[key] == visualState then
+        return
+    end
+
+    local costumeId = Neverbirth.StrongLaxative.GetCostumeId()
+    if costumeId then
+        Neverbirth.StrongLaxative.RemoveCostume(player, costumeId)
+        if active then
+            Neverbirth.StrongLaxative.AddCostume(player, costumeId)
+        end
+    end
+    strongLaxativeCostumeStates[key] = visualState
+end
+
+function Neverbirth.StrongLaxative.GetState(player)
+    local key = GetFolkPlayerKey(player)
+    local state = strongLaxativeStates[key]
+    if type(state) ~= "table" then
+        state = {
+            creepCooldown = 0,
+            poopTimer = 0,
+        }
+        strongLaxativeStates[key] = state
+    end
+    return state
+end
+
+function Neverbirth.StrongLaxative.IsMoving(player)
+    if not player then
+        return false
+    end
+
+    local velocity = player.Velocity
+    if velocity and velocity.Length then
+        local ok, length = pcall(function()
+            return velocity:Length()
+        end)
+        if ok and (tonumber(length) or 0) > 0.35 then
+            return true
+        end
+    end
+
+    if player.GetMovementInput then
+        local ok, input = pcall(function()
+            return player:GetMovementInput()
+        end)
+        if ok and input and input.Length then
+            local okLength, length = pcall(function()
+                return input:Length()
+            end)
+            if okLength and (tonumber(length) or 0) > 0.1 then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function Neverbirth.StrongLaxative.GetRng(player)
+    if player and player.GetCollectibleRNG and IsValidItemId(Items.StrongLaxative) then
+        local ok, rng = pcall(function()
+            return player:GetCollectibleRNG(Items.StrongLaxative)
+        end)
+        if ok and rng and rng.RandomInt then
+            return rng
+        end
+    end
+    return nil
+end
+
+function Neverbirth.StrongLaxative.RandomInt(player, max)
+    if max <= 0 then
+        return 0
+    end
+
+    local rng = Neverbirth.StrongLaxative.GetRng(player)
+    if rng and rng.RandomInt then
+        local ok, value = pcall(function()
+            return rng:RandomInt(max)
+        end)
+        if ok and type(value) == "number" then
+            return math.max(0, math.min(max - 1, math.floor(value)))
+        end
+    end
+
+    local room = GetFolkRoom()
+    local seed = room and room.GetSpawnSeed and room:GetSpawnSeed() or 0
+    return math.max(0, math.floor(seed) % max)
+end
+
+function Neverbirth.StrongLaxative.SpawnCreep(player)
+    if not player or not player.Position or not Isaac or not Isaac.Spawn then
+        return nil
+    end
+
+    local creep = Isaac.Spawn(StrongLaxativeConfig.EntityEffect, StrongLaxativeConfig.CreepVariant, 0, player.Position, Vector(0, 0), player)
+    if not creep then
+        return nil
+    end
+
+    local data = creep.GetData and creep:GetData() or nil
+    if type(data) == "table" then
+        data.NeverbirthStrongLaxativeCreep = true
+        data.Owner = player
+        data.OwnerSeed = player.InitSeed
+        data.Life = StrongLaxativeConfig.CreepLifetime
+        data.Age = 0
+        data.Radius = StrongLaxativeConfig.CreepRadius
+        data.Damage = (tonumber(player.Damage) or 3.5) * 0.1
+    end
+
+    if creep.SetColor and Color then
+        pcall(function()
+            creep:SetColor(Color(0.45, 0.6, 0.22, 0.9, 0.1, 0.04, 0), StrongLaxativeConfig.CreepLifetime, 1, true, false)
+        end)
+    end
+
+    return creep
+end
+
+function Neverbirth.StrongLaxative.IsCreepVariant(variant)
+    for _, creepVariant in ipairs(StrongLaxativeConfig.CreepVariants) do
+        if type(creepVariant) == "number" and variant == creepVariant then
+            return true
+        end
+    end
+    return false
+end
+
+function Neverbirth.StrongLaxative.GetPoopRoomCount(roomKey)
+    return math.max(0, tonumber(strongLaxativeRoomPoopCounts[roomKey]) or 0)
+end
+
+function Neverbirth.StrongLaxative.GetPoopSpawnPosition(player)
+    if not player or not player.Position then
+        return nil
+    end
+
+    local room = GetFolkRoom()
+    local angleIndex = Neverbirth.StrongLaxative.RandomInt(player, 8)
+    local angle = (angleIndex / 8) * math.pi * 2
+    local offset = Vector(math.cos(angle), math.sin(angle)) * StrongLaxativeConfig.PoopDistance
+    local position = player.Position + offset
+
+    if room and room.FindFreePickupSpawnPosition then
+        local ok, freePosition = pcall(function()
+            return room:FindFreePickupSpawnPosition(position, 24, true, false)
+        end)
+        if ok and freePosition then
+            position = freePosition
+        end
+    end
+
+    if room and room.IsPositionInRoom then
+        local ok, inRoom = pcall(function()
+            return room:IsPositionInRoom(position, 16)
+        end)
+        if ok and not inRoom then
+            return nil
+        end
+    end
+
+    return position
+end
+
+function Neverbirth.StrongLaxative.SpawnPoop(player)
+    local room = GetFolkRoom()
+    if not room then
+        return false
+    end
+
+    local position = Neverbirth.StrongLaxative.GetPoopSpawnPosition(player)
+    if not position then
+        return false
+    end
+
+    local variants = Neverbirth.StrongLaxativePoopVariants or {}
+    if #variants <= 0 then
+        return false
+    end
+
+    local variant = variants[Neverbirth.StrongLaxative.RandomInt(player, #variants) + 1] or 0
+    local seed = room.GetSpawnSeed and room:GetSpawnSeed() or 0
+
+    if room.SpawnGridEntity and room.GetGridIndex then
+        local ok, result = pcall(function()
+            return room:SpawnGridEntity(room:GetGridIndex(position), StrongLaxativeConfig.GridPoop, variant, seed, 0)
+        end)
+        return ok and result ~= false
+    end
+
+    return false
+end
+
+function Neverbirth.StrongLaxative.TryPoopRoll(player, copies)
+    local roomKey = GetFolkRoomKey()
+    if Neverbirth.StrongLaxative.GetPoopRoomCount(roomKey) >= StrongLaxativeConfig.RoomPoopCap then
+        return
+    end
+
+    local chance = math.min(100, math.max(0, (tonumber(copies) or 0) * StrongLaxativeConfig.PoopChancePerCopy))
+    if chance <= 0 then
+        return
+    end
+
+    if Neverbirth.StrongLaxative.RandomInt(player, 100) < chance and Neverbirth.StrongLaxative.SpawnPoop(player) then
+        strongLaxativeRoomPoopCounts[roomKey] = Neverbirth.StrongLaxative.GetPoopRoomCount(roomKey) + 1
+    end
+end
+
+function Neverbirth:UpdateStrongLaxativePlayers()
+    for _, player in ipairs(GetPlayers()) do
+        local copies = Neverbirth.StrongLaxative.GetCopyCount(player)
+        if copies <= 0 then
+            strongLaxativeStates[GetFolkPlayerKey(player)] = nil
+            Neverbirth.StrongLaxative.ApplyCostume(player, false)
+        else
+            local state = Neverbirth.StrongLaxative.GetState(player)
+            Neverbirth.StrongLaxative.ApplyCostume(player, true)
+
+            state.creepCooldown = math.max(0, (tonumber(state.creepCooldown) or 0) - 1)
+            if state.creepCooldown <= 0 and Neverbirth.StrongLaxative.IsMoving(player) then
+                if Neverbirth.StrongLaxative.SpawnCreep(player) then
+                    state.creepCooldown = StrongLaxativeConfig.CreepInterval
+                end
+            end
+
+            state.poopTimer = (tonumber(state.poopTimer) or 0) + 1
+            if state.poopTimer >= StrongLaxativeConfig.PoopRollInterval then
+                state.poopTimer = 0
+                Neverbirth.StrongLaxative.TryPoopRoll(player, copies)
+            end
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateStrongLaxativePlayers)
+
+function Neverbirth:UpdateStrongLaxativeCreep(effect)
+    if not effect then
+        return
+    end
+
+    local data = effect.GetData and effect:GetData() or nil
+    if type(data) ~= "table" or data.NeverbirthStrongLaxativeCreep ~= true then
+        return
+    end
+
+    data.Age = (tonumber(data.Age) or 0) + 1
+    data.Life = (tonumber(data.Life) or 0) - 1
+    if data.Life <= 0 then
+        if effect.Remove then
+            effect:Remove()
+        end
+        return
+    end
+
+    if not Isaac.GetRoomEntities then
+        return
+    end
+
+    local radius = tonumber(data.Radius) or StrongLaxativeConfig.CreepRadius
+    local radiusSquared = radius * radius
+    local source = EntityRef(data.Owner or effect)
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if entity ~= effect and IsVulnerableEnemy(entity) and entity.Position and effect.Position then
+            local dx = (entity.Position.X or 0) - (effect.Position.X or 0)
+            local dy = (entity.Position.Y or 0) - (effect.Position.Y or 0)
+            if dx * dx + dy * dy <= radiusSquared then
+                if entity.AddSlowing then
+                    pcall(function()
+                        entity:AddSlowing(source, StrongLaxativeConfig.SlowDuration, 0.5, Color and Color(0.45, 0.65, 0.2, 1, 0, 0, 0) or nil)
+                    end)
+                end
+                if ((tonumber(data.Age) or 0) % StrongLaxativeConfig.CreepDamageInterval) == 0 and entity.TakeDamage then
+                    pcall(function()
+                        entity:TakeDamage(tonumber(data.Damage) or 0, 0, source, 0)
+                    end)
+                end
+            end
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_EFFECT_UPDATE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, Neverbirth.UpdateStrongLaxativeCreep, StrongLaxativeConfig.CreepVariant)
+end
+
+function Neverbirth.StrongLaxative.GetDamageSource(source)
+    if source and source.Entity then
+        return source.Entity
+    end
+    return source
+end
+
+function Neverbirth:BlockStrongLaxativeCreepDamage(entity, amount, flags, source)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    if not player or Neverbirth.StrongLaxative.GetCopyCount(player) <= 0 then
+        return nil
+    end
+
+    local sourceEntity = Neverbirth.StrongLaxative.GetDamageSource(source)
+    local sourceData = sourceEntity and sourceEntity.GetData and sourceEntity:GetData() or nil
+    if type(sourceData) == "table" and sourceData.NeverbirthStrongLaxativeCreep == true then
+        return false
+    end
+
+    if sourceEntity and sourceEntity.Type == StrongLaxativeConfig.EntityEffect and Neverbirth.StrongLaxative.IsCreepVariant(sourceEntity.Variant) then
+        return false
+    end
+
+    return nil
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.BlockStrongLaxativeCreepDamage, EntityType and EntityType.ENTITY_PLAYER or 1)
+
+function Neverbirth:RefreshStrongLaxativeOnPickup(...)
+    local player = nil
+    for index = 1, select("#", ...) do
+        local value = select(index, ...)
+        if type(value) == "table" and value.ToPlayer then
+            local ok, maybePlayer = pcall(function()
+                return value:ToPlayer()
+            end)
+            if ok and maybePlayer then
+                player = maybePlayer
+                break
+            end
+        end
+    end
+
+    if player then
+        Neverbirth.StrongLaxative.ApplyCostume(player, true)
+    end
+end
+
+if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.RefreshStrongLaxativeOnPickup, Items.StrongLaxative)
+end
+
+function Neverbirth:ResetStrongLaxativeRoomState()
+    strongLaxativeRoomPoopCounts[GetFolkRoomKey()] = 0
+    for _, state in pairs(strongLaxativeStates) do
+        if type(state) == "table" then
+            state.creepCooldown = 0
+            state.poopTimer = 0
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_ROOM then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.ResetStrongLaxativeRoomState)
+end
+
 local function DischargeCoinSewnSword(player, slot)
     if player and player.DischargeActiveItem then
         pcall(function()
@@ -4967,6 +7107,16 @@ local function GetCoinMaskCostumeId(path)
     return coinFacedMaskCostumeIds[path] or nil
 end
 
+local function GetFirstCoinMaskCostumeId(paths)
+    for _, path in ipairs(paths or {}) do
+        local costumeId = GetCoinMaskCostumeId(path)
+        if costumeId then
+            return costumeId
+        end
+    end
+    return nil
+end
+
 local function TryRemoveCoinMaskCostume(player, costumeId)
     if player and costumeId and player.TryRemoveNullCostume then
         pcall(function()
@@ -4994,8 +7144,8 @@ local function ApplyCoinFacedMaskCostume(player, visualState)
         return
     end
 
-    local activeCostume = GetCoinMaskCostumeId(COIN_MASK_COSTUME_PATH)
-    local brokenCostume = GetCoinMaskCostumeId(COIN_MASK_BROKEN_COSTUME_PATH)
+    local activeCostume = GetFirstCoinMaskCostumeId(COIN_MASK_COSTUME_PATHS)
+    local brokenCostume = GetFirstCoinMaskCostumeId(COIN_MASK_BROKEN_COSTUME_PATHS)
     if activeCostume then
         TryRemoveCoinMaskCostume(player, activeCostume)
     end
@@ -5012,7 +7162,7 @@ local function ApplyCoinFacedMaskCostume(player, visualState)
     coinFacedMaskCostumeStates[key] = visualState
 end
 
-local function GetCoinFacedMaskVisualState(state)
+function Neverbirth.GetCoinFacedMaskVisualState(state)
     if state and state.active then
         return COIN_MASK_VISUAL_ACTIVE
     end
@@ -5059,7 +7209,7 @@ local function RefreshCoinFacedMaskForPlayer(player)
     if state.active then
         DisturbMaskEnemies(player)
     end
-    ApplyCoinFacedMaskCostume(player, GetCoinFacedMaskVisualState(state))
+    ApplyCoinFacedMaskCostume(player, Neverbirth.GetCoinFacedMaskVisualState(state))
     if hadPenalty then
         RefreshMaskLuck(player)
     end
@@ -5088,9 +7238,19 @@ end
 
 function Neverbirth:UpdateCoinFacedMaskCostumes()
     for _, player in ipairs(GetPlayers()) do
+        local key = GetFolkPlayerKey(player)
         if not PlayerHasCollectible(player, Items.CoinFacedMask) then
-            coinFacedMaskStates[GetFolkPlayerKey(player)] = nil
+            coinFacedMaskStates[key] = nil
             ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_NONE)
+        else
+            local state = coinFacedMaskStates[key]
+            if type(state) ~= "table" or state.roomKey ~= GetFolkRoomKey() then
+                RefreshCoinFacedMaskForPlayer(player)
+            elseif not state.consumed and not state.active and (tonumber(state.luckPenalty) or 0) == 0 and GetPlayerCoins(player) >= MASK_REQUIRED_COINS then
+                RefreshCoinFacedMaskForPlayer(player)
+            else
+                ApplyCoinFacedMaskCostume(player, Neverbirth.GetCoinFacedMaskVisualState(state))
+            end
         end
     end
 end
@@ -5099,9 +7259,60 @@ if ModCallbacks.MC_POST_UPDATE then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateCoinFacedMaskCostumes)
 end
 
-function Neverbirth:HandleCoinFacedMaskDamage(entity, amount)
+local function HasCoinFacedMaskDamageFlag(flags, flag)
+    return type(flags) == "number" and type(flag) == "number" and (flags & flag) ~= 0
+end
+
+local function IsIgnoredCoinFacedMaskDamage(flags)
+    local ignoredFlags = {
+        DamageFlag and DamageFlag.DAMAGE_FAKE,
+        DamageFlag and DamageFlag.DAMAGE_IV_BAG,
+        DamageFlag and DamageFlag.DAMAGE_DEVIL,
+        DamageFlag and DamageFlag.DAMAGE_CURSED_DOOR,
+        DamageFlag and DamageFlag.DAMAGE_NOKILL,
+    }
+
+    for _, flag in ipairs(ignoredFlags) do
+        if HasCoinFacedMaskDamageFlag(flags, flag) then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function GetCoinFacedMaskDamageSourceEntity(source)
+    if source and source.Entity then
+        return source.Entity
+    end
+    return source
+end
+
+local function IsCoinFacedMaskMonsterDamage(source)
+    local sourceEntity = GetCoinFacedMaskDamageSourceEntity(source)
+    if not sourceEntity then
+        return true
+    end
+
+    if sourceEntity.ToPlayer then
+        local ok, sourcePlayer = pcall(function()
+            return sourceEntity:ToPlayer()
+        end)
+        if ok and sourcePlayer then
+            return false
+        end
+    end
+
+    if IsVulnerableEnemy(sourceEntity) then
+        return true
+    end
+
+    return sourceEntity.Type ~= (EntityType and EntityType.ENTITY_PLAYER or 1)
+end
+
+function Neverbirth:HandleCoinFacedMaskDamage(entity, amount, flags, source)
     local player = entity and entity.ToPlayer and entity:ToPlayer()
-    if coinFacedMaskSettling > 0 or not player or (tonumber(amount) or 0) <= 0 or not PlayerHasCollectible(player, Items.CoinFacedMask) then
+    if coinFacedMaskSettling > 0 or not player or (tonumber(amount) or 0) <= 0 or not PlayerHasCollectible(player, Items.CoinFacedMask) or IsIgnoredCoinFacedMaskDamage(flags) or not IsCoinFacedMaskMonsterDamage(source) then
         return nil
     end
 
@@ -5115,16 +7326,6 @@ function Neverbirth:HandleCoinFacedMaskDamage(entity, amount)
     if GetPlayerCoins(player) >= MASK_REQUIRED_COINS then
         AddPlayerCoins(player, -MASK_REQUIRED_COINS)
         ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_NONE)
-        if player.TakeDamage then
-            coinFacedMaskSettling = coinFacedMaskSettling + 1
-            local ok, err = pcall(function()
-                player:TakeDamage(1, COIN_SWORD_BACKLASH_FLAGS, EntityRef(player), 0)
-            end)
-            coinFacedMaskSettling = math.max(0, coinFacedMaskSettling - 1)
-            if not ok then
-                DebugLog("[neverbirth] Coin-Faced Mask half-hit failed: " .. tostring(err))
-            end
-        end
         return false
     end
 
@@ -5163,20 +7364,34 @@ Neverbirth.BlackTaisuiSpeedFloor = 0.5
 Neverbirth.BlackTaisuiFearDuration = 90
 Neverbirth.BlackTaisuiFearRadius = 180
 Neverbirth.BlackTaisuiWavyCap = (CollectibleType and CollectibleType.COLLECTIBLE_WAVY_CAP) or 582
+Neverbirth.BlackTaisuiWavyCapTearsBonus = 0.75
+Neverbirth.BlackTaisuiWavyCapRangeBonus = 20
 Neverbirth.BlackTaisuiOfficialLifeItem = (CollectibleType and CollectibleType.COLLECTIBLE_1UP) or 11
-Neverbirth.BlackTaisuiLifeHudText = "x1"
+Neverbirth.BlackTaisuiLifeHudText = "WARD"
 Neverbirth.BlackTaisuiLifeHudX = 132
 Neverbirth.BlackTaisuiLifeHudY = 28
+Neverbirth.CleansedWavyCapSpeedPenalty = 0.03
+Neverbirth.CleansedWavyCapTearsBonus = 0.75
+Neverbirth.CleansedWavyCapSettledSpeedPenalty = 0.06
+Neverbirth.CleansedWavyCapSettledTearsBonus = 0.30
+Neverbirth.CleansedWavyCapMaxCharge = 900
+Neverbirth.CleansedWavyCapChargeStep = 100
 
 function Neverbirth.GetBlackTaisuiData()
     EnsureMusicboxDataLoaded()
     local data = musicboxSaveData.blackTaisui
     if type(data) ~= "table" or data.runSeed ~= GetCurrentRunSeed() then
-        data = { runSeed = GetCurrentRunSeed(), players = {} }
+        data = { runSeed = GetCurrentRunSeed(), players = {}, meatLumpCounts = {}, meatLumpLives = {} }
         musicboxSaveData.blackTaisui = data
     end
     if type(data.players) ~= "table" then
         data.players = {}
+    end
+    if type(data.meatLumpCounts) ~= "table" then
+        data.meatLumpCounts = {}
+    end
+    if type(data.meatLumpLives) ~= "table" then
+        data.meatLumpLives = {}
     end
     return data
 end
@@ -5204,6 +7419,7 @@ function Neverbirth:GetBlackTaisuiRuntimeState(player)
         state.floorKey = GetFolkFloorKey()
         state.deathSavedFloorKey = nil
         state.sporeKeys = {}
+        state.wavySuppressedStacks = 0
     end
     if type(state.sporeKeys) ~= "table" then
         state.sporeKeys = {}
@@ -5216,12 +7432,19 @@ function Neverbirth:GetBlackTaisuiParasiteValue(player)
 end
 
 function Neverbirth:SetBlackTaisuiParasiteValue(player, value)
+    local oldStage = Neverbirth:GetBlackTaisuiStage(player)
     Neverbirth:GetBlackTaisuiSavedPlayer(player).parasite = math.max(0, tonumber(value) or 0)
+    Neverbirth:SpawnFolkVisualEffect("BlackTaisuiPulse", player and player.Position or Vector(320, 280), player)
     SaveMusicboxData()
     Neverbirth:RefreshBlackTaisuiCache(player)
+    if Neverbirth:GetBlackTaisuiStage(player) > oldStage then
+        Neverbirth:TriggerBlackTaisuiSpores(player, "stage-set:" .. tostring(value), true)
+    end
     if Neverbirth:GetBlackTaisuiStage(player) >= 2 then
+        Neverbirth:SuppressBlackTaisuiLevelCurses(player)
         Neverbirth:RevealBlackTaisuiRoomCollectibles(player, "stage-set")
     end
+    Neverbirth:EnsureBlackTaisuiStageThreeReward(player)
 end
 
 function Neverbirth:GetBlackTaisuiStage(player)
@@ -5234,6 +7457,43 @@ function Neverbirth:GetBlackTaisuiStage(player)
     return 1
 end
 
+function Neverbirth:SpawnBlackTaisuiMeatLump(player)
+    if not player or not PlayerHasCollectible(player, Items.BlackTaisui) or Neverbirth:GetBlackTaisuiStage(player) < 3 then
+        return false
+    end
+    local saved = Neverbirth:GetBlackTaisuiSavedPlayer(player)
+    if saved.meatLumpSpawned then
+        return false
+    end
+    if not IsValidItemId(Items.MeatLump) or not Isaac or not Isaac.Spawn or not EntityType or not PickupVariant then
+        return false
+    end
+
+    local position = player.Position or Vector(320, 280)
+    local game = GetFolkGame()
+    local room = game and game.GetRoom and game:GetRoom() or nil
+    if room and room.FindFreePickupSpawnPosition then
+        pcall(function()
+            position = room:FindFreePickupSpawnPosition(position, 40, true, false)
+        end)
+    end
+
+    local ok, spawned = pcall(function()
+        return Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, Items.MeatLump, position, Vector(0, 0), player)
+    end)
+    if ok and spawned then
+        saved.meatLumpSpawned = true
+        SaveMusicboxData()
+        Neverbirth:TriggerBlackTaisuiSpores(player, "meat-lump:" .. tostring(GetFolkPlayerKey(player)), true)
+        return true
+    end
+    return false
+end
+
+function Neverbirth:EnsureBlackTaisuiStageThreeReward(player)
+    Neverbirth:SpawnBlackTaisuiMeatLump(player)
+end
+
 function Neverbirth:RefreshBlackTaisuiCache(player)
     if not player or not player.AddCacheFlags or not CacheFlag then
         return
@@ -5241,6 +7501,8 @@ function Neverbirth:RefreshBlackTaisuiCache(player)
     local flags = 0
     if CacheFlag.CACHE_DAMAGE then flags = flags | CacheFlag.CACHE_DAMAGE end
     if CacheFlag.CACHE_SPEED then flags = flags | CacheFlag.CACHE_SPEED end
+    if CacheFlag.CACHE_FIREDELAY then flags = flags | CacheFlag.CACHE_FIREDELAY end
+    if CacheFlag.CACHE_RANGE then flags = flags | CacheFlag.CACHE_RANGE end
     if CacheFlag.CACHE_LUCK then flags = flags | CacheFlag.CACHE_LUCK end
     player:AddCacheFlags(flags)
     if player.EvaluateItems then
@@ -5259,11 +7521,13 @@ function Neverbirth:AddBlackTaisuiParasite(player, amount, reason)
     local saved = Neverbirth:GetBlackTaisuiSavedPlayer(player)
     local oldStage = Neverbirth:GetBlackTaisuiStage(player)
     saved.parasite = math.max(0, (tonumber(saved.parasite) or 0) + amount)
+    Neverbirth:SpawnFolkVisualEffect("BlackTaisuiPulse", player.Position or Vector(320, 280), player)
     SaveMusicboxData()
     Neverbirth:RefreshBlackTaisuiCache(player)
     if Neverbirth:GetBlackTaisuiStage(player) > oldStage then
         Neverbirth:TriggerBlackTaisuiSpores(player, "stage:" .. tostring(reason or saved.parasite), true)
     end
+    Neverbirth:EnsureBlackTaisuiStageThreeReward(player)
 end
 
 function Neverbirth:GetBlackTaisuiHealthSnapshot(player)
@@ -5314,21 +7578,23 @@ end
 
 function Neverbirth:IsBlackTaisuiIgnoredDamage(flags)
     flags = tonumber(flags) or 0
-    if DamageFlag and DamageFlag.DAMAGE_FAKE and (flags & DamageFlag.DAMAGE_FAKE) ~= 0 then
-        return true
-    end
-    if DamageFlag and DamageFlag.DAMAGE_IV_BAG and (flags & DamageFlag.DAMAGE_IV_BAG) ~= 0 then
-        return true
+    local ignoredFlags = {
+        DamageFlag and DamageFlag.DAMAGE_FAKE,
+        DamageFlag and DamageFlag.DAMAGE_IV_BAG,
+        DamageFlag and DamageFlag.DAMAGE_DEVIL,
+        DamageFlag and DamageFlag.DAMAGE_CURSED_DOOR,
+        DamageFlag and DamageFlag.DAMAGE_NOKILL,
+    }
+    for _, flag in ipairs(ignoredFlags) do
+        if flag and (flags & flag) ~= 0 then
+            return true
+        end
     end
     return false
 end
 
 function Neverbirth:BlackTaisuiDamageIsLethal(player, amount)
-    amount = tonumber(amount) or 0
-    local maxHearts = player and player.GetMaxHearts and player:GetMaxHearts() or tonumber(player and player.maxHearts) or 0
-    local hearts = player and player.GetHearts and player:GetHearts() or tonumber(player and player.hearts) or 0
-    local soulHearts = player and player.GetSoulHearts and player:GetSoulHearts() or tonumber(player and player.soulHearts) or 0
-    return (hearts + soulHearts) <= amount
+    return IsIncomingDamageLethal(player, tonumber(amount) or 0)
 end
 
 function Neverbirth:TriggerBlackTaisuiSpores(player, reason, strong)
@@ -5342,6 +7608,7 @@ function Neverbirth:TriggerBlackTaisuiSpores(player, reason, strong)
     end
     state.sporeKeys[key] = true
     SpawnFolkEffect(FOLK_BLACK_CREEP, player.Position or Vector(320, 280), player)
+    Neverbirth:SpawnFolkVisualEffect(strong and "BlackTaisuiFearPulse" or "BlackTaisuiSpore", player.Position or Vector(320, 280), player)
     if player.SetColor then
         pcall(function()
             player:SetColor(Color(0.22, 0.22, 0.22, 1, 0, 0, 0.08), strong and 45 or 20, 1, true, false)
@@ -5361,10 +7628,11 @@ function Neverbirth:TriggerBlackTaisuiSpores(player, reason, strong)
 end
 
 function Neverbirth:BlackTaisuiDeathSaveAvailable(player)
-    return player
-        and PlayerHasCollectible(player, Items.BlackTaisui)
-        and Neverbirth:GetBlackTaisuiStage(player) >= 3
-        and Neverbirth:GetBlackTaisuiRuntimeState(player).deathSavedFloorKey ~= GetFolkFloorKey()
+    if not player or not PlayerHasCollectible(player, Items.BlackTaisui) or Neverbirth:GetBlackTaisuiStage(player) < 3 then
+        return false
+    end
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    return state.deathSavedFloorKey ~= GetFolkFloorKey()
 end
 
 function Neverbirth:GetBlackTaisuiTemporaryEffects(player)
@@ -5405,6 +7673,59 @@ function Neverbirth:GetBlackTaisuiOfficialLifeCount(player)
     return nil
 end
 
+function Neverbirth:GetBlackTaisuiWavyCapEffectCount(player)
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    if not effects then
+        return 0
+    end
+    local itemId = Neverbirth.BlackTaisuiWavyCap
+    if effects.GetCollectibleEffectNum then
+        local ok, count = pcall(function()
+            return effects:GetCollectibleEffectNum(itemId)
+        end)
+        if ok then
+            return tonumber(count) or 0
+        end
+    end
+    if effects.HasCollectibleEffect then
+        local ok, has = pcall(function()
+            return effects:HasCollectibleEffect(itemId)
+        end)
+        if ok then
+            return has and 1 or 0
+        end
+    end
+    return 0
+end
+
+function Neverbirth:RemoveBlackTaisuiWavyCapEffects(player, count)
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    count = math.max(0, math.floor(tonumber(count) or 0))
+    if not effects or count <= 0 or not effects.RemoveCollectibleEffect then
+        return 0
+    end
+
+    local removed = 0
+    local ok = pcall(function()
+        effects:RemoveCollectibleEffect(Neverbirth.BlackTaisuiWavyCap, count)
+    end)
+    if ok then
+        removed = count
+    else
+        for _ = 1, count do
+            local oneOk = pcall(function()
+                effects:RemoveCollectibleEffect(Neverbirth.BlackTaisuiWavyCap, 1)
+            end)
+            if oneOk then
+                removed = removed + 1
+            else
+                break
+            end
+        end
+    end
+    return removed
+end
+
 function Neverbirth:AddBlackTaisuiOfficialLifeEffect(player)
     local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
     if state.officialLifeEffectActive then
@@ -5428,10 +7749,19 @@ end
 
 function Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
     local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
-    if not state.officialLifeEffectActive then
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    local hasEffect = state.officialLifeEffectActive == true
+    if not hasEffect and effects and effects.GetCollectibleEffectNum then
+        local ok, count = pcall(function()
+            return effects:GetCollectibleEffectNum(Neverbirth.BlackTaisuiOfficialLifeItem)
+        end)
+        hasEffect = ok and (tonumber(count) or 0) > 0
+    end
+    if not hasEffect then
+        state.officialLifeEffectActive = nil
+        state.officialLifeEffectConfirmed = nil
         return
     end
-    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
     if effects and effects.RemoveCollectibleEffect then
         pcall(function()
             effects:RemoveCollectibleEffect(Neverbirth.BlackTaisuiOfficialLifeItem, 1)
@@ -5442,23 +7772,9 @@ function Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
 end
 
 function Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
-    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
-    if Neverbirth:BlackTaisuiDeathSaveAvailable(player) then
-        if state.officialLifeEffectActive then
-            local count = Neverbirth:GetBlackTaisuiOfficialLifeCount(player)
-            if count ~= nil and count > 0 then
-                state.officialLifeEffectConfirmed = true
-            elseif count ~= nil and count <= 0 and state.officialLifeEffectConfirmed then
-                state.officialLifeEffectActive = nil
-                state.officialLifeEffectConfirmed = nil
-                Neverbirth:ApplyBlackTaisuiDeathSave(player, false)
-                return
-            end
-        end
-        Neverbirth:AddBlackTaisuiOfficialLifeEffect(player)
-    else
-        Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
-    end
+    -- Do not fake the official 1UP HUD/costume for Black Taisui. The protection
+    -- is a damage ward, not an extra-life item, so always clean old temp effects.
+    Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
 end
 
 function Neverbirth:RestoreBlackTaisuiDeathSaveHealth(player)
@@ -5476,12 +7792,27 @@ function Neverbirth:ApplyBlackTaisuiDeathSave(player, reviveDeadPlayer)
     local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
     Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
     state.deathSavedFloorKey = GetFolkFloorKey()
+    state.deathSaveFeedbackFrames = 90
+    state.deathSaveFeedbackText = "TAISUI BLOCK"
     if reviveDeadPlayer and player.Revive then
         pcall(function()
             player:Revive()
         end)
     end
     Neverbirth:RestoreBlackTaisuiDeathSaveHealth(player)
+    if player and player.SetColor and Color then
+        pcall(function()
+            player:SetColor(Color(0.35, 0.08, 0.45, 1, 0.12, 0, 0.2), 45, 1, true, false)
+        end)
+    end
+    Neverbirth:SpawnFolkVisualEffect("BlackTaisuiDeathDeny", player.Position or Vector(320, 280), player)
+    local game = GetFolkGame()
+    local hud = game and game.GetHUD and game:GetHUD()
+    if hud and hud.ShowItemText then
+        pcall(function()
+            hud:ShowItemText("黑太岁", "挡下致命伤害")
+        end)
+    end
     Neverbirth:TriggerBlackTaisuiSpores(player, "death-save:" .. tostring(GetFolkFloorKey()), true)
 end
 
@@ -5494,6 +7825,11 @@ function Neverbirth:HandleBlackTaisuiDamage(entity, amount, flags)
         return nil
     end
 
+    if Neverbirth:BlackTaisuiDeathSaveAvailable(player) and Neverbirth:BlackTaisuiDamageIsLethal(player, amount) then
+        Neverbirth:ApplyBlackTaisuiDeathSave(player, false)
+        return false
+    end
+
     local maxHearts = player.GetMaxHearts and player:GetMaxHearts() or tonumber(player.maxHearts) or 0
     if maxHearts > 0 and DamageFlag and DamageFlag.DAMAGE_RED_HEARTS and ((tonumber(flags) or 0) & DamageFlag.DAMAGE_RED_HEARTS) ~= 0 then
         Neverbirth:AddBlackTaisuiParasite(player, (tonumber(amount) or 0) * 2, "red-damage")
@@ -5501,11 +7837,6 @@ function Neverbirth:HandleBlackTaisuiDamage(entity, amount, flags)
         Neverbirth:AddBlackTaisuiParasite(player, (tonumber(amount) or 0), "soul-damage")
     end
 
-    local stage = Neverbirth:GetBlackTaisuiStage(player)
-    if stage >= 3 and Neverbirth:BlackTaisuiDeathSaveAvailable(player) and Neverbirth:BlackTaisuiDamageIsLethal(player, amount) then
-        Neverbirth:ApplyBlackTaisuiDeathSave(player, false)
-        return false
-    end
     return nil
 end
 
@@ -5534,31 +7865,122 @@ function Neverbirth:EvaluateBlackTaisui(player, cacheFlag)
         if stage == 1 and player.MoveSpeed and player.MoveSpeed > Neverbirth.BlackTaisuiSpeedFloor then
             player.MoveSpeed = math.max(Neverbirth.BlackTaisuiSpeedFloor, player.MoveSpeed - Neverbirth.BlackTaisuiStageOneSpeedPenalty * copies)
         end
+        local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+        local currentSpeed = tonumber(state.cleansedWavyCurrentSpeed) or 0
+        local lingeringSpeed = tonumber(state.cleansedWavyLingeringSpeed) or 0
+        if (currentSpeed > 0 or lingeringSpeed > 0) and player.MoveSpeed then
+            player.MoveSpeed = player.MoveSpeed - currentSpeed - lingeringSpeed
+        end
     elseif cacheFlag == CacheFlag.CACHE_LUCK then
         if stage == 1 then
             player.Luck = player.Luck - Neverbirth.BlackTaisuiStageOneLuckPenalty * copies
+        end
+    elseif cacheFlag == CacheFlag.CACHE_FIREDELAY then
+        local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+        local stacks = tonumber(state.wavySuppressedStacks) or 0
+        if stage >= 2 and stacks > 0 and player.MaxFireDelay then
+            player.MaxFireDelay = player.MaxFireDelay - (Neverbirth.BlackTaisuiWavyCapTearsBonus * stacks)
+        end
+        local currentTears = tonumber(state.cleansedWavyCurrentTears) or 0
+        local lingeringTears = tonumber(state.cleansedWavyLingeringTears) or 0
+        if (currentTears > 0 or lingeringTears > 0) and player.MaxFireDelay then
+            player.MaxFireDelay = player.MaxFireDelay - currentTears - lingeringTears
+        end
+    elseif cacheFlag == CacheFlag.CACHE_RANGE then
+        local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+        local stacks = tonumber(state.wavySuppressedStacks) or 0
+        if stage >= 2 and stacks > 0 and player.TearRange then
+            player.TearRange = player.TearRange + (Neverbirth.BlackTaisuiWavyCapRangeBonus * stacks)
         end
     end
 end
 
 Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateBlackTaisui)
 
-function Neverbirth:FilterBlackTaisuiCurses(curses)
-    local result = tonumber(curses) or 0
+function Neverbirth:GetBlackTaisuiCurseMask()
     local mask = 0
     if LevelCurse then
-        mask = ((LevelCurse.CURSE_OF_BLIND or 0) | (LevelCurse.CURSE_OF_LOST or 0) | (LevelCurse.CURSE_OF_UNKNOWN or 0))
+        mask = ((LevelCurse.CURSE_OF_BLIND or LevelCurse.CURSE_OF_THE_BLIND or 0)
+            | (LevelCurse.CURSE_OF_LOST or LevelCurse.CURSE_OF_THE_LOST or 0)
+            | (LevelCurse.CURSE_OF_UNKNOWN or LevelCurse.CURSE_OF_THE_UNKNOWN or 0))
     end
+    return mask
+end
+
+function Neverbirth:FilterBlackTaisuiCurses(curses)
+    local result = tonumber(curses) or 0
+    local mask = Neverbirth:GetBlackTaisuiCurseMask()
     if mask == 0 or (result & mask) == 0 then
         return result
     end
     for _, player in ipairs(GetPlayers()) do
         if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 2 then
             Neverbirth:TriggerBlackTaisuiSpores(player, "curse:" .. tostring(result), false)
+            Neverbirth:SpawnFolkVisualEffect("BlackTaisuiCurseDevour", player.Position or Vector(320, 280), player)
             return result & (~mask)
         end
     end
     return result
+end
+
+function Neverbirth:SuppressBlackTaisuiLevelCurses(player)
+    local mask = Neverbirth:GetBlackTaisuiCurseMask()
+    if mask == 0 then
+        return false
+    end
+    local game = GetFolkGame()
+    local level = game and game.GetLevel and game:GetLevel() or nil
+    if not level then
+        return false
+    end
+
+    local current = nil
+    if level.GetCurses then
+        local ok, value = pcall(function()
+            return level:GetCurses()
+        end)
+        if ok then
+            current = tonumber(value) or 0
+            if (current & mask) == 0 then
+                return false
+            end
+        end
+    end
+
+    local changed = false
+    if level.RemoveCurses then
+        local ok = pcall(function()
+            level:RemoveCurses(mask)
+        end)
+        changed = changed or ok
+    end
+    if level.RemoveCurse and LevelCurse then
+        local curseList = {
+            LevelCurse.CURSE_OF_BLIND or LevelCurse.CURSE_OF_THE_BLIND,
+            LevelCurse.CURSE_OF_LOST or LevelCurse.CURSE_OF_THE_LOST,
+            LevelCurse.CURSE_OF_UNKNOWN or LevelCurse.CURSE_OF_THE_UNKNOWN,
+        }
+        for _, curse in ipairs(curseList) do
+            if curse and curse ~= 0 then
+                local ok = pcall(function()
+                    level:RemoveCurse(curse)
+                end)
+                changed = changed or ok
+            end
+        end
+    end
+    if current ~= nil and level.SetCurses then
+        local ok = pcall(function()
+            level:SetCurses(current & (~mask))
+        end)
+        changed = changed or ok
+    end
+
+    if changed and player then
+        Neverbirth:TriggerBlackTaisuiSpores(player, "curse-active:" .. tostring(GetFolkFloorKey()), false)
+        Neverbirth:SpawnFolkVisualEffect("BlackTaisuiCurseDevour", player.Position or Vector(320, 280), player)
+    end
+    return changed
 end
 
 if ModCallbacks.MC_POST_CURSE_EVAL then
@@ -5628,11 +8050,6 @@ function Neverbirth:ApplyBlackTaisuiCollectibleSprite(pickup, subtype)
             sprite:LoadGraphics()
         end)
     end
-    if sprite.SetFrame then
-        pcall(function()
-            sprite:SetFrame(animation, 0)
-        end)
-    end
     if replaced then
         if pickup.hidden ~= nil then
             pickup.hidden = false
@@ -5681,6 +8098,7 @@ function Neverbirth:RevealBlackTaisuiCollectiblePickup(pickup, player, reason)
 
     if refreshed and firstReveal and player then
         Neverbirth:TriggerBlackTaisuiSpores(player, "reveal:" .. tostring(reason or GetFolkRoomKey()), false)
+        Neverbirth:SpawnFolkVisualEffect("BlackTaisuiReveal", pickup.Position or (player and player.Position) or Vector(320, 280), player)
     end
     if refreshed and firstReveal then
         DebugLog("[neverbirth] Black Taisui refreshed collectible pedestal subtype=" .. tostring(subtype))
@@ -5722,6 +8140,17 @@ if ModCallbacks.MC_POST_PICKUP_INIT and PickupVariant then
 end
 
 function Neverbirth:SuppressBlackTaisuiWavyCapSideEffects(player)
+    local removed = 0
+    local effectCount = Neverbirth:GetBlackTaisuiWavyCapEffectCount(player)
+    if effectCount > 0 then
+        removed = Neverbirth:RemoveBlackTaisuiWavyCapEffects(player, effectCount)
+        if removed > 0 then
+            local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+            state.wavySuppressedStacks = (tonumber(state.wavySuppressedStacks) or 0) + removed
+            Neverbirth:RefreshBlackTaisuiCache(player)
+        end
+    end
+
     if MusicManager then
         local ok, music = pcall(MusicManager)
         if ok and music then
@@ -5744,21 +8173,224 @@ function Neverbirth:SuppressBlackTaisuiWavyCapSideEffects(player)
         end)
     end
 
-    Neverbirth:TriggerBlackTaisuiSpores(player, "wavy:" .. tostring(GetFolkRoomKey()), false)
+    if removed > 0 then
+        Neverbirth:TriggerBlackTaisuiSpores(player, "wavy:" .. tostring(GetFolkRoomKey()) .. ":" .. tostring(removed), false)
+    end
 end
+
+function Neverbirth:ReplaceBlackTaisuiWavyCap(player)
+    if not player or not PlayerHasCollectible(player, Items.BlackTaisui) or Neverbirth:GetBlackTaisuiStage(player) < 2 then
+        return false
+    end
+    if not IsValidItemId(Items.CleansedWavyCap) or not PlayerHasCollectible(player, Neverbirth.BlackTaisuiWavyCap) then
+        return false
+    end
+
+    local count = player.GetCollectibleNum and (tonumber(player:GetCollectibleNum(Neverbirth.BlackTaisuiWavyCap)) or 0) or 1
+    count = math.max(1, math.floor(count))
+    local replaced = 0
+    for _ = 1, count do
+        local removed = false
+        if player.RemoveCollectible then
+            removed = pcall(function()
+                player:RemoveCollectible(Neverbirth.BlackTaisuiWavyCap)
+            end)
+        end
+        if removed then
+            replaced = replaced + 1
+            if player.AddCollectible then
+                pcall(function()
+                    player:AddCollectible(Items.CleansedWavyCap, 0, true)
+                end)
+            end
+        end
+    end
+
+    if replaced > 0 then
+        Neverbirth:SuppressBlackTaisuiWavyCapSideEffects(player)
+        Neverbirth:SpawnFolkVisualEffect("BlackTaisuiHallucinationEat", player.Position or Vector(320, 280), player)
+        Neverbirth:TriggerBlackTaisuiSpores(player, "wavy-replace:" .. tostring(GetFolkPlayerKey(player)), false)
+        return true
+    end
+    return false
+end
+
+function Neverbirth:GetCleansedWavyCapState(player)
+    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+    state.cleansedWavyRoomKey = state.cleansedWavyRoomKey or GetFolkRoomKey()
+    state.cleansedWavyCurrentSpeed = tonumber(state.cleansedWavyCurrentSpeed) or 0
+    state.cleansedWavyCurrentTears = tonumber(state.cleansedWavyCurrentTears) or 0
+    state.cleansedWavyLingeringSpeed = tonumber(state.cleansedWavyLingeringSpeed) or 0
+    state.cleansedWavyLingeringTears = tonumber(state.cleansedWavyLingeringTears) or 0
+    return state
+end
+
+function Neverbirth:RefreshCleansedWavyCapCache(player)
+    if not player or not player.AddCacheFlags or not CacheFlag then
+        return
+    end
+    local flags = 0
+    if CacheFlag.CACHE_SPEED then flags = flags | CacheFlag.CACHE_SPEED end
+    if CacheFlag.CACHE_FIREDELAY then flags = flags | CacheFlag.CACHE_FIREDELAY end
+    if flags ~= 0 then
+        player:AddCacheFlags(flags)
+        if player.EvaluateItems then
+            player:EvaluateItems()
+        end
+    end
+end
+
+function Neverbirth:QueueCleansedWavyCapChargeUpdate(player, slot)
+    if not player then
+        return
+    end
+    local state = Neverbirth:GetCleansedWavyCapState(player)
+    state.cleansedWavyChargeSlot = slot or 0
+    state.cleansedWavyChargeDelay = 1
+    state.cleansedWavyChargeRepeats = 3
+end
+
+function Neverbirth:ApplyCleansedWavyCapChargeUpdate(player)
+    if not player or not player.SetActiveCharge then
+        return
+    end
+    local state = Neverbirth:GetCleansedWavyCapState(player)
+    local delay = tonumber(state.cleansedWavyChargeDelay) or 0
+    if delay <= 0 then
+        return
+    end
+    if delay > 1 then
+        state.cleansedWavyChargeDelay = delay - 1
+        return
+    end
+    local uses = tonumber(state.cleansedWavyUses) or 1
+    local spent = math.min(Neverbirth.CleansedWavyCapMaxCharge, uses * Neverbirth.CleansedWavyCapChargeStep)
+    local charge = math.max(0, Neverbirth.CleansedWavyCapMaxCharge - spent)
+    pcall(function()
+        player:SetActiveCharge(charge, state.cleansedWavyChargeSlot or 0)
+    end)
+
+    local repeats = tonumber(state.cleansedWavyChargeRepeats) or 1
+    if repeats > 1 then
+        state.cleansedWavyChargeRepeats = repeats - 1
+        state.cleansedWavyChargeDelay = 1
+    else
+        state.cleansedWavyChargeDelay = nil
+        state.cleansedWavyChargeRepeats = nil
+    end
+end
+
+function Neverbirth:UseCleansedWavyCap(itemId, rng, player, flags, slot)
+    if not player then
+        return nil
+    end
+    local state = Neverbirth:GetCleansedWavyCapState(player)
+    state.cleansedWavyRoomKey = GetFolkRoomKey()
+    state.cleansedWavyCurrentSpeed = (tonumber(state.cleansedWavyCurrentSpeed) or 0) + Neverbirth.CleansedWavyCapSpeedPenalty
+    state.cleansedWavyCurrentTears = (tonumber(state.cleansedWavyCurrentTears) or 0) + Neverbirth.CleansedWavyCapTearsBonus
+    state.cleansedWavyUses = (tonumber(state.cleansedWavyUses) or 0) + 1
+    Neverbirth:QueueCleansedWavyCapChargeUpdate(player, slot)
+    Neverbirth:RefreshCleansedWavyCapCache(player)
+    return true
+end
+
+function Neverbirth:AdvanceCleansedWavyCapRoom(player)
+    if not player then
+        return
+    end
+    local state = Neverbirth:GetCleansedWavyCapState(player)
+    local roomKey = GetFolkRoomKey()
+    if state.cleansedWavyRoomKey == roomKey then
+        return
+    end
+
+    local speed = tonumber(state.cleansedWavyCurrentSpeed) or 0
+    local tears = tonumber(state.cleansedWavyCurrentTears) or 0
+    if speed > 0 or tears > 0 then
+        state.cleansedWavyLingeringSpeed = (tonumber(state.cleansedWavyLingeringSpeed) or 0) + speed * 2
+        state.cleansedWavyLingeringTears = (tonumber(state.cleansedWavyLingeringTears) or 0) + tears * 0.4
+        state.cleansedWavyCurrentSpeed = 0
+        state.cleansedWavyCurrentTears = 0
+        Neverbirth:RefreshCleansedWavyCapCache(player)
+    end
+    state.cleansedWavyRoomKey = roomKey
+    state.cleansedWavyClearRoomKey = nil
+end
+
+function Neverbirth:DecayCleansedWavyCapOnClear(player)
+    local room = GetFolkRoom()
+    if not room or not room.IsClear or not room:IsClear() then
+        return
+    end
+    local state = Neverbirth:GetCleansedWavyCapState(player)
+    local roomKey = GetFolkRoomKey()
+    if state.cleansedWavyClearRoomKey == roomKey then
+        return
+    end
+    state.cleansedWavyClearRoomKey = roomKey
+
+    local speed = tonumber(state.cleansedWavyLingeringSpeed) or 0
+    local tears = tonumber(state.cleansedWavyLingeringTears) or 0
+    if speed > 0 or tears > 0 then
+        state.cleansedWavyLingeringSpeed = math.max(0, speed - Neverbirth.CleansedWavyCapSettledSpeedPenalty)
+        state.cleansedWavyLingeringTears = math.max(0, tears - Neverbirth.CleansedWavyCapSettledTearsBonus)
+        Neverbirth:RefreshCleansedWavyCapCache(player)
+    end
+end
+
+function Neverbirth:AdvanceCleansedWavyCapRooms()
+    for _, player in ipairs(GetPlayers()) do
+        if PlayerHasCollectible(player, Items.CleansedWavyCap) then
+            Neverbirth:AdvanceCleansedWavyCapRoom(player)
+        end
+    end
+end
+
+if ModCallbacks.MC_POST_NEW_ROOM then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.AdvanceCleansedWavyCapRooms)
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseCleansedWavyCap, Items.CleansedWavyCap)
 
 function Neverbirth:UpdateBlackTaisui()
     for _, player in ipairs(GetPlayers()) do
+        local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+        if (tonumber(state.deathSaveFeedbackFrames) or 0) > 0 then
+            state.deathSaveFeedbackFrames = math.max(0, (tonumber(state.deathSaveFeedbackFrames) or 0) - 1)
+        end
         Neverbirth:UpdateBlackTaisuiParasiteFromHealth(player)
+        if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 2 and PlayerHasCollectible(player, Neverbirth.BlackTaisuiWavyCap) then
+            Neverbirth:ReplaceBlackTaisuiWavyCap(player)
+        end
         if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 2 and PlayerHasCollectible(player, Neverbirth.BlackTaisuiWavyCap) then
             Neverbirth:SuppressBlackTaisuiWavyCapSideEffects(player)
         end
+        if PlayerHasCollectible(player, Items.CleansedWavyCap) then
+            Neverbirth:ApplyCleansedWavyCapChargeUpdate(player)
+            Neverbirth:AdvanceCleansedWavyCapRoom(player)
+            Neverbirth:DecayCleansedWavyCapOnClear(player)
+        end
         if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 2 then
-            local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
+            Neverbirth:SuppressBlackTaisuiLevelCurses(player)
             local revealKey = tostring(GetFolkFloorKey()) .. ":" .. tostring(GetFolkRoomKey())
             if state.revealRoomKey ~= revealKey then
                 state.revealRoomKey = revealKey
+                state.revealRefreshTick = 0
                 Neverbirth:RevealBlackTaisuiRoomCollectibles(player, "room")
+            else
+                state.revealRefreshTick = (tonumber(state.revealRefreshTick) or 0) + 1
+                if state.revealRefreshTick >= 10 then
+                    state.revealRefreshTick = 0
+                    Neverbirth:RevealBlackTaisuiRoomCollectibles(player, "room-refresh")
+                end
+            end
+        end
+        Neverbirth:EnsureBlackTaisuiStageThreeReward(player)
+        if PlayerHasCollectible(player, Items.BlackTaisui) and Neverbirth:GetBlackTaisuiStage(player) >= 3 then
+            state.matureCoreTick = (tonumber(state.matureCoreTick) or 999) + 1
+            if state.matureCoreTick >= 60 then
+                state.matureCoreTick = 0
+                Neverbirth:SpawnFolkVisualEffect("BlackTaisuiMatureCore", player.Position or Vector(320, 280), player)
             end
         end
         Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
@@ -5782,12 +8414,18 @@ function Neverbirth:RenderBlackTaisuiLifeHud()
     local slot = 0
     for _, player in ipairs(GetPlayers()) do
         local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
-        if Neverbirth:BlackTaisuiDeathSaveAvailable(player) and not state.officialLifeEffectActive then
+        if Neverbirth:BlackTaisuiDeathSaveAvailable(player) then
             local x = Neverbirth.BlackTaisuiLifeHudX + slot * 24
             local y = Neverbirth.BlackTaisuiLifeHudY
             Isaac.RenderText(Neverbirth.BlackTaisuiLifeHudText, x + 1, y + 1, 0, 0, 0, 0.75)
-            Isaac.RenderText(Neverbirth.BlackTaisuiLifeHudText, x, y, 1, 1, 1, 1)
+            Isaac.RenderText(Neverbirth.BlackTaisuiLifeHudText, x, y, 0.58, 0.28, 0.76, 1)
             slot = slot + 1
+        end
+        if (tonumber(state.deathSaveFeedbackFrames) or 0) > 0 and player and player.Position and Isaac.WorldToScreen then
+            local screen = Isaac.WorldToScreen(player.Position + Vector(0, -52))
+            local text = state.deathSaveFeedbackText or "TAISUI BLOCK"
+            Isaac.RenderText(text, screen.X - 34 + 1, screen.Y + 1, 0, 0, 0, 0.85)
+            Isaac.RenderText(text, screen.X - 34, screen.Y, 0.65, 0.22, 0.88, 1)
         end
     end
 end
@@ -5803,6 +8441,13 @@ function Neverbirth:ResetBlackTaisuiOnNewLevel()
         state.revealRoomKey = nil
         state.snapshotReady = false
         state.officialLifeEffectActive = nil
+        state.wavySuppressedStacks = 0
+        state.cleansedWavyRoomKey = GetFolkRoomKey()
+        state.cleansedWavyCurrentSpeed = 0
+        state.cleansedWavyCurrentTears = 0
+        state.cleansedWavyLingeringSpeed = 0
+        state.cleansedWavyLingeringTears = 0
+        state.cleansedWavyClearRoomKey = nil
         Neverbirth:RefreshBlackTaisuiCache(player)
         Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
     end
@@ -5825,13 +8470,19 @@ local GOOD_GIRL_CHARM_DURATION = 90
 local GOOD_GIRL_REWARD_CHANCE = 33
 local GOOD_GIRL_HALF_SOUL = (HeartSubType and HeartSubType.HEART_HALF_SOUL) or 8
 local GOOD_GIRL_COIN = (CoinSubType and CoinSubType.COIN_PENNY) or 1
-local GOOD_GIRL_CARD = (Card and Card.CARD_RANDOM) or 0
-local goodGirlStates = {}
+Neverbirth.GoodGirl = Neverbirth.GoodGirl or {
+    CostumePath = "gfx/characters/costume_good_girl_of_babylon.anm2",
+    CardPickRetries = 16,
+    MaxReasonableCardSubtype = 10000,
+    states = {},
+    costumeStates = {},
+    costumeId = nil,
+}
 
-local function GetGoodGirlState(player)
+function GetGoodGirlState(player)
     local key = GetFolkPlayerKey(player)
     local roomKey = GetFolkRoomKey()
-    local state = goodGirlStates[key]
+    local state = Neverbirth.GoodGirl.states[key]
     if type(state) ~= "table" or state.roomKey ~= roomKey then
         state = {
             roomKey = roomKey,
@@ -5840,16 +8491,16 @@ local function GetGoodGirlState(player)
             rewarded = false,
             echoFrames = 0,
         }
-        goodGirlStates[key] = state
+        Neverbirth.GoodGirl.states[key] = state
     end
     return state
 end
 
-local function PlayerHasGoodGirl(player)
+function PlayerHasGoodGirl(player)
     return PlayerHasCollectible(player, Items.GoodGirlOfBabylon)
 end
 
-local function GoodGirlHasFullRedHearts(player)
+function GoodGirlHasFullRedHearts(player)
     if not player or not player.GetMaxHearts or not player.GetHearts then
         return false
     end
@@ -5859,11 +8510,225 @@ local function GoodGirlHasFullRedHearts(player)
     return maxRed > 0 and currentRed >= maxRed
 end
 
-local function IsGoodGirlPresentable(player, state)
+function IsGoodGirlPresentable(player, state)
     return PlayerHasGoodGirl(player) and GoodGirlHasFullRedHearts(player) and not (state and state.broken)
 end
 
-local function RefreshGoodGirlCache(player)
+function GetGoodGirlCostumeId()
+    if Neverbirth.GoodGirl.costumeId ~= nil then
+        return Neverbirth.GoodGirl.costumeId or nil
+    end
+
+    Neverbirth.GoodGirl.costumeId = false
+    if Isaac and Isaac.GetCostumeIdByPath then
+        local ok, costumeId = pcall(function()
+            return Isaac.GetCostumeIdByPath(Neverbirth.GoodGirl.CostumePath)
+        end)
+        if ok and type(costumeId) == "number" and costumeId > 0 then
+            Neverbirth.GoodGirl.costumeId = costumeId
+        end
+    end
+
+    return Neverbirth.GoodGirl.costumeId or nil
+end
+
+function RemoveGoodGirlCostume(player, costumeId)
+    if player and costumeId and player.TryRemoveNullCostume then
+        pcall(function()
+            player:TryRemoveNullCostume(costumeId)
+        end)
+    end
+end
+
+function AddGoodGirlCostume(player, costumeId)
+    if player and costumeId and player.AddNullCostume then
+        pcall(function()
+            player:AddNullCostume(costumeId)
+        end)
+    end
+end
+
+function ApplyGoodGirlCostume(player, active)
+    if not player then
+        return
+    end
+
+    local key = GetFolkPlayerKey(player)
+    local visualState = active and "presentable" or "none"
+    if Neverbirth.GoodGirl.costumeStates[key] == visualState then
+        return
+    end
+
+    local costumeId = GetGoodGirlCostumeId()
+    if costumeId then
+        RemoveGoodGirlCostume(player, costumeId)
+        if active then
+            AddGoodGirlCostume(player, costumeId)
+        end
+    end
+    Neverbirth.GoodGirl.costumeStates[key] = visualState
+end
+
+function GetGoodGirlItemPool()
+    local game = Game and Game() or nil
+    if game and game.GetItemPool then
+        local ok, itemPool = pcall(function()
+            return game:GetItemPool()
+        end)
+        if ok then
+            return itemPool
+        end
+    end
+    return nil
+end
+
+function GetGoodGirlItemConfig()
+    if Isaac and Isaac.GetItemConfig then
+        local ok, itemConfig = pcall(function()
+            return Isaac.GetItemConfig()
+        end)
+        if ok then
+            return itemConfig
+        end
+    end
+    return nil
+end
+
+function GetGoodGirlRewardSeed(player, attempt)
+    local seed = tonumber(player and player.InitSeed) or 0
+    local room = GetFolkRoom()
+    if room and room.GetSpawnSeed then
+        local ok, roomSeed = pcall(function()
+            return room:GetSpawnSeed()
+        end)
+        if ok and type(roomSeed) == "number" then
+            seed = seed + roomSeed
+        end
+    end
+    return math.abs(math.floor(seed + (attempt or 0) * 101 + 37))
+end
+
+function IsGoodGirlKnownCardSubtype(subtype)
+    subtype = math.floor(tonumber(subtype) or 0)
+    if subtype < 1 or subtype > Neverbirth.GoodGirl.MaxReasonableCardSubtype then
+        return false
+    end
+
+    local itemConfig = GetGoodGirlItemConfig()
+    if itemConfig and itemConfig.GetCard then
+        local ok, cardConfig = pcall(function()
+            return itemConfig:GetCard(subtype)
+        end)
+        if not ok or cardConfig == nil then
+            return false
+        end
+
+        local hasDisplayData = false
+        for _, field in ipairs({ "Name", "Description", "GfxFileName", "HudAnim" }) do
+            local fieldOk, value = pcall(function()
+                return cardConfig[field]
+            end)
+            if fieldOk and value ~= nil and tostring(value) ~= "" then
+                hasDisplayData = true
+                break
+            end
+        end
+        if not hasDisplayData then
+            return false
+        end
+    end
+
+    if EID then
+        local eidChecked = false
+        local descObj = nil
+        local eidCalls = {
+            function() return EID.getDescriptionObjByID and EID:getDescriptionObjByID(FOLK_ENTITY_PICKUP, (PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300, subtype) end,
+            function() return EID.getDescriptionObj and EID:getDescriptionObj(FOLK_ENTITY_PICKUP, (PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300, subtype) end,
+        }
+        for _, call in ipairs(eidCalls) do
+            local ok, result = pcall(call)
+            if ok and result ~= nil then
+                eidChecked = true
+                descObj = result
+                break
+            elseif ok then
+                eidChecked = true
+            end
+        end
+        if eidChecked then
+            if type(descObj) ~= "table" then
+                return false
+            end
+            local name = tostring(descObj.Name or descObj.ObjName or "")
+            local description = tostring(descObj.Description or "")
+            local combined = string.lower(name .. " " .. description)
+            if combined == " " then
+                return false
+            end
+            if combined:find("no description available", 1, true) then
+                return false
+            end
+            if combined:find(tostring(FOLK_ENTITY_PICKUP) .. "." .. tostring((PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300) .. ".", 1, true) then
+                return false
+            end
+        end
+    end
+
+    return true
+end
+
+function AddGoodGirlCardCandidate(candidates, seen, subtype)
+    subtype = math.floor(tonumber(subtype) or 0)
+    if subtype >= 1 and not seen[subtype] and IsGoodGirlKnownCardSubtype(subtype) then
+        seen[subtype] = true
+        candidates[#candidates + 1] = subtype
+    end
+end
+
+function CollectGoodGirlCardCandidates()
+    local candidates = {}
+    local seen = {}
+    local maxVanilla = (Card and type(Card.RUNE_HAGALAZ) == "number" and Card.RUNE_HAGALAZ > 1) and (Card.RUNE_HAGALAZ - 1) or 31
+    for subtype = 1, maxVanilla do
+        AddGoodGirlCardCandidate(candidates, seen, subtype)
+    end
+    if type(Card) == "table" then
+        for _, subtype in pairs(Card) do
+            AddGoodGirlCardCandidate(candidates, seen, subtype)
+        end
+    end
+    table.sort(candidates)
+    return candidates
+end
+
+function GetGoodGirlRewardCardSubtype(player)
+    local itemPool = GetGoodGirlItemPool()
+    if itemPool and itemPool.GetCard then
+        for attempt = 0, Neverbirth.GoodGirl.CardPickRetries - 1 do
+            local seed = GetGoodGirlRewardSeed(player, attempt)
+            local rolls = {
+                function() return itemPool:GetCard(seed, true, true, false) end,
+                function() return itemPool:GetCard(seed, true, false, false) end,
+            }
+            for _, roll in ipairs(rolls) do
+                local ok, subtype = pcall(roll)
+                if ok and IsGoodGirlKnownCardSubtype(subtype) then
+                    return math.floor(subtype)
+                end
+            end
+        end
+    end
+
+    local candidates = CollectGoodGirlCardCandidates()
+    if #candidates <= 0 then
+        return (Card and Card.CARD_FOOL) or 1
+    end
+
+    local seed = GetGoodGirlRewardSeed(player, 0)
+    return candidates[(seed % #candidates) + 1]
+end
+
+function RefreshGoodGirlCache(player)
     if not player or not player.AddCacheFlags or not CacheFlag then
         return
     end
@@ -5881,7 +8746,7 @@ local function RefreshGoodGirlCache(player)
     end
 end
 
-local function IsGoodGirlRedHeartDamage(player, amount, flags)
+function IsGoodGirlRedHeartDamage(player, amount, flags)
     if (tonumber(amount) or 0) <= 0 then
         return false
     end
@@ -5910,7 +8775,7 @@ local function IsGoodGirlRedHeartDamage(player, amount, flags)
     return soulHearts <= 0 and redHearts > 0
 end
 
-local function FearGoodGirlEnemies(player)
+function FearGoodGirlEnemies(player)
     if not Isaac.GetRoomEntities then
         return
     end
@@ -5926,7 +8791,7 @@ local function FearGoodGirlEnemies(player)
     end
 end
 
-local function CharmGoodGirlRoomEnemies(player)
+function CharmGoodGirlRoomEnemies(player)
     if not Isaac.GetRoomEntities or not IsGoodGirlPresentable(player, GetGoodGirlState(player)) then
         return
     end
@@ -5941,16 +8806,21 @@ local function CharmGoodGirlRoomEnemies(player)
                     data[key] = true
                 end
                 if GetFolkRandomInt(player, Items.GoodGirlOfBabylon, 100) < GOOD_GIRL_CHARM_CHANCE then
+                    local charmed = false
                     if entity.AddCharmed then
-                        pcall(function()
+                        charmed = pcall(function()
                             entity:AddCharmed(ref, GOOD_GIRL_CHARM_DURATION)
                         end)
                     elseif entity.AddConfusion then
-                        pcall(function()
+                        charmed = pcall(function()
                             entity:AddConfusion(ref, GOOD_GIRL_CHARM_DURATION, false)
                         end)
                     elseif entity.AddEntityFlags and EntityFlag and EntityFlag.FLAG_CHARM then
                         entity:AddEntityFlags(EntityFlag.FLAG_CHARM)
+                        charmed = true
+                    end
+                    if charmed then
+                        Neverbirth:SpawnFolkVisualEffect("GoodGirlCharm", entity.Position or player.Position or Vector(320, 280), player)
                     end
                 end
             end
@@ -5958,7 +8828,7 @@ local function CharmGoodGirlRoomEnemies(player)
     end
 end
 
-local function SpawnGoodGirlReward(player)
+function SpawnGoodGirlReward(player)
     local position = player and player.Position or Vector(320, 280)
     local room = GetFolkRoom()
     if room and room.FindFreePickupSpawnPosition then
@@ -5967,12 +8837,13 @@ local function SpawnGoodGirlReward(player)
 
     local reward = GetFolkRandomInt(player, Items.GoodGirlOfBabylon, 3)
     if reward == 0 then
-        Isaac.Spawn(FOLK_ENTITY_PICKUP, (PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300, GOOD_GIRL_CARD, position, Vector(0, 0), player)
+        Isaac.Spawn(FOLK_ENTITY_PICKUP, (PickupVariant and PickupVariant.PICKUP_TAROTCARD) or 300, GetGoodGirlRewardCardSubtype(player), position, Vector(0, 0), player)
     elseif reward == 1 then
         Isaac.Spawn(FOLK_ENTITY_PICKUP, FOLK_PICKUP_HEART, GOOD_GIRL_HALF_SOUL, position, Vector(0, 0), player)
     else
         Isaac.Spawn(FOLK_ENTITY_PICKUP, (PickupVariant and PickupVariant.PICKUP_COIN) or 20, GOOD_GIRL_COIN, position, Vector(0, 0), player)
     end
+    Neverbirth:SpawnFolkVisualEffect("GoodGirlReward", position, player)
 end
 
 function Neverbirth:EvaluateGoodGirlOfBabylon(player, cacheFlag)
@@ -6001,6 +8872,35 @@ end
 
 Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateGoodGirlOfBabylon)
 
+function Neverbirth:EnsureGoodGirlFollowEffect(state, field, key, player)
+    if type(state) ~= "table" or not player then
+        return nil
+    end
+
+    local effect = state[field]
+    if not Neverbirth:IsFolkVisualEffectActive(effect) then
+        effect = Neverbirth:SpawnFolkVisualEffect(key, player.Position or Vector(320, 280), player)
+        state[field] = effect
+    else
+        Neverbirth:BindFolkVisualEffectOwner(effect, key, player)
+        Neverbirth:RefreshFolkVisualEffectTimeout(effect, key)
+    end
+
+    return effect
+end
+
+function Neverbirth:RemoveGoodGirlFollowEffect(state, field)
+    if type(state) ~= "table" then
+        return
+    end
+
+    local effect = state[field]
+    if Neverbirth:IsFolkVisualEffectActive(effect) and effect.Remove then
+        effect:Remove()
+    end
+    state[field] = nil
+end
+
 function Neverbirth:HandleGoodGirlOfBabylonDamage(entity, amount, flags)
     local player = entity and entity.ToPlayer and entity:ToPlayer()
     if not player or not PlayerHasGoodGirl(player) then
@@ -6016,6 +8916,9 @@ function Neverbirth:HandleGoodGirlOfBabylonDamage(entity, amount, flags)
     state.redDamaged = true
     state.echoFrames = GOOD_GIRL_ECHO_FRAMES
     FearGoodGirlEnemies(player)
+    ApplyGoodGirlCostume(player, false)
+    Neverbirth:RemoveGoodGirlFollowEffect(state, "haloEffect")
+    Neverbirth:SpawnFolkVisualEffect("GoodGirlBreak", player.Position or Vector(320, 280), player)
     if player.SetColor then
         player:SetColor(Color(0.65, 0.05, 0.05, 1, 0.15, 0, 0), 45, 1, true, false)
     end
@@ -6029,13 +8932,17 @@ function Neverbirth:RefreshGoodGirlOfBabylonRoom()
     for _, player in ipairs(GetPlayers()) do
         if PlayerHasGoodGirl(player) then
             local key = GetFolkPlayerKey(player)
-            goodGirlStates[key] = {
+            local previousState = Neverbirth.GoodGirl.states[key]
+            Neverbirth:RemoveGoodGirlFollowEffect(previousState, "haloEffect")
+            Neverbirth:RemoveGoodGirlFollowEffect(previousState, "echoEffect")
+            Neverbirth.GoodGirl.states[key] = {
                 roomKey = GetFolkRoomKey(),
                 broken = false,
                 redDamaged = false,
                 rewarded = false,
                 echoFrames = 0,
             }
+            ApplyGoodGirlCostume(player, IsGoodGirlPresentable(player, Neverbirth.GoodGirl.states[key]))
             CharmGoodGirlRoomEnemies(player)
             RefreshGoodGirlCache(player)
         end
@@ -6056,10 +8963,23 @@ function Neverbirth:UpdateGoodGirlOfBabylon()
             local echoFrames = tonumber(state.echoFrames) or 0
             if echoFrames > 0 then
                 state.echoFrames = echoFrames - 1
-                if state.echoFrames <= 0 then
+                if state.echoFrames > 0 then
+                    Neverbirth:EnsureGoodGirlFollowEffect(state, "echoEffect", "GoodGirlEcho", player)
+                else
                     state.echoFrames = 0
+                    Neverbirth:RemoveGoodGirlFollowEffect(state, "echoEffect")
                     RefreshGoodGirlCache(player)
                 end
+            else
+                Neverbirth:RemoveGoodGirlFollowEffect(state, "echoEffect")
+            end
+
+            if IsGoodGirlPresentable(player, state) then
+                ApplyGoodGirlCostume(player, true)
+                Neverbirth:EnsureGoodGirlFollowEffect(state, "haloEffect", "GoodGirlHalo", player)
+            else
+                ApplyGoodGirlCostume(player, false)
+                Neverbirth:RemoveGoodGirlFollowEffect(state, "haloEffect")
             end
 
             if isClear and not state.rewarded then
@@ -6068,6 +8988,8 @@ function Neverbirth:UpdateGoodGirlOfBabylon()
                     SpawnGoodGirlReward(player)
                 end
             end
+        else
+            ApplyGoodGirlCostume(player, false)
         end
     end
 end
@@ -6080,11 +9002,17 @@ function Neverbirth:ResetFolkHorrorItemState(isContinued)
     end
     for _, player in ipairs(GetPlayers()) do
         ApplyCoinFacedMaskCostume(player, COIN_MASK_VISUAL_NONE)
+        ApplyGoodGirlCostume(player, false)
     end
     coinFacedMaskStates = {}
     coinFacedMaskCostumeStates = {}
     blackTaisuiStates = {}
-    goodGirlStates = {}
+    for _, state in pairs(Neverbirth.GoodGirl.states) do
+        Neverbirth:RemoveGoodGirlFollowEffect(state, "haloEffect")
+        Neverbirth:RemoveGoodGirlFollowEffect(state, "echoEffect")
+    end
+    Neverbirth.GoodGirl.states = {}
+    Neverbirth.GoodGirl.costumeStates = {}
 end
 
 if ModCallbacks.MC_POST_GAME_STARTED then
@@ -8457,6 +11385,219 @@ function Neverbirth:GrantUtilityKnifeBrokenHeart(...)
     SaveMusicboxData()
 end
 
+function Neverbirth:GrantMeatLumpOneUp(...)
+    local player = self:FindUtilityKnifePickupPlayer(...)
+    if not player then
+        return
+    end
+
+    local granted = self:GrantOfficialOneUpFromMeatLump(player)
+    if granted and player.GetCollectibleNum and IsValidItemId(Items.MeatLump) then
+        local data = Neverbirth.GetBlackTaisuiData()
+        local key = tostring((player and player.InitSeed) or "0")
+        data.meatLumpCounts[key] = math.max(tonumber(data.meatLumpCounts[key]) or 0, tonumber(player:GetCollectibleNum(Items.MeatLump)) or 0)
+        SaveMusicboxData()
+    end
+end
+
+function Neverbirth:GrantOfficialOneUpFromMeatLump(player)
+    if not player then
+        return false
+    end
+    Neverbirth:AddHiddenMeatLumpOneUpEffect(player, Neverbirth.BlackTaisuiOfficialLifeItem)
+    Neverbirth:AddMeatLumpLife(player, 1)
+    return true
+end
+
+function Neverbirth:GetMeatLumpLifeCount(player)
+    local data = Neverbirth.GetBlackTaisuiData()
+    local key = tostring((player and player.InitSeed) or "0")
+    return math.max(0, tonumber(data.meatLumpLives[key]) or 0)
+end
+
+function Neverbirth:AddMeatLumpLife(player, amount)
+    local data = Neverbirth.GetBlackTaisuiData()
+    local key = tostring((player and player.InitSeed) or "0")
+    data.meatLumpLives[key] = math.max(0, (tonumber(data.meatLumpLives[key]) or 0) + (tonumber(amount) or 0))
+    SaveMusicboxData()
+end
+
+function Neverbirth:ConsumeMeatLumpLife(player)
+    local data = Neverbirth.GetBlackTaisuiData()
+    local key = tostring((player and player.InitSeed) or "0")
+    local count = math.max(0, tonumber(data.meatLumpLives[key]) or 0)
+    if count <= 0 then
+        return false
+    end
+    data.meatLumpLives[key] = count - 1
+    SaveMusicboxData()
+    return true
+end
+
+function Neverbirth:RestoreMeatLumpLifeHealth(player)
+    if not player then
+        return
+    end
+    local maxHearts = player.GetMaxHearts and (tonumber(player:GetMaxHearts()) or 0) or tonumber(player.maxHearts) or 0
+    if maxHearts > 0 and player.GetHearts and player.AddHearts then
+        local current = tonumber(player:GetHearts()) or 0
+        player:AddHearts(math.max(0, 1 - current))
+    elseif player.AddBlackHearts then
+        player:AddBlackHearts(2)
+    elseif player.AddSoulHearts then
+        player:AddSoulHearts(2)
+    end
+end
+
+function Neverbirth:ApplyMeatLumpLife(player, reviveDeadPlayer)
+    if not Neverbirth:ConsumeMeatLumpLife(player) then
+        return false
+    end
+    Neverbirth:ConsumeHiddenMeatLumpOneUpEffect(player, Neverbirth.BlackTaisuiOfficialLifeItem)
+    if reviveDeadPlayer and player and player.Revive then
+        pcall(function()
+            player:Revive()
+        end)
+    end
+    Neverbirth:RestoreMeatLumpLifeHealth(player)
+    if player and player.SetColor and Color then
+        pcall(function()
+            player:SetColor(Color(0.25, 0.15, 0.18, 1, 0.08, 0, 0.08), 45, 1, true, false)
+        end)
+    end
+    return true
+end
+
+function Neverbirth:HandleMeatLumpDamage(entity, amount)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    if not player or (tonumber(amount) or 0) <= 0 or Neverbirth:GetMeatLumpLifeCount(player) <= 0 then
+        return nil
+    end
+    if IsIncomingDamageLethal(player, tonumber(amount) or 0) and Neverbirth:ApplyMeatLumpLife(player, false) then
+        return false
+    end
+    return nil
+end
+
+function Neverbirth:RecoverMeatLumpDeadPlayers()
+    for _, player in ipairs(GetPlayers()) do
+        if Neverbirth:GetMeatLumpLifeCount(player) > 0 and player and player.IsDead then
+            local ok, dead = pcall(function()
+                return player:IsDead()
+            end)
+            if ok and dead then
+                Neverbirth:ApplyMeatLumpLife(player, true)
+            end
+        end
+    end
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.HandleMeatLumpDamage, EntityType.ENTITY_PLAYER)
+if ModCallbacks.MC_POST_UPDATE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.RecoverMeatLumpDeadPlayers)
+end
+
+function Neverbirth:TryRemoveCollectibleCostume(player, itemId)
+    if not player or not itemId or not Isaac or not Isaac.GetItemConfig then
+        return
+    end
+    local ok, config = pcall(function()
+        local itemConfig = Isaac.GetItemConfig()
+        return itemConfig and itemConfig.GetCollectible and itemConfig:GetCollectible(itemId) or nil
+    end)
+    if not ok or not config then
+        return
+    end
+    if player.TryRemoveCollectibleCostume then
+        pcall(function() player:TryRemoveCollectibleCostume(config, true) end)
+        pcall(function() player:TryRemoveCollectibleCostume(config, false) end)
+    end
+    if player.RemoveCostume then
+        pcall(function() player:RemoveCostume(config) end)
+    end
+end
+
+function Neverbirth:AddHiddenMeatLumpOneUpEffect(player, itemId)
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    if not effects or not effects.AddCollectibleEffect then
+        return false
+    end
+    local attempts = {
+        function() effects:AddCollectibleEffect(itemId, false, 1) end,
+        function() effects:AddCollectibleEffect(itemId, false) end,
+        function() effects:AddCollectibleEffect(itemId) end,
+    }
+    for _, attempt in ipairs(attempts) do
+        if pcall(attempt) then
+            return true
+        end
+    end
+    return false
+end
+
+function Neverbirth:ConsumeHiddenMeatLumpOneUpEffect(player, itemId)
+    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
+    if not effects or not effects.RemoveCollectibleEffect then
+        return false
+    end
+    return pcall(function()
+        effects:RemoveCollectibleEffect(itemId, 1)
+    end)
+end
+
+function Neverbirth:HideMeatLumpOneUpCollectible(player, itemId)
+    Neverbirth:TryRemoveCollectibleCostume(player, itemId)
+
+    if player and player.RemoveCollectible then
+        local attempts = {
+            function() player:RemoveCollectible(itemId, false, 0, true) end,
+            function() player:RemoveCollectible(itemId, false, 0) end,
+            function() player:RemoveCollectible(itemId, false) end,
+            function() player:RemoveCollectible(itemId) end,
+        }
+        for _, attempt in ipairs(attempts) do
+            if pcall(attempt) then
+                break
+            end
+        end
+    end
+
+    -- The official 1UP is engine-side. After hiding its collectible/costume,
+    -- keep a no-costume collectible effect as the closest hidden official-life
+    -- backup available from Lua. If the engine ignores this for revives, the
+    -- visible collectible route is the only fully official path.
+    Neverbirth:AddHiddenMeatLumpOneUpEffect(player, itemId)
+end
+
+function Neverbirth:TrackMeatLumpOneUpCopies()
+    if not IsValidItemId(Items.MeatLump) then
+        return
+    end
+    local data = Neverbirth.GetBlackTaisuiData()
+    for _, player in ipairs(GetPlayers()) do
+        if player and player.GetCollectibleNum then
+            local key = tostring((player and player.InitSeed) or "0")
+            local currentCount = tonumber(player:GetCollectibleNum(Items.MeatLump)) or 0
+            local previousCount = tonumber(data.meatLumpCounts[key]) or 0
+            if currentCount > previousCount then
+                local granted = 0
+                for _ = 1, currentCount - previousCount do
+                    if Neverbirth:GrantOfficialOneUpFromMeatLump(player) then
+                        granted = granted + 1
+                    end
+                end
+                if granted > 0 then
+                    data.meatLumpCounts[key] = currentCount
+                    SaveMusicboxData()
+                end
+            elseif currentCount < previousCount then
+                data.meatLumpCounts[key] = currentCount
+                SaveMusicboxData()
+            end
+        end
+    end
+end
+
 function Neverbirth:TrackUtilityKnifeCopies()
     local data = self:GetUtilityKnifeData()
 
@@ -8482,8 +11623,27 @@ function Neverbirth:TrackUtilityKnifeCopies()
 end
 
 Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseCondom, Items.Condom)
+Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseDebugController, Items.DebugController)
 Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateUtilityKnife)
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackUtilityKnifeCopies)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackMeatLumpOneUpCopies)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateDebugControllerMenus)
+
+if ModCallbacks.MC_POST_RENDER then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_RENDER, Neverbirth.RenderDebugControllerMenus)
+end
+
+if ModCallbacks.MC_POST_FIRE_TEAR then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Neverbirth.SuppressDebugControllerTear)
+end
+
+if ModCallbacks.MC_POST_NEW_LEVEL then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.CloseDebugControllerMenus)
+end
+
+if ModCallbacks.MC_POST_GAME_STARTED then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.CloseDebugControllerMenus)
+end
 
 if ModCallbacks.MC_POST_PICKUP_INIT then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, Neverbirth.ReplaceCondomBannedPickup, Neverbirth.CondomCollectibleVariant)
@@ -8491,6 +11651,10 @@ end
 
 if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.GrantUtilityKnifeBrokenHeart, Items.UtilityKnife)
+end
+
+if ModCallbacks.MC_POST_ADD_COLLECTIBLE and IsValidItemId(Items.MeatLump) then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.GrantMeatLumpOneUp, Items.MeatLump)
 end
 end
 

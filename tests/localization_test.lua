@@ -36,7 +36,11 @@ local function loadNeverbirthWithEID(options)
         CoinSewnSword = 748,
         CoinFacedMask = 749,
         BlackTaisui = 750,
-        GoodGirlOfBabylon = 751,
+        MeatLump = 751,
+        GoodGirlOfBabylon = 752,
+        DebugController = 753,
+        BossOrder = 754,
+        StrongLaxative = 755,
     }
     local defaultItemIdsByLoadedName = {}
     for name, itemId in pairs(logicalItemIds) do
@@ -64,8 +68,16 @@ local function loadNeverbirthWithEID(options)
     defaultItemIdsByLoadedName["铜钱面具"] = logicalItemIds.CoinFacedMask
     defaultItemIdsByLoadedName["Black Taisui"] = logicalItemIds.BlackTaisui
     defaultItemIdsByLoadedName["黑太岁"] = logicalItemIds.BlackTaisui
+    defaultItemIdsByLoadedName["Meat Lump"] = logicalItemIds.MeatLump
+    defaultItemIdsByLoadedName["肉块"] = logicalItemIds.MeatLump
     defaultItemIdsByLoadedName["Good Girl of Babylon"] = logicalItemIds.GoodGirlOfBabylon
     defaultItemIdsByLoadedName["巴比伦好女孩"] = logicalItemIds.GoodGirlOfBabylon
+    defaultItemIdsByLoadedName["Debug Controller"] = logicalItemIds.DebugController
+    defaultItemIdsByLoadedName["调试控制器"] = logicalItemIds.DebugController
+    defaultItemIdsByLoadedName["Boss's Order"] = logicalItemIds.BossOrder
+    defaultItemIdsByLoadedName["老大的指令"] = logicalItemIds.BossOrder
+    defaultItemIdsByLoadedName["Strong Laxative"] = logicalItemIds.StrongLaxative
+    defaultItemIdsByLoadedName["强力泻药"] = logicalItemIds.StrongLaxative
 
     local itemIdsByLoadedName = options.itemIdsByLoadedName or defaultItemIdsByLoadedName
     local eidCalls = {}
@@ -315,6 +327,12 @@ local expectedXmlItems = {
         description = "Slaughter your kin to purify your aptitude.",
         zhDescription = "杀亲证道，提纯资质。",
     },
+    BossOrder = {
+        enName = "Boss's Order",
+        zhName = "老大的指令",
+        description = "I wanna catch u!",
+        zhDescription = "兄弟，想抓杀你",
+    },
     BetweenDeathAndLife = {
         enName = "Between Death and Life",
         zhName = "生死一念间",
@@ -351,11 +369,29 @@ local expectedXmlItems = {
         description = "Feeds on blood and lets you see clearly.",
         zhDescription = "以血为食，替你看清世界。",
     },
+    MeatLump = {
+        enName = "Meat Lump",
+        zhName = "肉块",
+        description = "One more bite",
+        zhDescription = "再活一口",
+    },
     GoodGirlOfBabylon = {
         enName = "Good Girl of Babylon",
         zhName = "巴比伦好女孩",
         description = "Don't stain the dress.",
         zhDescription = "别弄脏裙子。",
+    },
+    DebugController = {
+        enName = "Debug Controller",
+        zhName = "调试控制器",
+        description = "Debug command menu",
+        zhDescription = "调试命令菜单",
+    },
+    StrongLaxative = {
+        enName = "Strong Laxative",
+        zhName = "强力泻药",
+        description = "A thousand-mile purge",
+        zhDescription = "一泻千里",
     },
 }
 
@@ -460,6 +496,16 @@ local expectedEID = {
             description = "3充能主动道具#献祭1个属于你的跟班类道具#{{Damage}} 永久 +1.5 攻击#{{Range}} 永久 +1 射程#掉落1-2个黑心#没有可献祭跟班类道具时，反噬并受到半颗红心伤害",
         },
     },
+    BossOrder = {
+        en_us = {
+            name = "Boss's Order",
+            description = "Spawns a hostile target#Small enemies come from the current floor#Bosses come from the Boss Rush pool#Small enemies may become champions after spawning#Killing it drops cards: 1 normal, 2 champion, 3 boss",
+        },
+        zh_cn = {
+            name = "老大的指令",
+            description = "生成一个敌对目标#小怪来源于当前层小怪池#头目来源于Boss Rush池#小怪生成后有概率变为精英#击杀后掉落卡牌：普通1张，精英2张，头目3张",
+        },
+    },
     BetweenDeathAndLife = {
         en_us = {
             name = "Between Death and Life",
@@ -513,21 +559,31 @@ local expectedEID = {
     CoinFacedMask = {
         en_us = {
             name = "Coin-Faced Mask",
-            description = "Enter a room with at least 5 coins to gain a mask#The mask disturbs enemies#When hit, spend 5 coins to reduce the hit to half a red heart#Without enough coins, the mask breaks and lowers luck for the room",
+            description = "Enter a room with at least 5 coins to gain a mask#The mask disturbs enemies#When hit by a monster, spend 5 coins to block that hit#Without enough coins, the mask breaks and lowers luck for the room",
         },
         zh_cn = {
             name = "铜钱面具",
-            description = "拥有至少5枚硬币时，进房获得假面#假面会扰乱敌人#受伤时消耗5枚硬币，将伤害降为半红心#硬币不足时，假面破裂，本房间幸运下降",
+            description = "拥有至少5枚硬币时，进房获得假面#假面会扰乱敌人#被怪物伤害时消耗5枚硬币，免疫本次伤害#硬币不足时，假面破裂，本房间幸运下降",
         },
     },
     BlackTaisui = {
         en_us = {
             name = "Black Taisui",
-            description = "Feeds on blood to gain parasite value#0-7: heavy damage, speed, and luck penalties#8-15: reveals hidden items and suppresses Blind, Lost, Unknown, and Wavy Cap side effects#16+: inherits stage 2, grants fixed damage per copy, and prevents one lethal hit per floor#The stage 3 death save shows an x1 marker beside the HUD each floor#Multiple copies share parasite value, but the death save is once per floor",
+            description = "Feeds on blood to gain parasite value#0-7: heavy damage, speed, and luck penalties#8-15: reveals hidden items and suppresses Blind, Lost, Unknown, and Wavy Cap side effects#16+: inherits stage 2, grants fixed damage per copy, and creates Meat Lump once#Multiple copies share parasite value; Meat Lump still appears only once",
         },
         zh_cn = {
             name = "黑太岁",
-            description = "以红心治疗、红心容器和红心伤害积累寄生值#0-7：大幅降低伤害、移速和幸运#8-15：揭示问号道具，免疫致盲/迷途/未知诅咒表现，并压制波浪帽副作用#16+：继承二阶段效果，每个黑太岁提供修正伤害，每层抵挡一次致命伤害#三阶段抵死可用时，血量旁会显示 x1 提示#多个黑太岁共享寄生值；阶段效果按规则叠加，但抵死每层只有一次",
+            description = "以红心治疗、红心容器和红心伤害积累寄生值#0-7：大幅降低伤害、移速和幸运#8-15：揭示问号道具，免疫致盲/迷途/未知诅咒表现，并压制波浪帽副作用#16+：继承二阶段效果，每个黑太岁提供修正伤害，并生成一次肉块#多个黑太岁共享寄生值；阶段效果按规则叠加，但肉块只生成一次",
+        },
+    },
+    MeatLump = {
+        en_us = {
+            name = "Meat Lump",
+            description = "Conditionally blocks one lethal hit from enemies#This item does not exist in any item pool",
+        },
+        zh_cn = {
+            name = "肉块",
+            description = "有条件抵挡一次来自敌人的致死伤害#这个道具不存在于任何道具池里",
         },
     },
     GoodGirlOfBabylon = {
@@ -538,6 +594,26 @@ local expectedEID = {
         zh_cn = {
             name = "巴比伦好女孩",
             description = "满红心时进入端正状态：#{{Tears}} +0.6射速#{{Luck}} +2幸运#敌人有概率被魅惑#无红心伤害清房时，可能获得额外奖励#受到红心伤害时端正破裂：#{{Luck}} 本房间幸运下降#恐惧附近敌人#短暂获得巴比伦回声",
+        },
+    },
+    DebugController = {
+        en_us = {
+            name = "Debug Controller",
+            description = "Opens a directional debug command menu#Use again to close#Directional input selects entries instead of firing while open#Runs debug 1 through debug 10",
+        },
+        zh_cn = {
+            name = "调试控制器",
+            description = "打开四向调试命令菜单#再次使用关闭菜单#菜单打开时方向输入用于选择，不会发射眼泪#可执行 debug 1 至 debug 10",
+        },
+    },
+    StrongLaxative = {
+        en_us = {
+            name = "Strong Laxative",
+            description = "All creep is treated as friendly#Leave slippery creep while moving#Slippery creep slows enemies and deals 10% of your damage every 10 frames#5% chance per second to spawn random poop#Up to 15 poops per room#Extra copies increase poop chance",
+        },
+        zh_cn = {
+            name = "强力泻药",
+            description = "所有水迹视为己方水迹#移动时留下打滑水迹#打滑水迹使敌人减速，并每10帧造成10%角色伤害#每秒5%概率生成随机大便#每个房间最多生成15个大便#多拿提高生成概率",
         },
     },
     EmptyCradle = {

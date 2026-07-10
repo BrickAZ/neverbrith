@@ -7,8 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..");
 const outputDir = path.join(root, "outputs", "item-approval");
-const outputPath = path.join(outputDir, "neverbrith_item_approval.xlsx");
-const fallbackOutputPath = path.join(outputDir, "neverbrith_item_approval_sortable.xlsx");
+const outputPath = path.join(outputDir, "neverbrith_item_approval_sortable.xlsx");
+const fallbackOutputPath = path.join(outputDir, "neverbrith_item_approval_updated.xlsx");
 
 const poolNames = {
   treasure: "宝箱房",

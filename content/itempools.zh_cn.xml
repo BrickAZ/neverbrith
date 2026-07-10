@@ -12,6 +12,7 @@
         <Item Name="血颅蛊" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="生死一念间" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="虚空针尖" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="angel"> <!-- 天使 -->
@@ -27,7 +28,9 @@
         <Item Name="绝育证明" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="空摇篮" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="剪碎的塔罗" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="老大的指令" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱剑" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="强力泻药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="shop"> <!-- 商店 -->
@@ -53,6 +56,11 @@
         <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="黑太岁" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="巴比伦好女孩" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="强力泻药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="rottenBeggar"> <!-- 腐烂乞丐 -->
+        <Item Name="强力泻药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="library"> <!-- 书房 -->

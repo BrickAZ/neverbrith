@@ -1,0 +1,26 @@
+<costumes anm2root="gfx/characters/" version="1">
+  <costume
+    id="17491"
+    anm2path="costume_coin_faced_mask.anm2"
+    type="none"
+    priority="98"
+  />
+  <costume
+    id="17492"
+    anm2path="costume_coin_faced_mask_broken.anm2"
+    type="none"
+    priority="98"
+  />
+  <costume
+    id="17493"
+    anm2path="costume_strong_laxative.anm2"
+    type="none"
+    priority="98"
+  />
+  <costume
+    id="17494"
+    anm2path="costume_good_girl_of_babylon.anm2"
+    type="none"
+    priority="98"
+  />
+</costumes>

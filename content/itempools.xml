@@ -12,6 +12,7 @@
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Needletick" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="angel"> <!-- 天使 -->
@@ -27,7 +28,9 @@
         <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Empty Cradle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Shredded Tarot" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Boss's Order" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Sewn Sword" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Strong Laxative" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="shop"> <!-- 商店 -->
@@ -53,6 +56,11 @@
         <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Black Taisui" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Good Girl of Babylon" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Strong Laxative" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="rottenBeggar"> <!-- 腐烂乞丐 -->
+        <Item Name="Strong Laxative" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="library"> <!-- 书房 -->

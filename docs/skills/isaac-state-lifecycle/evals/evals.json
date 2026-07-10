@@ -1,0 +1,23 @@
+{
+  "skill_name": "isaac-state-lifecycle",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "主动道具使用后进入选择模式，直到离开当前房间才取消；如果玩家换房、死亡、或者道具丢失都不能残留 UI。写实现提示词。",
+      "expected_output": "Defines UI/runtime state owner, player keying, create/update/reset callbacks, room/death/item-loss cleanup, and explicitly avoids saved data unless needed.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我想把受到的伤害延迟到本层结束再结算，存档退出再进来也不能丢。",
+      "expected_output": "Routes to saved data, defines serializable fields, player keying, floor transition settlement, reload reconstruction, and avoids storing live damage/entity userdata.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "挑战里每个房间第一次杀敌会生成奖励，但出了挑战不能影响普通流程。",
+      "expected_output": "Defines challenge-only gate, room state reset, normal-run cleanup, and checks that state cannot leak outside the challenge.",
+      "files": []
+    }
+  ]
+}

@@ -64,6 +64,16 @@
     quality="3"
     tags="devil offensive summonable"
   />
+  <!-- 主动道具：老大的指令 -->
+  <active
+    name="Boss's Order"
+    maxcharges="3"
+    initcharge="3"
+    description="I wanna catch u!"
+    gfx="BossOrder.png"
+    quality="2"
+    tags="nochallenge nolostbr"
+  />
   <!-- 主动道具：生死一念间 -->
   <active
     name="Between Death and Life"
@@ -101,6 +111,25 @@
     quality="3"
     tags="offensive summonable"
   />
+  <!-- 被动道具：肉块 -->
+  <passive
+    name="Meat Lump"
+    cache="all"
+    description="One more bite"
+    gfx="BlackTaisuiMeat.png"
+    quality="2"
+    tags="dead summonable"
+  />
+  <!-- 主动道具：净化迷幻菇，黑太岁内部替换道具 -->
+  <active
+    name="Cleansed Wavy Cap"
+    maxcharges="900"
+    chargetype="timed"
+    description="Placeholder logic for a purified mushroom."
+    gfx="PurifiedMushroom.png"
+    quality="0"
+    tags="summonable"
+  />
   <!-- 被动道具：巴比伦好女孩 -->
   <passive
     name="Good Girl of Babylon"
@@ -117,6 +146,31 @@
     description="It does not count"
     gfx="Condom.png"
     quality="0"
+  />
+  <!-- 主动道具：Debug Controller -->
+  <active
+    name="Debug Controller"
+    maxcharges="0"
+    description="Debug command menu"
+    gfx="DebugController.png"
+    quality="0"
+    tags="noeden nochallenge"
+  />
+  <!-- 被动道具：强力泻药 -->
+  <passive
+    name="Strong Laxative"
+    description="A thousand-mile purge"
+    gfx="StrongLaxative.png"
+    quality="0"
+    tags="summonable"
+  />
+  <!-- 被动道具：虚空针尖 -->
+  <passive
+    name="Needletick"
+    description="vomit in buckets"
+    gfx="Needletick.png"
+    quality="3"
+    tags="offensive summonable"
   />
   <!-- 被动道具：美工刀 -->
   <passive

@@ -1,0 +1,53 @@
+{
+  "skill_name": "isaac-anm2-visuals",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "给 neverbrith 的一个道具加一个临时头部外观，状态开始时戴上，状态结束时移除。请写给代码 Codex 的实现提示词，不要直接改代码。",
+      "expected_output": "应该路由到 costumes，要求读取 content/costumes2.xml 和现有 costume_*.anm2，说明 Isaac.GetCostumeIdByPath、AddNullCostume/TryRemoveNullCostume、路径和 priority 检查。",
+      "files": [
+        "content/costumes2.xml",
+        "resources/gfx/characters/",
+        "main.lua"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我想做一个受伤后在玩家头上飘 30 帧的小光环，不需要碰撞。帮我写 anm2 和 Lua 接入的要求。",
+      "expected_output": "应该路由到 Lua Sprite effect，要求 Sprite:Load/Play/Update/Render、状态表、过期移除、动画名 Idle、不要走 entities2.xml。",
+      "files": [
+        "resources/gfx/Effects/",
+        "main.lua",
+        "tests/"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "给一个变身效果加 EID 内联图标，图标是 16x16 的 anm2。请告诉代码 Codex 应该怎么接。",
+      "expected_output": "应该路由到 EID icons，要求读取 DiceSetIcon 参考，检查动画名、EID:addIcon 或 InlineIcons、尺寸、路径大小写和 EID 缺失 fallback。",
+      "files": [
+        "resources/gfx/EID/DiceSetIcon.anm2",
+        "main.lua",
+        "tests/dice_set_behavior_test.lua"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "我要一个像原版道具底座那样的视觉，只换成我自己的贴图。应该新写 anm2 吗？",
+      "expected_output": "应该路由到 vanilla template reuse，建议优先复用 gfx/005.100_collectible.anm2，说明 ReplaceSpritesheet、LoadGraphics、动画名和 spritesheet index 需要验证。",
+      "files": [
+        "main.lua"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "玩家受伤后以撒头上出现一个小红点，持续 20 帧。这个是不是要改以撒本体？请写给代码 Codex 的提示词。",
+      "expected_output": "应该先做 visual carrier 判断，明确这是 player-anchored Lua Sprite effect，不是 costume 或以撒本体改动；要求 Sprite:Load/Play/Update/Render、按 player.Position 锚定、20 帧过期、不要改 content/costumes2.xml。",
+      "files": [
+        "main.lua",
+        "resources/gfx/Effects/",
+        "tests/"
+      ]
+    }
+  ]
+}

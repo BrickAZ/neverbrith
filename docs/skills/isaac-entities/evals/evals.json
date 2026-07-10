@@ -1,0 +1,23 @@
+{
+  "skill_name": "isaac-entities",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "给 neverbrith 做一个漂浮在玩家旁边的小婴儿影子，靠近敌人会造成接触伤害，房间结束后消失。写实现提示词。",
+      "expected_output": "Treats the request as entity behavior rather than only an anm2 sprite, specifies entity kind, spawn/update/collision/remove callbacks, owner state, and room cleanup.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我有一个 anm2 光环，想让它挡子弹并有血量，被打碎后播放破碎动画。",
+      "expected_output": "Routes to registered entity work, not visual-only anm2, and calls out HP, collision, damage/death callbacks, animation names, and state lifecycle.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "检查一个自定义 familiar 为什么不动，只显示一帧。",
+      "expected_output": "Inspects entities2.xml, familiar callbacks, update route, animation names, sprite update/play logic, and owner/state setup.",
+      "files": []
+    }
+  ]
+}
