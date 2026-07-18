@@ -4,6 +4,8 @@
         <Item Name="风油精" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="美工刀" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="通天塔" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="devil"> <!-- 恶魔房 -->
@@ -12,6 +14,10 @@
         <Item Name="血颅蛊" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="生死一念间" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="虚空针尖" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="焚尽郁结" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="小皮鞋" Weight="0.1" DecreaseBy="1" RemoveOn="1"/>
     </Pool>
 
     <Pool Name="angel"> <!-- 天使 -->
@@ -19,6 +25,8 @@
         <Item Name="恶魔盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="空摇篮" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="巴比伦好女孩" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="月色真美" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="treasure"> <!-- 宝箱 -->
@@ -27,13 +35,23 @@
         <Item Name="绝育证明" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="空摇篮" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="剪碎的塔罗" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="老大的指令" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱剑" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="强力泻药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="通天塔" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="月色真美" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="焚尽郁结" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="疯狂的椰子" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="小皮鞋" Weight="1" DecreaseBy="1" RemoveOn="1"/>
     </Pool>
 
     <Pool Name="shop"> <!-- 商店 -->
         <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱剑" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="小皮鞋" Weight="1" DecreaseBy="1" RemoveOn="1"/>
     </Pool>
 
     <Pool Name="secret"> <!-- 隐藏 -->
@@ -42,6 +60,7 @@
         <Item Name="恶魔盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="生死一念间" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="黑太岁" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
@@ -53,26 +72,44 @@
         <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="黑太岁" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="巴比伦好女孩" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="强力泻药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="焚尽郁结" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="rottenBeggar"> <!-- 腐烂乞丐 -->
+        <Item Name="强力泻药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="library"> <!-- 书房 -->
         <Item Name="巴比伦好女孩" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="craneGame"> <!-- 赌博乞丐 -->
         <Item Name="剪碎的塔罗" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="goldenChest"> <!-- 金箱子 -->
         <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="oldChest"> <!-- 旧箱子 -->
         <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="避孕套" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="woodenChest"> <!-- 木箱子 -->
         <Item Name="八音盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="planetarium"> <!-- 星象房 -->
+        <Item Name="月色真美" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 </ItemPools>

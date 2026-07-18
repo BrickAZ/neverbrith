@@ -1,0 +1,32 @@
+{
+  "skill_name": "isaac-audio-render-feedback",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "一个主动道具成功使用时播放短音效，失败时播放另一个音效。请写给代码 Codex 的提示词，要求它别只写 SFXManager:Play。",
+      "expected_output": "应该路由到 SFX，要求 content/sounds.xml、resources/sfx 路径、成功/失败触发点、id 匹配、文件存在、失败不消耗政策与 active skill 联动。",
+      "files": [
+        "docs/skills/isaac-audio-render-feedback/references/sfx-music.md",
+        "docs/skills/isaac-active-item-mechanics/references/use-callback-charge.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我想给道具加一个全屏 shader，受伤后持续 20 帧变暗。这个是不是直接改 shaders.xml 就行？",
+      "expected_output": "应该说明不是只改 shaders.xml，还要 MC_GET_SHADER_PARAMS、激活状态、20 帧生命周期、结束重置、黑屏风险和 fallback；小效果可考虑 render/sprite 替代。",
+      "files": [
+        "docs/skills/isaac-audio-render-feedback/references/shader-params.md"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "审核这个方案：每帧 MC_POST_RENDER 里 new 一个 Sprite 画选择菜单，并且 MC_INPUT_ACTION 一直 return false，直到玩家按确定。",
+      "expected_output": "应该指出每帧创建 Sprite 错误、input block 没有安全释放条件、需要明确 screen-space、取消/换房/退出重置、不要在 render 里写 gameplay 状态。",
+      "files": [
+        "docs/skills/isaac-audio-render-feedback/references/render-overlay.md",
+        "docs/skills/isaac-audio-render-feedback/references/input-interception.md"
+      ]
+    }
+  ]
+}
+

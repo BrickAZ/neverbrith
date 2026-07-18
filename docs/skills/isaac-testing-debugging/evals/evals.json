@@ -1,0 +1,23 @@
+{
+  "skill_name": "isaac-testing-debugging",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "新主动道具按了没反应，你不要直接猜修法，先给我调试路线。",
+      "expected_output": "Triages id lookup, callback registration, ownership, active slot, charge/use return, state and tests before proposing a fix.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "一个挑战规则退出挑战后还在普通局生效，怎么查？",
+      "expected_output": "Checks challenge gate, state lifecycle cleanup, callback scope, continued save behavior, and proposes static/scripted/in-game verification.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "贴图不显示，但 XML 看起来有路径，你帮我证明到底哪里坏了。",
+      "expected_output": "Uses validator, anm2 visual checks, animation names, asset existence, render/load owner, and states which parts require in-game verification.",
+      "files": []
+    }
+  ]
+}

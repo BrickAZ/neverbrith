@@ -1,0 +1,23 @@
+{
+  "skill_name": "isaac-neverbrith-router",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我想做一个主动道具，按下后弹出选择 UI，选中的效果会持续到本层结束，还要有一个 EID 图标和音效。你先写给代码 Codex 的提示词。",
+      "expected_output": "Routes to active item mechanics, state lifecycle, anm2 visuals or compat descriptions for EID icon/text, and audio/render feedback before writing a handoff prompt.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "做一个跟着玩家转圈的小影子，碰到敌人会造成伤害，死亡时播放 anm2 动画。",
+      "expected_output": "Identifies this as a registered entity or entity-like behavior, not only an anm2 sprite, and routes to isaac-entities plus anm2 visuals and state if needed.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "挑战开局给一张自定义魂石，但是现在进游戏看到是空白卡牌，你判断应该查什么。",
+      "expected_output": "Routes to challenges plus cards/pockets, checks pocketitems.xml, card generation/starting card, art/HUD keys, and descriptions instead of only editing challenge XML.",
+      "files": []
+    }
+  ]
+}

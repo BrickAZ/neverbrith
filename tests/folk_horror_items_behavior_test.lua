@@ -23,6 +23,30 @@ local function readFile(path)
     return text
 end
 
+local function readBinaryFile(path)
+    local file = assert(io.open(path, "rb"), path .. " should exist")
+    local text = file:read("*a")
+    file:close()
+    return text
+end
+
+local function readPngInfo(path)
+    local data = readBinaryFile(path)
+    local signature = string.char(137) .. "PNG\r\n" .. string.char(26) .. "\n"
+    assertEquals(data:sub(1, 8), signature, path .. " should be a PNG")
+
+    local function readBigEndian32(offset)
+        local b1, b2, b3, b4 = data:byte(offset, offset + 3)
+        return ((b1 * 256 + b2) * 256 + b3) * 256 + b4
+    end
+
+    return {
+        width = readBigEndian32(17),
+        height = readBigEndian32(21),
+        colorType = data:byte(26),
+    }
+end
+
 local function loadNeverbirth(options)
     options = options or {}
     local callbacks = {}
@@ -31,14 +55,21 @@ local function loadNeverbirth(options)
     local spawns = {}
     local debugStrings = {}
     local renderTexts = {}
+    local hudTexts = {}
+    local renderedSprites = {}
+    local loadedSprites = {}
     local costumeIds = {
-        ["gfx/characters/neverbirth_coin_faced_mask.anm2"] = 9101,
-        ["gfx/characters/neverbirth_coin_faced_mask_broken.anm2"] = 9102,
+        ["gfx/characters/neverbirth_coin_faced_mask.anm2"] = 9103,
+        ["gfx/characters/neverbirth_coin_faced_mask_broken.anm2"] = 9104,
+        ["gfx/characters/costume_coin_faced_mask.anm2"] = 9101,
+        ["gfx/characters/costume_coin_faced_mask_broken.anm2"] = 9102,
     }
     local itemIds = {
         CoinSewnSword = 748,
         CoinFacedMask = 749,
         BlackTaisui = 750,
+        MeatLump = 751,
+        CleansedWavyCap = 752,
     }
 
     package.loaded.json = nil
@@ -64,9 +95,9 @@ local function loadNeverbirth(options)
         MC_POST_CURSE_EVAL = 16,
         MC_POST_PICKUP_UPDATE = 17,
     }
-    CollectibleType = { COLLECTIBLE_NULL = 0, COLLECTIBLE_SPOON_BENDER = 3, COLLECTIBLE_1UP = 11, COLLECTIBLE_LOST_CONTACT = 213, COLLECTIBLE_PLAN_C = 475, COLLECTIBLE_DEATH_CERTIFICATE = 628 }
+    CollectibleType = { COLLECTIBLE_NULL = 0, COLLECTIBLE_SPOON_BENDER = 3, COLLECTIBLE_1UP = 11, COLLECTIBLE_LOST_CONTACT = 213, COLLECTIBLE_PLAN_C = 475, COLLECTIBLE_WAVY_CAP = 582, COLLECTIBLE_DEATH_CERTIFICATE = 628 }
     CacheFlag = { CACHE_DAMAGE = 1, CACHE_SHOTSPEED = 2, CACHE_TEARCOLOR = 4, CACHE_SPEED = 8, CACHE_FIREDELAY = 16, CACHE_TEARFLAG = 32, CACHE_RANGE = 64, CACHE_LUCK = 1024 }
-    DamageFlag = { DAMAGE_RED_HEARTS = 1, DAMAGE_NOKILL = 2, DAMAGE_INVINCIBLE = 4, DAMAGE_FAKE = 8, DAMAGE_IV_BAG = 16 }
+    DamageFlag = { DAMAGE_RED_HEARTS = 1, DAMAGE_NOKILL = 2, DAMAGE_INVINCIBLE = 4, DAMAGE_FAKE = 8, DAMAGE_IV_BAG = 16, DAMAGE_DEVIL = 32, DAMAGE_CURSED_DOOR = 64 }
     EntityFlag = { FLAG_CHARM = 1, FLAG_FRIENDLY = 2 }
     TearFlags = { TEAR_HOMING = 1, TEAR_PIERCING = 2, TEAR_SPECTRAL = 4 }
     EntityType = { ENTITY_PLAYER = 1, ENTITY_TEAR = 2, ENTITY_PICKUP = 5, ENTITY_SLOT = 6, ENTITY_PROJECTILE = 9, ENTITY_EFFECT = 1000 }
@@ -93,6 +124,7 @@ local function loadNeverbirth(options)
     local roomType = options.roomType or RoomType.ROOM_DEFAULT
     local roomIndex = options.roomIndex or 1
     local stage = options.stage or 1
+    local levelCurses = options.levelCurses or 0
 
     function MusicManager()
         return { GetCurrentMusicID = function() return 1 end, Play = function() end, Fadeout = function() end }
@@ -108,7 +140,7 @@ local function loadNeverbirth(options)
                 return { GetCollectible = function() return 1 end }
             end,
             GetHUD = function()
-                return { ShowItemText = function() end }
+                return { ShowItemText = function(_, title, subtitle) hudTexts[#hudTexts + 1] = { title = title, subtitle = subtitle } end }
             end,
         GetRoom = function()
                 return {
@@ -125,6 +157,10 @@ local function loadNeverbirth(options)
                     GetStage = function() return stage end,
                     GetStageType = function() return 0 end,
                     GetCurrentRoomIndex = function() return roomIndex end,
+                    GetCurses = function() return levelCurses end,
+                    SetCurses = function(_, curses) levelCurses = curses or 0 end,
+                    RemoveCurses = function(_, mask) levelCurses = levelCurses & (~(mask or 0)) end,
+                    RemoveCurse = function(_, curse) levelCurses = levelCurses & (~(curse or 0)) end,
                     AddAngelRoomChance = function() end,
                     InitializeDevilAngelRoom = function() end,
                 }
@@ -143,6 +179,8 @@ local function loadNeverbirth(options)
             if name == "Coin-Sewn Sword" or name == "铜钱剑" then return itemIds.CoinSewnSword end
             if name == "Coin-Faced Mask" or name == "铜钱面具" then return itemIds.CoinFacedMask end
             if name == "Black Taisui" or name == "黑太岁" then return itemIds.BlackTaisui end
+            if name == "Meat Lump" or name == "肉块" then return itemIds.MeatLump end
+            if name == "Cleansed Wavy Cap" or name == "净化迷幻菇" then return itemIds.CleansedWavyCap end
             return -1
         end,
         GetMusicIdByName = function() return -1 end,
@@ -158,10 +196,23 @@ local function loadNeverbirth(options)
             renderTexts[#renderTexts + 1] = { text = text, x = x, y = y, r = r, g = g, b = b, a = a }
         end,
         GetEntityVariantByName = function(name)
-            if name == "Coin Sword Qi" then return coinSwordQiVariant end
-            return -1
+            local variants = {
+                ["Coin Sword Qi"] = coinSwordQiVariant,
+                ["Black Taisui Spore"] = 3007,
+                ["Black Taisui Pulse"] = 3008,
+                ["Black Taisui Curse Devour"] = 3009,
+                ["Black Taisui Reveal"] = 3010,
+                ["Black Taisui Fear Pulse"] = 3011,
+                ["Black Taisui Death Deny"] = 3012,
+                ["Black Taisui Mature Core"] = 3013,
+                ["Black Taisui Hallucination Eat"] = 3014,
+            }
+            return variants[name] or -1
         end,
         GetCostumeIdByPath = function(path)
+            if options.missingCoinMaskCostumes then
+                return -1
+            end
             return costumeIds[path] or -1
         end,
         Spawn = function(entityType, variant, subtype, position, velocity, spawner)
@@ -207,6 +258,27 @@ local function loadNeverbirth(options)
 
     Color = setmetatable({}, { __call = function(_, r, g, b, a, ro, go, bo) return { R = r, G = g, B = b, A = a, RO = ro, GO = go, BO = bo } end })
     Color.Default = Color(1, 1, 1, 1, 0, 0, 0)
+    function Sprite()
+        local sprite = {
+            loads = {},
+            plays = {},
+            renders = {},
+            current = nil,
+        }
+        function sprite:Load(path, loadGraphics)
+            self.loads[#self.loads + 1] = { path = path, loadGraphics = loadGraphics }
+            loadedSprites[#loadedSprites + 1] = self
+        end
+        function sprite:Play(animation, force)
+            self.plays[#self.plays + 1] = { animation = animation, force = force }
+            self.current = animation
+        end
+        function sprite:Render(position)
+            self.renders[#self.renders + 1] = { position = position }
+            renderedSprites[#renderedSprites + 1] = { sprite = self, position = position }
+        end
+        return sprite
+    end
     local vectorMeta = {
         __add = function(left, right) return Vector(left.X + right.X, left.Y + right.Y) end,
         __sub = function(left, right) return Vector(left.X - right.X, left.Y - right.Y) end,
@@ -264,10 +336,10 @@ local function loadNeverbirth(options)
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_UPDATE)) do callback(mod) end
     end
 
-    local function runDamage(player, amount, flags)
+    local function runDamage(player, amount, flags, sourceEntity)
         local result
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_ENTITY_TAKE_DMG, EntityType.ENTITY_PLAYER)) do
-            local value = callback(mod, player, amount or 1, flags or 0, EntityRef(player), 0)
+            local value = callback(mod, player, amount or 1, flags or 0, EntityRef(sourceEntity or player), 0)
             if value == false then result = false end
         end
         return result
@@ -325,6 +397,12 @@ local function loadNeverbirth(options)
         end
     end
 
+    local function runPostAddCollectible(itemId, player)
+        for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_ADD_COLLECTIBLE, itemId)) do
+            callback(mod, itemId, 0, true, 0, 0, player)
+        end
+    end
+
     local function newPlayer(opts)
         opts = opts or {}
         local player = {
@@ -333,6 +411,7 @@ local function loadNeverbirth(options)
             Position = opts.position or Vector(100, 100),
             Damage = opts.damage or 3.5,
             MoveSpeed = opts.moveSpeed or 1,
+            MaxFireDelay = opts.maxFireDelay or 10,
             TearRange = opts.tearRange or 260,
             Luck = opts.luck or 0,
             hearts = opts.hearts or opts.maxHearts or 6,
@@ -342,6 +421,7 @@ local function loadNeverbirth(options)
             coins = opts.coins or 0,
             collectibles = opts.collectibles or {},
             damageCalls = {},
+            removedCollectibles = {},
             dead = opts.dead == true,
             addedNullCostumes = {},
             removedNullCostumes = {},
@@ -349,6 +429,7 @@ local function loadNeverbirth(options)
             tears = {},
             cacheFlags = {},
             activeItems = opts.activeItems or { [ActiveSlot.SLOT_PRIMARY] = itemIds.CoinSewnSword },
+            activeCharges = opts.activeCharges or {},
             dischargedSlots = {},
             rngSequence = opts.rngSequence or { 0, 0, 0, 0, 0, 0 },
             rngIndex = 0,
@@ -386,6 +467,15 @@ local function loadNeverbirth(options)
         function player:AddMaxHearts(amount) self.maxHearts = math.max(0, self.maxHearts + amount) end
         function player:AddSoulHearts(amount) self.soulHearts = math.max(0, self.soulHearts + amount) end
         function player:AddBlackHearts(amount) self.blackHearts = math.max(0, self.blackHearts + amount); self.soulHearts = math.max(0, self.soulHearts + amount) end
+        function player:AddCollectible(itemId, charge, firstTime)
+            self.addedCollectibles = self.addedCollectibles or {}
+            self.addedCollectibles[#self.addedCollectibles + 1] = { itemId = itemId, charge = charge, firstTime = firstTime }
+            self.collectibles[itemId] = (self.collectibles[itemId] or 0) + 1
+        end
+        function player:RemoveCollectible(itemId)
+            self.removedCollectibles[#self.removedCollectibles + 1] = itemId
+            self.collectibles[itemId] = math.max(0, (self.collectibles[itemId] or 0) - 1)
+        end
         function player:GetNumCoins() return self.coins end
         function player:AddCoins(amount) self.coins = self.coins + amount end
         function player:TakeDamage(amount, flags, source, countdown)
@@ -404,6 +494,10 @@ local function loadNeverbirth(options)
         function player:GetFireDirection() return self.testOptions.fireDirection or Vector(1, 0) end
         function player:GetMovementDirection() return self.testOptions.moveDirection or Vector(1, 0) end
         function player:GetActiveItem(slot) return self.activeItems[slot or ActiveSlot.SLOT_PRIMARY] or 0 end
+        function player:GetActiveCharge(slot) return self.activeCharges[slot or ActiveSlot.SLOT_PRIMARY] or 0 end
+        function player:SetActiveCharge(charge, slot)
+            self.activeCharges[slot or ActiveSlot.SLOT_PRIMARY] = charge
+        end
         function player:DischargeActiveItem(slot) self.dischargedSlots[#self.dischargedSlots + 1] = slot or ActiveSlot.SLOT_PRIMARY end
         function player:GetCollectibleRNG()
             return {
@@ -419,6 +513,7 @@ local function loadNeverbirth(options)
         function player:IsDead() return self.dead == true end
         function player:Revive() self.revived = (self.revived or 0) + 1; self.dead = false end
         function player:GetEffects() return self.effects end
+        function player:HasMortalDamage() return self.testOptions.hasMortalDamage == true end
         players[#players + 1] = player
         return player
     end
@@ -441,12 +536,17 @@ local function loadNeverbirth(options)
             animation = opts.animation or "Idle",
             replacedSpritesheets = {},
             loadGraphicsCalls = 0,
+            playCalls = {},
             setFrames = {},
             GetAnimation = function(self) return self.animation end,
             ReplaceSpritesheet = function(self, layer, path)
                 self.replacedSpritesheets[#self.replacedSpritesheets + 1] = { layer = layer, path = path }
             end,
             LoadGraphics = function(self) self.loadGraphicsCalls = self.loadGraphicsCalls + 1 end,
+            Play = function(self, animation, force)
+                self.playCalls[#self.playCalls + 1] = { animation = animation, force = force }
+                self.animation = animation
+            end,
             SetFrame = function(self, animation, frame)
                 self.setFrames[#self.setFrames + 1] = { animation = animation, frame = frame }
                 self.animation = animation
@@ -533,6 +633,9 @@ local function loadNeverbirth(options)
         runPostRender = runPostRender,
         runPostPickupInit = runPostPickupInit,
         runPostPickupUpdate = runPostPickupUpdate,
+        runPostAddCollectible = runPostAddCollectible,
+        getLevelCurses = function() return levelCurses end,
+        setLevelCurses = function(curses) levelCurses = curses or 0 end,
         runEffectUpdate = function(effect)
             local variant = effect and effect.Variant or coinSwordQiVariant
             for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_EFFECT_UPDATE, variant)) do
@@ -540,13 +643,19 @@ local function loadNeverbirth(options)
             end
         end,
         setRoomClear = function(value) roomClear = value end,
+        setRoomIndex = function(value) roomIndex = value or roomIndex end,
         coinSwordQiVariant = coinSwordQiVariant,
         costumes = {
-            active = costumeIds["gfx/characters/neverbirth_coin_faced_mask.anm2"],
-            broken = costumeIds["gfx/characters/neverbirth_coin_faced_mask_broken.anm2"],
+            active = costumeIds["gfx/characters/costume_coin_faced_mask.anm2"],
+            broken = costumeIds["gfx/characters/costume_coin_faced_mask_broken.anm2"],
+            fallbackActive = costumeIds["gfx/characters/neverbirth_coin_faced_mask.anm2"],
+            fallbackBroken = costumeIds["gfx/characters/neverbirth_coin_faced_mask_broken.anm2"],
         },
         debugStrings = debugStrings,
         renderTexts = renderTexts,
+        hudTexts = hudTexts,
+        renderedSprites = renderedSprites,
+        loadedSprites = loadedSprites,
         mod = mod,
     }
 end
@@ -583,6 +692,20 @@ local function coinSwordDataEffects(env)
     return effects
 end
 
+local function effectSpawns(env, variant)
+    local effects = {}
+    for _, spawn in ipairs(env.spawns) do
+        if spawn.Type == EntityType.ENTITY_EFFECT and spawn.Variant == variant then
+            effects[#effects + 1] = spawn
+        end
+    end
+    return effects
+end
+
+local function countEffectSpawns(env, variant)
+    return #effectSpawns(env, variant)
+end
+
 local function assertNoDischargeResult(result, message)
     assertTruthy(type(result) == "table", message or "initial Coin-Sewn Sword use should return a use-result table")
     assertEquals(result.Discharge, false, message or "initial Coin-Sewn Sword use should not discharge")
@@ -607,6 +730,11 @@ local function test_xml_registers_folk_horror_items_and_pools()
     assertTruthy(items:find('<active%s+name="Coin%-Sewn Sword".-maxcharges="3".-description="Coin and blade share the same edge%.". -', 1) or items:find('<active%s+name="Coin%-Sewn Sword".-maxcharges="3".-description="Coin and blade share the same edge%."', 1), "Coin-Sewn Sword should be a 3-charge active")
     assertTruthy(items:find('<passive%s+name="Coin%-Faced Mask".-description="Buy yourself another face%."', 1), "Coin-Faced Mask should be registered as passive")
     assertTruthy(items:find('<passive%s+name="Black Taisui".-cache="all".-description="Feeds on blood and lets you see clearly%."', 1), "Black Taisui should be registered as passive")
+    assertTruthy(items:find('<passive%s+name="Black Taisui".-gfx="BlackTaisui%.png"', 1), "Black Taisui should keep its own collectible icon")
+    assertTruthy(items:find('<passive%s+name="Meat Lump".-cache="all".-description="One more bite"', 1), "Meat Lump should be registered as passive")
+    assertTruthy(items:find('<active%s+name="Cleansed Wavy Cap".-maxcharges="900".-chargetype="timed".-description="Placeholder logic for a purified mushroom%."', 1), "Cleansed Wavy Cap should use Wavy Cap timed charge mode")
+    assertTruthy(items:find('<active%s+name="Cleansed Wavy Cap".-gfx="PurifiedMushroom%.png"', 1), "Cleansed Wavy Cap should use the Purified Mushroom collectible icon")
+    assertTruthy(not items:find('<active%s+name="Cleansed Wavy Cap".-gfx="PurifiedMushroom_64%.png"', 1), "Cleansed Wavy Cap should not use the 64px preview icon")
 
     assertTruthy(itemPoolBlock(pools, "shop"):find('<Item Name="Coin%-Sewn Sword" Weight="1"', 1), "Coin-Sewn Sword should be in shop")
     assertTruthy(itemPoolBlock(pools, "treasure"):find('<Item Name="Coin%-Sewn Sword" Weight="1"', 1), "Coin-Sewn Sword should be in treasure")
@@ -615,6 +743,8 @@ local function test_xml_registers_folk_horror_items_and_pools()
     assertTruthy(itemPoolBlock(pools, "secret"):find('<Item Name="Black Taisui" Weight="0.2"', 1), "Black Taisui should be in secret at low weight")
     assertTruthy(itemPoolBlock(pools, "curse"):find('<Item Name="Black Taisui" Weight="0.2"', 1), "Black Taisui should be in curse at low weight")
     assertTruthy(not itemPoolBlock(pools, "devil"):find('<Item Name="Black Taisui"', 1), "Black Taisui should not remain in devil pool")
+    assertTruthy(not pools:find('<Item Name="Meat Lump"', 1, true), "Meat Lump should not appear in natural item pools")
+    assertTruthy(not pools:find('<Item Name="Cleansed Wavy Cap"', 1, true), "Cleansed Wavy Cap should not appear in natural item pools")
     assertTruthy(entities:find('name="Coin Sword Qi"', 1, true), "entities2.xml should register Coin Sword Qi")
     assertTruthy(entities:find('anm2path="Effects/CoinSwordQi/CoinSwordQi.anm2"', 1, true), "Coin Sword Qi should use an anm2 path relative to gfx/")
     assertTruthy(not entities:find('anm2path="gfx/Effects/CoinSwordQi/CoinSwordQi.anm2"', 1, true), "Coin Sword Qi should not double-prefix gfx in entities2.xml")
@@ -624,6 +754,23 @@ local function test_xml_registers_folk_horror_items_and_pools()
     assertTruthy(anm2:find('Animation Name="Slash"', 1, true), "Coin Sword Qi anm2 should contain Slash")
     assertTruthy(anm2:find('Animation Name="BloodSlash"', 1, true), "Coin Sword Qi anm2 should contain BloodSlash")
     assertTruthy(anm2:find('Animation Name="EmpoweredSlash"', 1, true), "Coin Sword Qi anm2 should contain EmpoweredSlash")
+end
+
+local function test_purified_mushroom_icon_resource_is_collectible_ready()
+    local icon = readPngInfo("resources/gfx/Items/Collectibles/PurifiedMushroom.png")
+    assertEquals(icon.width, 32, "PurifiedMushroom.png should be 32px wide")
+    assertEquals(icon.height, 32, "PurifiedMushroom.png should be 32px tall")
+    assertEquals(icon.colorType, 6, "PurifiedMushroom.png should be RGBA")
+
+    local preview = readPngInfo("resources/gfx/Items/Collectibles/PurifiedMushroom_64.png")
+    assertEquals(preview.width, 64, "PurifiedMushroom_64.png should be 64px wide")
+    assertEquals(preview.height, 64, "PurifiedMushroom_64.png should be 64px tall")
+
+    for _, path in ipairs({ "content/items.xml", "content/items.zh_cn.xml", "content/items.en_us.xml" }) do
+        local xml = readFile(path)
+        assertTruthy(xml:find('gfx="PurifiedMushroom%.png"', 1), path .. " should reference the 32px Purified Mushroom icon")
+        assertTruthy(not xml:find('gfx="PurifiedMushroom_64%.png"', 1), path .. " should not reference the 64px preview icon")
+    end
 end
 
 local function test_coin_sewn_sword_spends_six_coins_for_six_slashes_and_empowered_slash()
@@ -1000,28 +1147,67 @@ local function test_coin_faced_mask_active_costume_appears_when_room_mask_is_act
     env.runNewRoom()
 
     assertTruthy(player.nullCostumes[env.costumes.active], "active mask costume should be worn after entering with enough coins")
+    assertEquals(player.nullCostumes[env.costumes.fallbackActive], nil, "stable 32px head costume should be preferred over the oversized fallback")
     assertEquals(player.nullCostumes[env.costumes.broken], nil, "broken mask costume should not be worn while the mask is intact")
 end
 
-local function test_coin_faced_mask_spends_coins_and_reduces_damage_to_half_heart()
+local function test_coin_faced_mask_active_costume_appears_when_picked_up_mid_room()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ coins = 5 })
+
+    env.runPostUpdate()
+    assertEquals(player.nullCostumes[env.costumes.active], nil, "mask should not appear before the item is held")
+
+    player.collectibles[env.items.CoinFacedMask] = 1
+    env.runPostUpdate()
+
+    assertTruthy(player.nullCostumes[env.costumes.active], "active mask costume should appear immediately when picked up mid-room")
+end
+
+local function test_coin_faced_mask_does_not_fake_an_overlay_when_null_costume_is_unavailable()
+    local env = loadNeverbirth({ missingCoinMaskCostumes = true })
+    local player = env.newPlayer({ coins = 5, collectibles = { [env.items.CoinFacedMask] = 1 } })
+
+    env.runPostUpdate()
+    env.runPostRender()
+
+    assertEquals(#player.addedNullCostumes, 0, "missing costume ids should not try to add an invalid null costume")
+    assertEquals(#env.renderedSprites, 0, "coin-faced mask should not fake a player costume with a loose overlay")
+    assertEquals(#env.loadedSprites, 0, "coin-faced mask should not load the costume anm2 as a normal render sprite")
+end
+
+local function test_coin_faced_mask_spends_coins_and_blocks_one_monster_hit()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ coins = 5, collectibles = { [env.items.CoinFacedMask] = 1 } })
+    local enemy = env.newEnemy(130, 100)
+
+    env.runNewRoom()
+    local result = env.runDamage(player, 2, 0, enemy)
+
+    assertEquals(result, false, "mask protection should cancel the original hit")
+    assertEquals(player.coins, 0, "mask protection should spend five coins")
+    assertEquals(#player.damageCalls, 0, "mask protection should fully block the monster hit")
+end
+
+local function test_coin_faced_mask_does_not_spend_on_non_monster_cost_damage()
     local env = loadNeverbirth()
     local player = env.newPlayer({ coins = 5, collectibles = { [env.items.CoinFacedMask] = 1 } })
 
     env.runNewRoom()
-    local result = env.runDamage(player, 2, 0)
+    local result = env.runDamage(player, 2, DamageFlag.DAMAGE_DEVIL, player)
 
-    assertEquals(result, false, "mask protection should cancel the original hit")
-    assertEquals(player.coins, 0, "mask protection should spend five coins")
-    assertEquals(#player.damageCalls, 1, "mask protection should reapply only half-heart damage")
-    assertEquals(player.damageCalls[1].amount, 1, "reapplied mask damage should be half a heart")
+    assertEquals(result, nil, "mask should not cancel non-monster cost damage")
+    assertEquals(player.coins, 5, "mask should not spend coins on non-monster cost damage")
+    assertTruthy(player.nullCostumes[env.costumes.active], "mask should remain active after ignored cost damage")
 end
 
 local function test_coin_faced_mask_spent_mask_removes_costumes()
     local env = loadNeverbirth()
     local player = env.newPlayer({ coins = 5, collectibles = { [env.items.CoinFacedMask] = 1 } })
+    local enemy = env.newEnemy(130, 100)
 
     env.runNewRoom()
-    env.runDamage(player, 2, 0)
+    env.runDamage(player, 2, 0, enemy)
 
     assertEquals(player.nullCostumes[env.costumes.active], nil, "spent mask should remove the active costume")
     assertEquals(player.nullCostumes[env.costumes.broken], nil, "spent mask should not leave a broken costume")
@@ -1030,10 +1216,11 @@ end
 local function test_coin_faced_mask_breaks_without_coins_and_applies_room_luck_penalty()
     local env = loadNeverbirth()
     local player = env.newPlayer({ coins = 5, luck = 1, collectibles = { [env.items.CoinFacedMask] = 1 } })
+    local enemy = env.newEnemy(130, 100)
 
     env.runNewRoom()
     player.coins = 0
-    env.runDamage(player, 2, 0)
+    env.runDamage(player, 2, 0, enemy)
     env.runEvaluate(player, CacheFlag.CACHE_LUCK)
 
     assertEquals(player.Luck, -1, "broken mask should apply -2 luck for this room")
@@ -1042,10 +1229,11 @@ end
 local function test_coin_faced_mask_breaks_to_broken_costume_until_next_room()
     local env = loadNeverbirth()
     local player = env.newPlayer({ coins = 5, collectibles = { [env.items.CoinFacedMask] = 1 } })
+    local enemy = env.newEnemy(130, 100)
 
     env.runNewRoom()
     player.coins = 0
-    env.runDamage(player, 2, 0)
+    env.runDamage(player, 2, 0, enemy)
 
     assertEquals(player.nullCostumes[env.costumes.active], nil, "broken mask should remove the active costume")
     assertTruthy(player.nullCostumes[env.costumes.broken], "broken mask costume should remain after the mask breaks")
@@ -1061,10 +1249,11 @@ local function test_coin_faced_mask_costumes_are_independent_for_multiple_player
     local env = loadNeverbirth()
     local playerA = env.newPlayer({ initSeed = 1, coins = 5, collectibles = { [env.items.CoinFacedMask] = 1 } })
     local playerB = env.newPlayer({ initSeed = 2, coins = 5, collectibles = { [env.items.CoinFacedMask] = 1 } })
+    local enemy = env.newEnemy(130, 100)
 
     env.runNewRoom()
     playerB.coins = 0
-    env.runDamage(playerB, 2, 0)
+    env.runDamage(playerB, 2, 0, enemy)
 
     assertTruthy(playerA.nullCostumes[env.costumes.active], "player A should keep the intact mask costume")
     assertEquals(playerA.nullCostumes[env.costumes.broken], nil, "player A should not receive player B's broken costume")
@@ -1072,14 +1261,96 @@ local function test_coin_faced_mask_costumes_are_independent_for_multiple_player
     assertTruthy(playerB.nullCostumes[env.costumes.broken], "player B should receive the broken costume")
 end
 
-local function test_coin_faced_mask_costume_resources_exist()
-    local activeAnm2 = readFile("resources/gfx/characters/neverbirth_coin_faced_mask.anm2")
-    local brokenAnm2 = readFile("resources/gfx/characters/neverbirth_coin_faced_mask_broken.anm2")
+local function anm2HasAnimation(text, animationName)
+    return text:find('<Animation[^>]-Name="' .. animationName .. '"', 1) ~= nil
+end
 
-    assertTruthy(activeAnm2:find('neverbirth_coin_faced_mask%.png', 1), "active mask anm2 should reference its PNG")
-    assertTruthy(brokenAnm2:find('neverbirth_coin_faced_mask_broken%.png', 1), "broken mask anm2 should reference its PNG")
-    assertTruthy(io.open("resources/gfx/characters/neverbirth_coin_faced_mask.png", "rb"), "active mask PNG should exist")
-    assertTruthy(io.open("resources/gfx/characters/neverbirth_coin_faced_mask_broken.png", "rb"), "broken mask PNG should exist")
+local function assertBlackTaisuiEffectResource(entities, spec)
+    local basePath = "Effects/BlackTaisui/" .. spec.file
+    local anm2Path = "resources/gfx/" .. basePath .. ".anm2"
+    local pngPath = "resources/gfx/" .. basePath .. ".png"
+    local spritePath = "gfx/" .. basePath .. ".png"
+    local relativeEntityPath = basePath .. ".anm2"
+
+    assertTruthy(entities:find('variant="' .. spec.variant .. '"', 1, true), spec.name .. " should reserve its entity variant")
+    assertTruthy(entities:find('name="' .. spec.name .. '"', 1, true), spec.name .. " should be registered in entities2.xml")
+    assertTruthy(entities:find('anm2path="' .. relativeEntityPath .. '"', 1, true), spec.name .. " should use an anm2 path relative to gfx/")
+    assertTruthy(not entities:find('anm2path="gfx/' .. relativeEntityPath .. '"', 1, true), spec.name .. " should not double-prefix gfx in entities2.xml")
+
+    local png = readPngInfo(pngPath)
+    assertEquals(png.width, spec.width * spec.frames, spec.name .. " PNG width should match its frame strip")
+    assertEquals(png.height, spec.height, spec.name .. " PNG height should match its frame height")
+    assertEquals(png.colorType, 6, spec.name .. " PNG should be RGBA")
+
+    local anm2 = readFile(anm2Path)
+    assertTruthy(anm2:find('<Spritesheet Id="0" Path="' .. spec.file .. '.png"', 1, true), spec.name .. " anm2 should reference the effect PNG relative to its own folder")
+    assertTruthy(not anm2:find('Path="gfx/Effects/BlackTaisui/', 1, true), spec.name .. " anm2 should not duplicate the gfx/Effects/BlackTaisui path inside the effect folder")
+    assertTruthy(anm2:find('<Layer Name="body" Id="0" SpritesheetId="0"', 1, true), spec.name .. " anm2 should have a visible body layer")
+    assertTruthy(anm2:find('<Animations DefaultAnimation="' .. spec.animation .. '"', 1, true), spec.name .. " anm2 should default to its playback animation")
+    assertTruthy(anm2:find('<Animation Name="' .. spec.animation .. '" FrameNum="' .. spec.frames .. '" Loop="' .. spec.loop .. '"', 1, true), spec.name .. " animation should use the expected frame count and loop flag")
+    assertTruthy(anm2:find('<LayerAnimation LayerId="0" Visible="true"', 1, true), spec.name .. " animation should contain a visible LayerAnimation")
+    assertTruthy(anm2:find('AlphaTint="255"', 1, true), spec.name .. " frames should render at full alpha")
+    assertTruthy(not anm2:find('AlphaTint="0"', 1, true), spec.name .. " should not contain invisible alpha-zero frames")
+    assertTruthy(anm2:find('Visible="true"', 1, true), spec.name .. " should contain visible frames")
+
+    local firstFrame = 'XPivot="' .. spec.pivot .. '" YPivot="' .. spec.pivot .. '" XCrop="0" YCrop="0" Width="' .. spec.width .. '" Height="' .. spec.height .. '"'
+    local lastCrop = (spec.frames - 1) * spec.width
+    local lastFrame = 'XPivot="' .. spec.pivot .. '" YPivot="' .. spec.pivot .. '" XCrop="' .. lastCrop .. '" YCrop="0" Width="' .. spec.width .. '" Height="' .. spec.height .. '"'
+    assertTruthy(anm2:find(firstFrame, 1, true), spec.name .. " first frame crop should start at the left edge")
+    assertTruthy(anm2:find(lastFrame, 1, true), spec.name .. " last frame crop should match the final strip frame")
+end
+
+local function test_black_taisui_effect_resources_exist()
+    local entities = readFile("content/entities2.xml")
+    assertTruthy(entities:find('<entities%s+anm2root="gfx/"', 1), "entities2.xml should resolve effect anm2 paths from gfx/")
+
+    local effects = {
+        { variant = 3007, name = "Black Taisui Spore", file = "BlackTaisuiSpore", animation = "Spore", frames = 6, width = 32, height = 32, pivot = 16, loop = "true" },
+        { variant = 3008, name = "Black Taisui Pulse", file = "BlackTaisuiPulse", animation = "Pulse", frames = 8, width = 64, height = 64, pivot = 32, loop = "true" },
+        { variant = 3009, name = "Black Taisui Curse Devour", file = "BlackTaisuiCurseDevour", animation = "Devour", frames = 10, width = 64, height = 64, pivot = 32, loop = "false" },
+        { variant = 3010, name = "Black Taisui Reveal", file = "BlackTaisuiReveal", animation = "Reveal", frames = 8, width = 64, height = 64, pivot = 32, loop = "false" },
+        { variant = 3011, name = "Black Taisui Fear Pulse", file = "BlackTaisuiFearPulse", animation = "FearPulse", frames = 10, width = 96, height = 96, pivot = 48, loop = "false" },
+        { variant = 3012, name = "Black Taisui Death Deny", file = "BlackTaisuiDeathDeny", animation = "DeathDeny", frames = 16, width = 128, height = 128, pivot = 64, loop = "false" },
+        { variant = 3013, name = "Black Taisui Mature Core", file = "BlackTaisuiMatureCore", animation = "MatureCore", frames = 8, width = 64, height = 64, pivot = 32, loop = "true" },
+        { variant = 3014, name = "Black Taisui Hallucination Eat", file = "BlackTaisuiHallucinationEat", animation = "HallucinationEat", frames = 12, width = 96, height = 96, pivot = 48, loop = "false" },
+    }
+
+    for _, spec in ipairs(effects) do
+        assertBlackTaisuiEffectResource(entities, spec)
+    end
+end
+
+local function test_coin_faced_mask_costume_resources_exist()
+    local costumes2 = readFile("content/costumes2.xml")
+    local activeAnm2 = readFile("resources/gfx/characters/costume_coin_faced_mask.anm2")
+    local brokenAnm2 = readFile("resources/gfx/characters/costume_coin_faced_mask_broken.anm2")
+
+    assertTruthy(costumes2:find('<costumes%s+anm2root="gfx/characters/"', 1), "costumes2.xml should register character costumes from gfx/characters")
+    assertTruthy(costumes2:find('anm2path="costume_coin_faced_mask%.anm2"', 1), "stable active mask costume should be registered in costumes2.xml")
+    assertTruthy(costumes2:find('anm2path="costume_coin_faced_mask_broken%.anm2"', 1), "stable broken mask costume should be registered in costumes2.xml")
+    assertTruthy(costumes2:find('anm2path="costume_coin_faced_mask%.anm2"%s+type="none"', 1), "active mask costume should be registered as a null costume for AddNullCostume")
+    assertTruthy(costumes2:find('anm2path="costume_coin_faced_mask_broken%.anm2"%s+type="none"', 1), "broken mask costume should be registered as a null costume for AddNullCostume")
+    assertTruthy(not costumes2:find("neverbirth_coin_faced_mask", 1, true), "oversized 64px mask art must not be registered as a live costume")
+    assertTruthy(activeAnm2:find('costume_coin_faced_mask%.png', 1), "active mask anm2 should reference the stable costume PNG")
+    assertTruthy(activeAnm2:find('Layer Name="head2"', 1), "active mask anm2 should use an overlay head layer")
+    assertTruthy(anm2HasAnimation(activeAnm2, "HeadDown"), "active mask should define HeadDown")
+    assertTruthy(anm2HasAnimation(activeAnm2, "HeadRight"), "active mask should define HeadRight")
+    assertTruthy(anm2HasAnimation(activeAnm2, "HeadUp"), "active mask should define HeadUp")
+    assertTruthy(anm2HasAnimation(activeAnm2, "HeadLeft"), "active mask should define HeadLeft")
+    assertTruthy(activeAnm2:find('Width="32"', 1), "stable active mask should use 32px head crops")
+    assertTruthy(activeAnm2:find('Height="32"', 1), "stable active mask should use 32px head crops")
+    assertTruthy(activeAnm2:find('XPivot="16"', 1), "stable active mask should use the Isaac head pivot")
+    assertTruthy(brokenAnm2:find('costume_coin_faced_mask_broken%.png', 1), "broken mask anm2 should reference the stable broken mask PNG")
+    assertTruthy(brokenAnm2:find('Layer Name="head2"', 1), "broken mask anm2 should use an overlay head layer")
+
+    local activePng = readPngInfo("resources/gfx/characters/costumes/costume_coin_faced_mask.png")
+    local brokenPng = readPngInfo("resources/gfx/characters/costumes/costume_coin_faced_mask_broken.png")
+    assertEquals(activePng.width, 256, "active mask PNG should be an 8-frame 32px costume strip")
+    assertEquals(activePng.height, 32, "active mask PNG should use 32px head frames")
+    assertEquals(activePng.colorType, 6, "active mask PNG should have an alpha channel")
+    assertEquals(brokenPng.width, 256, "broken mask PNG should be an 8-frame 32px costume strip")
+    assertEquals(brokenPng.height, 32, "broken mask PNG should use 32px head frames")
+    assertEquals(brokenPng.colorType, 6, "broken mask PNG should have an alpha channel")
 end
 
 local function setBlackTaisuiParasite(env, player, value)
@@ -1090,6 +1361,12 @@ end
 local function getBlackTaisuiParasite(env, player)
     assertTruthy(env.mod.GetBlackTaisuiParasiteValue, "Black Taisui should expose a testable parasite getter")
     return env.mod:GetBlackTaisuiParasiteValue(player)
+end
+
+local function isMeatLumpSpawn(env, spawn)
+    return (spawn.entityType or spawn.Type) == EntityType.ENTITY_PICKUP
+        and (spawn.variant or spawn.Variant) == PickupVariant.PICKUP_COLLECTIBLE
+        and (spawn.subtype or spawn.SubType) == env.items.MeatLump
 end
 
 local function test_black_taisui_stage_one_penalties_stack_and_respect_floors()
@@ -1148,6 +1425,144 @@ local function test_black_taisui_stage_two_softens_penalty_and_filters_curses()
     assertTruthy(enemy.feared > 0, "suppressing curses should trigger black spore fear feedback once")
 end
 
+local function test_black_taisui_spawns_effects_for_growth_curse_and_fear()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ collectibles = { [env.items.BlackTaisui] = 1 } })
+
+    setBlackTaisuiParasite(env, player, 8)
+    assertGreaterThan(countEffectSpawns(env, 3008), 0, "parasite growth should spawn Black Taisui Pulse")
+    assertGreaterThan(countEffectSpawns(env, 3011), 0, "strong spore triggers should spawn Black Taisui Fear Pulse")
+
+    env.runCurseEval(LevelCurse.CURSE_OF_BLIND)
+    assertGreaterThan(countEffectSpawns(env, 3007), 0, "ordinary spore triggers should spawn Black Taisui Spore")
+    assertGreaterThan(countEffectSpawns(env, 3009), 0, "curse suppression should spawn Black Taisui Curse Devour")
+end
+
+local function test_black_taisui_stage_two_removes_existing_level_curses_after_activation()
+    local env = loadNeverbirth({
+        levelCurses = LevelCurse.CURSE_OF_BLIND | LevelCurse.CURSE_OF_LOST | LevelCurse.CURSE_OF_UNKNOWN,
+    })
+    local player = env.newPlayer({ collectibles = { [env.items.BlackTaisui] = 1 } })
+
+    setBlackTaisuiParasite(env, player, 8)
+    env.runPostUpdate()
+
+    assertEquals(env.getLevelCurses(), 0, "stage two should actively remove existing Blind/Lost/Unknown curses from the current level")
+end
+
+local function test_black_taisui_stage_two_removes_wavy_cap_effects_and_keeps_positive_stats()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        maxFireDelay = 10,
+        tearRange = 260,
+        collectibles = {
+            [env.items.BlackTaisui] = 1,
+            [582] = 1,
+        },
+    })
+
+    setBlackTaisuiParasite(env, player, 8)
+    player.effects.counts[582] = 2
+    env.runPostUpdate()
+
+    assertEquals(player.effects.counts[582], 0, "stage two should remove active Wavy Cap temporary effects that drive distortion")
+    assertEquals(player.effects.removeCalls[#player.effects.removeCalls].itemId, 582, "stage two should remove Wavy Cap effect specifically")
+
+    env.runEvaluate(player, CacheFlag.CACHE_FIREDELAY)
+    env.runEvaluate(player, CacheFlag.CACHE_RANGE)
+    assertEquals(player.MaxFireDelay, 8.5, "stage two should compensate Wavy Cap tears benefit after suppressing its side effects")
+    assertEquals(player.TearRange, 300, "stage two should compensate Wavy Cap range benefit after suppressing its side effects")
+end
+
+local function test_black_taisui_stage_two_replaces_wavy_cap_with_cleansed_cap()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        collectibles = {
+            [env.items.BlackTaisui] = 1,
+            [CollectibleType.COLLECTIBLE_WAVY_CAP] = 1,
+        },
+    })
+
+    setBlackTaisuiParasite(env, player, 8)
+    env.runPostUpdate()
+
+    assertEquals(player.collectibles[CollectibleType.COLLECTIBLE_WAVY_CAP], 0, "stage two should remove the original Wavy Cap before it can keep distorting the room")
+    assertEquals(player.collectibles[env.items.CleansedWavyCap], 1, "stage two should grant the controlled Wavy Cap replacement")
+    assertEquals(player.removedCollectibles[#player.removedCollectibles], CollectibleType.COLLECTIBLE_WAVY_CAP, "replacement should explicitly remove Wavy Cap")
+    assertEquals(player.addedCollectibles[#player.addedCollectibles].itemId, env.items.CleansedWavyCap, "replacement should explicitly add Cleansed Wavy Cap")
+    assertGreaterThan(countEffectSpawns(env, 3014), 0, "replacing Wavy Cap should spawn Black Taisui Hallucination Eat")
+end
+
+local function test_cleansed_wavy_cap_applies_controlled_stats()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        moveSpeed = 1,
+        maxFireDelay = 10,
+        collectibles = {
+            [env.items.BlackTaisui] = 1,
+            [env.items.CleansedWavyCap] = 1,
+        },
+    })
+
+    setBlackTaisuiParasite(env, player, 8)
+    env.runUse(env.items.CleansedWavyCap, player)
+    env.runEvaluate(player, CacheFlag.CACHE_SPEED)
+    env.runEvaluate(player, CacheFlag.CACHE_FIREDELAY)
+
+    assertEquals(player.MoveSpeed, 0.97, "Cleansed Wavy Cap use should apply -0.03 speed")
+    assertEquals(player.MaxFireDelay, 9.25, "Cleansed Wavy Cap use should apply +0.75 tears correction")
+end
+
+local function test_cleansed_wavy_cap_uses_wavy_cap_timed_charge_curve()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        collectibles = {
+            [env.items.BlackTaisui] = 1,
+            [env.items.CleansedWavyCap] = 1,
+        },
+        activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.CleansedWavyCap },
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 900 },
+    })
+
+    setBlackTaisuiParasite(env, player, 8)
+    env.runUse(env.items.CleansedWavyCap, player)
+    env.runPostUpdate()
+
+    assertEquals(player.activeCharges[ActiveSlot.SLOT_PRIMARY], 800, "first Cleansed Wavy Cap use should leave a short timed recharge instead of fully emptying")
+end
+
+local function test_cleansed_wavy_cap_room_transition_and_clear_decay()
+    local env = loadNeverbirth({ roomClear = false, roomIndex = 1 })
+    local player = env.newPlayer({
+        moveSpeed = 1,
+        maxFireDelay = 10,
+        collectibles = {
+            [env.items.BlackTaisui] = 1,
+            [env.items.CleansedWavyCap] = 1,
+        },
+    })
+
+    setBlackTaisuiParasite(env, player, 8)
+    env.runUse(env.items.CleansedWavyCap, player)
+    env.setRoomIndex(2)
+    env.runNewRoom()
+    env.runEvaluate(player, CacheFlag.CACHE_SPEED)
+    env.runEvaluate(player, CacheFlag.CACHE_FIREDELAY)
+
+    assertEquals(player.MoveSpeed, 0.94, "leaving the room should convert -0.03 speed into -0.06 lingering speed")
+    assertEquals(player.MaxFireDelay, 9.7, "leaving the room should convert +0.75 tears into +0.30 lingering tears")
+
+    env.setRoomClear(true)
+    env.runPostUpdate()
+    player.MoveSpeed = 1
+    player.MaxFireDelay = 10
+    env.runEvaluate(player, CacheFlag.CACHE_SPEED)
+    env.runEvaluate(player, CacheFlag.CACHE_FIREDELAY)
+
+    assertEquals(player.MoveSpeed, 1, "clearing a room should remove one lingering Wavy Cap speed stack")
+    assertEquals(player.MaxFireDelay, 10, "clearing a room should remove one lingering Wavy Cap tears stack")
+end
+
 local function test_black_taisui_stage_two_refreshes_hidden_collectible_pedestals()
     local env = loadNeverbirth()
     local player = env.newPlayer({ collectibles = { [env.items.BlackTaisui] = 1 } })
@@ -1159,13 +1574,15 @@ local function test_black_taisui_stage_two_refreshes_hidden_collectible_pedestal
     assertEquals(pickup.hidden, false, "stage two should refresh hidden collectible pedestal visuals")
     assertEquals(pickup.sprite.replacedSpritesheets[#pickup.sprite.replacedSpritesheets].path, "gfx/items/collectibles/mock_302.png", "stage two should replace question-mark collectible spritesheet with the real item gfx")
     assertEquals(pickup.sprite.loadGraphicsCalls > 0, true, "stage two should reload collectible graphics after replacing the spritesheet")
-    assertEquals(pickup.sprite.setFrames[#pickup.sprite.setFrames].animation, "Idle", "stage two should keep pedestal animation on Idle")
+    assertEquals(#pickup.sprite.setFrames, 0, "stage two reveal should not freeze the pedestal animation on frame 0")
+    assertEquals(#pickup.sprite.playCalls, 0, "stage two reveal should not restart pedestal animation and risk restoring the question mark")
     assertEquals(pickup.SubType, 302, "stage two reveal should keep the real collectible subtype")
     assertEquals(pickup.OptionsPickupIndex, 7, "stage two reveal should keep option pickup index")
     assertEquals(pickup.Price, 15, "stage two reveal should keep shop price")
     assertEquals(pickup.ShopItemId, 2, "stage two reveal should keep shop item id")
     assertEquals(#pickup.morphCalls, 0, "stage two reveal should not morph collectible pedestals because Morph retriggers pickup init")
     assertEquals(pickup.updateAppearanceCalls, 0, "stage two reveal should not call UpdateAppearance because it can retrigger question-mark refresh paths")
+    assertGreaterThan(countEffectSpawns(env, 3010), 0, "revealing a hidden collectible should spawn Black Taisui Reveal")
 end
 
 local function test_black_taisui_stage_two_refreshes_shop_hidden_collectible_sprite_without_breaking_shop_data()
@@ -1177,10 +1594,49 @@ local function test_black_taisui_stage_two_refreshes_shop_hidden_collectible_spr
     env.runPostUpdate()
 
     assertEquals(pickup.sprite.replacedSpritesheets[#pickup.sprite.replacedSpritesheets].path, "gfx/items/collectibles/mock_455.png", "stage two should reveal shop collectible sprite using real item gfx")
-    assertEquals(pickup.sprite.setFrames[#pickup.sprite.setFrames].animation, "ShopIdle", "stage two should preserve shop pedestal animation")
+    assertEquals(#pickup.sprite.setFrames, 0, "stage two shop reveal should not freeze the shop pedestal animation on frame 0")
+    assertEquals(#pickup.sprite.playCalls, 0, "stage two shop reveal should not restart shop pedestal animation and risk restoring the question mark")
     assertEquals(pickup.Price, 30, "stage two shop reveal should keep price")
     assertEquals(pickup.ShopItemId, 4, "stage two shop reveal should keep shop item id")
     assertEquals(#pickup.morphCalls, 0, "stage two shop reveal should not morph shop pedestals")
+end
+
+local function test_black_taisui_stage_two_reveals_rerolled_collectible_without_room_reload()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ collectibles = { [env.items.BlackTaisui] = 1 } })
+    local pickup = env.newCollectiblePickup(302, { hidden = true })
+
+    setBlackTaisuiParasite(env, player, 8)
+    env.runPostUpdate()
+    assertEquals(pickup.sprite.replacedSpritesheets[#pickup.sprite.replacedSpritesheets].path, "gfx/items/collectibles/mock_302.png", "stage two should reveal the first item")
+
+    pickup.SubType = 455
+    for _ = 1, 10 do
+        env.runPostUpdate()
+    end
+
+    assertEquals(pickup.sprite.replacedSpritesheets[#pickup.sprite.replacedSpritesheets].path, "gfx/items/collectibles/mock_455.png", "stage two should reveal rerolled item without leaving the room")
+    assertEquals(#pickup.morphCalls, 0, "reroll reveal should still avoid Morph")
+    assertEquals(pickup.updateAppearanceCalls, 0, "reroll reveal should still avoid UpdateAppearance")
+end
+
+local function test_black_taisui_stage_two_reapplies_sprite_if_game_restores_question_mark()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ collectibles = { [env.items.BlackTaisui] = 1 } })
+    local pickup = env.newCollectiblePickup(302, { hidden = true })
+
+    setBlackTaisuiParasite(env, player, 8)
+    env.runPostUpdate()
+    assertTruthy(#pickup.sprite.replacedSpritesheets > 0, "stage two should reveal the pedestal")
+
+    pickup.hidden = true
+    pickup.sprite.replacedSpritesheets = {}
+    for _ = 1, 10 do
+        env.runPostUpdate()
+    end
+
+    assertEquals(pickup.hidden, false, "stage two should re-reveal when the game restores the question mark visual")
+    assertEquals(pickup.sprite.replacedSpritesheets[#pickup.sprite.replacedSpritesheets].path, "gfx/items/collectibles/mock_302.png", "stage two should reapply the real item gfx even when subtype did not change")
 end
 
 local function test_black_taisui_stage_two_does_not_guess_unknown_collectibles()
@@ -1195,92 +1651,173 @@ local function test_black_taisui_stage_two_does_not_guess_unknown_collectibles()
     assertEquals(pickup.hidden, true, "stage two reveal should leave truly unknown collectible pedestals alone")
 end
 
-local function test_black_taisui_stage_three_damage_and_once_per_floor_death_save()
+local function test_black_taisui_stage_three_damage_and_spawns_meat_lump_once()
     local env = loadNeverbirth()
     local player = env.newPlayer({ damage = 4, hearts = 1, maxHearts = 2, collectibles = { [env.items.BlackTaisui] = 2 } })
-    local enemy = env.newEnemy(140, 100)
 
     setBlackTaisuiParasite(env, player, 16)
     env.runEvaluate(player, CacheFlag.CACHE_DAMAGE)
     assertEquals(player.Damage, 7, "stage three should grant +1.5 fixed damage per Black Taisui")
 
-    local first = env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
-    assertEquals(first, false, "stage three should block the first lethal hit each floor")
-    assertEquals(player.hearts, 1, "stage three death save should leave half a red heart")
-    assertTruthy(enemy.feared > 0, "stage three death save should trigger strong spore fear")
+    env.runPostUpdate()
+    local meatLumps = 0
+    for _, spawn in ipairs(env.spawns) do
+        if isMeatLumpSpawn(env, spawn) then
+            meatLumps = meatLumps + 1
+        end
+    end
+    assertEquals(meatLumps, 1, "stage three should spawn one Meat Lump reward")
 
-    local second = env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
-    assertEquals(second, nil, "stage three should not block a second lethal hit on the same floor")
+    env.runPostUpdate()
+    env.runNewLevel()
+    env.runPostUpdate()
+    meatLumps = 0
+    for _, spawn in ipairs(env.spawns) do
+        if isMeatLumpSpawn(env, spawn) then
+            meatLumps = meatLumps + 1
+        end
+    end
+    assertEquals(meatLumps, 1, "stage three Meat Lump reward should be once per player per run")
+
+    player.hearts = 1
+    local hit = env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
+    assertEquals(hit, false, "Black Taisui stage three should block the first lethal damage each floor")
+    assertEquals(player.hearts, 1, "Black Taisui death save should leave half a red heart")
+    assertGreaterThan(countEffectSpawns(env, 3012), 0, "death save should spawn Black Taisui Death Deny")
+    assertGreaterThan(countEffectSpawns(env, 3013), 0, "stage three should periodically show Black Taisui Mature Core")
+
+    local deathDeny = effectSpawns(env, 3012)[1]
+    deathDeny.sprite.IsFinished = function() return true end
+    env.runEffectUpdate(deathDeny)
+    assertTruthy(deathDeny.removed, "finished non-loop Black Taisui effect should be removed")
+
+    player.hearts = 1
+    hit = env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
+    assertEquals(hit, nil, "Black Taisui death save should only trigger once per floor")
 
     env.runNewLevel()
-    local third = env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
-    assertEquals(third, false, "stage three death save should refresh on a new floor")
+    player.hearts = 1
+    hit = env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
+    assertEquals(hit, false, "Black Taisui death save should refresh on the next floor")
 end
 
-local function test_black_taisui_stage_three_renders_life_marker_and_clears_after_use()
+local function test_black_taisui_stage_three_spawns_meat_lump_when_crossing_threshold()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ hearts = 2, maxHearts = 4, collectibles = { [env.items.BlackTaisui] = 1 } })
+
+    setBlackTaisuiParasite(env, player, 15)
+    env.runPostUpdate()
+    for _, spawn in ipairs(env.spawns) do
+        assertTruthy(not isMeatLumpSpawn(env, spawn), "stage two should not spawn Meat Lump")
+    end
+
+    env.runDamage(player, 1, DamageFlag.DAMAGE_RED_HEARTS)
+    env.runPostUpdate()
+    local found = false
+    for _, spawn in ipairs(env.spawns) do
+        if isMeatLumpSpawn(env, spawn) then
+            found = true
+        end
+    end
+    assertTruthy(found, "crossing into stage three should spawn Meat Lump")
+end
+
+local function test_meat_lump_grants_custom_life_without_visible_c11_on_pickup()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({})
+
+    env.runPostAddCollectible(env.items.MeatLump, player)
+
+    assertEquals(#(player.addedCollectibles or {}), 0, "Meat Lump should not add visible c11 to the item list")
+    assertEquals(#player.removedCollectibles, 0, "Meat Lump should not add and then remove visible c11")
+    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 1, "Meat Lump should add a hidden c11 backup effect")
+
+    player.hearts = 1
+    local result = env.runDamage(player, 2, 0)
+    assertEquals(result, false, "Meat Lump custom life should block lethal damage")
+    assertEquals(player.hearts, 1, "Meat Lump custom life should leave the player at half a red heart")
+    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 0, "custom Meat Lump save should consume the hidden c11 backup effect")
+end
+
+local function test_meat_lump_grants_custom_life_from_held_copy_even_if_pickup_callback_missed()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ collectibles = { [env.items.MeatLump] = 1 } })
+
+    env.runPostUpdate()
+
+    assertEquals(player.collectibles[CollectibleType.COLLECTIBLE_1UP] or 0, 0, "held-copy tracking should not leave c11 in the visible item list")
+    assertEquals(#(player.addedCollectibles or {}), 0, "held Meat Lump should not call AddCollectible for visible c11")
+    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 1, "held Meat Lump should grant a hidden c11 backup effect")
+
+    env.runPostUpdate()
+    player.hearts = 1
+    local result = env.runDamage(player, 2, 0)
+    assertEquals(result, false, "held Meat Lump should grant one custom revive charge")
+
+    player.hearts = 1
+    result = env.runDamage(player, 2, 0)
+    assertEquals(result, nil, "custom revive charge should not repeat without gaining another Meat Lump")
+
+    player.collectibles[env.items.MeatLump] = 2
+    env.runPostUpdate()
+    player.hearts = 1
+    result = env.runDamage(player, 2, 0)
+    assertEquals(result, false, "a second Meat Lump copy should grant one more custom revive charge")
+end
+
+local function test_black_taisui_stage_three_renders_custom_life_marker_until_used()
     local env = loadNeverbirth()
     local player = env.newPlayer({ hearts = 2, maxHearts = 4, collectibles = { [env.items.BlackTaisui] = 1 } })
 
     setBlackTaisuiParasite(env, player, 16)
     env.runPostUpdate()
-    assertEquals(player.effects.addCalls[#player.effects.addCalls].itemId, CollectibleType.COLLECTIBLE_1UP, "stage three should try to use the official 1UP effect for the extra-life HUD marker")
-    assertEquals(player.effects.addCalls[#player.effects.addCalls].addCostume, false, "stage three should add the official 1UP effect without costume")
     env.runPostRender()
-    assertEquals(#env.renderTexts, 0, "stage three should not draw a duplicate custom marker when the official 1UP effect is active")
 
-    env.runDamage(player, 3, DamageFlag.DAMAGE_RED_HEARTS)
-    assertEquals(player.effects.removeCalls[#player.effects.removeCalls].itemId, CollectibleType.COLLECTIBLE_1UP, "stage three should remove the official 1UP effect when Black Taisui death save is consumed")
+    local sawWard = false
+    for _, rendered in ipairs(env.renderTexts) do
+        if rendered.text == "WARD" then
+            sawWard = true
+        end
+    end
+    assertTruthy(sawWard, "stage three should render a Black Taisui ward marker")
+    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 0, "Black Taisui ward should not fake a c11 temp effect")
+
+    player.hearts = 1
+    env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
+    assertGreaterThan(#env.hudTexts, 0, "Black Taisui should show feedback when blocking lethal damage")
+    assertTruthy(player.lastColor, "Black Taisui should flash the player when blocking lethal damage")
     for index = #env.renderTexts, 1, -1 do
         env.renderTexts[index] = nil
     end
     env.runPostRender()
-    assertEquals(#env.renderTexts, 0, "stage three life marker should disappear after the floor death save is used")
+
+    sawWard = false
+    local sawFeedback = false
+    for _, rendered in ipairs(env.renderTexts) do
+        if rendered.text == "WARD" then
+            sawWard = true
+        elseif rendered.text == "TAISUI BLOCK" then
+            sawFeedback = true
+        end
+    end
+    assertTruthy(not sawWard, "Black Taisui ward marker should disappear after the floor save is used")
+    assertTruthy(sawFeedback, "Black Taisui should briefly render a block feedback label")
 end
 
-local function test_black_taisui_stage_three_custom_life_marker_fallback_when_official_effect_unavailable()
+local function test_black_taisui_stage_three_does_not_block_cost_damage()
     local env = loadNeverbirth()
-    local player = env.newPlayer({ hearts = 2, maxHearts = 4, noEffects = true, collectibles = { [env.items.BlackTaisui] = 1 } })
+    local player = env.newPlayer({ hearts = 1, maxHearts = 2, collectibles = { [env.items.BlackTaisui] = 1 } })
 
     setBlackTaisuiParasite(env, player, 16)
-    env.runPostUpdate()
-    env.runPostRender()
 
-    assertTruthy(#env.renderTexts > 0, "stage three should render a fallback life marker when official effect API is unavailable")
-    assertTruthy(tostring(env.renderTexts[1].text):find("x1", 1, true), "fallback life marker should show x1")
-end
+    local result = env.runDamage(player, 2, DamageFlag.DAMAGE_IV_BAG)
+    assertEquals(result, nil, "Black Taisui should not block IV Bag style cost damage")
 
-local function test_black_taisui_stage_three_detects_official_life_effect_consumption()
-    local env = loadNeverbirth()
-    local player = env.newPlayer({ hearts = 0, maxHearts = 4, collectibles = { [env.items.BlackTaisui] = 1 } })
-    local enemy = env.newEnemy(140, 100)
+    result = env.runDamage(player, 2, DamageFlag.DAMAGE_DEVIL)
+    assertEquals(result, nil, "Black Taisui should not block devil deal style cost damage")
 
-    setBlackTaisuiParasite(env, player, 16)
-    env.runPostUpdate()
-    player.effects.counts[CollectibleType.COLLECTIBLE_1UP] = 0
-    player.hearts = 0
-    env.runPostUpdate()
-
-    assertEquals(player.hearts, 1, "stage three should restore half a red heart if the official 1UP effect was consumed by the engine")
-    assertTruthy(enemy.feared > 0, "official 1UP consumption should trigger strong black spore fear")
-end
-
-local function test_black_taisui_stage_three_revives_dead_player_fallback_once()
-    local env = loadNeverbirth()
-    local player = env.newPlayer({ hearts = 0, maxHearts = 4, dead = true, collectibles = { [env.items.BlackTaisui] = 1 } })
-    local enemy = env.newEnemy(140, 100)
-
-    setBlackTaisuiParasite(env, player, 16)
-    env.runPostUpdate()
-
-    assertEquals(player.dead, false, "stage three fallback should revive a dead player once per floor")
-    assertEquals(player.revived, 1, "stage three fallback should call Revive once")
-    assertEquals(player.hearts, 1, "stage three fallback should restore half a red heart")
-    assertTruthy(enemy.feared > 0, "stage three fallback revive should trigger strong spore fear")
-
-    player.dead = true
-    player.hearts = 0
-    env.runPostUpdate()
-    assertEquals(player.dead, true, "stage three fallback should not revive twice on the same floor")
+    result = env.runDamage(player, 2, DamageFlag.DAMAGE_CURSED_DOOR)
+    assertEquals(result, nil, "Black Taisui should not block curse door style cost damage")
 end
 
 local function test_black_taisui_parasite_value_grows_from_red_healing_container_and_damage()
@@ -1326,6 +1863,7 @@ local function test_black_taisui_multiple_players_are_independent()
 end
 
 test_xml_registers_folk_horror_items_and_pools()
+test_purified_mushroom_icon_resource_is_collectible_ready()
 test_coin_sewn_sword_spends_six_coins_for_six_slashes_and_empowered_slash()
 test_coin_sewn_sword_spreads_six_qi_visibly()
 test_coin_sewn_sword_holds_without_spending_until_direction_input()
@@ -1351,22 +1889,36 @@ test_coin_sword_qi_can_home_and_block_projectiles_together()
 test_coin_sword_qi_expires()
 test_coin_faced_mask_enters_room_with_mask_and_confuses_enemies()
 test_coin_faced_mask_active_costume_appears_when_room_mask_is_active()
-test_coin_faced_mask_spends_coins_and_reduces_damage_to_half_heart()
+test_coin_faced_mask_active_costume_appears_when_picked_up_mid_room()
+test_coin_faced_mask_does_not_fake_an_overlay_when_null_costume_is_unavailable()
+test_coin_faced_mask_spends_coins_and_blocks_one_monster_hit()
+test_coin_faced_mask_does_not_spend_on_non_monster_cost_damage()
 test_coin_faced_mask_spent_mask_removes_costumes()
 test_coin_faced_mask_breaks_without_coins_and_applies_room_luck_penalty()
 test_coin_faced_mask_breaks_to_broken_costume_until_next_room()
 test_coin_faced_mask_costumes_are_independent_for_multiple_players()
 test_coin_faced_mask_costume_resources_exist()
+test_black_taisui_effect_resources_exist()
 test_black_taisui_stage_one_penalties_stack_and_respect_floors()
 test_black_taisui_stage_two_softens_penalty_and_filters_curses()
+test_black_taisui_spawns_effects_for_growth_curse_and_fear()
+test_black_taisui_stage_two_removes_existing_level_curses_after_activation()
+test_black_taisui_stage_two_removes_wavy_cap_effects_and_keeps_positive_stats()
+test_black_taisui_stage_two_replaces_wavy_cap_with_cleansed_cap()
+test_cleansed_wavy_cap_applies_controlled_stats()
+test_cleansed_wavy_cap_uses_wavy_cap_timed_charge_curve()
+test_cleansed_wavy_cap_room_transition_and_clear_decay()
 test_black_taisui_stage_two_refreshes_hidden_collectible_pedestals()
 test_black_taisui_stage_two_refreshes_shop_hidden_collectible_sprite_without_breaking_shop_data()
+test_black_taisui_stage_two_reveals_rerolled_collectible_without_room_reload()
+test_black_taisui_stage_two_reapplies_sprite_if_game_restores_question_mark()
 test_black_taisui_stage_two_does_not_guess_unknown_collectibles()
-test_black_taisui_stage_three_damage_and_once_per_floor_death_save()
-test_black_taisui_stage_three_renders_life_marker_and_clears_after_use()
-test_black_taisui_stage_three_custom_life_marker_fallback_when_official_effect_unavailable()
-test_black_taisui_stage_three_detects_official_life_effect_consumption()
-test_black_taisui_stage_three_revives_dead_player_fallback_once()
+test_black_taisui_stage_three_damage_and_spawns_meat_lump_once()
+test_black_taisui_stage_three_spawns_meat_lump_when_crossing_threshold()
+test_meat_lump_grants_custom_life_without_visible_c11_on_pickup()
+test_meat_lump_grants_custom_life_from_held_copy_even_if_pickup_callback_missed()
+test_black_taisui_stage_three_renders_custom_life_marker_until_used()
+test_black_taisui_stage_three_does_not_block_cost_damage()
 test_black_taisui_parasite_value_grows_from_red_healing_container_and_damage()
 test_black_taisui_no_red_container_uses_soul_black_at_half_efficiency()
 test_black_taisui_multiple_players_are_independent()
