@@ -22,6 +22,13 @@ local function assertTruthy(value, message)
     end
 end
 
+local function readFile(path)
+    local file = assert(io.open(path, "r"), path .. " should exist")
+    local text = file:read("*a")
+    file:close()
+    return text
+end
+
 local function loadNeverbirth(savedStore)
     savedStore = savedStore or { text = nil, snapshot = nil }
 
@@ -122,6 +129,7 @@ local function loadNeverbirth(savedStore)
 
     local players = {}
     local roomEntities = {}
+    local spriteEvents = {}
 
     Isaac = {
         GetItemIdByName = function(name)
@@ -172,6 +180,25 @@ local function loadNeverbirth(savedStore)
 
     function EntityRef(entity)
         return { Entity = entity }
+    end
+
+    function Sprite()
+        local sprite = { path = nil, animation = nil, updates = 0 }
+        function sprite:Load(path)
+            self.path = path
+            spriteEvents[#spriteEvents + 1] = { type = "load", path = path }
+        end
+        function sprite:Play(animation)
+            self.animation = animation
+            spriteEvents[#spriteEvents + 1] = { type = "play", path = self.path, animation = animation }
+        end
+        function sprite:Update()
+            self.updates = self.updates + 1
+        end
+        function sprite:Render(position)
+            spriteEvents[#spriteEvents + 1] = { type = "render", path = self.path, animation = self.animation, position = position }
+        end
+        return sprite
     end
 
     local mod
@@ -367,6 +394,7 @@ local function loadNeverbirth(savedStore)
         getCallback = getCallback,
         getCallbackOrNil = getCallbackOrNil,
         getCallbacks = getCallbacks,
+        spriteEvents = spriteEvents,
         newPlayer = newPlayer,
         newEnemy = newEnemy,
     }
@@ -378,6 +406,12 @@ local function tick(env, frames)
         for _, update in ipairs(updates) do
             update(env.mod)
         end
+    end
+end
+
+local function render(env)
+    for _, callback in ipairs(env.getCallbacks(ModCallbacks.MC_POST_RENDER)) do
+        callback(env.mod)
     end
 end
 
@@ -612,6 +646,86 @@ local function test_plan_c_without_musicbox_uses_vanilla_behavior()
     assertEquals(#player.removeCalls, 0, "vanilla Plan C fallback should not be modified by neverbirth")
 end
 
+local function test_musicbox_visual_resources_match_runtime_contract()
+    local specs = {
+        { file = "musicbox_activation_panic", animation = "PanicActivate" },
+        { file = "musicbox_shadow_guardian", animation = "Activate" },
+        { file = "musicbox_active_contract", animation = "ContractIdle" },
+        { file = "musicbox_warning_windup", animation = "FinalWindup" },
+        { file = "musicbox_warning_beat", animation = "FinalBeat" },
+    }
+
+    for _, spec in ipairs(specs) do
+        local pngPath = "resources/gfx/Effects/" .. spec.file .. ".png"
+        local anm2 = readFile("resources/gfx/Effects/" .. spec.file .. ".anm2")
+        local png = assert(io.open(pngPath, "rb"), pngPath .. " should exist")
+        png:close()
+        assertTruthy(anm2:find('<Spritesheet Id="0" Path="' .. spec.file .. '.png"', 1, true), spec.file .. " should load its local PNG")
+        assertTruthy(anm2:find('<Animation Name="' .. spec.animation .. '"', 1, true), spec.file .. " should define its runtime animation")
+    end
+end
+
+local function sawSpriteEvent(env, eventType, path, animation)
+    for _, event in ipairs(env.spriteEvents) do
+        if event.type == eventType and event.path == path and (animation == nil or event.animation == animation) then
+            return true
+        end
+    end
+    return false
+end
+
+local function test_musicbox_visuals_follow_the_contract_timer()
+    local env = loadNeverbirth()
+    local player = env.newPlayer()
+    local use = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Musicbox)
+
+    use(env.mod, env.items.Musicbox, nil, player)
+    tick(env, 1)
+    render(env)
+    assertTruthy(sawSpriteEvent(env, "render", "gfx/Effects/musicbox_active_contract.anm2", "ContractIdle"), "active Musicbox should render ContractIdle")
+
+    tick(env, 449)
+    render(env)
+    assertTruthy(sawSpriteEvent(env, "render", "gfx/Effects/musicbox_warning_windup.anm2", "FinalWindup"), "Musicbox should render FinalWindup in its last five seconds")
+
+    tick(env, 90)
+    render(env)
+    assertTruthy(sawSpriteEvent(env, "render", "gfx/Effects/musicbox_warning_beat.anm2", "FinalBeat"), "Musicbox should render FinalBeat in its final two seconds")
+end
+
+local function test_panic_musicbox_plays_its_activation_visual()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({
+        hearts = 1,
+        activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 0 },
+    })
+    local damage = env.getCallback(ModCallbacks.MC_ENTITY_TAKE_DMG)
+
+    assertEquals(damage(env.mod, player, 1, 0, nil, 0), false, "panic Musicbox should cancel lethal damage")
+    render(env)
+    assertTruthy(sawSpriteEvent(env, "play", "gfx/Effects/musicbox_activation_panic.anm2", "PanicActivate"), "panic Musicbox should play PanicActivate")
+    assertTruthy(sawSpriteEvent(env, "render", "gfx/Effects/musicbox_activation_panic.anm2", "PanicActivate"), "panic Musicbox should render PanicActivate")
+end
+
+local function test_musicbox_start_plays_shadow_guardian_once()
+    local env = loadNeverbirth()
+    local player = env.newPlayer()
+    local use = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Musicbox)
+
+    use(env.mod, env.items.Musicbox, nil, player)
+    render(env)
+    assertTruthy(sawSpriteEvent(env, "play", "gfx/Effects/musicbox_shadow_guardian.anm2", "Activate"), "starting Musicbox should play the shadow guardian")
+    assertTruthy(sawSpriteEvent(env, "render", "gfx/Effects/musicbox_shadow_guardian.anm2", "Activate"), "starting Musicbox should render the shadow guardian")
+
+    use(env.mod, env.items.Musicbox, nil, player)
+    local playCount = 0
+    for _, event in ipairs(env.spriteEvents) do
+        if event.type == "play" and event.path == "gfx/Effects/musicbox_shadow_guardian.anm2" and event.animation == "Activate" then
+            playCount = playCount + 1
+        end
+    end
+    assertEquals(playCount, 1, "reusing active Musicbox should not replay the shadow guardian")
+end
 test_second_use_does_not_extend_death_timer()
 test_uncharged_musicbox_auto_triggers_on_lethal_damage()
 test_uncharged_musicbox_auto_triggers_on_real_half_heart_lethal_damage()
@@ -624,5 +738,9 @@ test_plan_c_during_musicbox_kills_enemies_without_plan_c_death()
 test_musicbox_cancels_pending_plan_c_death()
 test_plan_c_still_kills_when_musicbox_is_not_used()
 test_plan_c_without_musicbox_uses_vanilla_behavior()
+test_musicbox_visual_resources_match_runtime_contract()
+test_musicbox_visuals_follow_the_contract_timer()
+test_panic_musicbox_plays_its_activation_visual()
+test_musicbox_start_plays_shadow_guardian_once()
 
 print("musicbox behavior tests passed")

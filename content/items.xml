@@ -1,10 +1,11 @@
-<items gfxroot="gfx/Items/" version="1">
+<items gfxroot="gfx/Items/" deathanm2="gfx/UI/NeverbirthDeathItems.anm2" version="1">
   <!-- 被动道具：风油精 -->
   <passive
     name="EssentialBalm"
     cache="all"
     description="Handle with care"
     gfx="P_EssentialBalm.png"
+    id="1"
     quality="3"
     tags="offensive summonable"
   />
@@ -14,6 +15,7 @@
     cache="all"
     description="Dark wind, wild flight"
     gfx="Wuhu.png"
+    id="2"
     quality="4"
     tags="offensive summonable"
   />
@@ -23,6 +25,7 @@
     cache="all"
     description="Half now, half later"
     gfx="UncutCord.png"
+    id="3"
     quality="3"
     tags="summonable"
   />
@@ -32,6 +35,7 @@
     cache="all"
     description="No more births"
     gfx="SterilizationCertificate.png"
+    id="4"
     quality="3"
     tags="offensive summonable"
   />
@@ -41,6 +45,7 @@
     cache="damage"
     description="Remembered harm"
     gfx="EmptyCradle.png"
+    id="5"
     quality="3"
     tags="summonable"
   />
@@ -51,6 +56,7 @@
     maxcharges="0"
     description="Cut the deck"
     gfx="ShreddedTarot.png"
+    id="6"
     quality="3"
     tags="summonable"
   />
@@ -61,6 +67,7 @@
     maxcharges="3"
     description="Slaughter your kin to purify your aptitude."
     gfx="BloodSkullGu.png"
+    id="7"
     quality="3"
     tags="devil offensive summonable"
   />
@@ -71,6 +78,7 @@
     initcharge="3"
     description="I wanna catch u!"
     gfx="BossOrder.png"
+    id="8"
     quality="2"
     tags="nochallenge nolostbr"
   />
@@ -81,6 +89,7 @@
     maxcharges="12"
     description="Every life becomes testimony."
     gfx="BetweenDeathAndLife.png"
+    id="9"
     quality="4"
     tags="dead devil noeden nochallenge offensive"
   />
@@ -90,6 +99,7 @@
     maxcharges="3"
     description="Coin and blade share the same edge."
     gfx="CoinSewnSword.png"
+    id="10"
     quality="2"
     tags="offensive summonable"
   />
@@ -99,6 +109,7 @@
     cache="luck"
     description="Buy yourself another face."
     gfx="CoinFacedMask.png"
+    id="11"
     quality="2"
     tags="summonable"
   />
@@ -108,6 +119,7 @@
     cache="all"
     description="Feeds on blood and lets you see clearly."
     gfx="BlackTaisui.png"
+    id="12"
     quality="3"
     tags="offensive summonable"
   />
@@ -117,6 +129,7 @@
     cache="all"
     description="One more bite"
     gfx="BlackTaisuiMeat.png"
+    id="13"
     quality="2"
     tags="dead summonable"
   />
@@ -127,6 +140,7 @@
     chargetype="timed"
     description="Placeholder logic for a purified mushroom."
     gfx="PurifiedMushroom.png"
+    id="14"
     quality="0"
     tags="summonable"
   />
@@ -136,6 +150,7 @@
     cache="all"
     description="Don't stain the dress."
     gfx="GoodGirlOfBabylon.png"
+    id="15"
     quality="3"
     tags="angel summonable"
   />
@@ -145,6 +160,7 @@
     maxcharges="3"
     description="It does not count"
     gfx="Condom.png"
+    id="16"
     quality="0"
   />
   <!-- 主动道具：Debug Controller -->
@@ -153,6 +169,7 @@
     maxcharges="0"
     description="Debug command menu"
     gfx="DebugController.png"
+    id="17"
     quality="0"
     tags="noeden nochallenge"
   />
@@ -161,16 +178,66 @@
     name="Strong Laxative"
     description="A thousand-mile purge"
     gfx="StrongLaxative.png"
+    id="18"
     quality="0"
     tags="summonable"
+  />
+  <!-- 被动道具：通天塔 -->
+  <passive
+    name="Tower of Babel"
+    description="No more flood."
+    gfx="TowerOfBabel.png"
+    id="19"
+    quality="1"
+    tags="defensive anti-terrain"
+  />
+  <!-- 被动道具：月色真美 -->
+  <passive
+    name="The Moon Is Beautiful"
+    cache="damage luck"
+    description="Say that to me."
+    gfx="collectible_the_moon_is_beautiful.png"
+    id="20"
+    quality="3"
+    tags="angel summonable"
+  />
+  <!-- 被动道具：焚尽郁结 -->
+  <passive
+    name="Burn Away the Resentment"
+    cache="damage firedelay speed"
+    description="I've never felt so refreshed."
+    gfx="BurnAwayResentment.png"
+    id="21"
+    quality="3"
+    tags="offensive"
   />
   <!-- 被动道具：虚空针尖 -->
   <passive
     name="Needletick"
     description="vomit in buckets"
     gfx="Needletick.png"
+    id="22"
     quality="3"
     tags="offensive summonable"
+  />
+  <!-- 被动道具：疯狂的椰子 -->
+  <passive
+    name="Crazy Coconut"
+    cache="damage"
+    description="King of hollow earth"
+    gfx="CrazyCoconut.png"
+    id="23"
+    quality="4"
+    tags="offensive"
+  />
+  <!-- 被动道具：鸿运齐天蛊 -->
+  <passive
+    name="Fortune Rivalling Heaven Gu"
+    cache="luck"
+    description="The world bends your way."
+    gfx="fortune_rivalling_heaven_gu.png"
+    id="24"
+    quality="4"
   />
   <!-- 被动道具：美工刀 -->
   <passive
@@ -178,16 +245,27 @@
     cache="damage"
     description="Painful scars"
     gfx="UtilityKnife.png"
+    id="25"
     quality="2"
     tags="offensive summonable"
   />
-  <!-- 主动道具：春药 -->
+  <!-- 被动道具：柴刀，Stranger 起始道具 -->
+  <passive
+    name="Cleaver"
+    cache="damage firedelay range shotspeed"
+    description="Tears become cleaver swings"
+    gfx="Cleaver.png"
+    id="26"
+    quality="0"
+    tags="offensive"
+  />  <!-- 主动道具：春药 -->
   <active
     name="Aphrodisiac"
     cache="all"
     maxcharges="1"
     description="Heat of the moment"
     gfx="Chunyao.png"
+    id="27"
     quality="2"
     tags="devil offensive"
   />
@@ -198,6 +276,7 @@
     maxcharges="12"
     description="Your life, on a timer"
     gfx="Musicbox.png"
+    id="28"
     quality="4"
     tags="dead noeden nochallenge angel"
   /><!-- 主动道具：天使盒 -->
@@ -209,6 +288,7 @@
     chargetype="special"
     description="Full hearts, heavenbound"
     gfx="Angelbox.png"
+    id="29"
     quality="3"
     tags="noeden nochallenge angel offensive"
   />
@@ -221,6 +301,7 @@
     chargetype="special"
     description="Black hearts, below"
     gfx="Devilbox.png"
+    id="30"
     quality="4"
     tags="noeden nochallenge devil offensive"
   />
@@ -231,7 +312,16 @@
     maxcharges="0"
     description=""
     gfx="ds4.png"
+    id="31"
     quality="4"
     tags="noeden nochallenge"
   />
+  <!-- Passive: Little Leather Shoes -->
+  <passive name="Little Leather Shoes" cache="all" description="Meowmermermer" gfx="little_leather_shoes.png" id="32" quality="2" tags="offensive summonable" />
+  <!-- Hidden one-shot Traffic rewards -->
+  <passive name="Traffic: Unboxing" cache="all" description="A promising debut" gfx="traffic_unboxing.png" id="33" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <passive name="Traffic: Exposure" cache="all" description="More eyes are on you" gfx="traffic_exposure.png" id="34" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <passive name="Traffic: Heat" cache="firedelay" description="Are you sure this is what you want?" gfx="traffic_heat.png" id="35" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <!-- Developer gallery active: Certificate of Neverbirth -->
+  <active name="Certificate of Neverbirth" maxcharges="0" description="Enter the Neverbirth gallery" gfx="certificate_of_neverbirth.png" id="36" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
 </items>
