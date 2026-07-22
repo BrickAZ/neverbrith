@@ -30,7 +30,9 @@ function Assert-CandidateContract(
     [string]$CandidatePath,
     [int]$ExpectedWidth,
     [int]$ExpectedHeight,
-    [int[]]$AllowedAlpha
+    [int[]]$AllowedAlpha,
+    [int]$MinimumCyanPixels,
+    [int]$MaximumCyanPixels
 ) {
     if (-not (Test-Path -LiteralPath $CandidatePath)) {
         throw "$Label candidate is missing: $CandidatePath"
@@ -47,6 +49,7 @@ function Assert-CandidateContract(
         }
 
         $alphaSet = [System.Collections.Generic.HashSet[int]]::new()
+        $cyanPixels = 0
         for ($y = 0; $y -lt $candidate.Height; $y++) {
             for ($x = 0; $x -lt $candidate.Width; $x++) {
                 $sourcePixel = $source.GetPixel($x, $y)
@@ -58,6 +61,9 @@ function Assert-CandidateContract(
                 if ($candidatePixel.A -gt 0 -and $candidatePixel.R -gt ($candidatePixel.G + 12) -and $candidatePixel.R -gt ($candidatePixel.B + 12)) {
                     throw "$Label contains a red-dominant visible pixel at ($x,$y): $($candidatePixel.ToArgb())."
                 }
+                if ($candidatePixel.A -gt 0 -and $candidatePixel.G -ge 150 -and $candidatePixel.B -ge 140 -and $candidatePixel.G -gt ($candidatePixel.R + 80)) {
+                    $cyanPixels++
+                }
             }
         }
 
@@ -66,6 +72,9 @@ function Assert-CandidateContract(
         if (($actualAlpha -join ',') -ne ($expectedAlpha -join ',')) {
             throw "$Label alpha set mismatch: expected $($expectedAlpha -join ','), got $($actualAlpha -join ',')."
         }
+        if ($cyanPixels -lt $MinimumCyanPixels -or $cyanPixels -gt $MaximumCyanPixels) {
+            throw "$Label cyan accent area is out of range: expected $MinimumCyanPixels..$MaximumCyanPixels pixels, got $cyanPixels."
+        }
     }
     finally {
         $source.Dispose()
@@ -73,7 +82,7 @@ function Assert-CandidateContract(
     }
 }
 
-Assert-CandidateContract 'body' $bodySourcePath $bodyCandidatePath 256 256 @(0, 255)
-Assert-CandidateContract 'head' $headSourcePath $headCandidatePath 256 32 @(0, 77, 153, 255)
+Assert-CandidateContract 'body' $bodySourcePath $bodyCandidatePath 256 256 @(0, 255) 220 320
+Assert-CandidateContract 'head' $headSourcePath $headCandidatePath 256 32 @(0, 77, 153, 255) 80 130
 
 Write-Output 'Tokarev cloak candidate visual contract passed'
