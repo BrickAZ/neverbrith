@@ -13,7 +13,7 @@
 - Do not overwrite vanilla or existing mod assets.
 - Do not edit `content/costumes2.xml`, `main.lua`, or the Everchanging registry in this pass.
 - Body output is exactly `256x256`; head output is exactly `256x32`.
-- Preserve the source c216 alpha mask exactly and allow no semitransparent pixels.
+- Preserve every source c216 alpha value exactly. Body remains binary-alpha; head retains only its source-native `77/153` shadow-alpha pixels and adds no new semitransparency.
 - Use a near-black navy exterior, blue-black shadows, and sparse cyan lining; no red fringe.
 
 ---
@@ -45,7 +45,7 @@
 - Produces: pass/fail output and a nearest-neighbor review image.
 
 - [ ] **Step 1: Assert body/head dimensions are `256x256` and `256x32`.**
-- [ ] **Step 2: Assert every alpha value is `0` or `255` and equals the corresponding c216 source alpha.**
+- [ ] **Step 2: Assert every candidate alpha equals the corresponding c216 source alpha; body remains `0/255`, while head preserves only its existing `0/77/153/255` values.**
 - [ ] **Step 3: Assert no visible pixel falls outside the source mask and no visible red-dominant fringe color exists.**
 - [ ] **Step 4: Render both sheets at integer nearest-neighbor scale into `reports/tokarev_cloak_candidate_preview.png`.**
 - [ ] **Step 5: Run the validation script and require a passing result before presenting the preview.**
