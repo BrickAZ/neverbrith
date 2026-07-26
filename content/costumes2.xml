@@ -23,4 +23,9 @@
     type="none"
     priority="98"
   />
-</costumes>
+  <costume id="17501" anm2path="costume_tantan_hair.anm2" type="none" priority="98" />
+  <costume id="17502" anm2path="costume_tantan_glasses.anm2" type="none" priority="97" />
+  <costume id="17503" anm2path="costume_daodao_hair.anm2" type="none" priority="98" />
+  <costume id="17504" anm2path="costume_daodao_tissue_tears.anm2" type="none" priority="97" />
+  <costume id="17505" anm2path="costume_yoontoons_hair.anm2" type="none" priority="98" />
+  <costume id="17506" anm2path="costume_yoontoons_glasses.anm2" type="none" priority="97" /></costumes>
