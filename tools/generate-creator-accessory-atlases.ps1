@@ -161,161 +161,202 @@ function Save-Png([Drawing.Bitmap]$Bitmap,[string]$Path) {
     Write-Output "generated $Path"
 }
 
-function Test-FaceAperture([string]$View,[int]$X,[int]$Y) {
-    if($View -eq 'front') {
-        return $X -ge 7 -and $X -le 24 -and $Y -ge 12 -and $Y -le 23
-    }
-    if($View -eq 'right') {
-        return $X -ge 15 -and $X -le 29 -and $Y -ge 11 -and $Y -le 23
-    }
-    return $false
-}
-
-function Test-SourceAlpha(
-    [Drawing.Bitmap]$Bitmap,
-    [int]$SourceX,
-    [int]$X,
-    [int]$Y
-) {
-    if($X -lt 0 -or $X -ge 32 -or $Y -lt 0 -or $Y -ge 32) { return $false }
-    return $Bitmap.GetPixel($SourceX+$X,$Y).A -gt 0
-}
-
 function Get-HairColor([string]$Persona,[bool]$Boundary,[int]$X,[int]$Y) {
     if($Persona -eq 'tantan') {
         if($Boundary){return $palette.Outline}
-        if($X -le 7 -or $Y -ge 22){return $palette.TantanDark}
-        if($Y -le 8){return $palette.TantanLight}
+        if($X -le 6 -or $Y -ge 25){return $palette.TantanDark}
+        if($Y -le 15){return $palette.TantanLight}
         return $palette.Tantan
     }
     if($Persona -eq 'daodao') {
         if($Boundary){return $palette.DaodaoOutline}
-        if($X -le 7 -or $Y -ge 22){return $palette.DaodaoDark}
-        if($Y -le 7){return $palette.DaodaoLight}
+        if($X -le 6 -or $Y -ge 24){return $palette.DaodaoDark}
+        if($Y -le 13){return $palette.DaodaoLight}
         return $palette.Daodao
     }
     if($Boundary){return $palette.YoonDark}
-    if($X -le 6 -or $Y -ge 22){return $palette.Yoon}
-    return $palette.YoonLight
+    if($X -le 6 -or $Y -ge 25){return $palette.Yoon}
+    if($Y -le 14){return $palette.YoonLight}
+    return $palette.Yoon
 }
 
-function Draw-TantanTufts([Drawing.Bitmap]$Bitmap,[int]$Cell,[int]$Phase) {
-    $shift = $Phase
-    Fill-LocalSpan $Bitmap $Cell 32 9 13 (29+$shift) $palette.Outline
-    Fill-LocalSpan $Bitmap $Cell 32 9 12 (30+$shift) $palette.Tantan
-    Fill-LocalSpan $Bitmap $Cell 32 10 12 (31+$shift) $palette.TantanLight
-    Fill-LocalSpan $Bitmap $Cell 32 11 13 (32+$shift) $palette.TantanDark
-    Fill-LocalSpan $Bitmap $Cell 32 20 23 (29+$shift) $palette.Outline
-    Fill-LocalSpan $Bitmap $Cell 32 20 22 (30+$shift) $palette.Tantan
-    Fill-LocalSpan $Bitmap $Cell 32 21 23 (31+$shift) $palette.TantanLight
-    Fill-LocalSpan $Bitmap $Cell 32 20 22 (32+$shift) $palette.TantanDark
-}
-
-function Draw-DaodaoSpikes([Drawing.Bitmap]$Bitmap,[int]$Cell,[int]$Phase) {
-    $shift = $Phase
-    foreach($point in @(
-        @(6,8),@(7,7),@(8,6),@(9,7),@(10,8),
-        @(22,8),@(23,7),@(24,5),@(25,6),@(26,8)
-    )) {
-        $color = if($point[1] -le 6){$palette.DaodaoLight}else{$palette.DaodaoOutline}
-        Set-LocalPixel $Bitmap $Cell 32 $point[0] ($point[1]+16+$shift) $color
-    }
-}
-
-function Draw-YoonSignature([Drawing.Bitmap]$Bitmap,[int]$Cell,[string]$View,[int]$Phase) {
-    $shift = $Phase
-    foreach($point in @(@(4,20),@(3,21),@(3,22),@(4,23),@(27,20),@(28,21),@(28,22),@(27,23))) {
-        Set-LocalPixel $Bitmap $Cell 32 $point[0] ($point[1]+16+$shift) $palette.YoonDark
-    }
-    if($View -in @('front','right')) {
-        foreach($point in @(@(9,9),@(10,9),@(10,10))) {
-            Set-LocalPixel $Bitmap $Cell 32 $point[0] ($point[1]+16+$shift) $palette.YoonBlue
+function Draw-OutlinedRows(
+    [Drawing.Bitmap]$Bitmap,
+    [int]$Cell,
+    [object[]]$Rows,
+    [string]$Persona,
+    [int]$Phase
+) {
+    $mask=[bool[,]]::new(32,64)
+    foreach($row in $Rows) {
+        $y=[int]$row[0]+$Phase
+        for($x=[int]$row[1]; $x -le [int]$row[2]; $x++) {
+            $mask[$x,$y]=$true
         }
+    }
+    foreach($row in $Rows) {
+        $y=[int]$row[0]+$Phase
+        for($x=[int]$row[1]; $x -le [int]$row[2]; $x++) {
+            $boundary=$x -eq 0 -or $x -eq 31 -or $y -eq 0 -or $y -eq 63 -or
+                -not $mask[($x-1),$y] -or -not $mask[($x+1),$y] -or
+                -not $mask[$x,($y-1)] -or -not $mask[$x,($y+1)]
+            Set-LocalPixel $Bitmap $Cell 32 $x $y `
+                (Get-HairColor $Persona $boundary $x $y)
+        }
+    }
+}
+
+function Get-HairRows([string]$Persona,[string]$View) {
+    switch("$Persona/$View") {
+        'tantan/front' { return @(
+            @(11,12,15),@(12,9,18),@(13,7,21),@(14,6,24),@(15,5,26),
+            @(16,5,27),@(17,6,27),@(18,6,26),@(19,7,25),@(20,7,23),
+            @(21,6,13),@(21,17,24),@(22,5,11),@(22,18,24),
+            @(23,5,9),@(23,19,25),@(24,5,8),@(24,20,25),
+            @(25,4,7),@(25,22,26),@(26,4,7),@(26,23,26),
+            @(27,4,6),@(27,24,27),@(28,4,6),@(28,25,27),
+            @(29,4,6),@(29,25,27),@(30,5,6),@(30,26,27),
+            @(31,5,6),@(31,26,27),@(32,5,6),@(32,26,27)
+        ) }
+        'tantan/right' { return @(
+            @(11,14,18),@(12,11,20),@(13,9,23),@(14,8,26),@(15,7,28),
+            @(16,7,29),@(17,8,29),@(18,9,29),@(19,10,28),@(20,11,27),
+            @(21,5,12),@(21,22,27),@(22,5,11),@(22,23,28),
+            @(23,5,10),@(23,24,29),@(24,4,9),@(24,25,29),
+            @(25,4,8),@(25,26,29),@(26,4,8),@(26,27,29),
+            @(27,4,7),@(27,27,29),@(28,4,7),@(29,4,7),
+            @(30,4,7),@(31,4,7),@(32,4,7)
+        ) }
+        'tantan/back' { return @(
+            @(11,12,16),@(12,9,20),@(13,7,23),@(14,6,25),@(15,5,26),
+            @(16,5,27),@(17,6,27),@(18,6,26),@(19,7,25),@(20,7,24),
+            @(21,6,13),@(21,18,25),@(22,5,11),@(22,14,18),@(22,21,26),
+            @(23,5,10),@(23,13,17),@(23,22,26),@(24,5,9),@(24,14,18),
+            @(24,23,27),@(25,4,8),@(25,15,19),@(25,24,27),
+            @(26,4,8),@(26,16,19),@(26,25,27),@(27,4,7),@(27,25,27),
+            @(28,4,7),@(28,25,27),@(29,4,7),@(29,25,27),
+            @(30,5,7),@(30,25,26),@(31,5,6),@(31,25,26)
+        ) }
+        'daodao/front' { return @(
+            @(9,7,9),@(9,15,17),@(9,23,25),@(10,6,10),@(10,14,18),
+            @(10,22,26),@(11,5,11),@(11,13,19),@(11,21,27),
+            @(12,5,27),@(13,5,27),@(14,5,27),@(15,6,26),@(16,6,25),
+            @(17,7,24),@(18,6,13),@(18,18,25),@(19,6,12),@(19,19,25),
+            @(20,5,11),@(20,20,26),@(21,5,10),@(21,21,26),
+            @(22,4,8),@(22,23,27),@(23,4,7),@(23,24,27),
+            @(24,4,7),@(24,24,27),@(25,4,6),@(25,25,27),
+            @(26,4,6),@(26,25,27),@(27,4,6),@(27,25,27),
+            @(28,5,6),@(28,26,27),@(29,5,6),@(29,26,27)
+        ) }
+        'daodao/right' { return @(
+            @(9,13,15),@(9,22,25),@(10,11,16),@(10,21,27),
+            @(11,9,18),@(11,20,28),@(12,8,28),@(13,7,29),@(14,7,29),
+            @(15,8,29),@(16,9,28),@(17,10,27),@(18,5,12),@(18,21,28),
+            @(19,5,11),@(19,22,29),@(20,4,10),@(20,23,29),
+            @(21,4,9),@(21,24,29),@(22,4,8),@(22,25,29),
+            @(23,4,7),@(23,26,29),@(24,4,7),@(24,27,29),
+            @(25,4,6),@(25,27,29),@(26,4,6),@(27,4,6),@(28,5,6)
+        ) }
+        'daodao/back' { return @(
+            @(9,7,9),@(9,15,17),@(9,23,25),@(10,6,10),@(10,14,18),
+            @(10,22,26),@(11,5,11),@(11,13,19),@(11,21,27),
+            @(12,5,27),@(13,5,27),@(14,5,27),@(15,6,26),@(16,6,25),
+            @(17,7,24),@(18,5,11),@(18,14,18),@(18,21,27),
+            @(19,5,10),@(19,15,19),@(19,22,27),@(20,4,9),@(20,23,28),
+            @(21,4,8),@(21,24,28),@(22,4,7),@(22,25,28),
+            @(23,4,7),@(23,25,28),@(24,4,6),@(24,26,28),
+            @(25,4,6),@(25,26,28),@(26,5,6),@(26,26,27)
+        ) }
+        'yoontoons/front' { return @(
+            @(11,9,13),@(11,18,22),@(12,7,15),@(12,17,24),
+            @(13,6,25),@(14,5,26),@(15,5,27),@(16,6,27),@(17,6,26),
+            @(18,7,25),@(19,5,12),@(19,16,20),@(19,23,27),
+            @(20,4,11),@(20,16,19),@(20,24,28),@(21,4,10),@(21,25,28),
+            @(22,3,9),@(22,25,29),@(23,3,8),@(23,26,29),
+            @(24,3,7),@(24,26,29),@(25,3,7),@(25,26,29),
+            @(26,3,6),@(26,27,29),@(27,3,6),@(27,27,29),
+            @(28,3,6),@(28,27,29),@(29,4,6),@(29,27,28),
+            @(30,4,6),@(30,27,28),@(31,4,5),@(31,27,28)
+        ) }
+        'yoontoons/right' { return @(
+            @(11,12,16),@(11,20,23),@(12,9,18),@(12,19,26),
+            @(13,7,27),@(14,6,28),@(15,6,29),@(16,7,29),@(17,8,29),
+            @(18,9,28),@(19,4,11),@(19,23,29),@(20,3,10),@(20,24,29),
+            @(21,3,9),@(21,25,30),@(22,3,8),@(22,26,30),
+            @(23,3,7),@(23,27,30),@(24,3,7),@(24,27,30),
+            @(25,3,6),@(25,28,30),@(26,3,6),@(26,28,30),
+            @(27,3,6),@(28,3,6),@(29,4,6),@(30,4,6),@(31,4,5)
+        ) }
+        'yoontoons/back' { return @(
+            @(11,9,13),@(11,18,22),@(12,7,15),@(12,17,24),
+            @(13,6,25),@(14,5,26),@(15,5,27),@(16,6,27),@(17,6,26),
+            @(18,7,25),@(19,4,11),@(19,14,18),@(19,22,28),
+            @(20,3,10),@(20,15,19),@(20,23,29),@(21,3,9),@(21,24,29),
+            @(22,3,8),@(22,25,29),@(23,3,7),@(23,26,29),
+            @(24,3,7),@(24,26,29),@(25,3,6),@(25,27,29),
+            @(26,3,6),@(26,27,29),@(27,3,6),@(27,27,29),
+            @(28,4,6),@(28,27,28),@(29,4,6),@(29,27,28)
+        ) }
+        default { throw "missing authored hair rows for $Persona/$View" }
     }
 }
 
 function Draw-HairCell(
     [Drawing.Bitmap]$Bitmap,
-    [Drawing.Bitmap]$VanillaHead,
     [int]$Cell,
     [string]$Persona,
     [string]$View,
-    [int]$SourceX,
     [int]$Phase
 ) {
-    $neighbors = @(@(-1,0),@(1,0),@(0,-1),@(0,1))
-    for($y=0; $y -lt 32; $y++) {
-        for($x=0; $x -lt 32; $x++) {
-            if(-not (Test-SourceAlpha $VanillaHead $SourceX $x $y)) { continue }
-            if(Test-FaceAperture $View $x $y) { continue }
-            $boundary = $false
-            foreach($delta in $neighbors) {
-                if(-not (Test-SourceAlpha $VanillaHead $SourceX ($x+$delta[0]) ($y+$delta[1]))) {
-                    $boundary = $true
-                    break
-                }
-            }
-            Set-LocalPixel $Bitmap $Cell 32 $x ($y+16) (Get-HairColor $Persona $boundary $x $y)
-        }
-    }
-
-    if($Persona -eq 'tantan' -and $View -eq 'front') {
-        Draw-TantanTufts $Bitmap $Cell $Phase
-    } elseif($Persona -eq 'daodao') {
-        Draw-DaodaoSpikes $Bitmap $Cell $Phase
-    } elseif($Persona -eq 'yoontoons') {
-        Draw-YoonSignature $Bitmap $Cell $View $Phase
+    Draw-OutlinedRows $Bitmap $Cell (Get-HairRows $Persona $View) $Persona $Phase
+    if($Persona -eq 'yoontoons' -and $View -in @('front','right')) {
+        Set-LocalPixel $Bitmap $Cell 32 7 (17+$Phase) $palette.YoonBlue
+        Set-LocalPixel $Bitmap $Cell 32 8 (17+$Phase) $palette.YoonBlue
     }
 }
-
 function Draw-TantanFrontGlasses([Drawing.Bitmap]$Bitmap,[int]$Cell,[int]$OffsetY) {
-    $top = 12+$OffsetY
-    foreach($range in @(@(8,12),@(19,23))) {
-        $x1=$range[0]; $x2=$range[1]
-        Fill-LocalSpan $Bitmap $Cell 32 $x1 $x2 $top $palette.TantanGlassLight
-        Fill-LocalSpan $Bitmap $Cell 32 ($x1-1) $x1 ($top+1) $palette.TantanGlassDark
-        Fill-LocalSpan $Bitmap $Cell 32 $x2 ($x2+1) ($top+1) $palette.TantanGlassDark
-        Set-LocalPixel $Bitmap $Cell 32 ($x1-1) ($top+2) $palette.TantanGlass
-        Set-LocalPixel $Bitmap $Cell 32 ($x2+1) ($top+2) $palette.TantanGlass
-        Fill-LocalSpan $Bitmap $Cell 32 $x1 $x2 ($top+3) $palette.TantanGlass
-        Fill-LocalSpan $Bitmap $Cell 32 ($x1+1) ($x2-1) ($top+4) $palette.TantanGlassDark
-    }
-    Fill-LocalSpan $Bitmap $Cell 32 14 17 ($top+2) $palette.TantanGlass
+    $y=11+$OffsetY
+    Fill-LocalSpan $Bitmap $Cell 32 8 12 $y $palette.TantanGlassLight
+    Fill-LocalSpan $Bitmap $Cell 32 19 23 $y $palette.TantanGlassLight
+    Set-LocalPixel $Bitmap $Cell 32 7 ($y+1) $palette.TantanGlassDark
+    Set-LocalPixel $Bitmap $Cell 32 13 ($y+1) $palette.TantanGlass
+    Set-LocalPixel $Bitmap $Cell 32 18 ($y+1) $palette.TantanGlass
+    Set-LocalPixel $Bitmap $Cell 32 24 ($y+1) $palette.TantanGlassDark
+    Fill-LocalSpan $Bitmap $Cell 32 14 17 ($y+1) $palette.TantanGlassDark
 }
 
 function Draw-TantanSideGlasses([Drawing.Bitmap]$Bitmap,[int]$Cell,[int]$OffsetY) {
-    $top = 12+$OffsetY
-    Fill-LocalSpan $Bitmap $Cell 32 17 26 $top $palette.TantanGlassLight
-    Fill-LocalSpan $Bitmap $Cell 32 16 18 ($top+1) $palette.TantanGlassDark
-    Fill-LocalSpan $Bitmap $Cell 32 25 27 ($top+1) $palette.TantanGlassDark
-    Set-LocalPixel $Bitmap $Cell 32 16 ($top+2) $palette.TantanGlass
-    Set-LocalPixel $Bitmap $Cell 32 27 ($top+2) $palette.TantanGlass
-    Fill-LocalSpan $Bitmap $Cell 32 17 26 ($top+3) $palette.TantanGlass
-    Fill-LocalSpan $Bitmap $Cell 32 18 25 ($top+4) $palette.TantanGlassDark
+    $y=11+$OffsetY
+    Fill-LocalSpan $Bitmap $Cell 32 18 25 $y $palette.TantanGlassLight
+    Set-LocalPixel $Bitmap $Cell 32 17 ($y+1) $palette.TantanGlassDark
+    Set-LocalPixel $Bitmap $Cell 32 26 ($y+1) $palette.TantanGlassDark
 }
-
 function Draw-DaodaoFrontTissues([Drawing.Bitmap]$Bitmap,[int]$Cell,[int]$OffsetY) {
-    foreach($x1 in @(9,21)) {
-        Fill-LocalSpan $Bitmap $Cell 32 $x1 ($x1+2) (15+$OffsetY) $palette.TissueLight
-        for($y=16+$OffsetY; $y -le 24+$OffsetY; $y++) {
-            Set-LocalPixel $Bitmap $Cell 32 $x1 $y $palette.TissueDark
-            Set-LocalPixel $Bitmap $Cell 32 ($x1+1) $y $palette.TissueLight
-            Set-LocalPixel $Bitmap $Cell 32 ($x1+2) $y $palette.Tissue
-        }
-        Set-LocalPixel $Bitmap $Cell 32 ($x1+1) (25+$OffsetY) $palette.TissueLight
+    $left=@(@(11,6,7),@(12,5,7),@(13,5,6),@(14,4,6),
+        @(15,4,5),@(16,3,5),@(17,3,4),@(18,2,4))
+    foreach($row in $left) {
+        Fill-LocalSpan $Bitmap $Cell 32 $row[1] $row[2] ($row[0]+$OffsetY) $palette.Tissue
+        Set-LocalPixel $Bitmap $Cell 32 $row[1] ($row[0]+$OffsetY) $palette.TissueDark
+        Set-LocalPixel $Bitmap $Cell 32 $row[2] ($row[0]+$OffsetY) $palette.TissueLight
+    }
+    foreach($row in $left) {
+        $x1=31-$row[2]
+        $x2=31-$row[1]
+        Fill-LocalSpan $Bitmap $Cell 32 $x1 $x2 ($row[0]+$OffsetY) $palette.Tissue
+        Set-LocalPixel $Bitmap $Cell 32 $x1 ($row[0]+$OffsetY) $palette.TissueLight
+        Set-LocalPixel $Bitmap $Cell 32 $x2 ($row[0]+$OffsetY) $palette.TissueDark
     }
 }
 
 function Draw-DaodaoSideTissue([Drawing.Bitmap]$Bitmap,[int]$Cell,[int]$OffsetY) {
-    Fill-LocalSpan $Bitmap $Cell 32 21 23 (15+$OffsetY) $palette.TissueLight
-    for($y=16+$OffsetY; $y -le 24+$OffsetY; $y++) {
-        Set-LocalPixel $Bitmap $Cell 32 21 $y $palette.TissueDark
-        Set-LocalPixel $Bitmap $Cell 32 22 $y $palette.TissueLight
-        Set-LocalPixel $Bitmap $Cell 32 23 $y $palette.Tissue
+    $rows=@(@(11,12,14),@(12,11,14),@(13,11,13),@(14,10,13),
+        @(15,10,12),@(16,9,12),@(17,9,11),@(18,8,11))
+    foreach($row in $rows) {
+        Fill-LocalSpan $Bitmap $Cell 32 $row[1] $row[2] ($row[0]+$OffsetY) $palette.Tissue
+        Set-LocalPixel $Bitmap $Cell 32 $row[1] ($row[0]+$OffsetY) $palette.TissueDark
+        Set-LocalPixel $Bitmap $Cell 32 $row[2] ($row[0]+$OffsetY) $palette.TissueLight
     }
-    Set-LocalPixel $Bitmap $Cell 32 22 (25+$OffsetY) $palette.TissueLight
 }
-
 function Draw-YoonFrontGlasses([Drawing.Bitmap]$Bitmap,[int]$Cell,[int]$OffsetY) {
     $top=12+$OffsetY
     foreach($range in @(@(7,13),@(18,24))) {
@@ -455,7 +496,7 @@ try {
         $face=New-TransparentBitmap 256 32
         for($cell=0; $cell -lt 6; $cell++) {
             $view=$views[$cell]
-            Draw-HairCell $hair $vanillaHead $cell $persona $view.Name $view.Source $view.Phase
+            Draw-HairCell $hair $cell $persona $view.Name $view.Phase
             Draw-FaceCell $face $cell $persona $view.Name $view.Phase
         }
         Mirror-Cell $hair 2 6 32 64

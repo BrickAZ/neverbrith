@@ -4,15 +4,15 @@ Add-Type -AssemblyName System.Drawing
 
 $Root = [IO.Path]::GetFullPath($Root)
 $assets = @(
-    @{ Name='tantan_hair'; Width=256; Height=64; Kind='hair'; Min=120; Max=700;
+    @{ Name='tantan_hair'; Width=256; Height=64; Kind='hair'; Min=120; Max=300;
        Colors=@('#35282C','#92516B','#D97A9A','#F0A7B8') },
     @{ Name='tantan_glasses'; Width=256; Height=32; Kind='face'; Min=0; Max=130;
        Colors=@('#7A2D38','#B73C45','#E45A58') },
-    @{ Name='daodao_hair'; Width=256; Height=64; Kind='hair'; Min=110; Max=680;
+    @{ Name='daodao_hair'; Width=256; Height=64; Kind='hair'; Min=110; Max=300;
        Colors=@('#293247','#31486F','#4F6FA0','#7E98BC') },
     @{ Name='daodao_tissue_tears'; Width=256; Height=32; Kind='face'; Min=0; Max=150;
        Colors=@('#A9B0BA','#C7CCD2','#F1F1E8') },
-    @{ Name='yoontoons_hair'; Width=256; Height=64; Kind='hair'; Min=110; Max=680;
+    @{ Name='yoontoons_hair'; Width=256; Height=64; Kind='hair'; Min=110; Max=300;
        Colors=@('#202536','#30384D','#4C566D','#4A9BD1') },
     @{ Name='yoontoons_glasses'; Width=256; Height=32; Kind='face'; Min=0; Max=130;
        Colors=@('#873A35','#B94D3F','#E87955') }
@@ -37,6 +37,34 @@ function Get-CellVisibleCount([Drawing.Bitmap]$Bitmap, [int]$Cell, [int]$CellHei
         }
     }
     return $count
+}
+function Get-RegionVisibleCount(
+    [Drawing.Bitmap]$Bitmap,
+    [int]$Cell,
+    [int]$StartX,
+    [int]$EndX,
+    [int]$StartY,
+    [int]$EndY
+) {
+    $count=0
+    for($y=$StartY; $y -le $EndY; $y++) {
+        for($x=$StartX; $x -le $EndX; $x++) {
+            if($Bitmap.GetPixel(($Cell*32)+$x,$y).A -gt 0) { $count++ }
+        }
+    }
+    return $count
+}
+
+function Assert-RegionBlank(
+    [Drawing.Bitmap]$Bitmap,
+    [int]$Cell,
+    [int]$StartX,
+    [int]$EndX,
+    [int]$StartY,
+    [int]$EndY,
+    [string]$Message
+) {
+    Assert-True ((Get-RegionVisibleCount $Bitmap $Cell $StartX $EndX $StartY $EndY) -eq 0) $Message
 }
 
 foreach($asset in $assets) {
@@ -76,6 +104,29 @@ foreach($asset in $assets) {
             }
         }
     } finally { $bitmap.Dispose() }
+}
+
+$tantanHair=Open-BitmapCopy (Join-Path $Root 'resources\gfx\characters\costumes\costume_tantan_hair.png')
+$tantanGlasses=Open-BitmapCopy (Join-Path $Root 'resources\gfx\characters\costumes\costume_tantan_glasses.png')
+$daodaoHair=Open-BitmapCopy (Join-Path $Root 'resources\gfx\characters\costumes\costume_daodao_hair.png')
+$daodaoTissues=Open-BitmapCopy (Join-Path $Root 'resources\gfx\characters\costumes\costume_daodao_tissue_tears.png')
+$yoonHair=Open-BitmapCopy (Join-Path $Root 'resources\gfx\characters\costumes\costume_yoontoons_hair.png')
+try {
+    foreach($cell in 0,1) {
+        Assert-RegionBlank $tantanHair $cell 8 23 29 43 "Tantan front face must remain open"
+        Assert-RegionBlank $daodaoHair $cell 8 23 29 43 "Daodao front face must remain open"
+        Assert-RegionBlank $yoonHair $cell 8 23 29 43 "Yoontoons front face must remain open"
+        Assert-RegionBlank $tantanGlasses $cell 9 12 14 17 "Tantan left lens must stay open"
+        Assert-RegionBlank $tantanGlasses $cell 19 22 14 17 "Tantan right lens must stay open"
+        Assert-RegionBlank $daodaoTissues $cell 8 23 11 25 `
+            "Daodao tissues must stay outside vanilla tear columns"
+    }
+} finally {
+    $tantanHair.Dispose()
+    $tantanGlasses.Dispose()
+    $daodaoHair.Dispose()
+    $daodaoTissues.Dispose()
+    $yoonHair.Dispose()
 }
 
 Write-Output 'creator accessory atlas visual contract passed'
