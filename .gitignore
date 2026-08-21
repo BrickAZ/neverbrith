@@ -3,6 +3,7 @@
 tmp/
 node_modules/
 outputs/
+.worktrees/
 
 # Local editor and OS files
 .DS_Store
