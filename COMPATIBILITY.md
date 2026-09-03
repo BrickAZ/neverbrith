@@ -1,24 +1,33 @@
-# Neverbirth Third-Party Compatibility Interfaces
+# Neverbirth Compatibility API for Other Mods
 
 [Chinese version](COMPATIBILITY.zh-CN.md)
 
-This document is for mod authors who want to integrate their content with Neverbirth, and for future maintainers of these interfaces.
+This guide is for Isaac mod authors who want their own content to work with Neverbirth. It assumes that you know basic Isaac modding terms and Lua, but it does not assume that you already know how Neverbirth's items work.
 
-The current public contract covers only three compatibility interfaces:
+## What other mods can integrate
 
-1. Luck-cap registration for Fortune Rivalling Heaven Gu;
-2. The external character profile allowlist for Memory Disorder;
-3. Custom active dice item registration for Dice Set.
+Neverbirth currently lets other mods integrate with three of its items:
 
-> Other mods are welcome to provide compatibility with Neverbirth. Only the interfaces explicitly listed in this document are supported public compatibility interfaces. Calling unlisted `Neverbirth.*` methods or accessing `TestAPI`, `CarrierAPI`, runtime state tables, or other internal fields is not supported.
+1. **Fortune Rivalling Heaven Gu:** Tell Neverbirth how much Luck another collectible or trinket needs to reach its highest possible activation chance.
+2. **Memory Disorder:** Allow a custom player character to be selected as one of Memory Disorder's temporary identities.
+3. **Dice Set:** Mark a custom dice-themed active item so Dice Set can recognize and count it.
 
-## Current Status
+### Terms used in this guide
 
-| Interface | Status | Public Entry Points |
-| --- | --- | --- |
-| Fortune Rivalling Heaven Gu | Supported, but not yet versioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver` |
-| Memory Disorder | Supported through an experimental raw profile table | `Neverbirth.MemoryDisorderCharacterProfiles` |
-| Dice Set | Supported, but not yet versioned | `RegisterDiceItem` |
+- **Luck threshold** means the Luck value at which an item's luck-based effect reaches its highest possible activation chance. That highest chance is not necessarily 100%.
+- An **active item** is a collectible that the player activates manually from an active-item slot, such as the D6.
+- A **dice-themed active item** is an active item presented as a die or built around a dice-like effect. It does not mean a die that is currently active.
+- The **compatibility API** is the small set of functions and tables that Neverbirth intentionally allows other mods to use.
+
+> Only the functions and tables explicitly documented here are intended for other mods to use. Calling unlisted `Neverbirth.*` methods or accessing `TestAPI`, `CarrierAPI`, runtime state tables, or other internal fields is not supported.
+
+## API status
+
+| Neverbirth Item | What Another Mod Can Add | Status | Public Entry Points |
+| --- | --- | --- | --- |
+| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Supported, but not yet versioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver` |
+| Memory Disorder | Custom character identity profiles | Supported through an experimental raw profile table | `Neverbirth.MemoryDisorderCharacterProfiles` |
+| Dice Set | Custom dice-themed active items | Supported, but not yet versioned | `RegisterDiceItem` |
 
 There is currently no `Neverbirth.Compat` namespace, `API_VERSION`, or formal `OnReady` callback. Compatibility mods must detect the capabilities they need instead of making assumptions based solely on Neverbirth's version number.
 
@@ -54,25 +63,27 @@ Do not pass Neverbirth's XML-local IDs to any of the registration functions belo
 
 ## Load Order
 
-Neverbirth creates `_G.Neverbirth` while loading `main.lua`, but the three compatibility capabilities are established later as that file continues executing or loads modules. Checking only `_G.Neverbirth ~= nil` is therefore insufficient; check the specific function or table as well.
+Neverbirth creates `_G.Neverbirth` while loading `main.lua`, but the functions and table described in this guide are established later as that file continues executing or loads modules. Checking only `_G.Neverbirth ~= nil` is therefore insufficient; check the specific function or table you need as well.
 
 Implement each registration as an idempotent `tryRegister` operation:
 
 1. Try once immediately when your mod loads;
-2. If the required capability is not yet available, try again in your own `MC_POST_GAME_STARTED` callback;
+2. If the required function or table is not yet available, try again in your own `MC_POST_GAME_STARTED` callback;
 3. After success, use your own boolean flag to prevent duplicate registration;
 4. If Neverbirth is absent, skip silently without breaking your mod's core functionality;
 5. Do not poll every frame indefinitely while waiting for Neverbirth.
 
 The examples in each section follow these rules.
 
-## Fortune Rivalling Heaven Gu: Luck-Cap Registration
+## Fortune Rivalling Heaven Gu: Provide an item's Luck threshold
 
 ### Purpose
 
-When a player holds Fortune Rivalling Heaven Gu together with another collectible or trinket whose proc chance reaches a maximum at a particular luck value, Fortune Rivalling Heaven Gu needs to know that threshold.
+Some collectibles and trinkets have effects whose activation chance improves with Luck, then stops improving after a particular Luck value. This guide calls that value the item's **Luck threshold**. Reaching the threshold means reaching the effect's highest possible chance; it does not necessarily mean a 100% chance.
 
-Third-party content can register a fixed threshold or use a resolver to calculate one dynamically based on the player, collectible copy count, or trinket multiplier. Only players who actually hold Fortune Rivalling Heaven Gu receive the luck adjustment; registration alone does not affect other players.
+When a player holds Fortune Rivalling Heaven Gu together with one of those items, Fortune Rivalling Heaven Gu can raise the player's Luck to the highest relevant registered threshold. To support a third-party item, its mod must tell Neverbirth what that threshold is.
+
+A third-party mod can provide a fixed threshold or use a resolver to calculate one dynamically based on the player, collectible copy count, or trinket multiplier. Only players who actually hold Fortune Rivalling Heaven Gu receive the Luck adjustment; adding an entry to the API does not affect other players by itself.
 
 ### Public Signatures
 
@@ -90,7 +101,7 @@ Parameters:
 | --- | --- |
 | `itemId` | A positive runtime collectible ID |
 | `trinketId` | A positive runtime trinket ID |
-| `fixedCap` | The luck value at which this content reaches its maximum proc chance; use a non-negative number |
+| `fixedCap` | The Luck value at which this content reaches its highest possible activation chance; use a non-negative number |
 | `resolverFn` | A dynamic threshold function with the signature `resolverFn(player, id, count)` |
 
 Resolver parameters:
@@ -160,11 +171,13 @@ end) == true
 
 This example demonstrates only the interface. The values `8` and `12`, and the two-copy condition, must come from verified mechanics in the compatibility mod, not guesswork.
 
-## Memory Disorder: External Character Profiles
+## Memory Disorder: Add a custom character identity
 
 ### Purpose
 
-Memory Disorder selects an identity from the available character profiles on each actual room entry. Neverbirth includes profiles for vanilla characters; third-party characters enter the candidate pool only after being explicitly added to the allowlist.
+Memory Disorder temporarily changes the player into different character identities. Every time the player actually enters a room, it selects one identity from the character profiles currently available to that player.
+
+Neverbirth already includes profiles for vanilla characters. A custom character is not considered automatically: the character's mod must add a profile to the external allowlist. That profile tells Neverbirth which PlayerType to use, when the character is compatible, and which temporary health rules, items, or callbacks belong to the identity.
 
 The only currently supported external table is:
 
@@ -321,13 +334,13 @@ Do not put `-1` or `0` in component arrays. The example leaves the existing stat
 - Errors in `onApply`, `onRemove`, and `isCompatible` are caught by protected calls, but profile authors should still log enough information to diagnose problems;
 - In multiplayer, selection and evaluation are performed separately for each player. Compatibility code must use the actual player, not player 0 or a single global "current character."
 
-## Dice Set: Custom Dice Registration
+## Dice Set: Add a custom dice-themed active item
 
 ### Purpose
 
-Dice Set tracks the distinct active dice items each player has seen or used. After three distinct dice, that player unlocks the set. When an unlocked player uses a die, the set protects damage, fire-rate, and range-related results from falling below its recorded baseline.
+Dice Set keeps a separate record for each player of the different dice-themed active items that player has seen or used. After three different dice items, that player unlocks the set. Once unlocked, using a recognized die makes Dice Set protect damage, fire-rate, and range-related results from falling below its recorded baseline.
 
-Third-party dice can join this system through public registration even if their names do not contain Neverbirth's recognized dice keywords.
+If another mod provides a dice-themed active item, it can explicitly add that item to Dice Set's recognition list. This works even if the item's name does not contain one of Neverbirth's recognized dice keywords.
 
 ### Public Signature
 
@@ -339,7 +352,7 @@ Parameters:
 
 | Parameter | Required | Current Contract |
 | --- | --- | --- |
-| `itemId` | Yes | A positive runtime collectible ID for the third-party active dice item |
+| `itemId` | Yes | A positive runtime collectible ID for the third-party dice-themed active item |
 | `options.name` | No | A readable name stored in the registry; do not currently rely on it to change player-facing text |
 | `options.protectStats` | No | Defaults to `true`; when `false`, the item still counts as a die, but using it does not start Dice Set's stat protection |
 
