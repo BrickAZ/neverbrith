@@ -1,6 +1,6 @@
 # Neverbirth Third-Party Compatibility Interfaces
 
-[Chinese version](compatibility.md)
+[Chinese version](COMPATIBILITY.zh-CN.md)
 
 This document is for mod authors who want to integrate their content with Neverbirth, and for future maintainers of these interfaces.
 
@@ -436,8 +436,8 @@ Related implementations and tests:
 
 | Interface | Implementation | Main Tests |
 | --- | --- | --- |
-| Fortune Rivalling Heaven Gu | `RegisterLuckCap*` and `RegisterTrinketLuckCap*` in [`main.lua`](../main.lua) | [`tests/condom_utility_knife_behavior_test.lua`](../tests/condom_utility_knife_behavior_test.lua) |
-| Memory Disorder | [`memory_disorder.lua`](../memory_disorder.lua) | [`tests/memory_disorder_behavior_test.lua`](../tests/memory_disorder_behavior_test.lua) |
-| Dice Set | The Dice Set section in [`main.lua`](../main.lua) | [`tests/dice_set_behavior_test.lua`](../tests/dice_set_behavior_test.lua) |
+| Fortune Rivalling Heaven Gu | `RegisterLuckCap*` and `RegisterTrinketLuckCap*` in [`main.lua`](main.lua) | [`tests/condom_utility_knife_behavior_test.lua`](tests/condom_utility_knife_behavior_test.lua) |
+| Memory Disorder | [`memory_disorder.lua`](memory_disorder.lua) | [`tests/memory_disorder_behavior_test.lua`](tests/memory_disorder_behavior_test.lua) |
+| Dice Set | The Dice Set section in [`main.lua`](main.lua) | [`tests/dice_set_behavior_test.lua`](tests/dice_set_behavior_test.lua) |
 
 Before releasing compatibility interface changes, rerun the project's Lua behavior tests and XML/resource validators, and complete in-game checks with both Neverbirth and at least one test compatibility mod enabled.

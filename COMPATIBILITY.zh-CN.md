@@ -1,5 +1,7 @@
 # Neverbirth 第三方兼容接口
 
+[英文版本](COMPATIBILITY.md)
+
 本文面向希望让自己的 Mod 内容接入 Neverbirth 的作者，也面向以后维护这些接口的人。
 
 当前文档只承诺三个兼容表面：
@@ -434,8 +436,8 @@ Neverbirth 也会尝试把具有正充能且名称包含已知骰子关键词的
 
 | 表面 | 实现 | 主要测试 |
 | --- | --- | --- |
-| 鸿运齐天蛊 | [`main.lua`](../main.lua) 中的 `RegisterLuckCap*` 与 `RegisterTrinketLuckCap*` | [`tests/condom_utility_knife_behavior_test.lua`](../tests/condom_utility_knife_behavior_test.lua) |
-| 记忆紊乱 | [`memory_disorder.lua`](../memory_disorder.lua) | [`tests/memory_disorder_behavior_test.lua`](../tests/memory_disorder_behavior_test.lua) |
-| 骰子套装 | [`main.lua`](../main.lua) 中的骰子套装区块 | [`tests/dice_set_behavior_test.lua`](../tests/dice_set_behavior_test.lua) |
+| 鸿运齐天蛊 | [`main.lua`](main.lua) 中的 `RegisterLuckCap*` 与 `RegisterTrinketLuckCap*` | [`tests/condom_utility_knife_behavior_test.lua`](tests/condom_utility_knife_behavior_test.lua) |
+| 记忆紊乱 | [`memory_disorder.lua`](memory_disorder.lua) | [`tests/memory_disorder_behavior_test.lua`](tests/memory_disorder_behavior_test.lua) |
+| 骰子套装 | [`main.lua`](main.lua) 中的骰子套装区块 | [`tests/dice_set_behavior_test.lua`](tests/dice_set_behavior_test.lua) |
 
 发布兼容接口变更前，还应重新运行项目的 Lua 行为测试、XML/资源验证器，并在同时启用 Neverbirth 与至少一个测试兼容 Mod 的情况下完成实机检查。
