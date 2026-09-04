@@ -764,7 +764,13 @@ if ($LASTEXITCODE -ne 0) { throw 'Approved playable update is not an ancestor of
 
 Expected: both ancestry checks exit `0`.
 
-- [ ] **Step 6: Push the recoverable release branch, then fast-forward the default branch**
+Task 5 ends here. Do not push or remove the worktree until the per-task review and the broad whole-branch review both approve the release.
+
+## Post-review publication
+
+Execute this section only after all task reviews are clean, the broad whole-branch review is clean, and every review finding has been resolved.
+
+- [ ] **Publication step 1: Push the recoverable release branch, then fast-forward the default branch**
 
 Run:
 
@@ -777,7 +783,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Default branch push failed' }
 
 Expected: both pushes succeed without `--force`.
 
-- [ ] **Step 7: Verify GitHub's default branch and published tree**
+- [ ] **Publication step 2: Verify GitHub's default branch and published tree**
 
 Run:
 
@@ -801,7 +807,7 @@ foreach ($path in @('memory_disorder.lua', 'tests/memory_disorder_behavior_test.
 
 Expected: no exception and `origin/main` equals the locally verified release commit.
 
-- [ ] **Step 8: Verify the published README links and API functions from GitHub blobs**
+- [ ] **Publication step 3: Verify the published README links and API functions from GitHub blobs**
 
 Run:
 
@@ -823,7 +829,7 @@ foreach ($signature in @('RegisterLuckCap', 'RegisterLuckCapResolver', 'Register
 
 Expected: no exception. This proves that the default branch, README links, documents, and documented API functions are published together.
 
-- [ ] **Step 9: Preserve evidence and clean up only the worktree created for this release**
+- [ ] **Publication step 4: Preserve evidence and clean up only the worktree created for this release**
 
 Record the final commit hash and test counts in the completion report. Keep `origin/codex/compatibility-docs-release` and `origin/codex/compatibility-docs` unless the user separately asks to delete them.
 
