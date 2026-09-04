@@ -132,8 +132,8 @@ Expected: `Static validation completed with 3 warning(s) and 0 failure(s).` The 
 - Create: `COMPATIBILITY.md`
 - Verify: `main.lua:1999-2030`
 - Verify: `main.lua:14843-14922`
-- Verify: `tests/condom_utility_knife_behavior_test.lua`
-- Verify: `tests/dice_set_behavior_test.lua`
+- Modify: `tests/condom_utility_knife_behavior_test.lua` (review-driven public Luck API contract coverage)
+- Modify: `tests/dice_set_behavior_test.lua` (review-driven public Dice registration contract coverage)
 
 **Interfaces:**
 - Consumes: the five public Lua functions verified in Task 1.
@@ -683,6 +683,8 @@ Expected: one commit containing only `README.md` and the README assertions in `t
 - Verify: `COMPATIBILITY.zh-CN.md`
 - Verify: `README.md`
 - Verify: `tests/compatibility_docs_test.ps1`
+- Verify: `tests/condom_utility_knife_behavior_test.lua`
+- Verify: `tests/dice_set_behavior_test.lua`
 - Verify: the complete repository tree inherited from `fcd6a8e`
 
 **Interfaces:**
@@ -747,7 +749,7 @@ Expected:
 
 - `git diff --check` prints nothing.
 - `git status --short` prints nothing.
-- The diff beyond `fcd6a8e` contains only the approved spec, implementation plan, two compatibility guides, README, and `tests/compatibility_docs_test.ps1`.
+- The diff beyond `fcd6a8e` contains only the approved spec, implementation plan, two compatibility guides, README, `tests/compatibility_docs_test.ps1`, `tests/condom_utility_knife_behavior_test.lua`, and `tests/dice_set_behavior_test.lua`. The two existing Lua tests contain review-driven public API contract coverage only; they do not modify gameplay implementation.
 - The history also contains the two pre-existing playable-update commits between the old `main` and `fcd6a8e`; no commits from the dirty local checkout appear.
 
 - [ ] **Step 5: Re-fetch and prove the push is a fast-forward**
