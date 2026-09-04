@@ -41,8 +41,8 @@ Neverbirth 通过全局值 `Neverbirth` 提供其对接对象。兼容 Mod 应�
 
 ```lua
 local neverbirth = _G and rawget(_G, "Neverbirth")
-if not neverbirth or type(neverbirth.RegisterLuckCap) ~= "function" then
-    return
+if neverbirth and type(neverbirth.RegisterLuckCap) == "function" then
+    -- Optional Neverbirth compatibility registration goes here.
 end
 ```
 
@@ -150,7 +150,7 @@ MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneResolverC
 Neverbirth:RegisterDiceItem(itemId, options)
 ```
 
-`itemId` 是正数运行时收藏品 ID。`options` 必须是表或 `nil`。`options.name` 会被保存，但不会改变面向玩家的文本。只有 `protectStats = false` 会关闭该骰子的属性保护。
+`itemId` 是正数运行时收藏品 ID。`options` 必须是表或 `nil`。其他类型不受支持，且可能报错。`options.name` 会被保存，但不会改变面向玩家的文本。只有 `protectStats = false` 会关闭该骰子的属性保护。
 
 `RegisterDiceItem` 会对有效的正数 ID 返回 `true`，对无效 ID 返回 `false`。重复注册同一 ID 会替换其 options。调用方必须确保该 ID 属于主动道具。
 

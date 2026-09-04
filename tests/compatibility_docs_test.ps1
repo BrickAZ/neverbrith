@@ -50,11 +50,24 @@ function GetHeadings([string]$Text) {
 
 function GetExecutableLuaBlocks([string]$Text) {
     return @([regex]::Matches($Text, '(?ms)^```lua\s*\r?\n(.*?)^```\s*$') | ForEach-Object {
-        $lines = $_.Groups[1].Value -split '\r?\n' | ForEach-Object {
-            ($_ -replace '--.*$', '').TrimEnd()
-        } | Where-Object { $_ -ne '' }
-        $lines -join "`n"
+        $_.Groups[1].Value -replace "`r`n?", "`n"
     })
+}
+
+function CompileLuaBlock([string]$LuaPath, [string]$Block, [string]$Surface) {
+    $temporaryPath = Join-Path ([System.IO.Path]::GetTempPath()) ("compatibility-docs-$([guid]::NewGuid().ToString('N')).lua")
+    try {
+        [System.IO.File]::WriteAllText($temporaryPath, $Block, [System.Text.UTF8Encoding]::new($false))
+        $luaPathLiteral = $temporaryPath.Replace('\', '/')
+        $compileOnly = "local chunk, err = loadfile([[$luaPathLiteral]], 't'); if not chunk then error(err, 0) end"
+        & $LuaPath -e $compileOnly
+        Require ($LASTEXITCODE -eq 0) "$Surface does not syntax-compile"
+    }
+    finally {
+        if (Test-Path -LiteralPath $temporaryPath) {
+            Remove-Item -LiteralPath $temporaryPath -Force
+        }
+    }
 }
 
 $englishPath = Join-Path $Root 'COMPATIBILITY.md'
@@ -119,6 +132,7 @@ foreach ($sourceBackedGuideRule in @(
     'Resolver calls are protected; errors, non-numeric results, and negative results are ignored. Multiple applicable entries use the highest threshold, and Neverbirth never lowers higher existing Luck.',
     'Duplicate Luck registrations create duplicate resolver calls. Callers must make registration idempotent.',
     '`itemId` is a positive runtime collectible ID. `options` must be a table or `nil`.',
+    'Other types are unsupported and may raise an error.',
     'Only `protectStats = false` disables stat protection for that die.',
     '`RegisterDiceItem` returns `true` for a valid positive ID and `false` for an invalid ID. Re-registering an ID replaces its options.',
     'The caller must ensure the ID belongs to an active item.',
@@ -211,6 +225,7 @@ foreach ($required in @(
     '骰子类主动道具',
     '拾取、持有或使用',
     '`options` 必须是表或 `nil`',
+    '其他类型不受支持，且可能报错。',
     '临时公开，尚未版本化',
     '当前公开版本没有为记忆紊乱提供兼容接口。'
 )) {
@@ -272,9 +287,24 @@ for ($index = 0; $index -lt $headingPairs.Count; $index++) {
 
 $englishBlocks = GetExecutableLuaBlocks $english
 $chineseBlocks = GetExecutableLuaBlocks $chinese
+Require ($englishBlocks.Count -eq 7) 'COMPATIBILITY.md must contain exactly seven Lua blocks'
+Require ($chineseBlocks.Count -eq 7) 'COMPATIBILITY.zh-CN.md must contain exactly seven Lua blocks'
 Require ($englishBlocks.Count -eq $chineseBlocks.Count) 'English and Chinese Lua block counts differ'
 for ($index = 0; $index -lt $englishBlocks.Count; $index++) {
     Require ($englishBlocks[$index] -eq $chineseBlocks[$index]) "Lua block $($index + 1) differs between languages"
+}
+
+$loadOrderGlobalBlock = $englishBlocks[0]
+Require (-not [regex]::IsMatch($loadOrderGlobalBlock, '(?m)^\s*return\b')) 'load-order/global-object Lua block must not use a top-level early return'
+
+$lua = Get-Command lua -CommandType Application -ErrorAction Stop
+foreach ($guide in @(
+    @{ Name = 'COMPATIBILITY.md'; Blocks = $englishBlocks },
+    @{ Name = 'COMPATIBILITY.zh-CN.md'; Blocks = $chineseBlocks }
+)) {
+    for ($index = 0; $index -lt $guide.Blocks.Count; $index++) {
+        CompileLuaBlock $lua.Source $guide.Blocks[$index] "$($guide.Name) Lua block $($index + 1)"
+    }
 }
 
 CheckRelativeLinks $chinesePath $chinese

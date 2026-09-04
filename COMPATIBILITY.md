@@ -41,8 +41,8 @@ The examples below assume that your mod already has its own `MyMod` object. Do n
 
 ```lua
 local neverbirth = _G and rawget(_G, "Neverbirth")
-if not neverbirth or type(neverbirth.RegisterLuckCap) ~= "function" then
-    return
+if neverbirth and type(neverbirth.RegisterLuckCap) == "function" then
+    -- Optional Neverbirth compatibility registration goes here.
 end
 ```
 
@@ -150,7 +150,7 @@ Dice Set counts recognized dice items that the player has collected, held, or us
 Neverbirth:RegisterDiceItem(itemId, options)
 ```
 
-`itemId` is a positive runtime collectible ID. `options` must be a table or `nil`. `options.name` is stored but does not change player-facing text. Only `protectStats = false` disables stat protection for that die.
+`itemId` is a positive runtime collectible ID. `options` must be a table or `nil`. Other types are unsupported and may raise an error. `options.name` is stored but does not change player-facing text. Only `protectStats = false` disables stat protection for that die.
 
 `RegisterDiceItem` returns `true` for a valid positive ID and `false` for an invalid ID. Re-registering an ID replaces its options. The caller must ensure the ID belongs to an active item.
 
