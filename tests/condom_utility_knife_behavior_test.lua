@@ -226,6 +226,10 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    function include(name)
+        return dofile(name .. ".lua")
+    end
+
     dofile("main.lua")
 
     local function getCallbacks(callbackId, param)
@@ -691,6 +695,20 @@ local function test_condom_repeated_uses_can_exhaust_targets_and_show_feedback()
     assertTruthy(#env.hudMessages >= 1, "empty target use should give HUD feedback when available")
 end
 
+local function test_condom_runtime_feedback_uses_game_language()
+    local english = loadNeverbirth({ language = "en" })
+    english.mod:ShowCondomFeedback(2)
+    assertEquals(english.hudMessages[1].title, "Condom", "English runtime should keep the Condom feedback title")
+    assertEquals(english.hudMessages[1].subtitle, "2 baby items banned", "English runtime should keep the Condom count feedback")
+
+    local chinese = loadNeverbirth({ language = "zh" })
+    chinese.mod:ShowCondomFeedback(2)
+    assertEquals(chinese.hudMessages[1].title, "避孕套", "Chinese runtime should localize the Condom feedback title")
+    assertEquals(chinese.hudMessages[1].subtitle, "已禁用2件宝宝道具", "Chinese runtime should localize the Condom count feedback")
+    chinese.mod:ShowCondomFeedback(0)
+    assertEquals(chinese.hudMessages[2].subtitle, "没有剩余宝宝道具", "Chinese runtime should localize the empty-pool feedback")
+end
+
 local function test_condom_replaces_future_banned_collectible_pedestals()
     local env = loadNeverbirth({ poolSequence = { env and env.items and env.items.BabyA or 101, 201 } })
     local player = env.newPlayer({ rngSequence = { 0, 1 } })
@@ -891,6 +909,7 @@ test_crazy_coconut_confirms_a_pedestal_through_the_player_item_queue()
 test_crazy_coconut_discards_a_removed_pedestal_without_a_pickup()
 test_condom_bans_up_to_two_unowned_baby_items_without_repeats()
 test_condom_repeated_uses_can_exhaust_targets_and_show_feedback()
+test_condom_runtime_feedback_uses_game_language()
 test_condom_replaces_future_banned_collectible_pedestals()
 
 print("condom and utility knife behavior tests passed")

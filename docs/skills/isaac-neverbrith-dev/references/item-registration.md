@@ -4,6 +4,8 @@ Use this reference when defining a new item or checking whether an item is corre
 
 Read `item-basic-spec.md` first for new items, item rewrites, handoff prompts, or reviews. Registration should implement the item's already-decided identity; it should not invent quality, pools, tags, art, or localization.
 
+**Required generic contract:** use `isaac-collectible-registration` before this project adapter. Every custom collectible entry must have an explicit, unique, stable local `id`. That XML-local id is not the runtime/global ItemConfig id returned by name lookup and must not be derived from current mod load order. If legacy entries lack local ids, stop the affected registration/death-portrait work and use an append-only migration approved for this project.
+
 ## Files To Check
 
 - `content/items.xml`
@@ -21,6 +23,7 @@ Passive item:
 
 ```xml
 <passive
+  id="TBD_LOCAL_ID"
   name="Item Name"
   cache="damage speed"
   description="Short pickup text"
@@ -34,6 +37,7 @@ Active item:
 
 ```xml
 <active
+  id="TBD_LOCAL_ID"
   name="Item Name"
   cache="luck"
   maxcharges="3"
@@ -49,7 +53,7 @@ Only include `cache` values that are actually handled in `MC_EVALUATE_CACHE`.
 
 ## Lua ID Lookup
 
-Follow the repo's existing `Items.<Name>` pattern. The item ID must come from Isaac's item config lookup, not a hand-written numeric ID.
+Follow the repo's existing `Items.<Name>` pattern for runtime behavior. The runtime ItemConfig id must come from Isaac's item config lookup, not a hand-written numeric id. Keep it separate from the explicit stable XML-local `id` used by registration and native frame mappings.
 
 When adding a new item:
 
@@ -59,10 +63,13 @@ When adding a new item:
 
 ## Callback Registration
 
+All Lua snippets use `Mod` for the current project's existing `RegisterMod`
+object. Do not copy a project-specific mod object name into another mod.
+
 Passive stat item:
 
 ```lua
-function Neverbirth:EvaluateItemName(player, cacheFlag)
+function Mod:EvaluateItemName(player, cacheFlag)
     local itemCount = player:GetCollectibleNum(Items.ItemName)
     if itemCount <= 0 then
         return
@@ -73,13 +80,13 @@ function Neverbirth:EvaluateItemName(player, cacheFlag)
     end
 end
 
-Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateItemName)
+Mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Mod.EvaluateItemName)
 ```
 
 Active item shell:
 
 ```lua
-function Neverbirth:UseItemName(_, _, player)
+function Mod:UseItemName(_, _, player)
     if not player then
         return false
     end
@@ -88,7 +95,7 @@ function Neverbirth:UseItemName(_, _, player)
     return true
 end
 
-Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseItemName, Items.ItemName)
+Mod:AddCallback(ModCallbacks.MC_USE_ITEM, Mod.UseItemName, Items.ItemName)
 ```
 
 Do not assume every active item needs manual charge handling. In many Isaac callbacks, returning the correct value is enough. If a design needs conditional failure or zero-charge behavior, inspect an existing active item with similar behavior first.
@@ -97,10 +104,9 @@ Do not assume every active item needs manual charge handling. In many Isaac call
 
 For item-facing text, keep these surfaces aligned:
 
-- English XML
-- Chinese XML
-- Current default XML
-- EID descriptions in `main.lua`
+- Current default XML and every discovered locale XML
+- EID descriptions only when an existing optional integration owns them
+- The discovered bootstrap or compatibility module, not an assumed `main.lua`
 - Any tests that assert localized names/descriptions
 
 English entries should not contain Chinese text. Chinese entries should use Chinese display text.

@@ -26,7 +26,12 @@
         "docs/skills/isaac-cards-pockets/references/card-generation.md",
         "docs/skills/isaac-cards-pockets/references/card-pocket-review-checklist.md"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "陌生 mod 要加魂石，但我还不知道 pocket XML、HUD 图和回调写在哪里。",
+      "expected_output": "先用 isaac-mod-context 发现实际注册、资源和模块表面；不假定文件或 id，确认后才按卡牌注册和空白卡检查表实现。",
+      "files": []
     }
   ]
 }
-

@@ -7,6 +7,8 @@ Static validators are useful when they check facts that do not require Isaac to 
 - XML parses.
 - Duplicate ids or names are absent inside a file.
 - Referenced files exist at the expected path.
+- A registered custom entity has a unique positive type/variant, a name, a valid ANM2, at least one spritesheet, and a defined default animation.
+- A custom card/rune has a valid id, pickup id, and HUD key when `pocketitems.xml` exists.
 - Language variants contain matching internal names.
 - Skill directories contain `SKILL.md` and valid eval JSON.
 - Test files exist for non-trivial behavior.
@@ -31,3 +33,4 @@ When adding a check:
 3. Use warnings for uncertain checks and failures for definite breakage.
 4. Avoid network access.
 5. Avoid modifying files from a validator.
+6. Scope spawn checks to this mod's registrations and code. Unknown third-party entities are not static failures.

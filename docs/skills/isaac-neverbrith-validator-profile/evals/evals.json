@@ -1,0 +1,30 @@
+{
+  "skill_name": "isaac-neverbrith-validator-profile",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "给 neverbrith 新增了自定义卡牌和实体后，除了通用校验还要跑什么？",
+      "expected_output": "应该先运行 isaac-validators 的通用 runner，再运行 neverbrith 严格 profile，检查实体到 ANM2 链、pocket item 形状、池子语言一致性和 Neverbirth 回调；仍须列出游戏内检查。",
+      "files": [
+        "docs/skills/isaac-neverbrith-validator-profile/SKILL.md"
+      ],
+      "fixture_files": [
+        "docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "通用 validator 已经通过，Agent 因此宣称 Neverbirth 道具注册和本地安装副本也全部正确。请审查这个结论。",
+      "expected_output": "应拒绝过度结论：继续运行 Neverbirth 严格 profile、专用 skill-layer 审计和 source/installed 哈希一致性；静态通过仍不能冒充游戏内验证。",
+      "files": [
+        "docs/skills/isaac-neverbrith-validator-profile/SKILL.md"
+      ],
+      "fixture_files": [
+        "content/items.xml",
+        "main.lua",
+        "installed-skills/isaac-neverbrith-validator-profile"
+      ]
+    }
+  ]
+}
+

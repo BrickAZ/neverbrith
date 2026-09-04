@@ -303,6 +303,10 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    function include()
+        return function() end
+    end
+
     dofile("main.lua")
 
     local function newPlayer(opts)
@@ -571,6 +575,7 @@ end
 
 local function configureCleaver()
     local config = Neverbirth.Cleaver.Config
+    config.Registered = true
     config.PlayerType = 42
     config.PlayerShadowDamageSource = "shadowOwner"
     config.GetSwingDirection = nil
@@ -580,16 +585,10 @@ local function shadowFor(target, kind)
     return Neverbirth.Cleaver.shadows[Neverbirth.Cleaver.GetEntityKey(target, kind)]
 end
 
-local function test_stranger_registration_and_cleaver_assets()
+local function test_stranger_is_unregistered_but_cleaver_assets_remain_available()
     local players = readFile("content/players.xml")
-    assertTruthy(players:match('<player name="Stranger"'), "Stranger should be registered in players.xml")
-    assertTruthy(players:match('skin="Character_001_Isaac%.png"'), "Stranger should reference the vanilla Isaac skin")
-    assertTruthy(players:match('hp="6"'), "Stranger should start with 3 red hearts")
-    local strangerRegistration = players:match('<player name="Stranger"[^>]*/>')
-    assertTruthy(strangerRegistration and not strangerRegistration:match('%f[%a]hidden%s*='),
-        "Stranger should remain visible instead of being hidden from the character list")
-    assertTruthy(strangerRegistration and not strangerRegistration:match('%f[%a]achievement%s*='),
-        "Stranger should not use an achievement lock as a fake unavailable state")
+    assertEquals(players:match('<player name="Stranger"'), nil, "players.xml must keep Stranger unregistered")
+    assertTruthy(players:match('<player name="Dante"'), "Dante may register without re-enabling Stranger or Cleaver character support")
 
     local characterMenu = readFile("content/gfx/CharacterMenu.anm2")
     assertTruthy(characterMenu:match('<Spritesheet Id="1" Path="stranger_not_yet_name%.png"'),
@@ -621,8 +620,12 @@ local function test_stranger_registration_and_cleaver_assets()
     assertEquals(notYetItem.height, 32, "Stranger NOT YET item-name sheet height")
     assertEquals(notYetItem.colorType, 6, "Stranger NOT YET item-name sheet must preserve RGBA transparency")
 
-    loadNeverbirth({ strangerPlayerType = 777 })
-    assertEquals(Neverbirth.Cleaver.Config.PlayerType, 777, "Stranger PlayerType should resolve through Isaac.GetPlayerTypeByName")
+    local env = loadNeverbirth({ strangerPlayerType = 777 })
+    assertEquals(Neverbirth.Cleaver.Config.Registered, false, "production Cleaver character support should be disabled")
+    assertEquals(Neverbirth.Cleaver.Config.PlayerType, nil, "an unregistered Stranger must not resolve a PlayerType")
+    Neverbirth.Cleaver.Config.PlayerType = 777
+    local staleTypePlayer = env.newPlayer({ playerType = 777 })
+    assertEquals(Neverbirth.Cleaver.IsEnabled(staleTypePlayer), false, "a stale Stranger PlayerType must stay disabled after unregistering the character")
     assertEquals(Neverbirth.Cleaver.Config.CleaverVisualTimeout, 22, "11 authored frames at 30 FPS must last 22 game ticks")
     assertEquals(Neverbirth.Cleaver.Config.SwingDurationTicks, 22, "sweep duration must match the complete 11-frame animation")
     assertEquals(Neverbirth.Cleaver.Config.HoldVisualPath, "gfx/Effects/CleaverAttack/stranger_machete.anm2", "idle must use the Stranger machete actor")
@@ -1012,7 +1015,7 @@ local function test_item_loss_style_type_change_and_new_room_clear_runtime_state
     assertEquals(next(Neverbirth.Cleaver.states), nil, "new game should not retain cleaver state")
 end
 
-test_stranger_registration_and_cleaver_assets()
+test_stranger_is_unregistered_but_cleaver_assets_remain_available()
 test_stranger_starts_with_cleaver_but_does_not_depend_on_the_item()
 test_cleaver_has_a_persistent_handheld_visual_outside_swings()
 test_non_cleaver_players_are_fully_isolated()

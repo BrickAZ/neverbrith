@@ -6,6 +6,9 @@ Use this reference when an item changes player stats or tear properties.
 
 Isaac stat changes should usually be applied through `MC_EVALUATE_CACHE`, not by permanently mutating player fields in random update callbacks.
 
+All Lua snippets use `Mod` for the current project's `RegisterMod` object.
+Reuse the existing object; do not create a second mod object inside a module.
+
 The cache callback receives one `cacheFlag` at a time. Only modify the field that belongs to the current flag.
 
 ## Common Cache Flags
@@ -23,7 +26,7 @@ The cache callback receives one `cacheFlag` at a time. Only modify the field tha
 ## Passive Stat Template
 
 ```lua
-function Neverbirth:EvaluateItemName(player, cacheFlag)
+function Mod:EvaluateItemName(player, cacheFlag)
     local itemCount = player:GetCollectibleNum(Items.ItemName)
     if itemCount <= 0 then
         return
@@ -38,7 +41,7 @@ function Neverbirth:EvaluateItemName(player, cacheFlag)
     end
 end
 
-Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateItemName)
+Mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Mod.EvaluateItemName)
 ```
 
 ## Temporary Stat State

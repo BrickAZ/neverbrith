@@ -5,16 +5,16 @@ Use this when adding EID text, inline icons, card/pill icons, or localized descr
 ## Surfaces
 
 - `content/pocketitems.xml` description.
-- EID `addCard` or equivalent description file.
-- EID icon registration.
+- EID `addCard` or equivalent description file, only when EID integration exists.
+- EID icon registration, only when EID integration exists.
 - HUD/card icon art.
-- English and Chinese language files, if they exist.
+- Every discovered locale surface that owns this text.
 
 ## Hard Rules
 
 - EID text does not replace `pocketitems.xml` registration.
 - Inline EID icons do not replace pickup/HUD art.
-- Keep English and Chinese descriptions separate.
+- Keep each discovered locale's descriptions separate; do not invent language files.
 - Use `isaac-anm2-visuals` for `.anm2` icon assets.
 - Use `isaac-compat-descriptions` for optional EID guards and language sync.
 
@@ -24,4 +24,3 @@ Use this when adding EID text, inline icons, card/pill icons, or localized descr
 - Card id is resolved with `Isaac.GetCardIdByName`.
 - Icon art and text formatting are checked.
 - Languages are aligned.
-

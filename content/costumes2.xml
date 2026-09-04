@@ -23,9 +23,35 @@
     type="none"
     priority="98"
   />
+  <costume
+    id="17495"
+    anm2path="costume_blue_banana_peel.anm2"
+    type="none"
+    priority="98"
+  />
+  <costume
+    id="17496"
+    anm2path="costume_tokarev_cloak.anm2"
+    type="none"
+    priority="98"
+  />
+  <costume
+    id="17497"
+    anm2path="costume_tokarev_face.anm2"
+    type="none"
+    priority="97"
+  />
+  <costume
+    id="17498"
+    anm2path="costume_ringotsuga_headgear.anm2"
+    type="none"
+    priority="98"
+  />
   <costume id="17501" anm2path="costume_tantan_hair.anm2" type="none" priority="98" />
   <costume id="17502" anm2path="costume_tantan_glasses.anm2" type="none" priority="97" />
   <costume id="17503" anm2path="costume_daodao_hair.anm2" type="none" priority="98" />
   <costume id="17504" anm2path="costume_daodao_tissue_tears.anm2" type="none" priority="97" />
   <costume id="17505" anm2path="costume_yoontoons_hair.anm2" type="none" priority="98" />
-  <costume id="17506" anm2path="costume_yoontoons_glasses.anm2" type="none" priority="97" /></costumes>
+  <costume id="17506" anm2path="costume_yoontoons_glasses.anm2" type="none" priority="97" />
+  <costume id="17507" anm2path="costume_dante_hair.anm2" type="none" priority="98" />
+</costumes>

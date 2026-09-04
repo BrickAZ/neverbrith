@@ -4,8 +4,11 @@ Use this reference for `MC_ENTITY_TAKE_DMG` work. This is the most fragile item 
 
 ## Callback Shape
 
+All Lua snippets use `Mod` for the current project's existing `RegisterMod`
+object. Do not copy a project-specific mod object name into another mod.
+
 ```lua
-function Neverbirth:HandleItemNameDamage(entity, amount, flags, source, countdown)
+function Mod:HandleItemNameDamage(entity, amount, flags, source, countdown)
     local player = entity and entity.ToPlayer and entity:ToPlayer()
     if not player then
         return nil
@@ -24,7 +27,7 @@ function Neverbirth:HandleItemNameDamage(entity, amount, flags, source, countdow
     return nil
 end
 
-Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Neverbirth.HandleItemNameDamage, EntityType.ENTITY_PLAYER)
+Mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Mod.HandleItemNameDamage, EntityType.ENTITY_PLAYER)
 ```
 
 Return values matter:
@@ -80,7 +83,7 @@ local function ApplyItemNameSettlementDamage(player, amount)
     itemNameSettling[playerKey] = nil
 end
 
-function Neverbirth:HandleItemNameDamage(entity, amount, flags, source)
+function Mod:HandleItemNameDamage(entity, amount, flags, source)
     local player = entity and entity.ToPlayer and entity:ToPlayer()
     local playerKey = GetItemNamePlayerKey(player)
 

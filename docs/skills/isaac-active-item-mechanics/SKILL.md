@@ -1,11 +1,13 @@
 ---
 name: isaac-active-item-mechanics
-description: Design, implement, review, or write handoff prompts for complex active-item mechanics in Binding of Isaac Repentance mods, especially neverbrith. Use this whenever an active item involves conditional use, failed-use charge policy, charge slots, held input, option selection, temporary UI, render callbacks, room/floor limits, card/pill interaction, or multi-step state. Also use isaac-state-lifecycle for any active item mode, timer, cooldown, room/floor reset, or SaveData behavior.
+description: "Support the active-item shell for Binding of Isaac Repentance mods: charge policy, active slots, held input, option selection UI, render callbacks, and use-callback boundaries. Use this when those shell details are concretely involved. Keep it available for less capable agents, but use isaac-mechanic-contracts first when the difficult part is gameplay semantics rather than charge/input/UI. 中文触发：主动道具、充能、槽位、按住、长按、松开、选项、选择界面、使用失败不消耗、临时 UI。"
 ---
 
 # Isaac Active Item Mechanics
 
-Use this skill when an active item is more than a simple `MC_USE_ITEM` shell.
+Use this skill when an active item needs more than a simple `MC_USE_ITEM` shell. It is intentionally a shell skill: it keeps charge, slot, input, and UI work correct, while `isaac-mechanic-contracts` decides what the mechanic means.
+
+Read `../isaac-mod-context/references/design-authority.md` before suggesting charge policy, slot behavior, input semantics, or presentation direction. These are locked when the user has specified them.
 
 The goal is to stop a common failure: Codex sees "active item" and writes only XML plus `MC_USE_ITEM`, while the real design depends on input state, charge slots, temporary UI, room or floor state, card/pill callbacks, render callbacks, or a failure path that must not consume charge.
 
@@ -13,9 +15,11 @@ The goal is to stop a common failure: Codex sees "active item" and writes only X
 
 Before editing or writing a prompt:
 
-1. Read the current neverbrith item registration rules if the item is new: `../isaac-neverbrith-dev/references/item-basic-spec.md` and `../isaac-neverbrith-dev/references/item-registration.md`.
-2. Read the closest active item in the current repo before copying a callback shape.
-3. If using reference mods, prefer `E:/Isaac - Repentance/ysd/scripts/items/untuned_piano.lua` for complex active interaction and `E:/Isaac - Repentance/ysd/main.lua` for charge/data helpers.
+1. If trigger, success/failure, delay, exclusions, or repeated effects are not already explicit, use `isaac-mechanic-contracts` first and carry its Mechanic Contract into this work.
+2. In an unfamiliar mod, use `isaac-mod-context` to discover the mod object, bootstrap files, item metadata, and active-item examples. Do not assume `main.lua`, `content/`, or a module layout.
+3. If the item is new, read the current project's item-registration and metadata conventions before adding it.
+4. Read the closest current-project active item before copying a callback shape.
+5. If no local active item covers the route, use this skill's charge, input, UI, and state references. Do not require a third-party mod checkout.
 
 Do not treat the active item callback as the whole mechanic. `MC_USE_ITEM` decides whether use begins and whether charge is consumed; the effect may live elsewhere.
 
@@ -42,13 +46,11 @@ If the active item also changes stats, intercepts damage, spawns registered enti
 - For new item metadata, do not invent missing quality, pools, text, or art. Keep `TBD` fields explicit.
 - For debugging an active item that does not trigger or consumes charge incorrectly, use `isaac-testing-debugging` before guessing a fix.
 
-## Reference Mods
+## Self-Contained Fallback
 
-- YSD complex active reference: `E:/Isaac - Repentance/ysd/scripts/items/untuned_piano.lua`.
-- YSD data and charge helpers: `E:/Isaac - Repentance/ysd/main.lua`.
-- Reverie large active examples live under `E:/Isaac - Repentance/reverie/scripts/items/`.
-
-Use these as pattern references, not as code to copy blindly into neverbrith.
+When the current mod has no matching active item, use the route references in
+this skill: define the use/charge boundary first, then input/UI, then state.
+Do not fetch or copy a third-party mod merely to obtain a pattern.
 
 ## Handoff Prompt Template
 

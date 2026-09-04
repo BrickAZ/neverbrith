@@ -1,5 +1,6 @@
 param(
-    [string]$Root = "."
+    [string]$Root = ".",
+    [switch]$Check
 )
 
 $ErrorActionPreference = "Stop"
@@ -60,8 +61,20 @@ foreach ($row in $rows) {
     $lines += "    { localId = $($row.LocalId), englishName = $(ConvertTo-LuaString $row.EnglishName), names = { $candidateNames } },"
 }
 $lines += "}"
-$lines += ""
+[string]$expected = ($lines -join "`n") + "`n"
+
+if ($Check) {
+    if (-not (Test-Path -LiteralPath $outputPath)) {
+        throw "Generated collectible registry is missing: $outputPath"
+    }
+    $actual = [System.IO.File]::ReadAllText($outputPath, $utf8).Replace("`r`n", "`n")
+    if ($actual -ne $expected) {
+        throw "Generated collectible registry is out of date. Run tools/generate-neverbirth-collectibles.ps1 -Root `"$rootPath`""
+    }
+    Write-Output "Verified $($rows.Count) neverbrith collectible rows in $outputPath"
+    return
+}
 
 [System.IO.Directory]::CreateDirectory($outputDirectory) | Out-Null
-[System.IO.File]::WriteAllLines($outputPath, $lines, $utf8)
+[System.IO.File]::WriteAllText($outputPath, $expected, $utf8)
 Write-Output "Generated $($rows.Count) neverbrith collectible rows at $outputPath"

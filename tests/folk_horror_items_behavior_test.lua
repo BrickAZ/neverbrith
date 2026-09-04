@@ -115,6 +115,7 @@ local function loadNeverbirth(options)
     ItemConfig = { TAG_BABY = 1 }
     Card = { RUNE_HAGALAZ = 32, RUNE_BLACK = 41, RUNE_SHARD = 55, CARD_SOUL_ISAAC = 81, CARD_SOUL_JACOB = 97 }
     EffectVariant = { POOF01 = 1, BLOOD_EXPLOSION = 2, PLAYER_CREEP_BLACK = 3, CREEP_RED = 4 }
+    Options = { Language = options.language or "en" }
     local coinSwordQiVariant = options.coinSwordQiVariant
     if coinSwordQiVariant == nil then
         coinSwordQiVariant = 3001
@@ -279,6 +280,22 @@ local function loadNeverbirth(options)
         end
         return sprite
     end
+    function KColor(r, g, b, a)
+        return { Red = r, Green = g, Blue = b, Alpha = a }
+    end
+    function Font()
+        local font = { loadedPath = nil }
+        function font:Load(path)
+            self.loadedPath = path
+        end
+        function font:DrawString(text)
+            renderTexts[#renderTexts + 1] = { text = text, font = self.loadedPath }
+        end
+        function font:DrawStringUTF8(text)
+            renderTexts[#renderTexts + 1] = { text = text, font = self.loadedPath }
+        end
+        return font
+    end
     local vectorMeta = {
         __add = function(left, right) return Vector(left.X + right.X, left.Y + right.Y) end,
         __sub = function(left, right) return Vector(left.X - right.X, left.Y - right.Y) end,
@@ -312,6 +329,10 @@ local function loadNeverbirth(options)
         function mod:LoadData() return "{}" end
         function mod:SaveData() end
         return mod
+    end
+
+    function include()
+        return function() end
     end
 
     dofile("main.lua")
@@ -1804,6 +1825,41 @@ local function test_black_taisui_stage_three_renders_custom_life_marker_until_us
     assertTruthy(sawFeedback, "Black Taisui should briefly render a block feedback label")
 end
 
+local function test_black_taisui_runtime_feedback_uses_chinese_game_language()
+    local env = loadNeverbirth({ language = "zh" })
+    local player = env.newPlayer({ hearts = 2, maxHearts = 4, collectibles = { [env.items.BlackTaisui] = 1 } })
+
+    setBlackTaisuiParasite(env, player, 16)
+    env.runPostUpdate()
+    env.runPostRender()
+
+    local sawWard = false
+    for _, rendered in ipairs(env.renderTexts) do
+        if rendered.text == "护命" then
+            sawWard = true
+        end
+    end
+    assertTruthy(sawWard, "Chinese runtime should render the localized Black Taisui ward marker")
+
+    player.hearts = 1
+    env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
+    local feedback = env.hudTexts[#env.hudTexts]
+    assertEquals(feedback.title, "黑太岁", "Chinese runtime should localize Black Taisui feedback title")
+    assertEquals(feedback.subtitle, "挡下致命伤害", "Chinese runtime should localize Black Taisui feedback subtitle")
+
+    for index = #env.renderTexts, 1, -1 do
+        env.renderTexts[index] = nil
+    end
+    env.runPostRender()
+    local sawBlock = false
+    for _, rendered in ipairs(env.renderTexts) do
+        if rendered.text == "挡下致命伤害" then
+            sawBlock = true
+        end
+    end
+    assertTruthy(sawBlock, "Chinese runtime should render localized Black Taisui block feedback")
+end
+
 local function test_black_taisui_stage_three_does_not_block_cost_damage()
     local env = loadNeverbirth()
     local player = env.newPlayer({ hearts = 1, maxHearts = 2, collectibles = { [env.items.BlackTaisui] = 1 } })
@@ -1918,6 +1974,7 @@ test_black_taisui_stage_three_spawns_meat_lump_when_crossing_threshold()
 test_meat_lump_grants_custom_life_without_visible_c11_on_pickup()
 test_meat_lump_grants_custom_life_from_held_copy_even_if_pickup_callback_missed()
 test_black_taisui_stage_three_renders_custom_life_marker_until_used()
+test_black_taisui_runtime_feedback_uses_chinese_game_language()
 test_black_taisui_stage_three_does_not_block_cost_damage()
 test_black_taisui_parasite_value_grows_from_red_healing_container_and_damage()
 test_black_taisui_no_red_container_uses_soul_black_at_half_efficiency()

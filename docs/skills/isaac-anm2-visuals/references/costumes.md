@@ -21,11 +21,9 @@ Do not use this route for free-floating effects, screen UI, EID icons, or regist
 - `main.lua` for `Isaac.GetCostumeIdByPath(...)`
 - Behavior tests that stub `GetCostumeIdByPath`
 
-Reference examples:
-
-- neverbrith: `content/costumes2.xml`
-- YSD: `E:/Isaac - Repentance/ysd/content/costumes2.xml`
-- Reverie: `E:/Isaac - Repentance/reverie/content/costumes2.xml`
+Use the current project's `content/costumes2.xml` and a working local costume
+as the source of truth. If neither exists, follow the XML and Lua contracts in
+this reference rather than requiring a third-party mod checkout.
 
 ## XML Pattern
 

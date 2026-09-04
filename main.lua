@@ -5,12 +5,12 @@ if _G then
 end
 
 local ITEM_NAME_CANDIDATES = {
-    EssentialBalm = { "EssentialBalm", "风油精" },
-    Wuhu = { "Wuhu", "芜湖！~" },
+    EssentialBalm = { "EssentialBalm", "Essential Balm", "风油精" },
+    Wuhu = { "Wuhu", "Wuhu!", "芜湖！~" },
     Chunyao = { "Aphrodisiac", "春药" },
-    Musicbox = { "Musicbox", "八音盒" },
-    Angelbox = { "Angelbox", "天使盒" },
-    Devilbox = { "Devilbox", "恶魔盒" },
+    Musicbox = { "Musicbox", "Music Box", "八音盒" },
+    Angelbox = { "Angelbox", "Angel Box", "天使盒" },
+    Devilbox = { "Devilbox", "Devil Box", "恶魔盒" },
     UncutCord = { "Uncut Cord", "未剪断的脐带" },
     ShreddedTarot = { "Shredded Tarot", "剪碎的塔罗" },
     SterilizationCertificate = { "Sterilization Certificate", "绝育证明" },
@@ -40,6 +40,26 @@ local ITEM_NAME_CANDIDATES = {
     TrafficExposure = { "Traffic: Exposure", "流量：曝光" },
     TrafficHeat = { "Traffic: Heat", "流量：热度" },
     CertificateOfNeverbirth = { "Certificate of Neverbirth", "未生证明" },
+    HouseVsElephant = { "House VS Elephant", "再契象" },
+    Everchanging = { "Everchanging", "千变万化" },
+    ProteinStrip = { "Protein Strip", "高蛋白肉条" },
+    EnergyKibble = { "Energy Kibble", "活力狗饼干" },
+    LeanCan = { "Lean Can", "轻盈低脂罐头" },
+    DHAFishOil = { "DHA Fish Oil", "DHA 鱼油" },
+    DentalChew = { "Dental Chew", "护齿磨牙骨" },
+    LuckyLiverBites = { "Lucky Liver Bites", "幸运肝粒" },
+    GoatMilkPudding = { "Goat Milk Pudding", "羊奶布丁" },
+    ACEAntiCheatSystem = { "ACE Anti-Cheat System", "ACE 反作弊系统" },
+    YinsCurse = { "Yin's Curse", "阴的诅咒" },
+    BigDogBark = { "Big Dog Bark", "大狗叫" },
+    WindChargeRod = { "Wind Charge Rod", "蓄风棒" },
+    EchoShard = { "Echo Shard", "回响碎片" },
+    ReviveMyLove = { "Revive My Love", "复活吧，我的爱人！" },
+    NightOfTheCowards = { "Night of the Cowards", "胆小鬼之夜" },
+    Annihilation = { "Annihilation", "诛" },
+    KamikazeSquad = { "Kamikaze Squad", "神风特攻队" },
+    MemoryDisorder = { "Memory Disorder", "记忆紊乱" },
+    RingOfSevenCurses = { "Ring of the Seven Curses", "七咒之戒" },
     DS4 = { "ds4" },
 }
 
@@ -90,31 +110,315 @@ local Items = {
     TrafficExposure = FindItemIdByNames(ITEM_NAME_CANDIDATES.TrafficExposure),
     TrafficHeat = FindItemIdByNames(ITEM_NAME_CANDIDATES.TrafficHeat),
     CertificateOfNeverbirth = FindItemIdByNames(ITEM_NAME_CANDIDATES.CertificateOfNeverbirth),
+    HouseVsElephant = FindItemIdByNames(ITEM_NAME_CANDIDATES.HouseVsElephant),
+    Everchanging = FindItemIdByNames(ITEM_NAME_CANDIDATES.Everchanging),
+    ProteinStrip = FindItemIdByNames(ITEM_NAME_CANDIDATES.ProteinStrip),
+    EnergyKibble = FindItemIdByNames(ITEM_NAME_CANDIDATES.EnergyKibble),
+    LeanCan = FindItemIdByNames(ITEM_NAME_CANDIDATES.LeanCan),
+    DHAFishOil = FindItemIdByNames(ITEM_NAME_CANDIDATES.DHAFishOil),
+    DentalChew = FindItemIdByNames(ITEM_NAME_CANDIDATES.DentalChew),
+    LuckyLiverBites = FindItemIdByNames(ITEM_NAME_CANDIDATES.LuckyLiverBites),
+    GoatMilkPudding = FindItemIdByNames(ITEM_NAME_CANDIDATES.GoatMilkPudding),
+    ACEAntiCheatSystem = FindItemIdByNames(ITEM_NAME_CANDIDATES.ACEAntiCheatSystem),
+    YinsCurse = FindItemIdByNames(ITEM_NAME_CANDIDATES.YinsCurse),
+    BigDogBark = FindItemIdByNames(ITEM_NAME_CANDIDATES.BigDogBark),
+    WindChargeRod = FindItemIdByNames(ITEM_NAME_CANDIDATES.WindChargeRod),
+    EchoShard = FindItemIdByNames(ITEM_NAME_CANDIDATES.EchoShard),
+    ReviveMyLove = FindItemIdByNames(ITEM_NAME_CANDIDATES.ReviveMyLove),
+    NightOfTheCowards = FindItemIdByNames(ITEM_NAME_CANDIDATES.NightOfTheCowards),
+    Annihilation = FindItemIdByNames(ITEM_NAME_CANDIDATES.Annihilation),
+    KamikazeSquad = FindItemIdByNames(ITEM_NAME_CANDIDATES.KamikazeSquad),
+    MemoryDisorder = FindItemIdByNames(ITEM_NAME_CANDIDATES.MemoryDisorder),
+    RingOfSevenCurses = FindItemIdByNames(ITEM_NAME_CANDIDATES.RingOfSevenCurses),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
+
+Neverbirth.RuntimeLocalization = Neverbirth.RuntimeLocalization or {
+    defaultLocale = "en_us",
+    localeByGameLanguage = {
+        zh = "zh_cn",
+    },
+    fontPaths = {
+        zh_cn = "resources-dlc3.zh/font/teammeatfontextended10.fnt",
+    },
+    texts = {
+        en_us = {
+            uncutCordDelay = "DELAY",
+            uncutCordDebt = "DEBT",
+            uncutCordHalfPaid = "HALF PAID",
+            uncutCordFullPaid = "FULL PAID",
+            blackTaisuiTitle = "Black Taisui",
+            blackTaisuiWard = "WARD",
+            blackTaisuiBlock = "TAISUI BLOCK",
+            blackTaisuiDeathSaveSubtitle = "Lethal damage blocked",
+            condomTitle = "Condom",
+            condomBanned = "{count} baby items banned",
+            condomEmpty = "No baby items left",
+        },
+        zh_cn = {
+            uncutCordDelay = "延迟伤害",
+            uncutCordDebt = "延迟伤害",
+            uncutCordHalfPaid = "一半延迟伤害",
+            uncutCordFullPaid = "全部延迟伤害",
+            blackTaisuiTitle = "黑太岁",
+            blackTaisuiWard = "护命",
+            blackTaisuiBlock = "挡下致命伤害",
+            blackTaisuiDeathSaveSubtitle = "挡下致命伤害",
+            condomTitle = "避孕套",
+            condomBanned = "已禁用{count}件宝宝道具",
+            condomEmpty = "没有剩余宝宝道具",
+        },
+    },
+    fontCache = {},
+}
+
+function Neverbirth:GetRuntimeLocale()
+    local language = Options and Options.Language
+    return self.RuntimeLocalization.localeByGameLanguage[language]
+        or self.RuntimeLocalization.defaultLocale
+end
+
+function Neverbirth:GetRuntimeText(key, locale)
+    locale = locale or self:GetRuntimeLocale()
+    local texts = self.RuntimeLocalization.texts
+    local localized = texts[locale]
+    if localized and localized[key] ~= nil then
+        return localized[key]
+    end
+    local fallback = texts[self.RuntimeLocalization.defaultLocale]
+    return (fallback and fallback[key]) or tostring(key or "")
+end
+
+function Neverbirth:FormatRuntimeText(key, values, locale)
+    local text = self:GetRuntimeText(key, locale)
+    return (text:gsub("{([%w_]+)}", function(name)
+        local value = values and values[name]
+        return value ~= nil and tostring(value) or ("{" .. name .. "}")
+    end))
+end
+
+function Neverbirth:GetRuntimeTextFont(locale)
+    local localization = self.RuntimeLocalization
+    local cached = localization.fontCache[locale]
+    if cached ~= nil then
+        return cached or nil
+    end
+
+    localization.fontCache[locale] = false
+    local path = localization.fontPaths[locale]
+    if not path or type(Font) ~= "function" then
+        return nil
+    end
+
+    local okFont, font = pcall(Font)
+    if not okFont or not font or type(font.Load) ~= "function" then
+        return nil
+    end
+    local okLoad, loaded = pcall(function()
+        return font:Load(path)
+    end)
+    if not okLoad or loaded == false then
+        return nil
+    end
+
+    localization.fontCache[locale] = font
+    return font
+end
+
+function Neverbirth:RenderRuntimeText(key, suffix, x, y, r, g, b, a)
+    local locale = self:GetRuntimeLocale()
+    suffix = suffix or ""
+    local text = self:GetRuntimeText(key, locale) .. suffix
+
+    if locale ~= self.RuntimeLocalization.defaultLocale then
+        local font = self:GetRuntimeTextFont(locale)
+        if font and type(KColor) == "function" then
+            local okColor, color = pcall(KColor, r or 1, g or 1, b or 1, a or 1)
+            local method = font.DrawStringUTF8 or font.DrawString
+            if okColor and color and type(method) == "function" then
+                local drawn = pcall(method, font, text, x, y, color, 0, false)
+                if drawn then
+                    return true
+                end
+            end
+        end
+        text = self:GetRuntimeText(key, self.RuntimeLocalization.defaultLocale) .. suffix
+    end
+
+    if Isaac and Isaac.RenderText then
+        return pcall(Isaac.RenderText, text, x, y, r or 1, g or 1, b or 1, a or 1)
+    end
+    return false
+end
 
 local DEBUG_PRINT_ITEM_IDS = true
 local bloodSkullGuBacklashDepth = 0
 
 local EID_DESCRIPTIONS = {
+    [Items.RingOfSevenCurses] = {
+        en_us = {
+            name = "Ring of the Seven Curses",
+            eidDescription = "Permanently binds itself to your primary active slot for this run#Forces Darkness, Lost, Unknown, and Maze; blocks trinkets and flight#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Enemy health and damage taken are doubled#Maximum: 6 hearts, 2 keys, 1 bomb, and 20 coins#Every 2 rooms, charges the retained character-native secondary active by 1#Quality 4 and modded items stay uncollectible; a separate legal item appears beside them#Rerolling the original pedestal checks its new item again; pre-ring active drops are excluded#Trade items add a broken heart",
+        },
+        zh_cn = {
+            name = "七咒之戒",
+            eidDescription = "本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
+        },
+    },
+    [Items.MemoryDisorder] = {
+        en_us = {
+            name = "Memory Disorder",
+            eidDescription = "Starting next room, every room changes you into a random unlocked identity#Temporary starting components follow that identity; your normal build is preserved#Losing the item restores your original identity#Once picked up this run, valid finale nodes always offer a Void portal",
+        },
+        zh_cn = {
+            name = "记忆紊乱",
+            eidDescription = "从下次进房开始，每次进房都会随机变为一名已解锁角色#角色初始组件随身份临时替换；正常构筑永久保留#失去本道具会恢复原始身份#本局曾拾取后，原版有效终局节点必定提供虚空入口",
+        },
+    },
+    [Items.KamikazeSquad] = {
+        en_us = {
+            name = "Kamikaze Squad",
+            eidDescription = "While enemies are present, spawns a friendly Mulliboom near you every 3 seconds#Up to 2 per player#They chase the nearest enemy and explode on contact#The explosion deals normal Mulliboom damage with double radius#When the room is cleared, remaining squad members immediately explode",
+        },
+        zh_cn = {
+            name = "神风特攻队",
+            eidDescription = "房间内有敌人时，每3秒在身边召唤1只友好炸弹棉花怪#每名玩家最多同时存在2只#追逐最近敌人，接触后自爆#爆炸伤害与原版相同，范围翻倍#清房时剩余成员立即自爆",
+        },
+    },
+    [Items.Annihilation] = {
+        en_us = {
+            name = "Annihilation",
+            eidDescription = "For 5 seconds, emit an aura that deals 40% of your current damage every 4 frames#Your tears are replaced by radial shockwaves that deal 100% of your current damage#{{Range}} Range x0.45#{{Tears}} Fire rate x0.60#Enemy deaths extend the effect by 0.3 seconds#{{Collectible356}} Car Battery: while active, each hit charges your primary and secondary active items by 1",
+        },
+        zh_cn = {
+            name = "诛",
+            eidDescription = "持续5秒：每4帧以光环造成当前攻击力40%的伤害#泪弹替换为环形冲击波，造成当前攻击力100%的伤害#{{Range}}射程变为45%#{{Tears}}射击频率变为60%#敌人死亡会延长0.3秒#{{Collectible356}}车载电池：诛状态期间每次命中为主手和副手主动道具各充能1格",
+        },
+    },
+    [Items.NightOfTheCowards] = {
+        en_us = {
+            name = "Night of the Cowards",
+            eidDescription = "Grants {{Collectible20}} Transcendence#Normal enemies become Hosts, Red Hosts, or Hard Hosts#All enemies emit a short fear aura#Entering an aura shows {{Fear}} Fear and prevents shooting",
+        },
+        zh_cn = {
+            name = "胆小鬼之夜",
+            eidDescription = "获得{{Collectible20}}超凡升天#普通敌人会变为Host、红Host或硬Host#所有敌人脚下产生小型恐惧光环#进入光环会显示{{Fear}}恐惧且无法射击",
+        },
+    },
+    [Items.ReviveMyLove] = {
+        en_us = {
+            name = "Revive My Love",
+            eidDescription = "When no other revival is pending, your first true death this run plays out fully#After the death and revival animations, revive in the current room with {{Heart}} 1 full red heart and brief invincibility#Consumes 1 copy; other revival sources are preserved",
+        },
+        zh_cn = {
+            name = "复活吧，我的爱人！",
+            eidDescription = "没有其他复活待结算时，本局首次真正死亡会完整播放死亡过程#死亡动画与复活动画结束后，在当前房间以{{Heart}}1颗完整红心复活，并获得短暂无敌#消耗1份本道具；不会移除其他复活来源",
+        },
+    },
+    [Items.BigDogBark] = {
+        en_us = {
+            name = "Big Dog Bark",
+            eidDescription = "Hold the active button until fully charged, then release to send the dog dashing#Releasing early cancels the attack#Charge time scales with fire rate#Dash damage: 5 + 5% of the enemy's max HP + 20% of your damage#After picking up 4 food items this run, the dog autonomously chews enemies for 10% max HP",
+        },
+        zh_cn = {
+            name = "大狗叫",
+            eidDescription = "长按主动键蓄满后松开，沿移动方向放狗#未蓄满时松开会取消攻击#蓄力时间随射速缩短#冲刺伤害：5+目标最大生命值5%+攻击力20%#本局实际拾取4个食物标签道具后，自动咀嚼敌人并造成其最大生命值10%伤害",
+        },
+    },
+    [Items.WindChargeRod] = {
+        en_us = { name = "Wind Charge Rod", eidDescription = "Big Dog Bark fires instantly in the opposite movement direction#Removes its charge time" },
+        zh_cn = { name = "蓄风棒", eidDescription = "大狗叫无需蓄力，按下即沿移动方向反向发射" },
+    },
+    [Items.EchoShard] = {
+        en_us = { name = "Echo Shard", eidDescription = "Big Dog Bark's dash and echo leave polluted creep that slows enemies and deals 1% of your damage every frame#After the dash ends, an echo retraces its path and deals 50% damage" },
+        zh_cn = { name = "回响碎片", eidDescription = "大狗本体冲刺与回响都会留下减速水迹，每帧造成攻击力1%伤害#冲刺结束后回响重走原路径，并造成冲刺伤害的50%" },
+    },
+    [Items.YinsCurse] = {
+        en_us = {
+            name = "Yin's Curse",
+            eidDescription = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If Black Candle was held when this item was picked up, Ipecac instead appears beside it#Lose all explosion immunity; {{Collectible260}} Black Candle temporarily makes you immune to explosions",
+        },
+        zh_cn = {
+            name = "阴的诅咒",
+            eidDescription = "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#失去所有防爆；{{Collectible260}}黑蜡烛暂时使你免疫爆炸",
+        },
+    },
+    [Items.ACEAntiCheatSystem] = {
+        en_us = {
+            name = "ACE Anti-Cheat System",
+            eidDescription = "Damage taken is doubled#Killing a normal enemy in one hit causes severe room slowdown and 3 FPS-style stuttering for 5 seconds#Killing 3 normal enemies in one hit each in the same room kills the whole team",
+        },
+        zh_cn = {
+            name = "ACE 反作弊系统",
+            eidDescription = "受到的伤害翻倍#一击击杀普通敌人：全房间严重减速并呈现低帧卡顿，持续5秒#同一房间内一击击杀3个普通敌人：全队立即死亡",
+        },
+    },
+    [Items.ProteinStrip] = {
+        en_us = { name = "Protein Strip", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Damage}} +0.15 damage" },
+        zh_cn = { name = "高蛋白肉条", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Damage}} +0.15攻击" },
+    },
+    [Items.EnergyKibble] = {
+        en_us = { name = "Energy Kibble", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Tears}} +0.15 fire rate" },
+        zh_cn = { name = "活力狗饼干", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Tears}} +0.15射速" },
+    },
+    [Items.LeanCan] = {
+        en_us = { name = "Lean Can", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Speed}} +0.10 speed" },
+        zh_cn = { name = "轻盈低脂罐头", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Speed}} +0.10移速" },
+    },
+    [Items.DHAFishOil] = {
+        en_us = { name = "DHA Fish Oil", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Range}} +0.40 range" },
+        zh_cn = { name = "DHA 鱼油", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Range}} +0.40射程" },
+    },
+    [Items.DentalChew] = {
+        en_us = { name = "Dental Chew", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#Your tears push normal movable enemies in their direction of travel#Push strength: 1.25 per copy; maximum enemy speed: 4.5; 8-frame cooldown per enemy and player" },
+        zh_cn = { name = "护齿磨牙骨", eidDescription = "{{Heart}} +1红心上限并补满所有红心#自身泪弹会沿飞行方向轻推普通可移动敌人#每份推力1.25；速度上限4.5；同一敌人与玩家冷却8帧" },
+    },
+    [Items.LuckyLiverBites] = {
+        en_us = { name = "Lucky Liver Bites", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Luck}} +0.25 luck" },
+        zh_cn = { name = "幸运肝粒", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Luck}} +0.25幸运" },
+    },
+    [Items.GoatMilkPudding] = {
+        en_us = { name = "Goat Milk Pudding", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{SoulHeart}} +0.5 soul heart" },
+        zh_cn = { name = "羊奶布丁", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{SoulHeart}} +0.5魂心" },
+    },
+    [Items.Everchanging] = {
+        en_us = {
+            name = "Everchanging",
+            eidDescription = "Gain a random appearance for the run that stays visible over ordinary costumes#Additional copies reroll the appearance when possible#Unsupported characters keep their normal appearance",
+        },
+        zh_cn = {
+            name = "千变万化",
+            eidDescription = "本局获得一套确定性的高优先级外观样式#重复获得时，在可行情况下重抽不同样式#不兼容的角色骨架保留道具但不改变外观",
+        },
+    },
+    [Items.HouseVsElephant] = {
+        en_us = {
+            name = "House VS Elephant",
+            eidDescription = "One-use, zero-charge active item#Enter a paged room containing every passive or familiar item seen on a pedestal this run that no player currently holds#If the same item was seen on multiple pedestals, each one appears separately#The whole team may take 3 items total; the third item returns the team automatically#Use the previous, return, and next controls to browse or leave early#Fewer than 3 candidates are filled with {{Collectible25}} Milk",
+        },
+        zh_cn = {
+            name = "再契象",
+            eidDescription = "一次性主动道具，无需充能#进入分页特殊房，陈列本局见过且当前全队无人持有的被动或跟班道具底座#同一道具的不同底座实例会重复出现#全队合计拿取3件，第三件会自动送全队返回#使用上一页、返回、下一页机关浏览或提前离开#候选不足3件时用{{Collectible25}}牛奶补足",
+        },
+    },
     [Items.CertificateOfNeverbirth] = {
         en_us = {
             name = "Certificate of Neverbirth",
-            eidDescription = "Reusable, zero-charge active item#Enter a gallery containing every collectible registered by neverbrith#Take any number of items, then step on the floor button to return",
+            eidDescription = "Reusable debug active item with no charge#Enter a paged gallery containing every collectible registered by neverbrith#Take any number of items; changing pages rebuilds that page completely#Only the return control leaves the gallery",
         },
         zh_cn = {
             name = "未生证明",
-            eidDescription = "可重复使用，无需充能#进入陈列全部neverbrith注册收藏品的未生陈列室#可拿取任意数量道具，踩下地板按钮后返回",
+            eidDescription = "无需充能且不会消失的调试主动道具#进入分页陈列全部neverbrith注册收藏品的未生陈列室#可拿取任意数量道具；每次切页都会完整重建该页#只有使用返回机关才会离开陈列室",
         },
     },
     [Items.LittleLeatherShoes] = {
         en_us = {
             name = "Little Leather Shoes",
-            eidDescription = "Normal enemies may return after death: 33%, then 22%, then 11%#Cleared rooms add the highest death count among their valid enemy chains as Traffic#Boss rewards at 6, 8, and 12 Traffic#Traffic is checked and reset each floor",
+            eidDescription = "Normal enemies may return after death: 33%, then 22%, then 11%#Clearing a room grants Traffic equal to the highest death count of any returning enemy#Boss rewards at 6, 8, and 12 Traffic#At 12 Traffic, choose between Exposure and Heat#Traffic is checked and reset each floor",
         },
         zh_cn = {
             name = "小皮鞋",
-            eidDescription = "普通敌人死亡后可依次以33%、22%、11%概率返回#清房时，按本房有效敌人链中最高死亡次数获得流量#6、8、12点流量解锁Boss结算奖励#流量每层检查并重置",
+            eidDescription = "普通敌人死亡后可依次以33%、22%、11%概率返回#清房时，按本房有效敌人链中最高死亡次数获得流量#6、8、12点流量解锁Boss结算奖励#12点奖励中的曝光与热度二选一#流量每层检查并重置",
         },
     },
     [Items.TrafficUnboxing] = {
@@ -140,7 +444,7 @@ local EID_DESCRIPTIONS = {
     [Items.TrafficHeat] = {
         en_us = {
             name = "Traffic: Heat",
-            eidDescription = "{{Tears}} Permanently +0.5 fire rate",
+            eidDescription = "{{Tears}} +0.5 fire rate",
         },
         zh_cn = {
             name = "流量：热度",
@@ -180,7 +484,7 @@ local EID_DESCRIPTIONS = {
     [Items.Musicbox] = {
         en_us = {
             name = "Music Box",
-            eidDescription = "12-charge active item#On use: 20 seconds of invincibility, red tears, and Music Box music#{{Warning}} Die when the timer ends#Reuse does not extend the timer#At 0 charge, a lethal enemy hit removes Music Box and triggers it once#During Music Box, Plan C self-kill is prevented but its enemy damage remains#Only extra lives can continue the run",
+            eidDescription = "12-charge active item#On use: 20 seconds of invincibility, red tears, and Music Box music#{{Warning}} Die when the timer ends#Reuse does not extend the timer#At 0 charge, a lethal enemy hit removes Music Box and triggers it once#While Music Box is active, Plan C does not kill you, but still damages enemies#Only extra lives can continue the run",
         },
         zh_cn = {
             name = "八音盒",
@@ -190,7 +494,7 @@ local EID_DESCRIPTIONS = {
     [Items.Angelbox] = {
         en_us = {
             name = "Angel Box",
-            eidDescription = "{{Luck}} +3 luck while held#4-charge active item#Each player's first use: each red heart container gives 1 full soul heart#Afterwards, only soul-heart overflow charges it; 4 charges to use again#Later full-charge uses try to force an Angel Room this floor#If no Angel Room was entered this floor, the first Angel Room gains 1 quality-4 Angel item#Heart pickups have a 60% chance to spawn 1 extra full soul heart#While held, converts 50% Devil Deal chance to Angel Room chance",
+            eidDescription = "{{Luck}} +3 luck while held#4-charge active item#Each player's first use: each red heart container gives 1 full soul heart#After the first use, excess Soul Hearts are converted into charge; 4 charges to use again#Later uses at full charge attempt to open an Angel Room on the current floor#If no Angel Room was entered this floor, the first one also contains 1 quality-4 Angel item#Heart pickups have a 60% chance to spawn 1 extra full soul heart#While held, converts 50% Devil Deal chance to Angel Room chance",
         },
         zh_cn = {
             name = "天使盒",
@@ -200,7 +504,7 @@ local EID_DESCRIPTIONS = {
     [Items.Devilbox] = {
         en_us = {
             name = "Devil Box",
-            eidDescription = "4-charge active item#Each player's first use: each red heart container gives 1 full black heart#Afterwards, only black-heart overflow charges it; 4 charges to use again#Later full-charge uses try to force a Devil Room this floor#If no Devil Room was entered this floor, the first Devil Room gains 1 quality-3 Devil item#Heart pickups have an 80% chance to spawn 1 extra black heart#While held, converts 50% Angel Room chance to Devil Deal chance",
+            eidDescription = "4-charge active item#Each player's first use: each red heart container gives 1 full black heart#After the first use, excess Black Hearts are converted into charge; 4 charges to use again#Later uses at full charge attempt to open a Devil Room on the current floor#If no Devil Room was entered this floor, the first one also contains 1 quality-3 Devil item#Heart pickups have an 80% chance to spawn 1 extra black heart#While held, converts 50% Angel Room chance to Devil Deal chance",
         },
         zh_cn = {
             name = "恶魔盒",
@@ -220,7 +524,7 @@ local EID_DESCRIPTIONS = {
     [Items.ShreddedTarot] = {
         en_us = {
             name = "Shredded Tarot",
-            eidDescription = "{{Luck}} +3 Luck while held#Single-use active item#Removes card pickups in the current room#For every 3 cards removed, spawns 1 Treasure Room item#Not consumed if fewer than 3 cards are present#Empty use does not count; disappears after this floor if unused",
+            eidDescription = "{{Luck}} +3 Luck while held#Single-use active item#Removes card pickups in the current room#Every 3 removed cards spawn 1 Treasure Room item#Not consumed if fewer than 3 cards are present#Empty use does not count; disappears after this floor if unused",
         },
         zh_cn = {
             name = "剪碎的塔罗",
@@ -230,7 +534,7 @@ local EID_DESCRIPTIONS = {
     [Items.BloodSkullGu] = {
         en_us = {
             name = "Blood Skull Gu",
-            eidDescription = "3-charge active item#Sacrifice one familiar item you own#{{Damage}} Permanently gain +1.5 damage#{{Range}} Permanently gain +1 range#Drops 1-2 black hearts#If no familiar item can be sacrificed, take half a red heart of backlash damage instead",
+            eidDescription = "3-charge active item#Sacrifice one familiar item you own#{{Damage}} +1.5 permanent damage#{{Range}} +1 permanent range#Drops 1-2 black hearts#If no familiar item can be sacrificed, take half a red heart of backlash damage instead",
         },
         zh_cn = {
             name = "血颅蛊",
@@ -240,7 +544,7 @@ local EID_DESCRIPTIONS = {
     [Items.BossOrder] = {
         en_us = {
             name = "Boss's Order",
-            eidDescription = "3-charge active item#Spawns 1 hostile target#Small enemies come from the current floor#Bosses come from the Boss Rush pool#Small enemies have a 15% chance to become champions after spawning#Killing it drops cards: 1 normal, 2 champion, 3 boss",
+            eidDescription = "3-charge active item#Spawns 1 hostile target#Small enemies come from the current floor#Bosses come from the Boss Rush pool#Small enemies have a 15% chance to become champions after spawning#Killing the target drops cards: 1 for a normal enemy, 2 for a champion, or 3 for a boss",
         },
         zh_cn = {
             name = "老大的指令",
@@ -250,7 +554,7 @@ local EID_DESCRIPTIONS = {
     [Items.BetweenDeathAndLife] = {
         en_us = {
             name = "Between Death and Life",
-            eidDescription = "On pickup, activates Death Trial for the rest of the run:#Enemies become champions whenever possible#Bosses are championed or empowered#Defeating each floor boss spawns Death Certificate#Once per floor",
+            eidDescription = "On pickup, activates Death Trial for the rest of the run:#Enemies become champions whenever possible#Bosses become champions when possible; otherwise, they are empowered#Defeating each floor boss spawns Death Certificate#Once per floor",
         },
         zh_cn = {
             name = "生死一念间",
@@ -260,7 +564,7 @@ local EID_DESCRIPTIONS = {
     [Items.CoinSewnSword] = {
         en_us = {
             name = "Coin-Sewn Sword",
-            eidDescription = "3-charge active item#Spend up to 6 coins and fire that many coin sword qi in a 150-degree fan#Each qi deals your damage x2.0#Spending 6 coins also fires a piercing empowered qi that deals x6.0#With no coins, take half a red heart of damage and fire 1 blood qi that deals x4.0",
+            eidDescription = "3-charge active item#Spend up to 6 coins to fire the same number of coin blades in a 150-degree fan#Each blade deals 200% of your damage#Spending 6 coins also fires a piercing empowered blade that deals 600% of your damage#With no coins, take half a red heart of damage and fire 1 blood blade that deals 400% of your damage",
         },
         zh_cn = {
             name = "铜钱剑",
@@ -270,7 +574,7 @@ local EID_DESCRIPTIONS = {
     [Items.CoinFacedMask] = {
         en_us = {
             name = "Coin-Faced Mask",
-            eidDescription = "Enter a room with at least 5 coins to gain a mask#The mask confuses room enemies for 3 seconds#When hit by a monster, spend 5 coins to block that hit#Without enough coins, the mask breaks and {{Luck}} -2 luck for the room",
+            eidDescription = "Enter a room with at least 5 coins to gain a mask#The mask confuses room enemies for 3 seconds#When hit by a monster, spend 5 coins to block that hit#Without enough coins, the mask breaks and your {{Luck}} luck is reduced by 2 for the room",
         },
         zh_cn = {
             name = "铜钱面具",
@@ -280,7 +584,7 @@ local EID_DESCRIPTIONS = {
     [Items.BlackTaisui] = {
         en_us = {
             name = "Black Taisui",
-            eidDescription = "Gain parasite value from red-heart healing, red heart containers, and red-heart damage#Each red heart container: +4 parasite; red-heart healing: +1 per half heart; red-heart damage: +2 per half heart#Without red heart containers: soul/black healing +1 per full heart; soul/black damage +1 per half heart#0-7: {{Damage}} -0.5, {{Speed}} -0.2, {{Luck}} -3 per copy (damage floor 1, speed floor 0.5)#8-15: {{Damage}} -0.5; reveal question-mark item pedestals and suppress Blind, Lost, Unknown, and Wavy Cap side effects#16+: inherit stage 2; {{Damage}} +1.5 per copy; create Meat Lump once#Multiple copies share parasite value; Meat Lump still appears only once",
+            eidDescription = "Gain parasite value from red-heart healing, red heart containers, and red-heart damage#Each red heart container: +4 parasite; red-heart healing: +1 per half heart; red-heart damage: +2 per half heart#Without red heart containers: soul/black healing +1 per full heart; soul/black damage +1 per half heart#0-7: {{Damage}} -0.5, {{Speed}} -0.2, {{Luck}} -3 per copy (damage cannot fall below 1; speed cannot fall below 0.5)#8-15: {{Damage}} -0.5; reveal question-mark item pedestals and suppress Blind, Lost, Unknown, and Wavy Cap side effects#At 16+, all 8-15 effects remain; each copy grants {{Damage}} +1.5 damage, and Meat Lump is created once#Multiple copies share parasite value; Meat Lump still appears only once",
         },
         zh_cn = {
             name = "黑太岁",
@@ -290,7 +594,7 @@ local EID_DESCRIPTIONS = {
     [Items.MeatLump] = {
         en_us = {
             name = "Meat Lump",
-            eidDescription = "Conditionally blocks one lethal hit from enemies#This item does not exist in any item pool",
+            eidDescription = "Grants one extra life#On lethal damage, consume it and return with a little health#This item does not appear in any item pool",
         },
         zh_cn = {
             name = "肉块",
@@ -300,7 +604,7 @@ local EID_DESCRIPTIONS = {
     [Items.CleansedWavyCap] = {
         en_us = {
             name = "Cleansed Wavy Cap",
-            eidDescription = "A Black Taisui-safe Wavy Cap#On use: {{Speed}} -0.03 speed, {{Tears}} +0.75 fire rate#Leaving the room converts this room's speed loss to x2 and fire-rate gain to x0.4#Clearing a room removes one use worth of lingering changes",
+            eidDescription = "A Black Taisui-safe Wavy Cap#On use: {{Speed}} -0.03 speed, {{Tears}} +0.75 fire rate#Leaving the room doubles this room's speed loss and reduces its fire-rate gain to 40%#Clearing a room removes the lingering changes from one use",
         },
         zh_cn = {
             name = "净化迷幻菇",
@@ -310,7 +614,7 @@ local EID_DESCRIPTIONS = {
     [Items.GoodGirlOfBabylon] = {
         en_us = {
             name = "Good Girl of Babylon",
-            eidDescription = "At full red hearts, enter a presentable state:#{{Tears}} +0.6 tears#{{Luck}} +2 luck#Each enemy has a 15% chance to be charmed for 3 seconds#Clearing a room without red-heart damage has a 33% chance to drop 1 Tarot card, half soul heart, or penny#Taking red-heart damage breaks the state:#{{Luck}} -2 luck for the room#Fear enemies within 120 for 2 seconds#Gain a 5-second echo: {{Damage}} +1.2, {{Speed}} +0.15",
+            eidDescription = "At full red hearts, become prim and proper:#{{Tears}} +0.6 tears#{{Luck}} +2 luck#Each enemy has a 15% chance to be charmed for 3 seconds#Clearing a room without red-heart damage has a 33% chance to drop 1 Tarot card, half soul heart, or penny#Taking red-heart damage breaks the state:#{{Luck}} -2 luck for the room#Frighten enemies within 120 range for 2 seconds#Gain a 5-second echo: {{Damage}} +1.2, {{Speed}} +0.15",
         },
         zh_cn = {
             name = "巴比伦好女孩",
@@ -350,7 +654,7 @@ local EID_DESCRIPTIONS = {
     [Items.TheMoonIsBeautiful] = {
         en_us = {
             name = "The Moon Is Beautiful",
-            eidDescription = "After entering an uncleared room, avoid firing tears for 1 continuous second within the first 2 seconds:#{{Damage}} +1 damage and {{Luck}} +1 luck for the room#Marks all enemies in the room#The first player hit on a marked enemy releases a moonlight wave#Moonlight waves deal 30% of your damage#Marked enemies have a 10% chance to drop an extra reward on death#In boss rooms, bosses take +50% player tear damage for the room#Once per room",
+            eidDescription = "After entering an uncleared room, avoid firing tears for 1 continuous second within the first 2 seconds:#{{Damage}} +1 damage and {{Luck}} +1 luck for the room#Marks all enemies in the room#The first hit by a player on a marked enemy releases a moonlight wave#Moonlight waves deal 30% of your damage#Marked enemies have a 10% chance to drop an extra reward on death#In boss rooms, bosses take 50% more damage from player tears for the room#Once per room",
         },
         zh_cn = {
             name = "月色真美",
@@ -360,7 +664,7 @@ local EID_DESCRIPTIONS = {
     [Items.BurnAwayResentment] = {
         en_us = {
             name = "Burn Away the Resentment",
-            eidDescription = "On first pickup: gain 2 resentment layers#Clearing a hostile room: +1 layer; boss rooms give +2#{{Speed}} -0.04 speed per layer (minimum 0.5), up to 6 layers#At 6 layers, your first direct hit in the next hostile room purges the room for 300% damage and burns enemies for 3 seconds#Taking real enemy damage at 3-6 layers instead purges for 50% damage per layer#On the next floor, each spent or unspent layer gives {{Damage}} +0.35 damage and {{Tears}} +0.12 tears",
+            eidDescription = "On first pickup: gain 2 resentment layers#Clearing a hostile room: +1 layer; boss rooms give +2#{{Speed}} -0.04 speed per layer (minimum 0.5), up to 6 layers#At 6 layers, your first direct hit in the next hostile room deals 300% damage to all enemies and burns them for 3 seconds#Taking actual damage from an enemy at 3-6 layers instead deals 50% damage per layer to all enemies#On the next floor, each spent or unspent layer gives {{Damage}} +0.35 damage and {{Tears}} +0.12 tears",
         },
         zh_cn = {
             name = "焚尽郁结",
@@ -390,7 +694,7 @@ local EID_DESCRIPTIONS = {
     [Items.FortuneRivallingHeavenGu] = {
         en_us = {
             name = "Fortune Rivalling Heaven Gu",
-            eidDescription = "{{Luck}} Raises luck to the highest registered held-item threshold#10% chance for an eligible reward event to resolve once more#1% chance for a collectible pedestal to create a second item from the same pool#Coins have a 5% chance to create a Lucky Penny",
+            eidDescription = "{{Luck}} Raises luck enough to maximize the chance of luck-based items you hold#Room-clear, Boss, chest, beggar, and machine rewards have a 10% chance to pay out twice#1% chance for a collectible pedestal to create a second item from the same pool#Coins have a 5% chance to create a Lucky Penny",
         },
         zh_cn = {
             name = "鸿运齐天蛊",
@@ -400,7 +704,7 @@ local EID_DESCRIPTIONS = {
     [Items.SterilizationCertificate] = {
         en_us = {
             name = "Sterilization Certificate",
-            eidDescription = "Prevents spawning enemies from creating more enemies#Each blocked spawn deals backlash to its source: normal enemies take 10 + 5% max HP; bosses take 3 + 1% max HP#Boss summons are only partially weakened",
+            eidDescription = "Prevents enemies from creating more enemies#Whenever a summon is prevented, the summoner takes backlash: normal enemies take 10 + 5% max HP; bosses take 3 + 1% max HP#Boss summons are only partially weakened",
         },
         zh_cn = {
             name = "绝育证明",
@@ -410,7 +714,7 @@ local EID_DESCRIPTIONS = {
     [Items.Condom] = {
         en_us = {
             name = "Condom",
-            eidDescription = "3-charge active item#On use, randomly bans up to 2 future baby-tag items#Does not remove items you already own",
+            eidDescription = "3-charge active item#On use, randomly bans up to 2 future baby items#Does not remove items you already own",
         },
         zh_cn = {
             name = "避孕套",
@@ -430,7 +734,7 @@ local EID_DESCRIPTIONS = {
     [Items.Cleaver] = {
         en_us = {
             name = "Cleaver",
-            eidDescription = "Stranger only#Replaces tears with cleaver swings#Hit enemy bodies: 0.5 damage and heavy knockback#Hit past shadows: 2x your Damage",
+            eidDescription = "Stranger only#Replaces tears with cleaver swings#Hitting enemy bodies deals 0.5 damage and heavy knockback#Hitting past shadows deals 2x your damage",
         },
         zh_cn = {
             name = "柴刀",
@@ -439,7 +743,7 @@ local EID_DESCRIPTIONS = {
     },    [Items.EmptyCradle] = {
         en_us = {
             name = "Empty Cradle",
-            eidDescription = "The first effective damage each floor remembers the lost heart type#Clear that room for a reward:#Red heart: 1 full red, soul, or black heart#Soul heart: 1 roll of 3 pennies, 1 key, or 1 bomb#Black heart: {{Damage}} +1.0 for this floor#Taking another hit before the room is clear downgrades the reward:#Red heart: half red or half soul heart#Soul heart: no extra roll#Black heart: {{Damage}} +0.5 for this floor",
+            eidDescription = "The first time you lose health each floor, the type of heart lost is recorded#Clear that room for a reward:#Red heart: 1 full red, soul, or black heart#Soul heart: 3 pennies, 1 key, or 1 bomb#Black heart: {{Damage}} +1.0 for this floor#Taking another hit before the room is clear downgrades the reward:#Red heart: half red or half soul heart#Soul heart: no extra reward#Black heart: {{Damage}} +0.5 for this floor",
         },
         zh_cn = {
             name = "空摇篮",
@@ -486,8 +790,8 @@ function Neverbirth:RegisterPickupBannerText(itemId, enName, enSubtitle, zhName,
     }
 end
 
-Neverbirth:RegisterPickupBannerText(Items.EssentialBalm, "EssentialBalm", "Handle with care", "风油精", "3岁以下儿童慎用")
-Neverbirth:RegisterPickupBannerText(Items.Wuhu, "Wuhu", "Dark wind, wild flight", "芜湖！~", "黑风吹过呜呼起飞")
+Neverbirth:RegisterPickupBannerText(Items.EssentialBalm, "Essential Balm", "Handle with care", "风油精", "3岁以下儿童慎用")
+Neverbirth:RegisterPickupBannerText(Items.Wuhu, "Wuhu!", "Dark wind, wild flight", "芜湖！~", "黑风吹过呜呼起飞")
 Neverbirth:RegisterPickupBannerText(Items.UncutCord, "Uncut Cord", "Half now, half later", "未剪断的脐带", "一半现在，一半以后")
 Neverbirth:RegisterPickupBannerText(Items.SterilizationCertificate, "Sterilization Certificate", "No more births", "绝育证明", "不许再生")
 Neverbirth:RegisterPickupBannerText(Items.EmptyCradle, "Empty Cradle", "Remembered harm", "空摇篮", "伤痕会回应")
@@ -499,7 +803,7 @@ Neverbirth:RegisterPickupBannerText(Items.CoinSewnSword, "Coin-Sewn Sword", "Coi
 Neverbirth:RegisterPickupBannerText(Items.CoinFacedMask, "Coin-Faced Mask", "Buy yourself another face.", "铜钱面具", "买一张脸。")
 Neverbirth:RegisterPickupBannerText(Items.BlackTaisui, "Black Taisui", "Feeds on blood and lets you see clearly.", "黑太岁", "以血为食，替你看清世界。")
 Neverbirth:RegisterPickupBannerText(Items.MeatLump, "Meat Lump", "One more bite", "肉块", "再活一口")
-Neverbirth:RegisterPickupBannerText(Items.CleansedWavyCap, "Cleansed Wavy Cap", "Placeholder logic for a purified mushroom.", "净化迷幻菇", "被净化的迷幻蘑菇。")
+Neverbirth:RegisterPickupBannerText(Items.CleansedWavyCap, "Cleansed Wavy Cap", "A purified psychedelic mushroom.", "净化迷幻菇", "被净化的迷幻蘑菇。")
 Neverbirth:RegisterPickupBannerText(Items.GoodGirlOfBabylon, "Good Girl of Babylon", "Don't stain the dress.", "巴比伦好女孩", "别弄脏裙子。")
 Neverbirth:RegisterPickupBannerText(Items.Condom, "Condom", "It does not count", "避孕套", "她说戴了不算给")
 Neverbirth:RegisterPickupBannerText(Items.DebugController, "Debug Controller", "Debug command menu", "调试控制器", "调试命令菜单")
@@ -507,21 +811,42 @@ Neverbirth:RegisterPickupBannerText(Items.StrongLaxative, "Strong Laxative", "A 
 Neverbirth:RegisterPickupBannerText(Items.TowerOfBabel, "Tower of Babel", "No more flood.", "通天塔", "不再有洪水。")
 Neverbirth:RegisterPickupBannerText(Items.TheMoonIsBeautiful, "The Moon Is Beautiful", "Say that to me.", "月色真美", "请这样对我说。")
 Neverbirth:RegisterPickupBannerText(Items.BurnAwayResentment, "Burn Away the Resentment", "I've never felt so refreshed.", "焚尽郁结", "我从未如此神清气爽过。")
-Neverbirth:RegisterPickupBannerText(Items.Needletick, "Needletick", "vomit in buckets", "虚空针尖", "下次请吐在垃圾桶里……")
-Neverbirth:RegisterPickupBannerText(Items.CrazyCoconut, "Crazy Coconut", "King of hollow earth", "疯狂的椰子", "空心地球之王")
+Neverbirth:RegisterPickupBannerText(Items.Needletick, "Needletick", "Next time, use a trash can...", "虚空针尖", "下次请吐在垃圾桶里……")
+Neverbirth:RegisterPickupBannerText(Items.CrazyCoconut, "Crazy Coconut", "King of the Hollow Earth", "疯狂的椰子", "空心地球之王")
 Neverbirth:RegisterPickupBannerText(Items.FortuneRivallingHeavenGu, "Fortune Rivalling Heaven Gu", "The world bends your way.", "鸿运齐天蛊", "天命所归。")
 Neverbirth:RegisterPickupBannerText(Items.UtilityKnife, "Utility Knife", "Painful scars", "美工刀", "苦痛伤痕")
 Neverbirth:RegisterPickupBannerText(Items.Cleaver, "Cleaver", "Tears become cleaver swings", "柴刀", "眼泪替换为柴刀挥砍")
 Neverbirth:RegisterPickupBannerText(Items.Chunyao, "Aphrodisiac", "Heat of the moment", "春药", "性奋")
-Neverbirth:RegisterPickupBannerText(Items.Musicbox, "Musicbox", "Your life, on a timer", "八音盒", "为你的生命倒计时")
-Neverbirth:RegisterPickupBannerText(Items.Angelbox, "Angelbox", "Full hearts, heavenbound", "天使盒", "盈魂引向天国")
-Neverbirth:RegisterPickupBannerText(Items.Devilbox, "Devilbox", "Black hearts, below", "恶魔盒", "暗血引向深渊")
+Neverbirth:RegisterPickupBannerText(Items.Musicbox, "Music Box", "Your life, on a timer", "八音盒", "为你的生命倒计时")
+Neverbirth:RegisterPickupBannerText(Items.Angelbox, "Angel Box", "Full hearts, heavenbound", "天使盒", "盈魂引向天国")
+Neverbirth:RegisterPickupBannerText(Items.Devilbox, "Devil Box", "Black hearts, below", "恶魔盒", "暗血引向深渊")
 Neverbirth:RegisterPickupBannerText(Items.DS4, "ds4", "", "ds4", "")
 Neverbirth:RegisterPickupBannerText(Items.LittleLeatherShoes, "Little Leather Shoes", "Meowmermermer", "小皮鞋", "咪mermermer")
 Neverbirth:RegisterPickupBannerText(Items.TrafficUnboxing, "Traffic: Unboxing", "A promising debut", "流量：开箱", "初露锋芒")
 Neverbirth:RegisterPickupBannerText(Items.TrafficExposure, "Traffic: Exposure", "More eyes are on you", "流量：曝光", "更多人看见了你")
 Neverbirth:RegisterPickupBannerText(Items.TrafficHeat, "Traffic: Heat", "Are you sure this is what you want?", "流量：热度", "你确定这是你想要的吗？")
 Neverbirth:RegisterPickupBannerText(Items.CertificateOfNeverbirth, "Certificate of Neverbirth", "Enter the Neverbirth gallery", "未生证明", "进入未生陈列室")
+Neverbirth:RegisterPickupBannerText(Items.HouseVsElephant, "House VS Elephant", "Who wants a frantic game of House VS Elephant?", "再契象", "谁不想急头白脸来一把房子VS大象呢？")
+Neverbirth:RegisterPickupBannerText(Items.Everchanging, "Everchanging", "A different look for this run", "千变万化", "本局换个模样")
+Neverbirth:RegisterPickupBannerText(Items.ProteinStrip, "Protein Strip", "A stronger bite", "高蛋白肉条", "更有力的一口")
+Neverbirth:RegisterPickupBannerText(Items.EnergyKibble, "Energy Kibble", "Stay lively", "活力狗饼干", "活力满满")
+Neverbirth:RegisterPickupBannerText(Items.LeanCan, "Lean Can", "Light on your feet", "轻盈低脂罐头", "身轻步快")
+Neverbirth:RegisterPickupBannerText(Items.DHAFishOil, "DHA Fish Oil", "See farther", "DHA 鱼油", "看得更远")
+Neverbirth:RegisterPickupBannerText(Items.DentalChew, "Dental Chew", "Push back", "护齿磨牙骨", "顶回去")
+Neverbirth:RegisterPickupBannerText(Items.LuckyLiverBites, "Lucky Liver Bites", "A lucky snack", "幸运肝粒", "幸运零食")
+Neverbirth:RegisterPickupBannerText(Items.GoatMilkPudding, "Goat Milk Pudding", "Soft and nourishing", "羊奶布丁", "柔软滋养")
+Neverbirth:RegisterPickupBannerText(Items.ACEAntiCheatSystem, "ACE Anti-Cheat System", "Built on 20+ years of experience", "ACE 反作弊系统", "基于20+年的经验沉淀")
+Neverbirth:RegisterPickupBannerText(Items.YinsCurse, "Yin's Curse", "Darkness suppresses the curse", "阴的诅咒", "唯有黑暗能压制诅咒")
+Neverbirth:RegisterPickupBannerText(Items.BigDogBark, "Big Dog Bark", "Charge up and let the big dog run", "大狗叫", "蓄力，放狗")
+Neverbirth:RegisterPickupBannerText(Items.WindChargeRod, "Wind Charge Rod", "No charge, bark backwards", "蓄风棒", "即刻反向出击")
+Neverbirth:RegisterPickupBannerText(Items.EchoShard, "Echo Shard", "The dash echoes once", "回响碎片", "冲刺后留下回响")
+Neverbirth:RegisterPickupBannerText(Items.ReviveMyLove, "Revive My Love", "Please open your eyes again.", "复活吧，我的爱人！", "请再次睁开眼睛。")
+Neverbirth:RegisterPickupBannerText(Items.NightOfTheCowards, "Night of the Cowards", "Everybody is a Scaredy-Shroom.", "胆小鬼之夜", "人人都是胆小菇")
+Neverbirth:RegisterPickupBannerText(Items.Annihilation, "Annihilation", "Feel My Pain!", "诛", "感受！我的痛苦！")
+Neverbirth:RegisterPickupBannerText(Items.KamikazeSquad, "Kamikaze Squad", "For victory! Sacrifice!", "神风特攻队", "为胜利！献身！")
+Neverbirth:RegisterPickupBannerText(Items.MemoryDisorder, "Memory Disorder", "Who am I?", "记忆紊乱", "我是谁？")
+Neverbirth:RegisterPickupBannerText(Items.RingOfSevenCurses, "Ring of the Seven Curses", "This world isn't worth it.", "七咒之戒", "人间不值得")
+
 local eidDescriptionsRegistered = false
 
 local function RegisterEIDDescriptions()
@@ -1745,6 +2070,42 @@ local function EnsureMusicboxDataLoaded()
     if type(musicboxSaveData.certificateOfNeverbirth) ~= "table" then
         musicboxSaveData.certificateOfNeverbirth = {}
     end
+
+    if type(musicboxSaveData.houseVsElephant) ~= "table" then
+        musicboxSaveData.houseVsElephant = {}
+    end
+
+    if type(musicboxSaveData.everchanging) ~= "table" then
+        musicboxSaveData.everchanging = {}
+    end
+
+    if type(musicboxSaveData.dogFoodSeries) ~= "table" then
+        musicboxSaveData.dogFoodSeries = {}
+    end
+
+    if type(musicboxSaveData.bigDogBark) ~= "table" then
+        musicboxSaveData.bigDogBark = {}
+    end
+
+    if type(musicboxSaveData.yinCurse) ~= "table" then
+        musicboxSaveData.yinCurse = {}
+    end
+
+    if type(musicboxSaveData.reviveMyLove) ~= "table" then
+        musicboxSaveData.reviveMyLove = {}
+    end
+
+    if type(musicboxSaveData.memoryDisorder) ~= "table" then
+        musicboxSaveData.memoryDisorder = {}
+    end
+
+    if type(musicboxSaveData.ringOfSevenCurses) ~= "table" then
+        musicboxSaveData.ringOfSevenCurses = {}
+    end
+
+    if type(musicboxSaveData.nightOfTheCowards) ~= "table" then
+        musicboxSaveData.nightOfTheCowards = {}
+    end
 end
 
 local function SaveMusicboxData()
@@ -2314,7 +2675,7 @@ local function GetDiceSetUnlockText()
         return "骰子套装", "命运不再低于起点"
     end
 
-    return "Dice Set", "Fate no longer falls below its origin"
+    return "Dice Set", "Fate can no longer set you back"
 end
 
 ShowDiceSetUnlockBanner = function()
@@ -3415,13 +3776,14 @@ local function FormatUncutCordHeartAmount(amount)
     return string.format("%.1f", (tonumber(amount) or 0) / 2)
 end
 
-local function SetUncutCordFeedback(playerKey, text, r, g, b, player)
+local function SetUncutCordFeedback(playerKey, textKey, suffix, r, g, b, player)
     if playerKey == nil or playerKey == "" then
         return
     end
 
     uncutCordFeedbacks[playerKey] = {
-        text = text,
+        textKey = textKey,
+        suffix = suffix or "",
         timer = UNCUT_CORD_POPUP_DURATION,
         r = r or 1,
         g = g or 1,
@@ -3430,8 +3792,8 @@ local function SetUncutCordFeedback(playerKey, text, r, g, b, player)
     }
 end
 
-local function SetUncutCordPlayerFeedback(player, text, r, g, b)
-    SetUncutCordFeedback(GetUncutCordPlayerKey(player), text, r, g, b, player)
+local function SetUncutCordPlayerFeedback(player, textKey, suffix, r, g, b)
+    SetUncutCordFeedback(GetUncutCordPlayerKey(player), textKey, suffix, r, g, b, player)
 end
 
 local function ApplyUncutCordDamage(player, amount)
@@ -3445,16 +3807,17 @@ local function ApplyUncutCordDamage(player, amount)
     uncutCordSettling[playerKey] = nil
 end
 
-local function SettleUncutCordDebt(player, playerKey, record, amount, feedbackLabel)
+local function SettleUncutCordDebt(player, playerKey, record, amount, feedbackKey)
     local settledAmount = math.max(UNCUT_CORD_MIN_SETTLED_DAMAGE, tonumber(amount) or 0)
     uncutCordDebts[playerKey] = nil
-    if feedbackLabel then
+    if feedbackKey then
         SetUncutCordFeedback(
             playerKey,
-            feedbackLabel .. " " .. FormatUncutCordHeartAmount(settledAmount),
+            feedbackKey,
+            " " .. FormatUncutCordHeartAmount(settledAmount),
             1,
-            feedbackLabel == "HALF PAID" and 0.85 or 0.35,
-            feedbackLabel == "HALF PAID" and 0.25 or 0.2,
+            feedbackKey == "uncutCordHalfPaid" and 0.85 or 0.35,
+            feedbackKey == "uncutCordHalfPaid" and 0.25 or 0.2,
             player
         )
     end
@@ -3462,11 +3825,11 @@ local function SettleUncutCordDebt(player, playerKey, record, amount, feedbackLa
 end
 
 local function SettleUncutCordDebtHalf(player, playerKey, record)
-    SettleUncutCordDebt(player, playerKey, record, (tonumber(record.amount) or 0) / 2, "HALF PAID")
+    SettleUncutCordDebt(player, playerKey, record, (tonumber(record.amount) or 0) / 2, "uncutCordHalfPaid")
 end
 
 local function SettleUncutCordDebtFull(player, playerKey, record)
-    SettleUncutCordDebt(player, playerKey, record, tonumber(record.amount) or 0, "FULL PAID")
+    SettleUncutCordDebt(player, playerKey, record, tonumber(record.amount) or 0, "uncutCordFullPaid")
 end
 
 local function StoreUncutCordDebt(player, amount)
@@ -3478,7 +3841,7 @@ local function StoreUncutCordDebt(player, amount)
     }
     AttachUncutCordRoomState(record)
     uncutCordDebts[playerKey] = record
-    SetUncutCordPlayerFeedback(player, "DELAY " .. FormatUncutCordHeartAmount(record.amount), 0.55, 0.9, 1)
+    SetUncutCordPlayerFeedback(player, "uncutCordDelay", " " .. FormatUncutCordHeartAmount(record.amount), 0.55, 0.9, 1)
 end
 
 function Neverbirth:HandleUncutCordDamage(entity, amount)
@@ -3599,11 +3962,11 @@ local function GetUncutCordRenderPlayers()
     return playersByKey
 end
 
-local function RenderUncutCordText(text, screenPosition, r, g, b)
+local function RenderUncutCordText(textKey, suffix, screenPosition, r, g, b)
     local x = screenPosition.X - 32
     local y = screenPosition.Y
-    Isaac.RenderText(text, x + 1, y + 1, 0, 0, 0, 0.75)
-    Isaac.RenderText(text, x, y, r, g, b, 1)
+    Neverbirth:RenderRuntimeText(textKey, suffix, x + 1, y + 1, 0, 0, 0, 0.75)
+    Neverbirth:RenderRuntimeText(textKey, suffix, x, y, r, g, b, 1)
 end
 
 function Neverbirth:RenderUncutCordFeedbacks()
@@ -3611,20 +3974,19 @@ function Neverbirth:RenderUncutCordFeedbacks()
         local record = uncutCordDebts[playerKey]
         if record then
             local roomsCleared = math.min(tonumber(record.roomsCleared) or 0, UNCUT_CORD_ROOMS_REQUIRED)
-            local debtText = "DEBT " ..
-                FormatUncutCordHeartAmount(record.amount) ..
+            local debtSuffix = " " .. FormatUncutCordHeartAmount(record.amount) ..
                 " " ..
                 tostring(roomsCleared) ..
                 "/" ..
                 tostring(UNCUT_CORD_ROOMS_REQUIRED)
             local debtPosition = Isaac.WorldToScreen(player.Position + UNCUT_CORD_DEBT_OFFSET)
-            RenderUncutCordText(debtText, debtPosition, 1, 0.75, 0.2)
+            RenderUncutCordText("uncutCordDebt", debtSuffix, debtPosition, 1, 0.75, 0.2)
         end
 
         local feedback = uncutCordFeedbacks[playerKey]
         if feedback and (tonumber(feedback.timer) or 0) > 0 then
             local popupPosition = Isaac.WorldToScreen(player.Position + UNCUT_CORD_POPUP_OFFSET)
-            RenderUncutCordText(feedback.text, popupPosition, feedback.r or 1, feedback.g or 1, feedback.b or 1)
+            RenderUncutCordText(feedback.textKey, feedback.suffix, popupPosition, feedback.r or 1, feedback.g or 1, feedback.b or 1)
         end
     end
 end
@@ -6178,6 +6540,7 @@ end
 -- 柴刀角色机制：Stranger 只复用合成宝袋的挥砍控制器，不继承其物品交互。
 Neverbirth.Cleaver = Neverbirth.Cleaver or {}
 function Neverbirth.Cleaver.ResolvePlayerType()
+    if Neverbirth.Cleaver.Config and Neverbirth.Cleaver.Config.Registered ~= true then return nil end
     if Isaac and Isaac.GetPlayerTypeByName then
         local ok, playerType = pcall(function()
             return Isaac.GetPlayerTypeByName("Stranger", false)
@@ -6191,6 +6554,7 @@ end
 
 Neverbirth.Cleaver.Config = Neverbirth.Cleaver.Config or {
     PlayerName = "Stranger",
+    Registered = false,
     PlayerType = nil,
     CleaverVisualPath = "gfx/Effects/CleaverAttack/stranger_machete.anm2",
     -- The authored swing has 11 animation frames at 30 FPS: approximately 22 game ticks.
@@ -6232,13 +6596,15 @@ Neverbirth.Cleaver.Config = Neverbirth.Cleaver.Config or {
     ShadowAlpha = 0.45,
     FixedBodyDamage = 0.5,
 }
-Neverbirth.Cleaver.Config.PlayerType = Neverbirth.Cleaver.Config.PlayerType or Neverbirth.Cleaver.ResolvePlayerType()
+Neverbirth.Cleaver.Config.Registered = false
+Neverbirth.Cleaver.Config.PlayerType = Neverbirth.Cleaver.ResolvePlayerType()
 Neverbirth.Cleaver.states = Neverbirth.Cleaver.states or {}
 Neverbirth.Cleaver.shadows = Neverbirth.Cleaver.shadows or {}
 Neverbirth.Cleaver.roomKey = Neverbirth.Cleaver.roomKey or nil
 Neverbirth.Cleaver.consumedPlayerShadows = Neverbirth.Cleaver.consumedPlayerShadows or {}
 Neverbirth.Cleaver.shadowDamageDepth = Neverbirth.Cleaver.shadowDamageDepth or 0
 function Neverbirth.Cleaver.IsStranger(player)
+    if Neverbirth.Cleaver.Config.Registered ~= true then return false end
     local playerType = Neverbirth.Cleaver.Config.PlayerType or Neverbirth.Cleaver.ResolvePlayerType()
     Neverbirth.Cleaver.Config.PlayerType = playerType
     if playerType == nil or not player then
@@ -10490,7 +10856,7 @@ Neverbirth.BlackTaisuiWavyCap = (CollectibleType and CollectibleType.COLLECTIBLE
 Neverbirth.BlackTaisuiWavyCapTearsBonus = 0.75
 Neverbirth.BlackTaisuiWavyCapRangeBonus = 20
 Neverbirth.BlackTaisuiOfficialLifeItem = (CollectibleType and CollectibleType.COLLECTIBLE_1UP) or 11
-Neverbirth.BlackTaisuiLifeHudText = "WARD"
+Neverbirth.BlackTaisuiLifeHudTextKey = "blackTaisuiWard"
 Neverbirth.BlackTaisuiLifeHudX = 132
 Neverbirth.BlackTaisuiLifeHudY = 28
 Neverbirth.CleansedWavyCapSpeedPenalty = 0.03
@@ -10916,7 +11282,7 @@ function Neverbirth:ApplyBlackTaisuiDeathSave(player, reviveDeadPlayer)
     Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
     state.deathSavedFloorKey = GetFolkFloorKey()
     state.deathSaveFeedbackFrames = 90
-    state.deathSaveFeedbackText = "TAISUI BLOCK"
+    state.deathSaveFeedbackKey = "blackTaisuiBlock"
     if reviveDeadPlayer and player.Revive then
         pcall(function()
             player:Revive()
@@ -10933,7 +11299,10 @@ function Neverbirth:ApplyBlackTaisuiDeathSave(player, reviveDeadPlayer)
     local hud = game and game.GetHUD and game:GetHUD()
     if hud and hud.ShowItemText then
         pcall(function()
-            hud:ShowItemText("黑太岁", "挡下致命伤害")
+            hud:ShowItemText(
+                Neverbirth:GetRuntimeText("blackTaisuiTitle"),
+                Neverbirth:GetRuntimeText("blackTaisuiDeathSaveSubtitle")
+            )
         end)
     end
     Neverbirth:TriggerBlackTaisuiSpores(player, "death-save:" .. tostring(GetFolkFloorKey()), true)
@@ -11531,7 +11900,7 @@ end
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateBlackTaisui)
 
 function Neverbirth:RenderBlackTaisuiLifeHud()
-    if not Isaac or not Isaac.RenderText then
+    if not Isaac then
         return
     end
     local slot = 0
@@ -11540,15 +11909,15 @@ function Neverbirth:RenderBlackTaisuiLifeHud()
         if Neverbirth:BlackTaisuiDeathSaveAvailable(player) then
             local x = Neverbirth.BlackTaisuiLifeHudX + slot * 24
             local y = Neverbirth.BlackTaisuiLifeHudY
-            Isaac.RenderText(Neverbirth.BlackTaisuiLifeHudText, x + 1, y + 1, 0, 0, 0, 0.75)
-            Isaac.RenderText(Neverbirth.BlackTaisuiLifeHudText, x, y, 0.58, 0.28, 0.76, 1)
+            Neverbirth:RenderRuntimeText(Neverbirth.BlackTaisuiLifeHudTextKey, "", x + 1, y + 1, 0, 0, 0, 0.75)
+            Neverbirth:RenderRuntimeText(Neverbirth.BlackTaisuiLifeHudTextKey, "", x, y, 0.58, 0.28, 0.76, 1)
             slot = slot + 1
         end
         if (tonumber(state.deathSaveFeedbackFrames) or 0) > 0 and player and player.Position and Isaac.WorldToScreen then
             local screen = Isaac.WorldToScreen(player.Position + Vector(0, -52))
-            local text = state.deathSaveFeedbackText or "TAISUI BLOCK"
-            Isaac.RenderText(text, screen.X - 34 + 1, screen.Y + 1, 0, 0, 0, 0.85)
-            Isaac.RenderText(text, screen.X - 34, screen.Y, 0.65, 0.22, 0.88, 1)
+            local textKey = state.deathSaveFeedbackKey or "blackTaisuiBlock"
+            Neverbirth:RenderRuntimeText(textKey, "", screen.X - 34 + 1, screen.Y + 1, 0, 0, 0, 0.85)
+            Neverbirth:RenderRuntimeText(textKey, "", screen.X - 34, screen.Y, 0.65, 0.22, 0.88, 1)
         end
     end
 end
@@ -14418,10 +14787,11 @@ function Neverbirth:ShowCondomFeedback(bannedCount)
         return
     end
 
+    local title = self:GetRuntimeText("condomTitle")
     if bannedCount > 0 then
-        hud:ShowItemText("Condom", tostring(bannedCount) .. " baby items banned")
+        hud:ShowItemText(title, self:FormatRuntimeText("condomBanned", { count = bannedCount }))
     else
-        hud:ShowItemText("Condom", "No baby items left")
+        hud:ShowItemText(title, self:GetRuntimeText("condomEmpty"))
     end
 end
 
@@ -15341,7 +15711,7 @@ end
 Neverbirth.PickupBannerState = Neverbirth.PickupBannerState or { pending = {} }
 
 function Neverbirth:GetPickupBannerLocale()
-    return Options and Options.Language == "zh" and "zh_cn" or "en_us"
+    return self:GetRuntimeLocale()
 end
 
 function Neverbirth:GetPickupBannerQueuedItemId(player)
@@ -16217,12 +16587,24 @@ end)()
     local COLLECTIBLE_PICKUP = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
     local PORTAL_ENTITY = (EntityType and EntityType.ENTITY_EFFECT) or 1000
     local PORTAL_NAME = "Certificate Return Portal"
-    local PLAYER_ENTITY = (EntityType and EntityType.ENTITY_PLAYER) or 1
-    local GRID_DOOR_TYPE = (GridEntityType and GridEntityType.GRID_DOOR) or 16
-    local GALLERY_PAGE_SIZE = 32
+    local ITEMS_PER_PAGE = 6
     local PORTAL_TRIGGER_RADIUS = 24
     local GALLERY_ROOM_INDEX = (GridRooms and GridRooms.ROOM_DEBUG_IDX) or -3
     local GALLERY_ROOM_COMMAND = "goto s.default.2"
+    local PAGE_PRESS_FRAMES = 10
+    local RETURN_PRESS_FRAMES = 13
+    local CONTROL_COOLDOWN_FRAMES = 8
+    local ARRIVAL_LOCKOUT_FRAMES = 10
+    local ROOM_EDGE_MARGIN = 40
+    local CONTROL_ROW_RESERVE = 80
+    local CONTROL_SUBTYPE = { previous = 0, ["return"] = 1, next = 2 }
+    local CONTROL_ROLES = { "previous", "return", "next" }
+    local CONTROL_TRIGGER_ORDER = { "return", "previous", "next" }
+    local CONTROL_ANIMATIONS = {
+        previous = { idle = "PrevIdle", disabled = "PrevDisabled", press = "PrevPress" },
+        next = { idle = "NextIdle", disabled = "NextDisabled", press = "NextPress" },
+        ["return"] = { idle = "ReturnIdle", press = "ReturnPress" },
+    }
     local TELEPORT_ANIMATION = (RoomTransitionAnim and RoomTransitionAnim.TELEPORT) or 3
     local NO_DIRECTION = (Direction and Direction.NO_DIRECTION) or -1
 
@@ -16237,9 +16619,11 @@ end)()
     end
 
     Neverbirth.CertificateOfNeverbirthState = Neverbirth.CertificateOfNeverbirthState or {
-        registry = {}, missing = {}, pendingPickups = {}, frame = 0, transition = nil, nextTransientToken = 1,
+        registry = {}, missing = {}, pendingPickups = {}, frame = 0, transition = nil,
+        nextTransientToken = 1, controlEntities = {},
     }
     local state = Neverbirth.CertificateOfNeverbirthState
+    if type(state.controlEntities) ~= "table" then state.controlEntities = {} end
 
     local function call(object, method, ...)
         if not object or type(object[method]) ~= "function" then return nil, false end
@@ -16273,7 +16657,7 @@ end)()
         end
         if type(value.stack) ~= "table" then value.stack = {} end
         value.nextToken = math.max(1, math.floor(tonumber(value.nextToken) or 1))
-        value.galleryNetwork = nil
+
         return value
     end
 
@@ -16344,9 +16728,9 @@ end)()
             originRoomIndex = tonumber(originRoomIndex) or 0, originDimension = tonumber(originDimension) or 0,
             originPlayerPositions = { { key = tostring(initiatorKey or ""), x = x, y = y } },
             rows = copyRows(rows), collected = {}, galleryPageIndex = 1,
-            galleryPageCount = math.max(1, math.ceil(#(rows or {}) / GALLERY_PAGE_SIZE)),
-            galleryRoomIndex = GALLERY_ROOM_INDEX, galleryDimension = 0,
-            galleryPortalPositions = {}, phase = "created",
+            galleryPageCount = math.max(1, math.ceil(#(rows or {}) / ITEMS_PER_PAGE)),
+            galleryPortalPositions = {}, controlTouchLatch = {}, interactionLocked = false,
+            controlCooldownUntil = 0, selected = false, phase = "created",
         }
     end
 
@@ -16363,7 +16747,7 @@ end)()
 
     local function getPageCount(session)
         local rows = session and session.rows or state.registry
-        return math.max(1, math.ceil(#(rows or {}) / GALLERY_PAGE_SIZE))
+        return math.max(1, math.ceil(#(rows or {}) / ITEMS_PER_PAGE))
     end
 
     local function getPageRows(session, pageIndex)
@@ -16372,13 +16756,22 @@ end)()
         local rows = session.rows or state.registry
         session.collected = type(session.collected) == "table" and session.collected or {}
         pageIndex = math.max(1, math.floor(tonumber(pageIndex) or 1))
-        local first = (pageIndex - 1) * GALLERY_PAGE_SIZE + 1
-        local last = math.min(#rows, first + GALLERY_PAGE_SIZE - 1)
+        local first = (pageIndex - 1) * ITEMS_PER_PAGE + 1
+        local last = math.min(#rows, first + ITEMS_PER_PAGE - 1)
         for index = first, last do
             local row = rows[index]
-            if row and session.collected[tostring(row.localId)] ~= true then result[#result + 1] = row end
+            if row then result[#result + 1] = row end
         end
         return result
+    end
+
+    local function getVirtualEdges(session, pageIndex)
+        local count = getPageCount(session)
+        pageIndex = math.max(1, math.min(count, math.floor(tonumber(pageIndex) or 1)))
+        return {
+            previous = pageIndex > 1 and pageIndex - 1 or nil,
+            next = pageIndex < count and pageIndex + 1 or nil,
+        }
     end
 
     local function markCollected(session, runtimeId)
@@ -16423,9 +16816,6 @@ end)()
     local function currentDimension(level, descriptor)
         if not level or not descriptor then return 0 end
         local currentIndex = select(1, call(level, "GetCurrentRoomIndex"))
-        local persistent = getPersistentData()
-        local session = persistent.stack[#persistent.stack]
-        if session and tonumber(currentIndex) == GALLERY_ROOM_INDEX and session.phase ~= "returning" then return 0 end
         if type(GetPtrHash) == "function" then
             local descriptorIndex = tonumber(descriptor.SafeGridIndex or descriptor.GridIndex or currentIndex)
             if descriptorIndex then
@@ -16480,56 +16870,59 @@ end)()
         return entity and entity.GetData and entity:GetData() or nil
     end
 
-    local function removeGalleryPortals(session)
-        if not Isaac.GetRoomEntities then return end
-        for _, entity in ipairs(Isaac.GetRoomEntities() or {}) do
-            local data = portalData(entity)
-            local owned = data and data.NeverbirthCertificateGalleryPortal == true
-            local matches = not session or data.NeverbirthCertificateSessionToken == session.token
-            if owned and matches and entity.Remove then pcall(function() entity:Remove() end) end
+    local function controlBucket(session, create)
+        if not session then return nil end
+        local bucket = state.controlEntities[session.token]
+        if type(bucket) ~= "table" and create then
+            bucket = {}
+            state.controlEntities[session.token] = bucket
         end
+        return bucket
+    end
+
+    local function removeGalleryPortals(session)
+        if Isaac.GetRoomEntities then
+            for _, entity in ipairs(Isaac.GetRoomEntities() or {}) do
+                local data = portalData(entity)
+                local owned = data and data.NeverbirthCertificateGalleryPortal == true
+                local matches = not session or data.NeverbirthCertificateSessionToken == session.token
+                if owned and matches and entity.Remove then pcall(function() entity:Remove() end) end
+            end
+        end
+        if session then state.controlEntities[session.token] = nil else state.controlEntities = {} end
     end
 
     local function findPortal(session, role)
-        if not session or not Isaac.GetRoomEntities then return nil end
+        if not session then return nil end
+        local bucket = controlBucket(session, false)
+        local cached = bucket and bucket[role] or nil
+        if entityIsActive(cached) then return cached end
+        if not Isaac.GetRoomEntities then return nil end
         for _, entity in ipairs(Isaac.GetRoomEntities() or {}) do
             local data = portalData(entity)
             if entityIsActive(entity) and entity.Type == PORTAL_ENTITY
                 and data and data.NeverbirthCertificateGalleryPortal == true
                 and data.NeverbirthCertificateSessionToken == session.token
-                and data.NeverbirthCertificatePortalRole == role then return entity end
+                and data.NeverbirthCertificatePortalRole == role then
+                controlBucket(session, true)[role] = entity
+                return entity
+            end
         end
         return nil
     end
-
     local function removeGalleryPedestals(session, removeUnknown)
         if not Isaac.GetRoomEntities then return end
         for _, entity in ipairs(Isaac.GetRoomEntities() or {}) do
             if entity and entity.Type == PICKUP_ENTITY and entity.Variant == COLLECTIBLE_PICKUP then
                 local data = entity.GetData and entity:GetData() or nil
-                local owned = data and session and data.NeverbirthCertificateSessionToken == session.token
-                if owned or removeUnknown then pcall(function() entity:Remove() end) end
+                local owned = data and data.NeverbirthCertificateSessionToken ~= nil
+                local matches = not session or data.NeverbirthCertificateSessionToken == session.token
+                if (owned and matches) or removeUnknown then pcall(function() entity:Remove() end) end
             end
         end
     end
 
-    local function clearGalleryRoom(room, descriptor)
-        if Isaac.GetRoomEntities then
-            for _, entity in ipairs(Isaac.GetRoomEntities() or {}) do
-                local entityType = tonumber(entity and entity.Type) or -1
-                local remove = entityType == PICKUP_ENTITY or entityType == 6 or entityType == PORTAL_ENTITY
-                    or (entityType >= 10 and entityType < PORTAL_ENTITY)
-                if remove and entityType ~= PLAYER_ENTITY and entity.Remove then pcall(function() entity:Remove() end) end
-            end
-        end
-        local gridSize = select(1, call(room, "GetGridSize"))
-        if tonumber(gridSize) then
-            for index = 0, math.max(0, math.floor(gridSize) - 1) do
-                local grid = select(1, call(room, "GetGridEntity", index))
-                local gridType = grid and grid.Desc and tonumber(grid.Desc.Type) or nil
-                if grid and gridType ~= GRID_DOOR_TYPE then call(room, "RemoveGridEntity", index, 0, false) end
-            end
-        end
+    local function prepareGalleryRoom(room, descriptor)
         if descriptor then
             pcall(function() descriptor.NoReward = true end)
             pcall(function() descriptor.Clear = true end)
@@ -16537,83 +16930,140 @@ end)()
         call(room, "SetClear", true)
     end
 
+    local function roomSafeBounds(room)
+        local topLeft, hasTopLeft = call(room, "GetTopLeftPos")
+        local bottomRight, hasBottomRight = call(room, "GetBottomRightPos")
+        if not hasTopLeft or not hasBottomRight or not topLeft or not bottomRight then
+            DebugLog("[neverbirth][Certificate] room bounds unavailable for gallery layout")
+            return nil
+        end
+        local left, top = vectorXY(topLeft)
+        local right, bottom = vectorXY(bottomRight)
+        left, right = left + ROOM_EDGE_MARGIN, right - ROOM_EDGE_MARGIN
+        top, bottom = top + ROOM_EDGE_MARGIN, bottom - ROOM_EDGE_MARGIN
+        if right <= left or bottom <= top + CONTROL_ROW_RESERVE then
+            DebugLog("[neverbirth][Certificate] room safe area too small for gallery controls")
+            return nil
+        end
+        return { left = left, right = right, top = top, bottom = bottom,
+            galleryBottom = bottom - CONTROL_ROW_RESERVE }
+    end
+
+    local function positionIsSafe(room, position, margin)
+        local inside, checkedInside = call(room, "IsPositionInRoom", position, margin or 18)
+        return not checkedInside or inside == true
+    end
+
     local function makeGalleryPositions(room)
-        local center = select(1, call(room, "GetCenterPos")) or makeVector(320, 280)
-        local centerX, centerY = vectorXY(center)
+        local bounds = roomSafeBounds(room)
+        if not bounds then return {} end
         local result = {}
-        for row = 0, 3 do
-            for column = 0, 7 do
-                local position = makeVector(centerX + (column - 3.5) * 64, centerY + (row - 1.5) * 64)
-                local inside, checkedInside = call(room, "IsPositionInRoom", position, 16)
-                if not checkedInside or inside == true then result[#result + 1] = position end
+        local width = bounds.right - bounds.left
+        local height = bounds.galleryBottom - bounds.top
+        for row = 1, 2 do
+            for column = 1, 3 do
+                local position = makeVector(
+                    bounds.left + (column - 0.5) * width / 3,
+                    bounds.top + (row - 0.5) * height / 2)
+                if positionIsSafe(room, position, 18) then result[#result + 1] = position end
             end
         end
         return result
     end
 
     local function choosePortalPosition(room, role)
-        local center = select(1, call(room, "GetCenterPos")) or makeVector(320, 280)
-        local x, y = vectorXY(center)
-        local candidates
-        if role == "previous" then
-            candidates = { makeVector(x - 192, y + 128), makeVector(x - 224, y + 96), makeVector(x - 224, y) }
-        elseif role == "next" then
-            candidates = { makeVector(x + 192, y + 128), makeVector(x + 224, y + 96), makeVector(x + 224, y) }
-        else
-            candidates = { center, makeVector(x, y + 64), makeVector(x, y - 64) }
-        end
-        for _, position in ipairs(candidates) do
-            local inside, checkedInside = call(room, "IsPositionInRoom", position, 18)
-            if not checkedInside or inside == true then return position end
-        end
+        local bounds = roomSafeBounds(room)
+        if not bounds then return nil end
+        local centerX = (bounds.left + bounds.right) / 2
+        local gap = math.max(48, math.min(112, (bounds.right - bounds.left) / 4))
+        local x = centerX
+        if role == "previous" then x = centerX - gap elseif role == "next" then x = centerX + gap end
+        local position = makeVector(x, bounds.bottom)
+        if positionIsSafe(room, position, 18) then return position end
+        DebugLog("[neverbirth][Certificate] no legal position for control role=" .. tostring(role))
         return nil
+    end
+    local function controlEnabled(session, role)
+        if role == "return" then return true end
+        return getVirtualEdges(session, session and session.galleryPageIndex or 1)[role] ~= nil
+    end
+
+    local function playPortalAnimation(effect, mode)
+        local data = portalData(effect)
+        local role = data and data.NeverbirthCertificatePortalRole or nil
+        local animations = role and CONTROL_ANIMATIONS[role] or nil
+        local requested = animations and animations[mode] or nil
+        if data then data.NeverbirthCertificateRequestedAnimation = requested end
+        if not requested then return false end
+        local sprite = effect and effect.GetSprite and effect:GetSprite() or nil
+        if not sprite or not sprite.Play then return false end
+        if sprite.HasAnimation then
+            local ok, exists = pcall(function() return sprite:HasAnimation(requested) end)
+            if not ok or exists ~= true then
+                DebugLog("[neverbirth][Certificate] missing archive control animation=" .. tostring(requested))
+                return false
+            end
+        end
+        local ok = pcall(function() sprite:Play(requested, true) end)
+        if data then data.NeverbirthCertificatePlayedAnimation = ok and requested or nil end
+        return ok
     end
 
     local function spawnPortal(room, session, role)
         local variant = getPortalVariant()
-        if not variant then return nil end
+        local subtype = CONTROL_SUBTYPE[role]
+        if not variant or subtype == nil then return nil end
         local position = choosePortalPosition(room, role)
-        if not position then
-            DebugLog("[neverbirth][Certificate] no legal position for portal role=" .. tostring(role))
-            return nil
-        end
+        if not position then return nil end
         local ok, effect = pcall(function()
-            return Isaac.Spawn(PORTAL_ENTITY, variant, 0, position, makeVector(0, 0), nil)
+            return Isaac.Spawn(PORTAL_ENTITY, variant, subtype, position, makeVector(0, 0), nil)
         end)
         if not ok or not effect then
-            DebugLog("[neverbirth][Certificate] failed to spawn portal role=" .. tostring(role) .. ": " .. tostring(effect))
+            DebugLog("[neverbirth][Certificate] failed to spawn control role=" .. tostring(role) .. ": " .. tostring(effect))
             return nil
         end
+        local enabled = controlEnabled(session, role)
         local data = portalData(effect)
         if data then
             data.NeverbirthCertificateGalleryPortal = true
             data.NeverbirthCertificateSessionToken = session.token
             data.NeverbirthCertificatePortalRole = role
+            data.NeverbirthCertificatePortalEnabled = enabled
+            data.NeverbirthCertificateTargetPage = getVirtualEdges(session, session.galleryPageIndex)[role]
         end
         pcall(function() effect.Timeout = -1 end)
-        local sprite = effect.GetSprite and effect:GetSprite() or nil
-        if sprite and sprite.Play then pcall(function() sprite:Play("Idle", true) end) end
+        pcall(function() effect.CollisionDamage = 0 end)
+        if EntityCollisionClass and EntityCollisionClass.ENTCOLL_NONE ~= nil then
+            pcall(function() effect.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE end)
+        end
+        if GridCollisionClass and GridCollisionClass.COLLISION_NONE ~= nil then
+            pcall(function() effect.GridCollisionClass = GridCollisionClass.COLLISION_NONE end)
+        end
+        controlBucket(session, true)[role] = effect
+        playPortalAnimation(effect, enabled and "idle" or "disabled")
         local px, py = vectorXY(position)
         session.galleryPortalPositions[role] = { x = px, y = py }
         return effect
     end
 
     local function spawnGalleryPortals(room, session)
-        removeGalleryPortals(nil)
+        removeGalleryPortals(session)
         session.galleryPortalPositions = {}
-        session.portalArmedFrame = state.frame + 10
+        session.controlTouchLatch = type(session.controlTouchLatch) == "table" and session.controlTouchLatch or {}
+        session.portalArmedFrame = state.frame + ARRIVAL_LOCKOUT_FRAMES
+        session.controlCooldownUntil = math.max(tonumber(session.controlCooldownUntil) or 0,
+            state.frame + CONTROL_COOLDOWN_FRAMES)
+        session.interactionLocked = false
         session.returnTriggered = false
-        spawnPortal(room, session, "return")
-        if session.galleryPageIndex > 1 then spawnPortal(room, session, "previous") end
-        if session.galleryPageIndex < session.galleryPageCount then spawnPortal(room, session, "next") end
+        local allSpawned = true
+        for _, role in ipairs(CONTROL_ROLES) do
+            if not spawnPortal(room, session, role) then allSpawned = false end
+        end
+        if not allSpawned then
+            DebugLog("[neverbirth][Certificate] one or more archive controls failed to spawn")
+        end
+        return allSpawned
     end
-
-    local function storedPortalPosition(session, role)
-        local stored = session and session.galleryPortalPositions and session.galleryPortalPositions[role]
-        if type(stored) ~= "table" then return nil end
-        return makeVector(tonumber(stored.x) or 0, tonumber(stored.y) or 0)
-    end
-
     local function logCapacityFailure(remaining, positions)
         local overflow = {}
         for index = #positions + 1, #remaining do overflow[#overflow + 1] = remaining[index] end
@@ -16630,9 +17080,11 @@ end)()
         local roomIndex = level and select(1, call(level, "GetCurrentRoomIndex")) or nil
         if not room or not level or not session or tonumber(roomIndex) ~= GALLERY_ROOM_INDEX then return false end
         session.galleryPageCount = getPageCount(session)
-        session.galleryPageIndex = math.max(1, math.min(session.galleryPageCount,
-            math.floor(tonumber(session.galleryPageIndex) or 1)))
-        clearGalleryRoom(room, descriptor)
+        session.galleryPageIndex = math.max(1,
+            math.min(session.galleryPageCount, math.floor(tonumber(session.galleryPageIndex) or 1)))
+        prepareGalleryRoom(room, descriptor)
+        removeGalleryPedestals(session, false)
+        removeGalleryPortals(session)
         local pageRows = getPageRows(session, session.galleryPageIndex)
         local positions = makeGalleryPositions(room)
         local assignments, overflow = assignPositions(pageRows, positions)
@@ -16684,8 +17136,14 @@ end)()
     local function noConsume(showAnimation)
         return { Discharge = false, Remove = false, ShowAnim = showAnimation == true }
     end
+
+    local function committedUse(showAnimation)
+        return { Discharge = false, Remove = false, ShowAnim = showAnimation == true }
+    end
     local function useItem(_, itemId, rng, player, useFlags, activeSlot, customVarData)
         if itemId ~= CERTIFICATE then return nil end
+        local externalOwner = Neverbirth.HouseVsElephantCarrierAPI
+        if externalOwner and externalOwner.IsActive and externalOwner.IsActive() then return noConsume(false) end
         if state.transition then return noConsume(false) end
         if #state.registry == 0 then refreshRegistry() end
         if #state.missing > 0 or #state.registry ~= #generatedRows then
@@ -16705,18 +17163,31 @@ end)()
             DebugLog("[neverbirth][Certificate] use refused: current room or player unavailable")
             return noConsume(false)
         end
-        local session = createRuntimeSession(player, roomIndex, currentDimension(level, descriptor))
+        local originDimension = currentDimension(level, descriptor)
+        local persistent = getPersistentData()
+        local parent = persistent.stack[#persistent.stack]
+        local nested = parent and tonumber(roomIndex) == GALLERY_ROOM_INDEX
+            and (parent.phase == "active" or parent.phase == "capacity_failure")
+        if nested then
+            removeGalleryPedestals(parent, false)
+            removeGalleryPortals(parent)
+        end
+        local session = createRuntimeSession(player, roomIndex, originDimension)
         state.transition = { mode = "enter", token = session.token }
         save()
-        if not executeGalleryCommand() then
-            local persistent = getPersistentData()
+        if nested then
+            state.transition = nil
+            if spawnGallery(session) then return committedUse(true) end
+        elseif executeGalleryCommand() then
+            return committedUse(true)
+        end
+        do
             if persistent.stack[#persistent.stack] == session then table.remove(persistent.stack, #persistent.stack) end
             state.transition = nil
             save()
-            DebugLog("[neverbirth][Certificate] failed to enter independent gallery room")
-            return noConsume(false)
+            DebugLog("[neverbirth][Certificate] failed to enter virtual gallery carrier")
         end
-        return noConsume(true)
+        return noConsume(false)
     end
 
     local function restorePlayerPositions(session)
@@ -16733,7 +17204,7 @@ end)()
         state.transition = nil
         state.pendingPickups = {}
         local previous = persistent.stack[#persistent.stack]
-        if previous then spawnGallery(previous) else removeGalleryPortals(nil) end
+        if previous then spawnGallery(previous) else removeGalleryPortals(session) end
         save()
         return true
     end
@@ -16746,8 +17217,8 @@ end)()
         local descriptor = level and select(1, call(level, "GetCurrentRoomDesc")) or nil
         local roomIndex = level and select(1, call(level, "GetCurrentRoomIndex")) or nil
         local dimension = level and currentDimension(level, descriptor) or 0
-        removeGalleryPedestals(session, true)
-        removeGalleryPortals(nil)
+        removeGalleryPedestals(session, false)
+        removeGalleryPortals(session)
         if tonumber(roomIndex) == tonumber(session.originRoomIndex)
             and tonumber(dimension) == tonumber(session.originDimension) then
             return finishReturnInCurrentRoom(session)
@@ -16771,48 +17242,100 @@ end)()
         return true
     end
 
-    local function beginPageChange(session, targetPage)
-        if not session or state.transition then return false end
+    local function beginVirtualRoomChange(session, targetPage)
+        if not session or state.transition or session.interactionLocked == true then return false end
         targetPage = math.floor(tonumber(targetPage) or 0)
-        if targetPage < 1 or targetPage > session.galleryPageCount or targetPage == session.galleryPageIndex then return false end
-        local previousPage = session.galleryPageIndex
-        removeGalleryPedestals(session, true)
-        removeGalleryPortals(nil)
-        session.galleryPageIndex = targetPage
-        session.phase = "changing_page"
-        state.transition = { mode = "page", token = session.token, page = targetPage }
-        save()
-        if not executeGalleryCommand() then
-            session.galleryPageIndex = previousPage
-            session.phase = "active"
-            state.transition = nil
-            spawnGallery(session)
-            DebugLog("[neverbirth][Certificate] failed to change gallery page")
-            return false
-        end
+        local edges = getVirtualEdges(session, session.galleryPageIndex)
+        if targetPage ~= edges.previous and targetPage ~= edges.next then return false end
+        local role = targetPage == edges.previous and "previous" or "next"
+        local control = findPortal(session, role)
+        local data = portalData(control)
+        if not control or not data or data.NeverbirthCertificatePortalEnabled ~= true then return false end
+        session.interactionLocked = true
+        session.controlCooldownUntil = state.frame + CONTROL_COOLDOWN_FRAMES
+        removeGalleryPedestals(session, false)
+        state.transition = {
+            mode = "virtual", phase = "pressing", token = session.token, targetPage = targetPage,
+            previousPage = session.galleryPageIndex, controlRole = role,
+            readyFrame = state.frame + PAGE_PRESS_FRAMES,
+        }
+        playPortalAnimation(control, "press")
         return true
     end
 
+    local function beginControlReturn(session)
+        if not session or state.transition or session.interactionLocked == true then return false end
+        local control = findPortal(session, "return")
+        local data = portalData(control)
+        if not control or not data or data.NeverbirthCertificatePortalEnabled ~= true then return false end
+        session.interactionLocked = true
+        session.controlCooldownUntil = state.frame + CONTROL_COOLDOWN_FRAMES
+        removeGalleryPedestals(session, false)
+        state.transition = {
+            mode = "control_return", phase = "pressing", token = session.token,
+            controlRole = "return", readyFrame = state.frame + RETURN_PRESS_FRAMES,
+        }
+        playPortalAnimation(control, "press")
+        return true
+    end
+
+    local function processVirtualTransition()
+        local transition = state.transition
+        if type(transition) ~= "table"
+            or (transition.mode ~= "virtual" and transition.mode ~= "control_return")
+            or state.frame < (tonumber(transition.readyFrame) or math.huge) then return false end
+        local persistent = getPersistentData()
+        local session = persistent.stack[#persistent.stack]
+        if not session or session.token ~= transition.token then
+            state.transition = nil
+            return false
+        end
+        if transition.mode == "control_return" then
+            state.transition = nil
+            removeGalleryPortals(session)
+            return beginReturn(session)
+        end
+        if transition.phase ~= "pressing" then
+            state.transition = nil
+            session.interactionLocked = false
+            return false
+        end
+        removeGalleryPedestals(session, false)
+        removeGalleryPortals(session)
+        session.galleryPageIndex = transition.targetPage
+        state.transition = nil
+        local spawned = spawnGallery(session)
+        if spawned then save() end
+        return spawned
+    end
     local function abortSession(persistent, session, roomIndex)
         DebugLog("[neverbirth][Certificate] independent gallery session aborted token="
             .. tostring(session and session.token) .. " room=" .. tostring(roomIndex))
         if persistent.stack[#persistent.stack] == session then table.remove(persistent.stack, #persistent.stack) end
         state.transition = nil
         state.pendingPickups = {}
-        removeGalleryPortals(nil)
+        removeGalleryPedestals(session, false)
+        removeGalleryPortals(session)
         save()
     end
 
     local function newRoom()
+        state.controlEntities = {}
+        local externalOwner = Neverbirth.HouseVsElephantCarrierAPI
+        if externalOwner and externalOwner.IsActive and externalOwner.IsActive() then return nil end
         local game = currentGame()
         local level = game and select(1, call(game, "GetLevel")) or nil
+        local room = game and select(1, call(game, "GetRoom")) or nil
         local descriptor = level and select(1, call(level, "GetCurrentRoomDesc")) or nil
         local roomIndex = level and select(1, call(level, "GetCurrentRoomIndex")) or nil
         local dimension = level and currentDimension(level, descriptor) or 0
         local persistent = getPersistentData()
         local session = persistent.stack[#persistent.stack]
         if not session or roomIndex == nil then
-            if not session then removeGalleryPortals(nil) end
+            if not session then
+                removeGalleryPedestals(nil, false)
+                removeGalleryPortals(nil)
+            end
             return nil
         end
         if session.phase == "returning" and tonumber(roomIndex) == tonumber(session.originRoomIndex)
@@ -16820,21 +17343,26 @@ end)()
             finishReturnInCurrentRoom(session)
             return nil
         end
-        if tonumber(roomIndex) == GALLERY_ROOM_INDEX and (session.phase == "entering"
-            or session.phase == "changing_page" or session.phase == "active"
-            or session.phase == "capacity_failure") then
+        if tonumber(roomIndex) == GALLERY_ROOM_INDEX
+            and (session.phase == "entering" or session.phase == "active"
+                or session.phase == "capacity_failure") then
             state.transition = nil
             spawnGallery(session)
             return nil
         end
-        if (session.phase == "active" or session.phase == "capacity_failure")
-            and tonumber(roomIndex) == tonumber(session.originRoomIndex)
-            and tonumber(dimension) == tonumber(session.originDimension) then
-            finishReturnInCurrentRoom(session)
+        if session.phase == "active" or session.phase == "capacity_failure" then
+            state.transition = nil
+            beginReturn(session)
             return nil
         end
         abortSession(persistent, session, roomIndex)
         return nil
+    end
+
+    local function clearPendingForSession(token)
+        for key, pending in pairs(state.pendingPickups) do
+            if pending.sessionToken == token then state.pendingPickups[key] = nil end
+        end
     end
 
     local function pickupCollision(_, pickup, collider)
@@ -16843,7 +17371,8 @@ end)()
         if not data or not data.NeverbirthCertificateSessionToken then return nil end
         local persistent = getPersistentData()
         local session = persistent.stack[#persistent.stack]
-        if not session or session.token ~= data.NeverbirthCertificateSessionToken then return nil end
+        if not session or session.token ~= data.NeverbirthCertificateSessionToken
+            or session.selected == true or session.interactionLocked == true then return nil end
         local player = collider and collider.ToPlayer and collider:ToPlayer() or nil
         if not player then return nil end
         local key = tostring(session.token) .. ":" .. tostring(pickup.InitSeed or data.NeverbirthCertificateLocalId)
@@ -16851,10 +17380,22 @@ end)()
             local before = player.GetCollectibleNum and tonumber(player:GetCollectibleNum(pickup.SubType)) or 0
             state.pendingPickups[key] = {
                 pickup = pickup, player = player, runtimeId = tonumber(pickup.SubType),
-                beforeCount = before or 0, expires = state.frame + 3,
+                beforeCount = before or 0, expires = state.frame + 3, sessionToken = session.token,
             }
+            session.interactionLocked = true
+            session.pickupLockKey = key
         end
         return nil
+    end
+
+    local function finishSelection(session, runtimeId)
+        if not session or state.transition then return false end
+        session.pickupLockKey = nil
+        clearPendingForSession(session.token)
+        session.interactionLocked = false
+        session.controlCooldownUntil = state.frame + CONTROL_COOLDOWN_FRAMES
+        save()
+        return true
     end
 
     local function processPendingPickups()
@@ -16866,23 +17407,27 @@ end)()
             end
             local count = pending.player and pending.player.GetCollectibleNum
                 and tonumber(pending.player:GetCollectibleNum(pending.runtimeId)) or pending.beforeCount
+            local persistent = getPersistentData()
+            local session = persistent.stack[#persistent.stack]
             if not exists or count > pending.beforeCount then
-                local persistent = getPersistentData()
-                local session = persistent.stack[#persistent.stack]
-                if session and markCollected(session, pending.runtimeId) then save() end
                 state.pendingPickups[key] = nil
+                if session and session.token == pending.sessionToken then finishSelection(session, pending.runtimeId) end
             elseif state.frame >= pending.expires then
                 state.pendingPickups[key] = nil
+                if session and session.token == pending.sessionToken and session.pickupLockKey == key then
+                    session.pickupLockKey = nil
+                    session.interactionLocked = false
+                    session.controlCooldownUntil = state.frame + CONTROL_COOLDOWN_FRAMES
+                end
             end
         end
     end
 
     local function portalEntered(session, role)
-        if not session or state.frame < (tonumber(session.portalArmedFrame) or math.huge) then return false end
+        if not session then return false end
         local portal = findPortal(session, role)
-        local position = portal and portal.Position or storedPortalPosition(session, role)
-        if not position then return false end
-        local portalX, portalY = vectorXY(position)
+        if not portal then return false end
+        local portalX, portalY = vectorXY(portal.Position)
         local radiusSquared = PORTAL_TRIGGER_RADIUS * PORTAL_TRIGGER_RADIUS
         for _, player in ipairs(GetPlayers()) do
             local playerX, playerY = vectorXY(player and player.Position)
@@ -16892,26 +17437,53 @@ end)()
         return false
     end
 
+    local function updateControlTouchLatches(session)
+        session.controlTouchLatch = type(session.controlTouchLatch) == "table" and session.controlTouchLatch or {}
+        local touching = {}
+        for _, role in ipairs(CONTROL_ROLES) do
+            touching[role] = portalEntered(session, role)
+            if not touching[role] then session.controlTouchLatch[role] = nil end
+        end
+        return touching
+    end
+
+    local function triggerControl(session, role)
+        local control = findPortal(session, role)
+        local data = portalData(control)
+        if not control or not data or data.NeverbirthCertificatePortalEnabled ~= true then return false end
+        if role == "return" then return beginControlReturn(session) end
+        local target = getVirtualEdges(session, session.galleryPageIndex)[role]
+        return target ~= nil and beginVirtualRoomChange(session, target) or false
+    end
+
     local function update()
+        local externalOwner = Neverbirth.HouseVsElephantCarrierAPI
+        if externalOwner and externalOwner.IsActive and externalOwner.IsActive() then return nil end
         state.frame = state.frame + 1
         processPendingPickups()
-        if state.transition then return nil end
+        if state.transition then
+            processVirtualTransition()
+            return nil
+        end
         local persistent = getPersistentData()
         local session = persistent.stack[#persistent.stack]
-        if not session or (session.phase ~= "active" and session.phase ~= "capacity_failure") then return nil end
-        if portalEntered(session, "return") then
-            beginReturn(session)
-        elseif portalEntered(session, "previous") then
-            beginPageChange(session, session.galleryPageIndex - 1)
-        elseif portalEntered(session, "next") then
-            beginPageChange(session, session.galleryPageIndex + 1)
+        if not session or session.phase ~= "active" then return nil end
+        local touching = updateControlTouchLatches(session)
+        if session.interactionLocked == true
+            or state.frame < (tonumber(session.portalArmedFrame) or 0)
+            or state.frame < (tonumber(session.controlCooldownUntil) or 0) then return nil end
+        for _, role in ipairs(CONTROL_TRIGGER_ORDER) do
+            if touching[role] and session.controlTouchLatch[role] ~= true then
+                session.controlTouchLatch[role] = true
+                if triggerControl(session, role) then return nil end
+            end
         end
         return nil
     end
-
     local function gameStarted()
         state.pendingPickups = {}
         state.transition = nil
+        state.controlEntities = {}
         refreshRegistry()
         getPersistentData()
         newRoom()
@@ -16924,11 +17496,37 @@ end)()
     end
 
     refreshRegistry()
+    Neverbirth.CertificateOfNeverbirthCarrierAPI = {
+        SuspendCurrent = function()
+            local persistent = getPersistentData()
+            local session = persistent.stack[#persistent.stack]
+            if not session or (session.phase ~= "active" and session.phase ~= "capacity_failure") then return nil end
+            removeGalleryPedestals(session, false)
+            removeGalleryPortals(session)
+            return session.token
+        end,
+        RestoreCurrent = function(token)
+            local persistent = getPersistentData()
+            local session = persistent.stack[#persistent.stack]
+            if not session or session.token ~= token then return false end
+            return spawnGallery(session)
+        end,
+        IsCurrent = function(token)
+            local persistent = getPersistentData()
+            local session = persistent.stack[#persistent.stack]
+            return session ~= nil and (token == nil or session.token == token)
+        end,
+    }
     Neverbirth.CertificateOfNeverbirthTestAPI = {
         GetItemId = function() return CERTIFICATE end,
         GetGeneratedCount = function() return #generatedRows end,
-        GetGalleryCapacity = function() return GALLERY_PAGE_SIZE end,
-        GetPageCount = getPageCount, GetPageRows = getPageRows,
+        GetGalleryCapacity = function() return ITEMS_PER_PAGE end,
+        GetControlSubtype = function(role) return CONTROL_SUBTYPE[role] end,
+        IsControlEnabled = controlEnabled,
+        GetControlAnimation = function(role, mode)
+            return CONTROL_ANIMATIONS[role] and CONTROL_ANIMATIONS[role][mode] or nil
+        end,
+        GetPageCount = getPageCount, GetPageRows = getPageRows, GetVirtualEdges = getVirtualEdges,
         ResolveRegistry = resolveRegistry, AssignPositions = assignPositions,
         MakeTestPositions = makeTestPositions, NewSession = newSession,
         MarkCollected = markCollected, GetRemainingRows = getRemainingRows,
@@ -16947,3 +17545,3127 @@ end)()
     if ModCallbacks.MC_PRE_GAME_EXIT then Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, preGameExit) end
 end)()
 -- CERTIFICATE_OF_NEVERBIRTH_END
+-- HOUSE_VS_ELEPHANT_BEGIN
+;(function()
+    local HOUSE = Items.HouseVsElephant
+    local MILK = (CollectibleType and CollectibleType.COLLECTIBLE_BREAKFAST) or 25
+    local ACTIVE_ITEM_TYPE = (ItemType and ItemType.ITEM_ACTIVE) or 3
+    local PICKUP_ENTITY = (EntityType and EntityType.ENTITY_PICKUP) or 5
+    local COLLECTIBLE_PICKUP = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
+    local SPECIAL_ROOM_INDEX = (GridRooms and GridRooms.ROOM_DEBUG_IDX) or -3
+    local SPECIAL_ROOM_COMMAND = "goto s.default.2"
+    local NO_DIRECTION = (Direction and Direction.NO_DIRECTION) or -1
+    local TELEPORT_ANIMATION = (RoomTransitionAnim and RoomTransitionAnim.TELEPORT) or 3
+    local CONFIRM_FRAMES = 4
+    local PORTAL_ENTITY = (EntityType and EntityType.ENTITY_EFFECT) or 1000
+    local PORTAL_NAME = "Certificate Return Portal"
+    local ITEMS_PER_PAGE = 6
+    local CONTROL_TRIGGER_RADIUS = 24
+    local PAGE_PRESS_FRAMES = 10
+    local RETURN_PRESS_FRAMES = 13
+    local CONTROL_COOLDOWN_FRAMES = 8
+    local ARRIVAL_LOCKOUT_FRAMES = 10
+    local ROOM_EDGE_MARGIN = 40
+    local CONTROL_ROW_RESERVE = 80
+    local CONTROL_SUBTYPE = { previous = 0, ["return"] = 1, next = 2 }
+    local CONTROL_ROLES = { "previous", "return", "next" }
+    local CONTROL_TRIGGER_ORDER = { "return", "previous", "next" }
+    local CONTROL_ANIMATIONS = { previous = { idle = "PrevIdle", disabled = "PrevDisabled", press = "PrevPress" }, next = { idle = "NextIdle", disabled = "NextDisabled", press = "NextPress" }, ["return"] = { idle = "ReturnIdle", press = "ReturnPress" } }
+
+    Neverbirth.HouseVsElephantState = Neverbirth.HouseVsElephantState or {
+        frame = 0, pending = {}, returningAfterContinue = nil, transition = nil, controlEntities = {},
+    }
+    local state = Neverbirth.HouseVsElephantState
+
+    local function call(object, method, ...)
+        if not object or type(object[method]) ~= "function" then return nil, false end
+        local ok, value = pcall(object[method], object, ...)
+        if not ok then return nil, false end
+        return value, true
+    end
+
+    local function vectorXY(value)
+        if not value then return 0, 0 end
+        return tonumber(value.X or value.x) or 0, tonumber(value.Y or value.y) or 0
+    end
+
+    local function makeVector(x, y)
+        local ok, value = pcall(function() return Vector(x, y) end)
+        if ok and value ~= nil then return value end
+        error("[neverbirth][HouseVsElephant] Vector constructor unavailable: " .. tostring(value), 2)
+    end
+
+    local function currentGame()
+        if type(Game) ~= "function" then return nil end
+        local ok, value = pcall(Game)
+        return ok and value or nil
+    end
+
+    local function playerKey(player)
+        return tostring(player and player.InitSeed or "")
+    end
+
+    local function findPlayer(key)
+        key = tostring(key or "")
+        for _, player in ipairs(GetPlayers()) do
+            if playerKey(player) == key then return player end
+        end
+        return nil
+    end
+
+    local function currentDimension(level, descriptor)
+        if not level or not descriptor then return 0 end
+        local currentIndex = select(1, call(level, "GetCurrentRoomIndex"))
+        if type(GetPtrHash) == "function" then
+            local descriptorIndex = tonumber(descriptor.SafeGridIndex or descriptor.GridIndex or currentIndex)
+            if descriptorIndex then
+                for dimension = 0, 2 do
+                    local candidate = select(1, call(level, "GetRoomByIdx", descriptorIndex, dimension))
+                    local okLeft, left = pcall(GetPtrHash, descriptor)
+                    local okRight, right = pcall(GetPtrHash, candidate)
+                    if okLeft and okRight and candidate and left == right then return dimension end
+                end
+            end
+        end
+        return 0
+    end
+
+    local function newRunData(runSeed)
+        return { runSeed = tostring(runSeed or "unknown"), encounters = {}, seenKeys = {}, nextSequence = 1,
+            nextSessionToken = 1, session = nil }
+    end
+
+    local function normalizeRunData(value, runSeed, clearSession)
+        runSeed = tostring(runSeed or "unknown")
+        if type(value) ~= "table" or tostring(value.runSeed or "") ~= runSeed then
+            return newRunData(runSeed)
+        end
+        value.encounters = type(value.encounters) == "table" and value.encounters or {}
+        value.seenKeys = type(value.seenKeys) == "table" and value.seenKeys or {}
+        value.nextSequence = math.max(1, math.floor(tonumber(value.nextSequence) or (#value.encounters + 1)))
+        value.nextSessionToken = math.max(1, math.floor(tonumber(value.nextSessionToken) or 1))
+        if clearSession == true then value.session = nil end
+        return value
+    end
+
+    local function getPersistentData()
+        EnsureMusicboxDataLoaded()
+        local value = normalizeRunData(musicboxSaveData.houseVsElephant, GetCurrentRunSeed(), false)
+        musicboxSaveData.houseVsElephant = value
+        return value
+    end
+
+    local function save()
+        SaveMusicboxData()
+    end
+
+    local function encounterKey(roomContext, pickup)
+        if type(roomContext) ~= "table" or not pickup then return nil end
+        local initSeed = tonumber(pickup.InitSeed)
+        if not initSeed then return nil end
+        return table.concat({
+            tostring(tonumber(roomContext.stage) or 0),
+            tostring(tonumber(roomContext.stageType) or 0),
+            tostring(tonumber(roomContext.dimension) or 0),
+            tostring(tonumber(roomContext.safeGridIndex) or 0),
+            tostring(math.floor(initSeed)),
+        }, ":")
+    end
+
+    local function recordEncounter(runData, roomContext, pickup)
+        if type(runData) ~= "table" or not pickup
+            or tonumber(pickup.Type) ~= PICKUP_ENTITY
+            or tonumber(pickup.Variant) ~= COLLECTIBLE_PICKUP
+            or (tonumber(pickup.SubType) or 0) <= 0 then return false end
+        local entityData = pickup.GetData and pickup:GetData() or nil
+        if entityData and entityData.NeverbirthHouseSessionToken then return false end
+        runData.encounters = type(runData.encounters) == "table" and runData.encounters or {}
+        runData.seenKeys = type(runData.seenKeys) == "table" and runData.seenKeys or {}
+        local key = encounterKey(roomContext, pickup)
+        if not key or runData.seenKeys[key] then return false end
+        local sequence = math.max(1, math.floor(tonumber(runData.nextSequence) or (#runData.encounters + 1)))
+        runData.nextSequence = sequence + 1
+        runData.seenKeys[key] = true
+        runData.encounters[#runData.encounters + 1] = {
+            encounterKey = key, itemId = math.floor(tonumber(pickup.SubType)), sequence = sequence,
+        }
+        return true
+    end
+
+    local function buildCandidates(encounters, players, hasCollectible, isActiveItem)
+        players = type(players) == "table" and players or {}
+        hasCollectible = hasCollectible or function(player, itemId)
+            return player and player.HasCollectible and player:HasCollectible(itemId)
+        end
+        isActiveItem = isActiveItem or function(itemId)
+            if not Isaac or type(Isaac.GetItemConfig) ~= "function" then return false end
+            local okConfig, config = pcall(Isaac.GetItemConfig)
+            if not okConfig or not config or type(config.GetCollectible) ~= "function" then return false end
+            local okItem, item = pcall(config.GetCollectible, config, itemId)
+            return okItem and item ~= nil and tonumber(item.Type) == ACTIVE_ITEM_TYPE
+        end
+        local held = {}
+        local active = {}
+        for _, encounter in ipairs(encounters or {}) do
+            local itemId = math.floor(tonumber(encounter.itemId) or 0)
+            if itemId > 0 and active[itemId] == nil then
+                local ok, value = pcall(isActiveItem, itemId)
+                active[itemId] = ok and value == true
+            end
+            if itemId > 0 and held[itemId] == nil then
+                held[itemId] = false
+                for _, player in ipairs(players) do
+                    local ok, value = pcall(hasCollectible, player, itemId)
+                    if ok and value == true then held[itemId] = true; break end
+                end
+            end
+        end
+        local candidates = {}
+        for index, encounter in ipairs(encounters or {}) do
+            local itemId = math.floor(tonumber(encounter.itemId) or 0)
+            if itemId > 0 and held[itemId] ~= true and active[itemId] ~= true then
+                candidates[#candidates + 1] = {
+                    itemId = itemId, encounterKey = tostring(encounter.encounterKey or index),
+                    sourceSequence = tonumber(encounter.sequence) or index, isMilkFallback = false,
+                }
+            end
+        end
+        while #candidates < 3 do
+            candidates[#candidates + 1] = {
+                itemId = MILK, encounterKey = "milk-fallback:" .. tostring(#candidates + 1),
+                sourceSequence = nil, isMilkFallback = true,
+            }
+        end
+        return candidates
+    end
+
+    local function newSession(token, candidates)
+        local copied = {}
+        for index, candidate in ipairs(candidates or {}) do
+            copied[index] = {
+                itemId = math.floor(tonumber(candidate.itemId) or 0),
+                encounterKey = tostring(candidate.encounterKey or index),
+                sourceSequence = candidate.sourceSequence,
+                isMilkFallback = candidate.isMilkFallback == true,
+            }
+        end
+        return {
+            token = tostring(token or ""), candidates = copied, selected = {}, selectedCount = 0,
+            pageIndex = 1, pageCount = math.max(1, math.ceil(#copied / ITEMS_PER_PAGE)),
+            controlTouchLatch = {}, interactionLocked = false, controlCooldownUntil = 0,
+            phase = "created",
+        }
+    end
+
+    local function markSelected(session, candidateIndex)
+        if type(session) ~= "table" or session.phase == "completed" then return false end
+        session.selected = type(session.selected) == "table" and session.selected or {}
+        local key = tostring(math.floor(tonumber(candidateIndex) or 0))
+        if key == "0" or session.selected[key] then return false end
+        session.selected[key] = true
+        session.selectedCount = math.max(0, math.floor(tonumber(session.selectedCount) or 0)) + 1
+        if session.selectedCount >= 3 then session.phase = "completed"; return true end
+        return false
+    end
+
+    local function roomContext()
+        local game = currentGame()
+        local level = game and select(1, call(game, "GetLevel")) or nil
+        local descriptor = level and select(1, call(level, "GetCurrentRoomDesc")) or nil
+        local roomIndex = level and select(1, call(level, "GetCurrentRoomIndex")) or nil
+        if not level or roomIndex == nil then return nil end
+        local stage = select(1, call(level, "GetStage"))
+        local stageType = select(1, call(level, "GetStageType"))
+        return {
+            stage = tonumber(stage) or 0,
+            stageType = tonumber(stageType) or 0,
+            dimension = currentDimension(level, descriptor),
+            safeGridIndex = tonumber(descriptor and (descriptor.SafeGridIndex or descriptor.GridIndex) or roomIndex) or roomIndex,
+            roomIndex = tonumber(roomIndex),
+        }
+    end
+
+    local function scanCurrentRoom()
+        local context = roomContext()
+        if not context or context.roomIndex == SPECIAL_ROOM_INDEX then return 0 end
+        local runData = getPersistentData()
+        local added = 0
+        local entities = Isaac and Isaac.GetRoomEntities and Isaac.GetRoomEntities() or {}
+        for _, entity in ipairs(entities) do
+            if recordEncounter(runData, context, entity) then added = added + 1 end
+        end
+        if added > 0 then save() end
+        return added
+    end
+
+    local function capturePlayerPositions()
+        local result = {}
+        for _, player in ipairs(GetPlayers()) do
+            local x, y = vectorXY(player and player.Position)
+            result[#result + 1] = { key = playerKey(player), x = x, y = y }
+        end
+        return result
+    end
+
+    local function restorePlayerPositions(session)
+        for _, entry in ipairs(session and session.originPlayerPositions or {}) do
+            local player = findPlayer(entry.key)
+            if player then player.Position = makeVector(tonumber(entry.x) or 0, tonumber(entry.y) or 0) end
+        end
+    end
+
+    local function getPageCount(session)
+        return math.max(1, math.ceil(#(session and session.candidates or {}) / ITEMS_PER_PAGE))
+    end
+
+    local function getPageEntries(session, pageIndex)
+        local result = {}
+        if not session then return result end
+        session.selected = type(session.selected) == "table" and session.selected or {}
+        pageIndex = math.max(1, math.floor(tonumber(pageIndex) or 1))
+        local first = (pageIndex - 1) * ITEMS_PER_PAGE + 1
+        local last = math.min(#(session.candidates or {}), first + ITEMS_PER_PAGE - 1)
+        for candidateIndex = first, last do
+            local candidate = session.candidates[candidateIndex]
+            if candidate and session.selected[tostring(candidateIndex)] ~= true then
+                result[#result + 1] = { candidateIndex = candidateIndex, candidate = candidate }
+            end
+        end
+        return result
+    end
+
+    local function getVirtualEdges(session, pageIndex)
+        local count = getPageCount(session)
+        pageIndex = math.max(1, math.min(count, math.floor(tonumber(pageIndex) or 1)))
+        return {
+            previous = pageIndex > 1 and pageIndex - 1 or nil,
+            next = pageIndex < count and pageIndex + 1 or nil,
+        }
+    end
+
+    local function roomSafeBounds(room)
+        local topLeft, hasTopLeft = call(room, "GetTopLeftPos")
+        local bottomRight, hasBottomRight = call(room, "GetBottomRightPos")
+        if not hasTopLeft or not hasBottomRight or not topLeft or not bottomRight then return nil end
+        local left, top = vectorXY(topLeft)
+        local right, bottom = vectorXY(bottomRight)
+        left, right = left + ROOM_EDGE_MARGIN, right - ROOM_EDGE_MARGIN
+        top, bottom = top + ROOM_EDGE_MARGIN, bottom - ROOM_EDGE_MARGIN
+        if right <= left or bottom <= top + CONTROL_ROW_RESERVE then return nil end
+        return { left = left, right = right, top = top, bottom = bottom,
+            galleryBottom = bottom - CONTROL_ROW_RESERVE }
+    end
+
+    local function makePositions(room, count)
+        local bounds = roomSafeBounds(room)
+        if not bounds then return {} end
+        local result = {}
+        count = math.min(ITEMS_PER_PAGE, math.max(0, math.floor(tonumber(count) or 0)))
+        local width = bounds.right - bounds.left
+        local height = bounds.galleryBottom - bounds.top
+        for index = 1, count do
+            local column = (index - 1) % 3
+            local row = math.floor((index - 1) / 3)
+            result[index] = makeVector(
+                bounds.left + (column + 0.5) * width / 3,
+                bounds.top + (row + 0.5) * height / 2)
+        end
+        return result
+    end
+
+    local function chooseControlPosition(room, role)
+        local bounds = roomSafeBounds(room)
+        if not bounds then return nil end
+        local centerX = (bounds.left + bounds.right) / 2
+        local gap = math.max(48, math.min(112, (bounds.right - bounds.left) / 4))
+        local x = centerX
+        if role == "previous" then x = centerX - gap elseif role == "next" then x = centerX + gap end
+        return makeVector(x, bounds.bottom)
+    end
+
+    local function getControlVariant()
+        if not Isaac or type(Isaac.GetEntityVariantByName) ~= "function" then return nil end
+        local ok, variant = pcall(Isaac.GetEntityVariantByName, PORTAL_NAME)
+        variant = ok and tonumber(variant) or nil
+        return variant and variant >= 0 and math.floor(variant) or nil
+    end
+
+    local function controlData(entity)
+        return entity and entity.GetData and entity:GetData() or nil
+    end
+
+    local function playControlAnimation(effect, mode)
+        local data = controlData(effect)
+        local role = data and data.NeverbirthHouseControlRole or nil
+        local requested = role and CONTROL_ANIMATIONS[role] and CONTROL_ANIMATIONS[role][mode] or nil
+        if not requested then return false end
+        local sprite = effect and effect.GetSprite and effect:GetSprite() or nil
+        if not sprite or not sprite.Play then return false end
+        if sprite.HasAnimation then
+            local ok, exists = pcall(function() return sprite:HasAnimation(requested) end)
+            if not ok or exists ~= true then return false end
+        end
+        return pcall(function() sprite:Play(requested, true) end) == true
+    end
+
+    local function controlEnabled(session, role)
+        if role == "return" then return true end
+        return getVirtualEdges(session, session and session.pageIndex or 1)[role] ~= nil
+    end
+
+    local function findControl(session, role)
+        local control = state.controlEntities and state.controlEntities[role] or nil
+        local data = controlData(control)
+        if not control or not data or not session or data.NeverbirthHouseSessionToken ~= session.token then return nil end
+        if control.Exists then
+            local ok, exists = pcall(function() return control:Exists() end)
+            if not ok or exists ~= true then return nil end
+        end
+        return control
+    end
+
+    local function removeOwnedControls(session)
+        for _, entity in ipairs(Isaac and Isaac.GetRoomEntities and Isaac.GetRoomEntities() or {}) do
+            local data = controlData(entity)
+            if data and data.NeverbirthHouseGalleryControl == true
+                and (not session or data.NeverbirthHouseSessionToken == session.token) and entity.Remove then
+                entity:Remove()
+            end
+        end
+        state.controlEntities = {}
+    end
+
+    local function spawnControl(room, session, role)
+        local variant = getControlVariant()
+        local subtype = CONTROL_SUBTYPE[role]
+        local position = chooseControlPosition(room, role)
+        if not variant or subtype == nil or not position then return nil end
+        local effect = Isaac.Spawn(PORTAL_ENTITY, variant, subtype, position, makeVector(0, 0), nil)
+        if not effect then return nil end
+        local enabled = controlEnabled(session, role)
+        local data = controlData(effect)
+        if data then
+            data.NeverbirthHouseGalleryControl = true
+            data.NeverbirthHouseSessionToken = session.token
+            data.NeverbirthHouseControlRole = role
+            data.NeverbirthHouseControlEnabled = enabled
+        end
+        pcall(function() effect.Timeout = -1 end)
+        pcall(function() effect.CollisionDamage = 0 end)
+        if EntityCollisionClass and EntityCollisionClass.ENTCOLL_NONE ~= nil then
+            pcall(function() effect.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE end)
+        end
+        if GridCollisionClass and GridCollisionClass.COLLISION_NONE ~= nil then
+            pcall(function() effect.GridCollisionClass = GridCollisionClass.COLLISION_NONE end)
+        end
+        state.controlEntities[role] = effect
+        playControlAnimation(effect, enabled and "idle" or "disabled")
+        return effect
+    end
+
+    local function spawnControls(room, session)
+        removeOwnedControls(session)
+        session.controlTouchLatch = {}
+        session.controlArmedFrame = state.frame + ARRIVAL_LOCKOUT_FRAMES
+        session.controlCooldownUntil = state.frame + CONTROL_COOLDOWN_FRAMES
+        session.interactionLocked = false
+        local allSpawned = true
+        for _, role in ipairs(CONTROL_ROLES) do
+            if not spawnControl(room, session, role) then allSpawned = false end
+        end
+        return allSpawned
+    end
+
+    local function removeOwnedPedestals(session)
+        local entities = Isaac and Isaac.GetRoomEntities and Isaac.GetRoomEntities() or {}
+        for _, entity in ipairs(entities) do
+            if tonumber(entity.Type) == PICKUP_ENTITY and tonumber(entity.Variant) == COLLECTIBLE_PICKUP then
+                local data = entity.GetData and entity:GetData() or nil
+                local owned = data and session and data.NeverbirthHouseSessionToken == session.token
+                if owned and entity.Remove then entity:Remove() end
+            end
+        end
+    end
+
+    local function adoptSessionSpawnedPedestals(session)
+        if not session then return end
+        session.preexistingPickupSeeds = type(session.preexistingPickupSeeds) == "table"
+            and session.preexistingPickupSeeds or {}
+        for _, entity in ipairs(Isaac and Isaac.GetRoomEntities and Isaac.GetRoomEntities() or {}) do
+            if tonumber(entity.Type) == PICKUP_ENTITY and tonumber(entity.Variant) == COLLECTIBLE_PICKUP then
+                local data = entity.GetData and entity:GetData() or nil
+                local seedKey = tostring(entity.InitSeed or "")
+                if data and not data.NeverbirthHouseSessionToken
+                    and not data.NeverbirthCertificateSessionToken
+                    and not session.preexistingPickupSeeds[seedKey] then
+                    data.NeverbirthHouseSessionToken = session.token
+                    data.NeverbirthHouseSessionExtra = true
+                end
+            end
+        end
+    end
+    local function prepareRoom(room)
+        if room and room.SetClear then pcall(function() room:SetClear(true) end) end
+    end
+
+    local function spawnSelectionRoom(session)
+        local game = currentGame()
+        local level = game and select(1, call(game, "GetLevel")) or nil
+        local room = game and select(1, call(game, "GetRoom")) or nil
+        local index = level and select(1, call(level, "GetCurrentRoomIndex")) or nil
+        if not session or not room or tonumber(index) ~= SPECIAL_ROOM_INDEX then return false end
+        removeOwnedPedestals(session)
+        removeOwnedControls(session)
+        prepareRoom(room)
+        session.pageCount = getPageCount(session)
+        session.pageIndex = math.max(1, math.min(session.pageCount, math.floor(tonumber(session.pageIndex) or 1)))
+        session.preexistingPickupSeeds = {}
+        for _, entity in ipairs(Isaac.GetRoomEntities and Isaac.GetRoomEntities() or {}) do
+            if tonumber(entity.Type) == PICKUP_ENTITY and tonumber(entity.Variant) == COLLECTIBLE_PICKUP then
+                session.preexistingPickupSeeds[tostring(entity.InitSeed or "")] = true
+            end
+        end
+        local entries = getPageEntries(session, session.pageIndex)
+        local positions = makePositions(room, #entries)
+        if #positions < #entries then
+            DebugLog("[neverbirth][HouseVsElephant] selection room capacity insufficient page=" .. tostring(session.pageIndex))
+            return false
+        end
+        for slot, entry in ipairs(entries) do
+            local candidateIndex, candidate = entry.candidateIndex, entry.candidate
+            local entity = Isaac.Spawn(PICKUP_ENTITY, COLLECTIBLE_PICKUP, candidate.itemId,
+                positions[slot], makeVector(0, 0), nil)
+            local data = entity and entity.GetData and entity:GetData() or nil
+            if data then
+                data.NeverbirthHouseSessionToken = session.token
+                data.NeverbirthHouseCandidateIndex = candidateIndex
+                data.NeverbirthHouseMilkFallback = candidate.isMilkFallback == true
+            end
+        end
+        spawnControls(room, session)
+        session.phase = "active"
+        state.pending = {}
+        state.transition = nil
+        save()
+        return true
+    end
+
+    local function executeSpecialRoomCommand()
+        if not Isaac or type(Isaac.ExecuteCommand) ~= "function" then return false end
+        return pcall(function() Isaac.ExecuteCommand(SPECIAL_ROOM_COMMAND) end) == true
+    end
+
+    local function clearSession(runData, session)
+        if runData and runData.session == session then runData.session = nil end
+        state.pending = {}
+        removeOwnedControls(session)
+        state.transition = nil
+        state.controlEntities = {}
+        save()
+    end
+
+    local function restoreCertificateParent(session)
+        local api = Neverbirth.CertificateOfNeverbirthCarrierAPI
+        if not session or not session.parentCertificateToken or not api or not api.RestoreCurrent then return false end
+        return api.RestoreCurrent(session.parentCertificateToken) == true
+    end
+
+    local function finishInOrigin(runData, session)
+        restorePlayerPositions(session)
+        clearSession(runData, session)
+        if session.parentCertificateToken then restoreCertificateParent(session) end
+        return true
+    end
+
+    local function beginReturn(runData, session)
+        if not session or session.returnStarted then return false end
+        session.returnStarted = true
+        removeOwnedPedestals(session)
+        removeOwnedControls(session)
+        state.transition = nil
+        local context = roomContext()
+        if context and tonumber(context.roomIndex) == tonumber(session.originRoomIndex)
+            and tonumber(context.dimension) == tonumber(session.originDimension) then
+            return finishInOrigin(runData, session)
+        end
+        session.phase = "returning"
+        save()
+        local game = currentGame()
+        local player = findPlayer(session.initiatorKey)
+        local ok, result = pcall(function()
+            local targetRoom = tonumber(session.originSafeGridIndex) or session.originRoomIndex
+            return game:StartRoomTransition(targetRoom, NO_DIRECTION, TELEPORT_ANIMATION,
+                player, session.originDimension)
+        end)
+        if not ok or result == false then
+            session.returnStarted = false
+            local failedContext = roomContext()
+            if failedContext and failedContext.roomIndex == SPECIAL_ROOM_INDEX then
+                session.phase = "active"
+                spawnSelectionRoom(session)
+            else
+                clearSession(runData, session)
+                restoreCertificateParent(session)
+            end
+            DebugLog("[neverbirth][HouseVsElephant] failed to return to origin")
+            return false
+        end
+        return true
+    end
+
+    local function controlEntered(session, role)
+        local control = findControl(session, role)
+        if not control then return false end
+        local controlX, controlY = vectorXY(control.Position)
+        local radiusSquared = CONTROL_TRIGGER_RADIUS * CONTROL_TRIGGER_RADIUS
+        for _, player in ipairs(GetPlayers()) do
+            local playerX, playerY = vectorXY(player and player.Position)
+            local dx, dy = playerX - controlX, playerY - controlY
+            if dx * dx + dy * dy <= radiusSquared then return true end
+        end
+        return false
+    end
+
+    local function updateControlTouchLatches(session)
+        session.controlTouchLatch = type(session.controlTouchLatch) == "table" and session.controlTouchLatch or {}
+        local touching = {}
+        for _, role in ipairs(CONTROL_ROLES) do
+            touching[role] = controlEntered(session, role)
+            if not touching[role] then session.controlTouchLatch[role] = nil end
+        end
+        return touching
+    end
+
+    local function beginPageChange(session, targetPage)
+        if not session or state.transition or session.interactionLocked == true then return false end
+        targetPage = math.floor(tonumber(targetPage) or 0)
+        local edges = getVirtualEdges(session, session.pageIndex)
+        if targetPage ~= edges.previous and targetPage ~= edges.next then return false end
+        local role = targetPage == edges.previous and "previous" or "next"
+        local control = findControl(session, role)
+        local data = controlData(control)
+        if not control or not data or data.NeverbirthHouseControlEnabled ~= true then return false end
+        session.interactionLocked = true
+        session.controlCooldownUntil = state.frame + CONTROL_COOLDOWN_FRAMES
+        removeOwnedPedestals(session)
+        state.transition = {
+            mode = "page", token = session.token, targetPage = targetPage,
+            readyFrame = state.frame + PAGE_PRESS_FRAMES,
+        }
+        playControlAnimation(control, "press")
+        return true
+    end
+
+    local function beginControlReturn(session)
+        if not session or state.transition or session.interactionLocked == true then return false end
+        local control = findControl(session, "return")
+        local data = controlData(control)
+        if not control or not data or data.NeverbirthHouseControlEnabled ~= true then return false end
+        session.interactionLocked = true
+        session.controlCooldownUntil = state.frame + CONTROL_COOLDOWN_FRAMES
+        removeOwnedPedestals(session)
+        state.transition = {
+            mode = "return", token = session.token,
+            readyFrame = state.frame + RETURN_PRESS_FRAMES,
+        }
+        playControlAnimation(control, "press")
+        return true
+    end
+
+    local function processControlTransition(runData, session)
+        local transition = state.transition
+        if type(transition) ~= "table" or state.frame < (tonumber(transition.readyFrame) or math.huge) then return false end
+        if not session or session.token ~= transition.token then state.transition = nil; return false end
+        if transition.mode == "return" then
+            state.transition = nil
+            removeOwnedControls(session)
+            return beginReturn(runData, session)
+        end
+        if transition.mode ~= "page" then state.transition = nil; return false end
+        session.pageIndex = math.max(1, math.min(getPageCount(session), math.floor(tonumber(transition.targetPage) or 1)))
+        state.transition = nil
+        return spawnSelectionRoom(session)
+    end
+
+    local function triggerControl(session, role)
+        local control = findControl(session, role)
+        local data = controlData(control)
+        if not control or not data or data.NeverbirthHouseControlEnabled ~= true then return false end
+        if role == "return" then return beginControlReturn(session) end
+        local target = getVirtualEdges(session, session.pageIndex)[role]
+        return target ~= nil and beginPageChange(session, target) or false
+    end
+
+    local function processControls(runData, session)
+        if state.transition then processControlTransition(runData, session); return end
+        if not session or session.phase ~= "active" then return end
+        local touching = updateControlTouchLatches(session)
+        if session.interactionLocked == true
+            or state.frame < (tonumber(session.controlArmedFrame) or 0)
+            or state.frame < (tonumber(session.controlCooldownUntil) or 0) then return end
+        for _, role in ipairs(CONTROL_TRIGGER_ORDER) do
+            if touching[role] and session.controlTouchLatch[role] ~= true then
+                session.controlTouchLatch[role] = true
+                if triggerControl(session, role) then return end
+            end
+        end
+    end
+
+    local function createRuntimeSession(player, activeSlot, candidates, context, parentToken)
+        local runData = getPersistentData()
+        local token = tostring(runData.runSeed) .. ":house:" .. tostring(runData.nextSessionToken)
+            .. ":" .. playerKey(player)
+        runData.nextSessionToken = runData.nextSessionToken + 1
+        local session = newSession(token, candidates)
+        session.initiatorKey = playerKey(player)
+        session.activeSlot = activeSlot
+        session.originStage = context.stage
+        session.originStageType = context.stageType
+        session.originDimension = context.dimension
+        session.originRoomIndex = context.roomIndex
+        session.originSafeGridIndex = context.safeGridIndex
+        session.originPlayerPositions = capturePlayerPositions()
+        session.parentCertificateToken = parentToken
+        session.phase = "entering"
+        runData.session = session
+        save()
+        return runData, session
+    end
+
+    local function noConsume(showAnimation)
+        return { Discharge = false, Remove = false, ShowAnim = showAnimation == true }
+    end
+
+    local function consumeNow()
+        return { Discharge = false, Remove = true, ShowAnim = true }
+    end
+
+    local function useItem(_, itemId, rng, player, useFlags, activeSlot, customVarData)
+        if itemId ~= HOUSE then return nil end
+        local runData = getPersistentData()
+        if runData.session then return noConsume(false) end
+        local context = roomContext()
+        if not context or not player then return noConsume(false) end
+        if not getControlVariant() then
+            DebugLog("[neverbirth][HouseVsElephant] use refused: gallery control entity unresolved")
+            return noConsume(false)
+        end
+        local candidates = buildCandidates(runData.encounters, GetPlayers())
+        local parentToken = nil
+        if context.roomIndex == SPECIAL_ROOM_INDEX then
+            local api = Neverbirth.CertificateOfNeverbirthCarrierAPI
+            if api and api.SuspendCurrent then parentToken = api.SuspendCurrent() end
+            if not parentToken then
+                DebugLog("[neverbirth][HouseVsElephant] use refused: special-room carrier has no supported owner")
+                return noConsume(false)
+            end
+        end
+        local _, session = createRuntimeSession(player, activeSlot, candidates, context, parentToken)
+        if parentToken then
+            if spawnSelectionRoom(session) then return consumeNow() end
+        elseif executeSpecialRoomCommand() then
+            return consumeNow()
+        end
+        runData.session = nil
+        if parentToken then restoreCertificateParent(session) end
+        save()
+        DebugLog("[neverbirth][HouseVsElephant] failed to enter special room")
+        return noConsume(false)
+    end
+
+    local function pickupCollision(_, pickup, collider)
+        if not pickup or tonumber(pickup.Type) ~= PICKUP_ENTITY
+            or tonumber(pickup.Variant) ~= COLLECTIBLE_PICKUP then return nil end
+        local data = pickup.GetData and pickup:GetData() or nil
+        if not data or not data.NeverbirthHouseSessionToken then return nil end
+        local runData = getPersistentData()
+        local session = runData.session
+        if not session or session.phase ~= "active" or data.NeverbirthHouseSessionToken ~= session.token then return nil end
+        local player = collider and collider.ToPlayer and collider:ToPlayer() or nil
+        if not player then return nil end
+        local candidateIndex = math.floor(tonumber(data.NeverbirthHouseCandidateIndex) or 0)
+        local key = tostring(session.token) .. ":" .. tostring(candidateIndex)
+        if candidateIndex > 0 and not session.selected[tostring(candidateIndex)] and not state.pending[key] then
+            local before = player.GetCollectibleNum and tonumber(player:GetCollectibleNum(pickup.SubType)) or 0
+            state.pending[key] = {
+                pickup = pickup, player = player, itemId = tonumber(pickup.SubType),
+                candidateIndex = candidateIndex, beforeCount = before or 0,
+                expires = state.frame + CONFIRM_FRAMES,
+            }
+        end
+        return nil
+    end
+
+    local function processPending()
+        local runData = getPersistentData()
+        local session = runData.session
+        if not session or session.phase ~= "active" then state.pending = {}; return end
+        for key, pending in pairs(state.pending) do
+            local exists = true
+            if pending.pickup and pending.pickup.Exists then
+                local ok, value = pcall(function() return pending.pickup:Exists() end)
+                exists = ok and value == true
+            end
+            local count = pending.player and pending.player.GetCollectibleNum
+                and tonumber(pending.player:GetCollectibleNum(pending.itemId)) or pending.beforeCount
+            if not exists or count > pending.beforeCount then
+                state.pending[key] = nil
+                adoptSessionSpawnedPedestals(session)
+                if markSelected(session, pending.candidateIndex) then
+                    beginReturn(runData, session)
+                    return
+                end
+                save()
+            elseif state.frame >= pending.expires then
+                state.pending[key] = nil
+            end
+        end
+    end
+
+    local function resumeInterruptedSession(stale)
+        if type(stale) ~= "table" then return false end
+        local context = roomContext()
+        if not context or context.roomIndex ~= SPECIAL_ROOM_INDEX then return false end
+        local game = currentGame()
+        local player = findPlayer(stale.initiatorKey)
+        local ok = pcall(function()
+            removeOwnedPedestals(stale)
+            local targetRoom = tonumber(stale.originSafeGridIndex) or stale.originRoomIndex
+            removeOwnedControls(stale)
+            game:StartRoomTransition(targetRoom, NO_DIRECTION, TELEPORT_ANIMATION,
+                player, stale.originDimension)
+        end)
+        return ok
+    end
+
+    local function newRoom()
+        local runData = getPersistentData()
+        local session = runData.session
+        local context = roomContext()
+        if state.returningAfterContinue then
+            local stale = state.returningAfterContinue
+            state.returningAfterContinue = nil
+            resumeInterruptedSession(stale)
+            return nil
+        end
+        if not session then
+            scanCurrentRoom()
+            return nil
+        end
+        if session.phase == "returning" and context
+            and tonumber(context.roomIndex) == tonumber(session.originRoomIndex)
+            and tonumber(context.dimension) == tonumber(session.originDimension) then
+            finishInOrigin(runData, session)
+            return nil
+        end
+        if context and context.roomIndex == SPECIAL_ROOM_INDEX
+            and (session.phase == "entering" or session.phase == "active") then
+            spawnSelectionRoom(session)
+            return nil
+        end
+        if session.phase == "active" then
+            beginReturn(runData, session)
+            return nil
+        end
+        return nil
+    end
+
+    local function update()
+        state.frame = state.frame + 1
+        processPending()
+        local runData = getPersistentData()
+        local session = runData.session
+        processControls(runData, session)
+        return nil
+    end
+
+    local function gameStarted(_, isContinued)
+        EnsureMusicboxDataLoaded()
+        local old = musicboxSaveData.houseVsElephant
+        local stale = type(old) == "table" and old.session or nil
+        local value = normalizeRunData(old, GetCurrentRunSeed(), isContinued == true)
+        musicboxSaveData.houseVsElephant = value
+        state.pending = {}
+        if isContinued == true and stale then state.returningAfterContinue = stale else state.returningAfterContinue = nil end
+        state.transition = nil
+        state.controlEntities = {}
+        save()
+        newRoom()
+        return nil
+    end
+
+    local function preGameExit()
+        save()
+        return nil
+    end
+
+    Neverbirth.HouseVsElephantCarrierAPI = {
+        IsActive = function()
+            local value = getPersistentData()
+            return type(value.session) == "table"
+        end,
+    }
+
+    Neverbirth.HouseVsElephantTestAPI = {
+        GetItemId = function() return HOUSE end,
+        NewRunData = newRunData, NormalizeRunData = normalizeRunData,
+        EncounterKey = encounterKey, RecordEncounter = recordEncounter,
+        BuildCandidates = buildCandidates, NewSession = newSession, MarkSelected = markSelected,
+        GetPageCount = getPageCount, GetPageEntries = getPageEntries, GetVirtualEdges = getVirtualEdges,
+        GetControlSubtype = function(role) return CONTROL_SUBTYPE[role] end,
+        GetControlAnimation = function(role, mode)
+            return CONTROL_ANIMATIONS[role] and CONTROL_ANIMATIONS[role][mode] or nil
+        end,
+        MakePositions = makePositions, GetPersistentData = getPersistentData,
+        Callbacks = {
+            UseItem = useItem, NewRoom = newRoom, PickupCollision = pickupCollision,
+            Update = update, GameStarted = gameStarted, PreGameExit = preGameExit,
+        },
+    }
+
+    Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, useItem, HOUSE)
+    if ModCallbacks.MC_POST_NEW_ROOM then Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, newRoom) end
+    if ModCallbacks.MC_PRE_PICKUP_COLLISION then
+        Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, pickupCollision, COLLECTIBLE_PICKUP)
+    end
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, update)
+    if ModCallbacks.MC_POST_GAME_STARTED then Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, gameStarted) end
+    if ModCallbacks.MC_PRE_GAME_EXIT then Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, preGameExit) end
+end)()
+-- HOUSE_VS_ELEPHANT_END
+
+-- EVERCHANGING_BEGIN
+;(function()
+    local EVERCHANGING = Items.Everchanging
+    local PLAYER_RUNTIME_KEY = "neverbirth_everchanging_runtime"
+    local DEBUG_COMMAND = "nb_everchanging"
+    local ALLOWED_SLOTS = {
+        full = true,
+        head = true,
+        face = true,
+        body = true,
+        legs = true,
+        accessory = true,
+    }
+
+    local STYLE_SPECS = {
+        {
+            id = "blue_banana_peel",
+            slots = { "head" },
+            resources = {
+                head = { costume = "gfx/characters/costume_blue_banana_peel.anm2" },
+            },
+            full = false,
+            metadata = { source = "existing_blue_banana_peel_costume" },
+        },
+        {
+            id = "tokarev_cloak",
+            slots = { "accessory", "face" },
+            resources = {
+                accessory = { costume = "gfx/characters/costume_tokarev_cloak.anm2" },
+                face = { costume = "gfx/characters/costume_tokarev_face.anm2" },
+            },
+            full = false,
+            metadata = { source = "tokarev_cloak_with_independent_head2_face" },
+        },
+        {
+            id = "ringotsuga_apple_storyteller",
+            slots = { "head" },
+            resources = {
+                head = { costume = "gfx/characters/costume_ringotsuga_headgear.anm2" },
+            },
+            full = false,
+            metadata = { source = "ringotsuga_headgear_only" },
+        },
+        {
+            id = "tantan_daodao_twins",
+            eligibility = "normal_jacob_esau_pair",
+            pairRoles = {
+                jacob = {
+                    slots = { "head" },
+                    resources = {
+                        head = { costume = "gfx/characters/costume_daodao_hair.anm2" },
+                    },
+                },
+                esau = {
+                    slots = { "head", "face" },
+                    resources = {
+                        head = { costume = "gfx/characters/costume_tantan_hair.anm2" },
+                        face = { costume = "gfx/characters/costume_tantan_glasses.anm2" },
+                    },
+                },
+            },
+            full = false,
+            metadata = { source = "tantan_daodao_normal_twins_accessories" },
+        },
+        {
+            id = "yoontoons_storyteller",
+            slots = { "head", "face" },
+            resources = {
+                head = { costume = "gfx/characters/costume_yoontoons_hair.anm2" },
+                face = { costume = "gfx/characters/costume_yoontoons_glasses.anm2" },
+            },
+            full = false,
+            metadata = { source = "yoontoons_hair_glasses_accessories" },
+        },
+    }
+
+    local function LogInvalidStyle(index, reason)
+        DebugLog("[neverbirth] Everchanging ignored style #" .. tostring(index) .. ": " .. tostring(reason))
+    end
+
+    local function NormalizeStyleResourceSet(slots, resources, allowFull)
+        if type(slots) ~= "table" or #slots == 0 then return nil, "missing slots" end
+        if type(resources) ~= "table" then return nil, "missing resources" end
+        local normalized = { slots = {}, resources = {} }
+        local seen = {}
+        for _, rawSlot in ipairs(slots) do
+            local slot = tostring(rawSlot or "")
+            local resource = resources[slot]
+            if not ALLOWED_SLOTS[slot] then return nil, "unsupported slot " .. slot end
+            if seen[slot] then return nil, "duplicate slot " .. slot end
+            if type(resource) ~= "table" then return nil, "missing resource for slot " .. slot end
+            if slot == "full" then
+                if not allowFull then return nil, "paired roles cannot use the full slot" end
+                if type(resource.anm2) ~= "string" or resource.anm2 == "" then
+                    return nil, "missing ANM2 resource for full slot"
+                end
+                normalized.resources[slot] = { anm2 = resource.anm2 }
+            else
+                if type(resource.costume) ~= "string" or resource.costume == "" then
+                    return nil, "missing costume resource for slot " .. slot
+                end
+                normalized.resources[slot] = { costume = resource.costume }
+            end
+            seen[slot] = true
+            normalized.slots[#normalized.slots + 1] = slot
+        end
+        normalized.hasFull = seen.full == true
+        return normalized
+    end
+
+    local function BuildStyleRegistry(specs)
+        local registry = { byId = {} }
+        if type(specs) ~= "table" then return registry end
+
+        for index, spec in ipairs(specs) do
+            local valid = type(spec) == "table"
+            local styleId = valid and tostring(spec.id or "") or ""
+            local reason = nil
+            local style = nil
+
+            if not valid then
+                reason = "entry is not a table"
+            elseif styleId == "" then
+                reason = "missing stable id"
+            elseif registry.byId[styleId] then
+                reason = "duplicate id " .. styleId
+            elseif spec.pairRoles ~= nil then
+                if type(spec.pairRoles) ~= "table" then
+                    reason = "paired roles are not a table"
+                else
+                    local jacob, jacobReason = NormalizeStyleResourceSet(
+                        spec.pairRoles.jacob and spec.pairRoles.jacob.slots,
+                        spec.pairRoles.jacob and spec.pairRoles.jacob.resources,
+                        false
+                    )
+                    local esau, esauReason = NormalizeStyleResourceSet(
+                        spec.pairRoles.esau and spec.pairRoles.esau.slots,
+                        spec.pairRoles.esau and spec.pairRoles.esau.resources,
+                        false
+                    )
+                    if not jacob then
+                        reason = "invalid Jacob role: " .. tostring(jacobReason)
+                    elseif not esau then
+                        reason = "invalid Esau role: " .. tostring(esauReason)
+                    else
+                        jacob.hasFull = nil
+                        esau.hasFull = nil
+                        style = {
+                            id = styleId,
+                            pairRoles = { jacob = jacob, esau = esau },
+                            eligibility = spec.eligibility,
+                            full = false,
+                            metadata = spec.metadata,
+                        }
+                    end
+                end
+            else
+                local normalized, normalizeReason = NormalizeStyleResourceSet(spec.slots, spec.resources, true)
+                if not normalized then
+                    reason = normalizeReason
+                else
+                    local isFull = spec.full == true
+                    local hasFull = normalized.hasFull
+                    normalized.hasFull = nil
+                    if isFull or hasFull then
+                        if not isFull or #normalized.slots ~= 1 or normalized.slots[1] ~= "full" then
+                            reason = "full styles must declare only the full slot"
+                        end
+                    end
+                    if not reason then
+                        style = {
+                            id = styleId,
+                            slots = normalized.slots,
+                            resources = normalized.resources,
+                            full = isFull,
+                            metadata = spec.metadata,
+                        }
+                    end
+                end
+            end
+
+            if reason then
+                LogInvalidStyle(index, reason)
+            elseif style then
+                registry[#registry + 1] = style
+                registry.byId[styleId] = style
+            end
+        end
+        return registry
+    end
+    local STYLE_REGISTRY = BuildStyleRegistry(STYLE_SPECS)
+    local costumeIdCache = {}
+    local resourceFailureLogged = {}
+    local emptyRegistryLogged = false
+    local strangerPlayerType = nil
+    local strangerPlayerTypeResolved = false
+
+    local function GetEverchangingPlayerKey(player)
+        return tostring(player and player.InitSeed or "")
+    end
+
+    local function ResetEverchangingRunState()
+        EnsureMusicboxDataLoaded()
+        musicboxSaveData.everchanging = {
+            runSeed = GetCurrentRunSeed(),
+            players = {},
+        }
+        SaveMusicboxData()
+        return musicboxSaveData.everchanging
+    end
+
+    local function GetEverchangingRunState()
+        EnsureMusicboxDataLoaded()
+        local state = musicboxSaveData.everchanging
+        if type(state) ~= "table"
+            or tostring(state.runSeed or "") ~= tostring(GetCurrentRunSeed() or "") then
+            return ResetEverchangingRunState()
+        end
+        if type(state.players) ~= "table" then
+            state.players = {}
+        end
+        return state
+    end
+
+    local function NormalizeSavedPlayerState(state)
+        state.knownCopies = math.max(0, math.floor(tonumber(state.knownCopies) or 0))
+        state.rollCount = math.max(0, math.floor(tonumber(state.rollCount) or 0))
+        if type(state.styleId) ~= "string" or not STYLE_REGISTRY.byId[state.styleId] then
+            state.styleId = nil
+        end
+        return state
+    end
+
+    local function GetEverchangingPlayerState(player)
+        local playerKey = GetEverchangingPlayerKey(player)
+        if playerKey == "" then
+            return nil
+        end
+        local runState = GetEverchangingRunState()
+        if type(runState.players[playerKey]) ~= "table" then
+            runState.players[playerKey] = {}
+        end
+        return NormalizeSavedPlayerState(runState.players[playerKey])
+    end
+
+    local function GetEverchangingRuntime(player)
+        if not player or not player.GetData then
+            return nil
+        end
+        local ok, data = pcall(function()
+            return player:GetData()
+        end)
+        if not ok or type(data) ~= "table" then
+            return nil
+        end
+        if type(data[PLAYER_RUNTIME_KEY]) ~= "table" then
+            data[PLAYER_RUNTIME_KEY] = {
+                appliedStyleId = nil,
+                appliedRole = nil,
+                appliedPlayerAnm2 = nil,
+
+                originalSpriteFilename = nil,
+                appliedCostumeIds = {},
+                failedStyleId = nil,
+                dirty = true,
+            }
+        end
+        local runtime = data[PLAYER_RUNTIME_KEY]
+        if type(runtime.appliedCostumeIds) ~= "table" then
+            runtime.appliedCostumeIds = {}
+        end
+
+        return runtime
+    end
+
+    local function GetCostumeId(costumePath)
+        if costumeIdCache[costumePath] ~= nil then
+            return costumeIdCache[costumePath] or nil
+        end
+
+        local costumeId = nil
+        if Isaac and Isaac.GetCostumeIdByPath then
+            local ok, resolved = pcall(function()
+                return Isaac.GetCostumeIdByPath(costumePath)
+            end)
+            if ok and type(resolved) == "number" and resolved > 0 then
+                costumeId = resolved
+            end
+        end
+        costumeIdCache[costumePath] = costumeId or false
+        if not costumeId and not resourceFailureLogged[costumePath] then
+            resourceFailureLogged[costumePath] = true
+            DebugLog("[neverbirth] Everchanging missing costume resource: " .. tostring(costumePath))
+        end
+        return costumeId
+    end
+
+    local function GetNormalTwinRole(player)
+        if not player or not player.GetPlayerType or type(PlayerType) ~= "table" then return nil end
+        local ok, playerType = pcall(function() return player:GetPlayerType() end)
+        if not ok then return nil end
+        if playerType == PlayerType.PLAYER_JACOB then return "jacob" end
+        if playerType == PlayerType.PLAYER_ESAU then return "esau" end
+        return nil
+    end
+
+    local function GetNormalTwinPair(player)
+        local role = GetNormalTwinRole(player)
+        if not role or not player.GetOtherTwin then return nil end
+        local ok, other = pcall(function() return player:GetOtherTwin() end)
+        if not ok or not other or other == player then return nil end
+        local otherRole = GetNormalTwinRole(other)
+        if role == "jacob" and otherRole == "esau" then return { jacob=player, esau=other } end
+        if role == "esau" and otherRole == "jacob" then return { jacob=other, esau=player } end
+        return nil
+    end
+
+    local function IsStyleEligibleForPlayer(player, style)
+        if not style then return false end
+        if style.eligibility == "normal_jacob_esau_pair" then
+            return GetNormalTwinPair(player) ~= nil
+        end
+        return true
+    end
+
+    local function ResolveStyleResources(style, role)
+        if type(style) ~= "table" then return nil end
+        local resourceSet = style
+        if style.pairRoles then
+            resourceSet = role and style.pairRoles[role] or nil
+            if not resourceSet then
+                DebugLog("[neverbirth] Everchanging style " .. tostring(style.id)
+                    .. " missing paired role " .. tostring(role))
+                return nil
+            end
+        end
+        local resolved = { playerAnm2 = nil, costumes = {} }
+        for _, slot in ipairs(resourceSet.slots or {}) do
+            local resource = resourceSet.resources and resourceSet.resources[slot]
+            if slot == "full" then
+                local anm2 = resource and resource.anm2
+                if type(anm2) ~= "string" or anm2 == "" then return nil end
+                resolved.playerAnm2 = anm2
+            else
+                local costumePath = resource and resource.costume
+                local costumeId = costumePath and GetCostumeId(costumePath) or nil
+                if not costumeId then
+                    DebugLog("[neverbirth] Everchanging style " .. tostring(style.id)
+                        .. " role " .. tostring(role or "regular")
+                        .. " failed at slot " .. tostring(slot)
+                        .. " path " .. tostring(costumePath))
+                    return nil
+                end
+                resolved.costumes[#resolved.costumes + 1] = {
+                    id = costumeId,
+                    path = costumePath,
+                    slot = slot,
+                }
+            end
+        end
+        return resolved
+    end
+
+    local function ResolveStyleCostumes(style, role)
+        local resolved = ResolveStyleResources(style, role)
+        return resolved and resolved.costumes or nil
+    end
+
+    local function SelectStyle(player, currentStyleId, registry)
+        registry = registry or STYLE_REGISTRY
+        if type(registry) ~= "table" or #registry == 0 then
+            if not emptyRegistryLogged then
+                emptyRegistryLogged = true
+                DebugLog("[neverbirth] Everchanging style registry is empty")
+            end
+            return nil
+        end
+        local eligible = {}
+        for _, style in ipairs(registry) do
+            if IsStyleEligibleForPlayer(player, style) then
+                eligible[#eligible + 1] = style
+            end
+        end
+        if #eligible == 0 then return nil end
+        local candidates = {}
+        for _, style in ipairs(eligible) do
+            if #eligible == 1 or style.id ~= currentStyleId then
+                candidates[#candidates + 1] = style
+            end
+        end
+        if #candidates == 0 then return eligible[1] end
+        if not player or not player.GetCollectibleRNG or not IsValidItemId(EVERCHANGING) then
+            DebugLog("[neverbirth] Everchanging collectible RNG unavailable")
+            return nil
+        end
+        local ok, rng = pcall(function() return player:GetCollectibleRNG(EVERCHANGING) end)
+        if not ok or not rng or not rng.RandomInt then
+            DebugLog("[neverbirth] Everchanging collectible RNG resolution failed")
+            return nil
+        end
+        local rollOk, roll = pcall(function() return rng:RandomInt(#candidates) end)
+        if not rollOk then
+            DebugLog("[neverbirth] Everchanging collectible RNG draw failed")
+            return nil
+        end
+        return candidates[(tonumber(roll) or 0) % #candidates + 1]
+    end
+    local function ResolveStrangerPlayerType()
+        if strangerPlayerTypeResolved then
+            return strangerPlayerType
+        end
+        strangerPlayerTypeResolved = true
+        if Isaac and Isaac.GetPlayerTypeByName then
+            local ok, resolved = pcall(function()
+                return Isaac.GetPlayerTypeByName("Stranger", false)
+            end)
+            if ok and type(resolved) == "number" and resolved >= 0 then
+                strangerPlayerType = resolved
+            end
+        end
+        return strangerPlayerType
+    end
+
+    local function IsCompatiblePlayer(player, runtime)
+        if not player then
+            return false
+        end
+        local strangerType = ResolveStrangerPlayerType()
+        if strangerType ~= nil and player.GetPlayerType then
+            local ok, playerType = pcall(function()
+                return player:GetPlayerType()
+            end)
+            if ok and playerType == strangerType then
+                return false
+            end
+        end
+        if not player.GetSprite then
+            return false
+        end
+        local ok, sprite = pcall(function()
+            return player:GetSprite()
+        end)
+        if not ok or not sprite or not sprite.GetFilename then
+            return false
+        end
+        local filenameOk, filename = pcall(function()
+            return sprite:GetFilename()
+        end)
+        if not filenameOk then
+            return false
+        end
+        filename = tostring(filename or ""):gsub("\\", "/"):lower()
+        local applied = runtime and tostring(runtime.appliedPlayerAnm2 or ""):gsub("\\", "/"):lower() or ""
+        if applied ~= "" and filename == applied then
+            filename = tostring(runtime.originalSpriteFilename or ""):gsub("\\", "/"):lower()
+        end
+        return filename:match("001%.000_player%.anm2$") ~= nil
+    end
+    local function NormalizeAssetPath(path)
+        return tostring(path or ""):gsub("\\", "/"):lower()
+    end
+
+    local function GetPlayerSprite(player)
+        if not player or not player.GetSprite then
+            return nil
+        end
+        local ok, sprite = pcall(function()
+            return player:GetSprite()
+        end)
+        return ok and sprite or nil
+    end
+
+    local function GetSpriteFilename(sprite)
+        if not sprite or not sprite.GetFilename then
+            return nil
+        end
+        local ok, filename = pcall(function()
+            return sprite:GetFilename()
+        end)
+        return ok and tostring(filename or "") or nil
+    end
+
+    local function IsManagedPlayerAnm2(path)
+        local normalized = NormalizeAssetPath(path)
+        if normalized == "" then
+            return false
+        end
+        for _, style in ipairs(STYLE_REGISTRY) do
+            local full = style.resources and style.resources.full
+            if full and NormalizeAssetPath(full.anm2) == normalized then
+                return true
+            end
+        end
+        return false
+    end
+
+    local function CaptureOriginalPlayerAnm2(runtime, sprite)
+        if runtime.originalSpriteFilename and runtime.originalSpriteFilename ~= "" then
+            return runtime.originalSpriteFilename
+        end
+        local currentPath = GetSpriteFilename(sprite)
+        if currentPath and currentPath ~= "" and not IsManagedPlayerAnm2(currentPath) then
+            runtime.originalSpriteFilename = currentPath
+        end
+        return runtime.originalSpriteFilename
+    end
+
+    local function CaptureSpritePlayback(sprite)
+        local playback = { animation = nil, frame = 0, overlayAnimation = nil, overlayFrame = 0 }
+        pcall(function()
+            if sprite.GetAnimation then playback.animation = sprite:GetAnimation() end
+            if sprite.GetFrame then playback.frame = sprite:GetFrame() end
+            if sprite.GetOverlayAnimation then playback.overlayAnimation = sprite:GetOverlayAnimation() end
+            if sprite.GetOverlayFrame then playback.overlayFrame = sprite:GetOverlayFrame() end
+        end)
+        return playback
+    end
+
+    local function RestoreSpritePlayback(sprite, playback)
+        if playback.animation and playback.animation ~= "" and sprite.SetFrame then
+            sprite:SetFrame(playback.animation, playback.frame or 0)
+        end
+        if playback.overlayAnimation and playback.overlayAnimation ~= "" and sprite.SetOverlayFrame then
+            sprite:SetOverlayFrame(playback.overlayAnimation, playback.overlayFrame or 0)
+        end
+    end
+
+    local function LoadPlayerAnm2(sprite, anm2Path)
+        if not sprite or not sprite.Load or type(anm2Path) ~= "string" or anm2Path == "" then
+            return false
+        end
+        local playback = CaptureSpritePlayback(sprite)
+        local ok, err = pcall(function()
+            sprite:Load(anm2Path, true)
+            RestoreSpritePlayback(sprite, playback)
+        end)
+        if not ok then
+            DebugLog("[neverbirth] Everchanging failed to load player ANM2 "
+                .. tostring(anm2Path) .. ": " .. tostring(err))
+        end
+        return ok
+    end
+
+    local function ApplyPlayerAnm2(player, runtime, anm2Path)
+        local sprite = GetPlayerSprite(player)
+        if not sprite or not sprite.Load then
+            return false
+        end
+        if NormalizeAssetPath(GetSpriteFilename(sprite)) == NormalizeAssetPath(anm2Path) then
+            runtime.appliedPlayerAnm2 = anm2Path
+            return true
+        end
+        if not CaptureOriginalPlayerAnm2(runtime, sprite) then
+            DebugLog("[neverbirth] Everchanging could not resolve the original player ANM2")
+            return false
+        end
+        if not LoadPlayerAnm2(sprite, anm2Path) then
+            return false
+        end
+        runtime.appliedPlayerAnm2 = anm2Path
+        return true
+    end
+
+    local function RestorePlayerAnm2(player, runtime)
+        local appliedPath = runtime.appliedPlayerAnm2
+        if not appliedPath then
+            return false
+        end
+        local sprite = GetPlayerSprite(player)
+        local originalPath = runtime.originalSpriteFilename
+        local currentPath = GetSpriteFilename(sprite)
+        runtime.appliedPlayerAnm2 = nil
+        if not sprite or not originalPath then
+            return false
+        end
+        if NormalizeAssetPath(currentPath) == NormalizeAssetPath(originalPath) then
+            return true
+        end
+        if NormalizeAssetPath(currentPath) ~= NormalizeAssetPath(appliedPath)
+            and not IsManagedPlayerAnm2(currentPath) then
+            return false
+        end
+        local ok = LoadPlayerAnm2(sprite, originalPath)
+        if not ok then
+            DebugLog("[neverbirth] Everchanging failed to restore player ANM2 "
+                .. tostring(originalPath))
+        end
+        return ok
+    end
+    local function ClearEverchangingStyle(player)
+        local runtime = GetEverchangingRuntime(player)
+        if not runtime then
+            return false
+        end
+        local changedAny = RestorePlayerAnm2(player, runtime)
+        for _, costume in ipairs(runtime.appliedCostumeIds) do
+            local costumeId = type(costume) == "table" and costume.id or costume
+            if type(costumeId) == "number"
+                and player.TryRemoveNullCostume then
+                local ok = pcall(function()
+                    player:TryRemoveNullCostume(costumeId)
+                end)
+                changedAny = changedAny or ok
+            end
+        end
+        runtime.appliedStyleId = nil
+        runtime.appliedRole = nil
+        runtime.appliedCostumeIds = {}
+        runtime.failedStyleId = nil
+        runtime.dirty = false
+        return changedAny
+    end
+
+    local function CostumeListsMatch(left, right)
+        if #left ~= #right then
+            return false
+        end
+        for index = 1, #left do
+            local leftId = type(left[index]) == "table" and left[index].id or left[index]
+            local rightId = type(right[index]) == "table" and right[index].id or right[index]
+            if leftId ~= rightId then
+                return false
+            end
+        end
+        return true
+    end
+
+    local function PlayerAnm2Matches(player, expectedPath)
+        if not expectedPath then
+            return true
+        end
+        local currentPath = GetSpriteFilename(GetPlayerSprite(player))
+        if not currentPath then
+            return nil
+        end
+        return NormalizeAssetPath(currentPath) == NormalizeAssetPath(expectedPath)
+    end
+
+    local function ApplyEverchangingStyle(player, styleId, role)
+        local runtime = GetEverchangingRuntime(player)
+        if not runtime then return false end
+        local style = styleId and STYLE_REGISTRY.byId[styleId] or nil
+        if not style or not IsStyleEligibleForPlayer(player, style) then
+            ClearEverchangingStyle(player)
+            return false
+        end
+        if not IsCompatiblePlayer(player, runtime) then
+            ClearEverchangingStyle(player)
+            runtime.failedStyleId = styleId
+            runtime.dirty = false
+            return false
+        end
+        local resources = ResolveStyleResources(style, role)
+        if not resources then
+            ClearEverchangingStyle(player)
+            runtime.failedStyleId = styleId
+            runtime.dirty = false
+            return false
+        end
+        local styleStateMatches = runtime.appliedStyleId == styleId
+            and runtime.appliedRole == role
+            and runtime.appliedPlayerAnm2 == resources.playerAnm2
+            and CostumeListsMatch(runtime.appliedCostumeIds, resources.costumes)
+        if styleStateMatches and PlayerAnm2Matches(player, resources.playerAnm2) ~= false then
+            runtime.failedStyleId = nil
+            runtime.dirty = false
+            return true
+        end
+        if styleStateMatches and resources.playerAnm2 then
+            runtime.appliedPlayerAnm2 = nil
+            if ApplyPlayerAnm2(player, runtime, resources.playerAnm2) then
+                if not runtime.anm2DriftLogged then
+                    runtime.anm2DriftLogged = true
+                    DebugLog("[neverbirth] Everchanging repaired a player ANM2 reset for style "
+                        .. tostring(styleId))
+                end
+                runtime.failedStyleId = nil
+                runtime.dirty = false
+                return true
+            end
+            runtime.failedStyleId = styleId
+            runtime.dirty = false
+            return false
+        end
+        ClearEverchangingStyle(player)
+        if resources.playerAnm2 and not ApplyPlayerAnm2(player, runtime, resources.playerAnm2) then
+            runtime.failedStyleId = styleId
+            runtime.dirty = false
+            return false
+        end
+        local applied = {}
+        for _, costume in ipairs(resources.costumes) do
+            if not player.AddNullCostume then break end
+            local ok = pcall(function() player:AddNullCostume(costume.id) end)
+            if not ok then break end
+            applied[#applied + 1] = costume
+        end
+        if #applied ~= #resources.costumes then
+            runtime.appliedCostumeIds = applied
+            ClearEverchangingStyle(player)
+            runtime.failedStyleId = styleId
+            DebugLog("[neverbirth] Everchanging failed to apply style " .. tostring(styleId)
+                .. " role " .. tostring(role or "regular"))
+            return false
+        end
+        runtime.appliedStyleId = styleId
+        runtime.appliedRole = role
+        runtime.appliedCostumeIds = applied
+        runtime.failedStyleId = nil
+        runtime.dirty = false
+        return true
+    end
+    local function GetEverchangingCount(player)
+        if not player or not player.GetCollectibleNum or not IsValidItemId(EVERCHANGING) then
+            return 0
+        end
+        local ok, count = pcall(function()
+            return player:GetCollectibleNum(EVERCHANGING)
+        end)
+        if not ok then
+            return 0
+        end
+        return math.max(0, math.floor(tonumber(count) or 0))
+    end
+
+    local function UpdateEverchangingSelection(player)
+        local state = GetEverchangingPlayerState(player)
+        local runtime = GetEverchangingRuntime(player)
+        if not state or not runtime then
+            return nil, nil, 0, false
+        end
+
+        local count = GetEverchangingCount(player)
+        local changed = count ~= state.knownCopies
+        local styleChanged = false
+        if count <= 0 then
+            if state.styleId ~= nil or state.knownCopies ~= 0 then
+                state.styleId = nil
+                state.knownCopies = 0
+                SaveMusicboxData()
+            end
+            return state, runtime, 0, changed
+        end
+
+        local draws = math.max(0, count - state.knownCopies)
+        if not state.styleId and draws == 0 then
+            draws = 1
+        end
+        for _ = 1, draws do
+            local selected = SelectStyle(player, state.styleId, STYLE_REGISTRY)
+            if selected then
+                styleChanged = styleChanged or state.styleId ~= selected.id
+                state.styleId = selected.id
+                state.rollCount = state.rollCount + 1
+            end
+        end
+        if changed or draws > 0 then
+            state.knownCopies = count
+            SaveMusicboxData()
+        end
+        if changed or styleChanged then
+            runtime.dirty = true
+        end
+        return state, runtime, count, changed or styleChanged
+    end
+
+    local function SyncEverchangingVisual(player, state, runtime, count)
+        if not state or not runtime then
+            return false
+        end
+        if count <= 0 then
+            if runtime.appliedStyleId ~= nil
+                or runtime.appliedRole ~= nil
+                or #runtime.appliedCostumeIds > 0
+                or runtime.appliedPlayerAnm2 ~= nil
+                or runtime.failedStyleId ~= nil then
+                ClearEverchangingStyle(player)
+            else
+                runtime.dirty = false
+            end
+            return false
+        end
+
+        local playerAnm2Drifted = false
+        local currentStyle = state.styleId and STYLE_REGISTRY.byId[state.styleId] or nil
+        local fullResource = currentStyle
+            and not currentStyle.pairRoles
+            and currentStyle.resources
+            and currentStyle.resources.full
+            or nil
+        if runtime.appliedStyleId == state.styleId
+            and runtime.appliedRole == nil
+            and runtime.appliedPlayerAnm2
+            and fullResource
+            and fullResource.anm2 then
+            playerAnm2Drifted = PlayerAnm2Matches(player, fullResource.anm2) == false
+        end
+        if runtime.dirty
+            or playerAnm2Drifted
+            or (runtime.appliedStyleId ~= state.styleId
+                and runtime.failedStyleId ~= state.styleId) then
+            ApplyEverchangingStyle(player, state.styleId, nil)
+        end
+        return playerAnm2Drifted
+    end
+
+    local TWIN_STYLE_ID = "tantan_daodao_twins"
+
+    local function ApplyEverchangingPair(pair, style)
+        local jacobRuntime = GetEverchangingRuntime(pair.jacob)
+        local esauRuntime = GetEverchangingRuntime(pair.esau)
+        local jacobResources = ResolveStyleResources(style, "jacob")
+        local esauResources = ResolveStyleResources(style, "esau")
+        if not jacobRuntime or not esauRuntime or not jacobResources or not esauResources
+            or not IsCompatiblePlayer(pair.jacob, jacobRuntime)
+            or not IsCompatiblePlayer(pair.esau, esauRuntime) then
+            ClearEverchangingStyle(pair.jacob)
+            ClearEverchangingStyle(pair.esau)
+            return false
+        end
+
+        local jacobOk = ApplyEverchangingStyle(pair.jacob, style.id, "jacob")
+        local esauOk = ApplyEverchangingStyle(pair.esau, style.id, "esau")
+        if not jacobOk or not esauOk then
+            ClearEverchangingStyle(pair.jacob)
+            ClearEverchangingStyle(pair.esau)
+            return false
+        end
+        return true
+    end
+
+    local function SyncEverchangingPlayer(player)
+        local pair = GetNormalTwinPair(player)
+        if pair then
+            local jacobState, jacobRuntime, jacobCount, jacobChanged = UpdateEverchangingSelection(pair.jacob)
+            local esauState, esauRuntime, esauCount, esauChanged = UpdateEverchangingSelection(pair.esau)
+            local pairActive =
+                (jacobCount > 0 and jacobState and jacobState.styleId == TWIN_STYLE_ID)
+                or (esauCount > 0 and esauState and esauState.styleId == TWIN_STYLE_ID)
+            if pairActive then
+                ApplyEverchangingPair(pair, STYLE_REGISTRY.byId[TWIN_STYLE_ID])
+            else
+                SyncEverchangingVisual(pair.jacob, jacobState, jacobRuntime, jacobCount)
+                SyncEverchangingVisual(pair.esau, esauState, esauRuntime, esauCount)
+            end
+            return jacobChanged or esauChanged
+        end
+
+        local state, runtime, count, changed = UpdateEverchangingSelection(player)
+        if state and state.styleId == TWIN_STYLE_ID then
+            ClearEverchangingStyle(player)
+            runtime.dirty = false
+            return changed
+        end
+        SyncEverchangingVisual(player, state, runtime, count)
+        return changed
+    end
+    local function ForceEverchangingStyle(player, styleId)
+        if not player or GetEverchangingCount(player) <= 0 then
+            return false, "the current player must hold Everchanging"
+        end
+        if type(styleId) ~= "string" or not STYLE_REGISTRY.byId[styleId] then
+            return false, "unknown style " .. tostring(styleId)
+        end
+        if not IsStyleEligibleForPlayer(player, STYLE_REGISTRY.byId[styleId]) then
+            return false, "style is not eligible for the current player"
+        end
+
+        local state = GetEverchangingPlayerState(player)
+        local runtime = GetEverchangingRuntime(player)
+        if not state or not runtime then
+            return false, "player state is unavailable"
+        end
+
+        state.styleId = styleId
+        state.knownCopies = GetEverchangingCount(player)
+        SaveMusicboxData()
+        runtime.failedStyleId = nil
+        runtime.dirty = true
+        SyncEverchangingPlayer(player)
+        if GetEverchangingRuntime(player).appliedStyleId ~= styleId then
+            return false, "style application failed"
+        end
+        return true, "forced style " .. styleId
+    end
+
+    local function WriteEverchangingCommandResult(message)
+        local line = "[neverbirth] Everchanging: " .. tostring(message)
+        DebugLog(line)
+        return line
+    end
+
+    local function OnEverchangingExecuteCommand(_, command, parameters)
+        if tostring(command or ""):lower() ~= DEBUG_COMMAND then
+            return nil
+        end
+
+        local alias = tostring(parameters or ""):match("^%s*(%S+)")
+        alias = tostring(alias or ""):lower()
+        local styleAliases = {
+            ringo = "ringotsuga_apple_storyteller",
+            ringotsuga = "ringotsuga_apple_storyteller",
+            banana = "blue_banana_peel",
+            blue_banana = "blue_banana_peel",
+            tokarev = "tokarev_cloak",
+            twins = "tantan_daodao_twins",
+            tantan = "tantan_daodao_twins",
+            daodao = "tantan_daodao_twins",
+            yoon = "yoontoons_storyteller",
+            yoontoons = "yoontoons_storyteller",
+        }
+        local styleId = styleAliases[alias]
+        if not styleId then
+            return WriteEverchangingCommandResult(
+                "usage: nb_everchanging ringo|banana|tokarev|twins|yoontoons"
+            )
+        end
+
+        local player = GetPlayers()[1]
+        if not player then
+            return WriteEverchangingCommandResult("no player is available")
+        end
+
+        local _, reason = ForceEverchangingStyle(player, styleId)
+        return WriteEverchangingCommandResult(reason)
+    end
+
+    local function MarkAllEverchangingPlayersDirty()
+        for _, player in ipairs(GetPlayers()) do
+            local runtime = GetEverchangingRuntime(player)
+            if runtime then
+                runtime.dirty = true
+            end
+        end
+    end
+
+    local function ClearEverchangingRuntime(player, removeCostume)
+        local runtime = GetEverchangingRuntime(player)
+        if not runtime then
+            return
+        end
+        if removeCostume then
+            ClearEverchangingStyle(player)
+        end
+        local data = player:GetData()
+        data[PLAYER_RUNTIME_KEY] = {
+            appliedStyleId = nil,
+            appliedRole = nil,
+            appliedPlayerAnm2 = nil,
+
+            originalSpriteFilename = nil,
+            appliedCostumeIds = {},
+            dirty = true,
+        }
+    end
+
+    local function OnEverchangingPlayerUpdate(_, player)
+        SyncEverchangingPlayer(player)
+        return nil
+    end
+
+    local function OnEverchangingPlayerInit(_, player)
+        local runtime = GetEverchangingRuntime(player)
+        if runtime then
+            runtime.dirty = true
+        end
+        SyncEverchangingPlayer(player)
+        return nil
+    end
+
+    local function OnEverchangingNewRoom(_)
+        MarkAllEverchangingPlayersDirty()
+        return nil
+    end
+
+    local function OnEverchangingNewLevel(_)
+        MarkAllEverchangingPlayersDirty()
+        return nil
+    end
+
+    local function OnEverchangingGameStarted(_, isContinued)
+        local players = GetPlayers()
+        if isContinued then
+            GetEverchangingRunState()
+        else
+            for _, player in ipairs(players) do
+                ClearEverchangingStyle(player)
+                ClearEverchangingRuntime(player, false)
+            end
+            ResetEverchangingRunState()
+        end
+        for _, player in ipairs(players) do
+            local runtime = GetEverchangingRuntime(player)
+            if runtime then
+                runtime.dirty = true
+            end
+            SyncEverchangingPlayer(player)
+        end
+        return nil
+    end
+
+    Neverbirth.Everchanging = {
+        StyleRegistry = STYLE_REGISTRY,
+    }
+
+    Neverbirth.EverchangingTestAPI = {
+        StyleSpecs = STYLE_SPECS,
+        StyleRegistry = STYLE_REGISTRY,
+        BuildStyleRegistry = BuildStyleRegistry,
+        ResolveStyleCostumes = ResolveStyleCostumes,
+        ResolveStyleResources = ResolveStyleResources,
+        SelectStyle = SelectStyle,
+        GetNormalTwinRole = GetNormalTwinRole,
+        GetNormalTwinPair = GetNormalTwinPair,
+        IsStyleEligible = IsStyleEligibleForPlayer,
+        IsCompatiblePlayer = IsCompatiblePlayer,
+        GetPlayerState = GetEverchangingPlayerState,
+        ForceStyle = ForceEverchangingStyle,
+        SyncPlayer = SyncEverchangingPlayer,
+        ResetRunState = ResetEverchangingRunState,
+        ClearRuntime = ClearEverchangingRuntime,
+        GetRuntime = GetEverchangingRuntime,
+        ApplyPair = ApplyEverchangingPair,
+        GetItemId = function() return EVERCHANGING end,
+        Callbacks = {
+            PlayerUpdate = OnEverchangingPlayerUpdate,
+            PlayerInit = OnEverchangingPlayerInit,
+            NewRoom = OnEverchangingNewRoom,
+            NewLevel = OnEverchangingNewLevel,
+            GameStarted = OnEverchangingGameStarted,
+            ExecuteCommand = OnEverchangingExecuteCommand,
+        },
+    }
+
+    if ModCallbacks.MC_POST_PLAYER_UPDATE then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, OnEverchangingPlayerUpdate)
+    end
+    if ModCallbacks.MC_POST_PLAYER_INIT then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, OnEverchangingPlayerInit)
+    end
+    if ModCallbacks.MC_POST_NEW_ROOM then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, OnEverchangingNewRoom)
+    end
+    if ModCallbacks.MC_POST_NEW_LEVEL then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, OnEverchangingNewLevel)
+    end
+    if ModCallbacks.MC_POST_GAME_STARTED then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, OnEverchangingGameStarted)
+    end
+    if ModCallbacks.MC_EXECUTE_CMD then
+        Neverbirth:AddCallback(ModCallbacks.MC_EXECUTE_CMD, OnEverchangingExecuteCommand)
+    end
+end)()
+-- EVERCHANGING_END
+
+-- DOG_FOOD_SERIES_BEGIN
+;(function()
+    local ITEM_DEFS = {
+        { key = "ProteinStrip", itemId = Items.ProteinStrip, cache = "damage", amount = 0.15 },
+        { key = "EnergyKibble", itemId = Items.EnergyKibble, cache = "tears", amount = 0.15 },
+        { key = "LeanCan", itemId = Items.LeanCan, cache = "speed", amount = 0.10 },
+        { key = "DHAFishOil", itemId = Items.DHAFishOil, cache = "range", amount = 16 },
+        { key = "DentalChew", itemId = Items.DentalChew, cache = nil },
+        { key = "LuckyLiverBites", itemId = Items.LuckyLiverBites, cache = "luck", amount = 0.25 },
+        { key = "GoatMilkPudding", itemId = Items.GoatMilkPudding, cache = nil, soulHeartHalfUnits = 1 },
+    }
+    local ITEM_BY_ID = {}
+    for _, def in ipairs(ITEM_DEFS) do
+        if IsValidItemId(def.itemId) then
+            ITEM_BY_ID[def.itemId] = def
+        end
+    end
+
+    local CACHE_DAMAGE = (CacheFlag and CacheFlag.CACHE_DAMAGE) or 1
+    local CACHE_SPEED = (CacheFlag and CacheFlag.CACHE_SPEED) or 8
+    local CACHE_FIREDELAY = (CacheFlag and CacheFlag.CACHE_FIREDELAY) or 16
+    local CACHE_RANGE = (CacheFlag and CacheFlag.CACHE_RANGE) or 64
+    local CACHE_LUCK = (CacheFlag and CacheFlag.CACHE_LUCK) or 1024
+    local PLAYER_ENTITY = (EntityType and EntityType.ENTITY_PLAYER) or 1
+    local PICKUP_ENTITY = (EntityType and EntityType.ENTITY_PICKUP) or 5
+    local COLLECTIBLE_PICKUP = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
+    local RECONCILE_INTERVAL = 15
+    local PICKUP_SETTLE_FRAMES = 2
+    local DENTAL_PUSH_PER_COPY = 1.25
+    local DENTAL_SPEED_CAP = 4.5
+    local DENTAL_COOLDOWN_FRAMES = 8
+    local DENTAL_TEAR_KEY = "NeverbirthDentalChewPlayerTear"
+    local DENTAL_SOURCE_KEY = "NeverbirthDentalChewSourcePlayer"
+    local DENTAL_COOLDOWN_KEY = "NeverbirthDentalChewLastPushByPlayer"
+
+    local runtime = {
+        frame = 0,
+        pending = {},
+        incompatibleHealthLogged = {},
+    }
+
+    local function playerKey(player)
+        return tostring(player and player.InitSeed or "")
+    end
+
+    local function itemCount(player, itemId)
+        if not player or not player.GetCollectibleNum or not IsValidItemId(itemId) then
+            return 0
+        end
+        local ok, count = pcall(function() return player:GetCollectibleNum(itemId) end)
+        return ok and math.max(0, math.floor(tonumber(count) or 0)) or 0
+    end
+
+    local function resetRunData()
+        EnsureMusicboxDataLoaded()
+        musicboxSaveData.dogFoodSeries = {
+            runSeed = GetCurrentRunSeed(),
+            players = {},
+        }
+        SaveMusicboxData()
+        return musicboxSaveData.dogFoodSeries
+    end
+
+    local function runData()
+        EnsureMusicboxDataLoaded()
+        local data = musicboxSaveData.dogFoodSeries
+        if type(data) ~= "table" or tostring(data.runSeed or "") ~= tostring(GetCurrentRunSeed() or "") then
+            return resetRunData()
+        end
+        if type(data.players) ~= "table" then data.players = {} end
+        return data
+    end
+
+    local function playerRecord(player, create)
+        local key = playerKey(player)
+        if key == "" then return nil end
+        local data = runData()
+        local record = data.players[key]
+        if type(record) ~= "table" and create then
+            record = { counts = {} }
+            data.players[key] = record
+        end
+        if type(record) == "table" and type(record.counts) ~= "table" then record.counts = {} end
+        return record
+    end
+
+    local function getProcessedCount(player, itemId)
+        local record = playerRecord(player, false)
+        if not record then return 0 end
+        return math.max(0, math.floor(tonumber(record.counts[tostring(itemId)] or record.counts[itemId]) or 0))
+    end
+
+    local function setProcessedCount(player, itemId, count)
+        local record = playerRecord(player, true)
+        if not record then return false end
+        record.counts[tostring(itemId)] = math.max(0, math.floor(tonumber(count) or 0))
+        return true
+    end
+
+    local function addTears(maxFireDelay, amount)
+        local delay = tonumber(maxFireDelay) or 0
+        local bonus = math.max(0, tonumber(amount) or 0)
+        if bonus <= 0 then return delay end
+        local tears = 30 / math.max(0.0001, delay + 1)
+        return 30 / math.max(0.0001, tears + bonus) - 1
+    end
+
+    local function grantPickupBenefits(player, def, copies)
+        copies = math.max(0, math.floor(tonumber(copies) or 0))
+        if not player or not def or copies <= 0 then return false end
+
+        local beforeMax = player.GetMaxHearts and (tonumber(player:GetMaxHearts()) or 0) or 0
+        if player.AddMaxHearts then
+            pcall(function() player:AddMaxHearts(2 * copies, true) end)
+        end
+        local afterMax = player.GetMaxHearts and (tonumber(player:GetMaxHearts()) or beforeMax) or beforeMax
+        if afterMax > beforeMax and player.AddHearts then
+            -- AddHearts clamps at the new maximum, so this fills all red hearts without
+            -- changing soul-only/coin/other custom health models when AddMaxHearts refuses.
+            pcall(function() player:AddHearts(afterMax) end)
+        elseif afterMax <= beforeMax then
+            local key = playerKey(player)
+            if key ~= "" and not runtime.incompatibleHealthLogged[key] then
+                runtime.incompatibleHealthLogged[key] = true
+                DebugLog("[neverbirth] Dog food red-heart container skipped for incompatible player " .. key)
+            end
+        end
+
+        if def.soulHeartHalfUnits and player.AddSoulHearts then
+            pcall(function() player:AddSoulHearts(def.soulHeartHalfUnits * copies) end)
+        end
+        return true
+    end
+
+    local function reconcilePlayerItem(player, def)
+        local current = itemCount(player, def.itemId)
+        local processed = getProcessedCount(player, def.itemId)
+        if current > processed then
+            grantPickupBenefits(player, def, current - processed)
+            setProcessedCount(player, def.itemId, current)
+            return true
+        elseif current < processed then
+            -- Losing/rerolling a copy lowers the baseline, so a later genuine reacquisition
+            -- receives its one-time pickup reward exactly once again.
+            setProcessedCount(player, def.itemId, current)
+            return true
+        end
+        return false
+    end
+
+    local function hasPendingPlayerItem(player, itemId)
+        local key = playerKey(player)
+        for _, pending in pairs(runtime.pending) do
+            if pending.playerKey == key and pending.itemId == itemId then return true end
+        end
+        return false
+    end
+
+    local function pickupKey(pickup)
+        if pickup and pickup.InitSeed ~= nil then return "seed:" .. tostring(pickup.InitSeed) end
+        return tostring(pickup)
+    end
+
+    local function trackPickupCollision(_, pickup, collider)
+        if not pickup or pickup.Type ~= PICKUP_ENTITY or pickup.Variant ~= COLLECTIBLE_PICKUP then return nil end
+        local def = ITEM_BY_ID[tonumber(pickup.SubType) or 0]
+        if not def then return nil end
+        local player = collider and collider.ToPlayer and collider:ToPlayer() or nil
+        if not player then return nil end
+        local key = playerKey(player) .. "|" .. pickupKey(pickup)
+        if not runtime.pending[key] then
+            runtime.pending[key] = {
+                player = player,
+                playerKey = playerKey(player),
+                itemId = def.itemId,
+                beforeCount = itemCount(player, def.itemId),
+                due = runtime.frame + PICKUP_SETTLE_FRAMES,
+            }
+        end
+        return nil
+    end
+
+    local function processPending()
+        local changed = false
+        for key, pending in pairs(runtime.pending) do
+            if runtime.frame >= (pending.due or 0) then
+                local player = pending.player
+                local def = ITEM_BY_ID[pending.itemId]
+                if player and def then
+                    local current = itemCount(player, pending.itemId)
+                    local processed = getProcessedCount(player, pending.itemId)
+                    local baseline = math.max(processed, tonumber(pending.beforeCount) or 0)
+                    if current > baseline then
+                        grantPickupBenefits(player, def, current - baseline)
+                        setProcessedCount(player, pending.itemId, current)
+                        changed = true
+                    elseif current < processed then
+                        setProcessedCount(player, pending.itemId, current)
+                        changed = true
+                    end
+                end
+                runtime.pending[key] = nil
+            end
+        end
+        return changed
+    end
+
+    local function reconcileInventory()
+        local changed = false
+        for _, player in ipairs(GetPlayers()) do
+            for _, def in ipairs(ITEM_DEFS) do
+                if IsValidItemId(def.itemId) and not hasPendingPlayerItem(player, def.itemId) then
+                    changed = reconcilePlayerItem(player, def) or changed
+                end
+            end
+        end
+        return changed
+    end
+
+    local function update()
+        runtime.frame = runtime.frame + 1
+        local changed = processPending()
+        if runtime.frame % RECONCILE_INTERVAL == 0 then
+            changed = reconcileInventory() or changed
+        end
+        if changed then SaveMusicboxData() end
+        return nil
+    end
+
+    local function evaluate(_, player, cacheFlag)
+        if not player then return nil end
+        if cacheFlag == CACHE_DAMAGE then
+            local count = itemCount(player, Items.ProteinStrip)
+            if count > 0 and type(player.Damage) == "number" then
+                player.Damage = player.Damage + 0.15 * count
+            end
+        elseif cacheFlag == CACHE_FIREDELAY then
+            local count = itemCount(player, Items.EnergyKibble)
+            if count > 0 and type(player.MaxFireDelay) == "number" then
+                player.MaxFireDelay = addTears(player.MaxFireDelay, 0.15 * count)
+            end
+        elseif cacheFlag == CACHE_SPEED then
+            local count = itemCount(player, Items.LeanCan)
+            if count > 0 and type(player.MoveSpeed) == "number" then
+                player.MoveSpeed = player.MoveSpeed + 0.10 * count
+            end
+        elseif cacheFlag == CACHE_RANGE then
+            local count = itemCount(player, Items.DHAFishOil)
+            if count > 0 and type(player.TearRange) == "number" then
+                player.TearRange = player.TearRange + 16 * count
+            end
+        elseif cacheFlag == CACHE_LUCK then
+            local count = itemCount(player, Items.LuckyLiverBites)
+            if count > 0 and type(player.Luck) == "number" then
+                player.Luck = player.Luck + 0.25 * count
+            end
+        end
+        return nil
+    end
+
+    local function directPlayerTearOwner(tear)
+        local spawner = tear and tear.SpawnerEntity
+        if not spawner or not spawner.ToPlayer then return nil end
+        local ok, player = pcall(function() return spawner:ToPlayer() end)
+        return ok and player or nil
+    end
+
+    local function markDentalTear(_, tear)
+        local player = directPlayerTearOwner(tear)
+        if not player or itemCount(player, Items.DentalChew) <= 0 or not tear.GetData then return nil end
+        local data = tear:GetData()
+        data[DENTAL_TEAR_KEY] = true
+        data[DENTAL_SOURCE_KEY] = playerKey(player)
+        return nil
+    end
+
+    local function hasFlag(entity, flag)
+        if not entity or not flag or flag == 0 or not entity.HasEntityFlags then return false end
+        local ok, result = pcall(function() return entity:HasEntityFlags(flag) end)
+        return ok and result == true
+    end
+
+    local function eligibleDentalTarget(collider)
+        if not collider or collider.Type == PLAYER_ENTITY or not collider.ToNPC then return nil end
+        local ok, npc = pcall(function() return collider:ToNPC() end)
+        if not ok or not npc then return nil end
+        if npc.IsBoss then
+            local bossOk, boss = pcall(function() return npc:IsBoss() end)
+            if bossOk and boss then return nil end
+        end
+        if npc.IsVulnerableEnemy then
+            local vulnerableOk, vulnerable = pcall(function() return npc:IsVulnerableEnemy() end)
+            if vulnerableOk and vulnerable ~= true then return nil end
+        end
+        if npc.IsActiveEnemy then
+            local activeOk, active = pcall(function() return npc:IsActiveEnemy(false) end)
+            if activeOk and active ~= true then return nil end
+        end
+        if EntityFlag then
+            if hasFlag(npc, EntityFlag.FLAG_BOSS)
+                or hasFlag(npc, EntityFlag.FLAG_FRIENDLY)
+                or hasFlag(npc, EntityFlag.FLAG_NO_KNOCKBACK)
+                or hasFlag(npc, EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK) then
+                return nil
+            end
+        end
+        -- A segmented main body owns a child segment but has no parent segment.
+        -- Reject only that body shape; ordinary summoned enemies remain eligible.
+        if npc.ChildNPC and not npc.ParentNPC then return nil end
+        return npc
+    end
+
+    local function vectorLength(vector)
+        local x, y = vector and tonumber(vector.X) or 0, vector and tonumber(vector.Y) or 0
+        return math.sqrt(x * x + y * y)
+    end
+
+    local function applyDentalPush(npc, direction, amount)
+        local length = vectorLength(direction)
+        if length <= 0 then return false end
+        local velocity = npc.Velocity or Vector(0, 0)
+        local x = (tonumber(velocity.X) or 0) + (tonumber(direction.X) or 0) / length * amount
+        local y = (tonumber(velocity.Y) or 0) + (tonumber(direction.Y) or 0) / length * amount
+        local resultLength = math.sqrt(x * x + y * y)
+        if resultLength > DENTAL_SPEED_CAP then
+            x = x / resultLength * DENTAL_SPEED_CAP
+            y = y / resultLength * DENTAL_SPEED_CAP
+        end
+        npc.Velocity = Vector(x, y)
+        return true
+    end
+
+    local function dentalCollision(_, tear, collider)
+        if not tear or not tear.GetData then return nil end
+        local tearData = tear:GetData()
+        if not tearData or tearData[DENTAL_TEAR_KEY] ~= true then return nil end
+        local player = directPlayerTearOwner(tear)
+        local key = playerKey(player)
+        if not player or key == "" or tearData[DENTAL_SOURCE_KEY] ~= key then return nil end
+        local copies = itemCount(player, Items.DentalChew)
+        if copies <= 0 then return nil end
+        local npc = eligibleDentalTarget(collider)
+        if not npc or not npc.GetData then return nil end
+        local npcData = npc:GetData()
+        if type(npcData[DENTAL_COOLDOWN_KEY]) ~= "table" then npcData[DENTAL_COOLDOWN_KEY] = {} end
+        local lastFrame = tonumber(npcData[DENTAL_COOLDOWN_KEY][key])
+        if lastFrame and runtime.frame - lastFrame < DENTAL_COOLDOWN_FRAMES then return nil end
+        if applyDentalPush(npc, tear.Velocity, DENTAL_PUSH_PER_COPY * copies) then
+            npcData[DENTAL_COOLDOWN_KEY][key] = runtime.frame
+        end
+        return nil
+    end
+
+    local function initializeContinuedPlayers()
+        local changed = false
+        for _, player in ipairs(GetPlayers()) do
+            if not playerRecord(player, false) then
+                for _, def in ipairs(ITEM_DEFS) do
+                    if IsValidItemId(def.itemId) then setProcessedCount(player, def.itemId, itemCount(player, def.itemId)) end
+                end
+                changed = true
+            end
+        end
+        if changed then SaveMusicboxData() end
+    end
+
+    local function gameStarted(_, isContinued)
+        runtime.frame = 0
+        runtime.pending = {}
+        runtime.incompatibleHealthLogged = {}
+        if isContinued then
+            runData()
+            initializeContinuedPlayers()
+        else
+            resetRunData()
+        end
+        return nil
+    end
+
+    local function resetTransient()
+        runtime.pending = {}
+        return nil
+    end
+
+    Neverbirth.DogFoodSeriesTestAPI = {
+        ItemDefs = ITEM_DEFS,
+        ItemById = ITEM_BY_ID,
+        Runtime = runtime,
+        AddTears = addTears,
+        GrantPickupBenefits = grantPickupBenefits,
+        ReconcilePlayerItem = reconcilePlayerItem,
+        GetProcessedCount = getProcessedCount,
+        EligibleDentalTarget = eligibleDentalTarget,
+        ApplyDentalPush = applyDentalPush,
+        Callbacks = {
+            Evaluate = evaluate,
+            TrackPickupCollision = trackPickupCollision,
+            Update = update,
+            MarkDentalTear = markDentalTear,
+            DentalCollision = dentalCollision,
+            GameStarted = gameStarted,
+        },
+    }
+
+    Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, evaluate)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, update)
+    if ModCallbacks.MC_PRE_PICKUP_COLLISION then
+        Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, trackPickupCollision, COLLECTIBLE_PICKUP)
+    end
+    if ModCallbacks.MC_POST_FIRE_TEAR then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, markDentalTear)
+    end
+    if ModCallbacks.MC_PRE_TEAR_COLLISION then
+        Neverbirth:AddCallback(ModCallbacks.MC_PRE_TEAR_COLLISION, dentalCollision)
+    end
+    if ModCallbacks.MC_POST_NEW_ROOM then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, resetTransient)
+    end
+    if ModCallbacks.MC_POST_NEW_LEVEL then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetTransient)
+    end
+    if ModCallbacks.MC_POST_GAME_STARTED then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, gameStarted)
+    end
+end)()
+-- DOG_FOOD_SERIES_END
+
+-- ACE_ANTI_CHEAT_SYSTEM_BEGIN
+;(function()
+    local ITEM_ID = Items.ACEAntiCheatSystem
+    local AUDIT_DURATION_MS = 5000
+    local AUDIT_PRESENTATION_STEP = 10
+    local AUDIT_FRAME_BUDGET_MS = 300
+    local AUDIT_MAX_SPIN_ITERATIONS = 20000000
+    local DEATH_THRESHOLD = 3
+    local FATAL_MESSAGE = "ACE Anti-Cheat: suspicious combat behavior detected."
+
+    local DATA_MONITORED = "NeverbirthACEMonitored"
+    local DATA_DAMAGE_EVENTS = "NeverbirthACEDamageEvents"
+    local DATA_DEATH_PROCESSED = "NeverbirthACEDeathProcessed"
+
+    -- Ordinary Repentance has no verified target-FPS or safe process-exit API.
+    -- ACE therefore combines the supported Broken Watch slowdown with a
+    -- deliberately expensive but strictly bounded main-thread workload.
+    -- The time budget and iteration guard prevent an infinite loop. The fatal
+    -- fallback is a real team wipe, not a Lua error that disables the mod.
+    local capabilities = {
+        sameHitDamageRewrite = false,
+        guardedDamageReplacement = true,
+        targetFps = false,
+        safeRoomSlowdown = true,
+        boundedFrameThrottle = true,
+        fatalProcessExit = false,
+        fatalLuaError = false,
+        fatalTeamKill = true,
+    }
+
+    local runtime = {
+        active = false,
+        frame = 0,
+        pendingDamage = {},
+        roomOneHitKills = 0,
+        lockUntilMs = 0,
+        fatalTriggered = false,
+        lastFatalMessage = nil,
+        playerDamageReplacementDepth = {},
+        slowRoom = nil,
+        previousBrokenWatchState = nil,
+        lastKilledPlayers = 0,
+        presentationPulses = 0,
+        workloadCalls = 0,
+        workloadIterations = 0,
+        workloadSink = 0,
+        warnings = {},
+    }
+
+    local function safeCall(target, methodName, ...)
+        if not target or type(target[methodName]) ~= "function" then return nil, false end
+        local ok, result = pcall(target[methodName], target, ...)
+        if not ok then return nil, false end
+        return result, true
+    end
+
+    local function dataOf(entity)
+        local data, ok = safeCall(entity, "GetData")
+        return ok and data or nil
+    end
+
+    local function itemCount(player)
+        if not player or not IsValidItemId(ITEM_ID) then return 0 end
+        local count, ok = safeCall(player, "GetCollectibleNum", ITEM_ID)
+        if ok and type(count) == "number" then return math.max(0, count) end
+        local held, heldOk = safeCall(player, "HasCollectible", ITEM_ID)
+        return heldOk and held == true and 1 or 0
+    end
+
+    local function anyHolder()
+        for _, player in ipairs(GetPlayers()) do
+            if itemCount(player) > 0 then return true end
+        end
+        return false
+    end
+
+    local function logOnce(key, message)
+        if runtime.warnings[key] then return end
+        runtime.warnings[key] = true
+        DebugLog(message)
+    end
+
+    local function realTimeMs()
+        if not Isaac or type(Isaac.GetTime) ~= "function" then
+            logOnce("clock", "[neverbirth][ACE] Isaac.GetTime is unavailable; real-time audits are disabled")
+            return nil
+        end
+        local ok, value = pcall(Isaac.GetTime)
+        if not ok or type(value) ~= "number" then
+            logOnce("clock", "[neverbirth][ACE] Isaac.GetTime failed; real-time audits are disabled")
+            return nil
+        end
+        return value
+    end
+
+    local function readWorkloadClock(clock)
+        if type(clock) ~= "function" then return nil end
+        local ok, value = pcall(clock)
+        if not ok then return nil end
+        return tonumber(value)
+    end
+
+    local function runAuditWorkload(clock, budgetMs, maxIterations)
+        if not runtime.active or runtime.lockUntilMs <= 0 then return 0 end
+
+        local workloadClock = clock
+        if type(workloadClock) ~= "function" then
+            workloadClock = Isaac and Isaac.GetTime or nil
+        end
+
+        local startedAt = readWorkloadClock(workloadClock)
+        if startedAt == nil then
+            logOnce("workload_clock", "[neverbirth][ACE] Audit workload clock is unavailable")
+            return 0
+        end
+
+        local requestedBudget = tonumber(budgetMs) or AUDIT_FRAME_BUDGET_MS
+        local frameBudget = math.min(AUDIT_FRAME_BUDGET_MS, math.max(0, requestedBudget))
+        local remaining = math.max(0, runtime.lockUntilMs - startedAt)
+        local deadline = startedAt + math.min(frameBudget, remaining)
+        if deadline <= startedAt then return 0 end
+
+        local requestedLimit = math.floor(tonumber(maxIterations) or AUDIT_MAX_SPIN_ITERATIONS)
+        local iterationLimit = math.min(AUDIT_MAX_SPIN_ITERATIONS, math.max(1, requestedLimit))
+        local iterations = 0
+        local current = startedAt
+        local sink = tonumber(runtime.workloadSink) or 0
+
+        -- Deliberately waste one main-thread time slice. The clock condition,
+        -- per-frame budget and iteration limit are all mandatory exit paths.
+        while current < deadline and iterations < iterationLimit do
+            iterations = iterations + 1
+            sink = (sink + (iterations % 997) * 17) % 2147483647
+            if iterations % 64 == 0 then
+                current = readWorkloadClock(workloadClock) or deadline
+            end
+        end
+
+        runtime.workloadSink = sink
+        runtime.workloadCalls = math.max(0, tonumber(runtime.workloadCalls) or 0) + 1
+        runtime.workloadIterations = math.max(0, tonumber(runtime.workloadIterations) or 0) + iterations
+        return iterations
+    end
+
+    local function playerKey(player)
+        return tostring(player and player.InitSeed or "")
+    end
+
+
+    local function currentGame()
+        if type(Game) ~= "function" then return nil end
+        local ok, value = pcall(Game)
+        return ok and value or nil
+    end
+
+    local function currentRoom()
+        local game = currentGame()
+        local room, ok = safeCall(game, "GetRoom")
+        return ok and room or nil
+    end
+
+    local function restoreRoomSlowdown()
+        local room = runtime.slowRoom
+        local previousState = tonumber(runtime.previousBrokenWatchState) or 0
+        runtime.slowRoom = nil
+        runtime.previousBrokenWatchState = nil
+        if not room then return false end
+
+        local _, ok = safeCall(room, "SetBrokenWatchState", previousState)
+        if not ok then
+            logOnce("slow_restore", "[neverbirth][ACE] Failed to restore the room''s previous Broken Watch state")
+        end
+        return ok
+    end
+
+    local function applyRoomSlowdown()
+        local room = currentRoom()
+        if not room then
+            logOnce("slow_room", "[neverbirth][ACE] Current room is unavailable; severe slowdown cannot be applied")
+            return false
+        end
+
+        if runtime.slowRoom ~= room then
+            restoreRoomSlowdown()
+            local previousState, stateOk = safeCall(room, "GetBrokenWatchState")
+            runtime.slowRoom = room
+            runtime.previousBrokenWatchState = stateOk and (tonumber(previousState) or 0) or 0
+        end
+
+        local _, ok = safeCall(room, "SetBrokenWatchState", 1)
+        if not ok then
+            logOnce("slow_apply", "[neverbirth][ACE] Room:SetBrokenWatchState(1) is unavailable")
+        end
+        return ok
+    end
+
+    local function pulseAuditPresentation(force)
+        if not force and runtime.frame % AUDIT_PRESENTATION_STEP ~= 0 then return false end
+        local game = currentGame()
+        if not game then return false end
+
+        -- These short pulses create a deliberately choppy presentation without
+        -- a busy loop or artificial CPU/memory pressure.
+        safeCall(game, "AddPixelation", 2)
+        safeCall(game, "Darken", 0.35, 2)
+        runtime.presentationPulses = math.max(0, tonumber(runtime.presentationPulses) or 0) + 1
+        return true
+    end
+
+    local function clearAuditState()
+        runtime.lockUntilMs = 0
+        restoreRoomSlowdown()
+    end
+
+    local function killTeam()
+        local killed = 0
+        for _, player in ipairs(GetPlayers()) do
+            local dead, deadOk = safeCall(player, "IsDead")
+            if not deadOk or dead ~= true then
+                local ok = pcall(function()
+                    player:Kill()
+                end)
+                if ok then killed = killed + 1 end
+            end
+        end
+        runtime.lastKilledPlayers = killed
+        return killed
+    end
+
+    local function updateAuditState(now, force)
+        if runtime.lockUntilMs <= 0 then return false end
+        local timestamp = tonumber(now)
+        if timestamp == nil then timestamp = realTimeMs() end
+        if timestamp == nil then return false end
+
+        if timestamp >= runtime.lockUntilMs then
+            clearAuditState()
+            return true
+        end
+
+        if force or runtime.frame % AUDIT_PRESENTATION_STEP == 0 then
+            applyRoomSlowdown()
+            pulseAuditPresentation(force == true)
+        end
+        return false
+    end
+
+    local function toNpc(entity)
+        if not entity or type(entity.ToNPC) ~= "function" then return nil end
+        local ok, npc = pcall(entity.ToNPC, entity)
+        return ok and npc or nil
+    end
+
+    local function present(entity)
+        if not entity then return false end
+        local exists, ok = safeCall(entity, "Exists")
+        return not ok or exists == true
+    end
+
+    local function hasFlag(entity, flag)
+        if not entity or not flag or flag == 0 then return false end
+        local result, ok = safeCall(entity, "HasEntityFlags", flag)
+        return ok and result == true
+    end
+
+    local function bossOrMiniBoss(npc)
+        local boss, bossOk = safeCall(npc, "IsBoss")
+        if bossOk and boss == true then return true end
+        local bossId, bossIdOk = safeCall(npc, "GetBossID")
+        if bossIdOk and type(bossId) == "number" and bossId > 0 then return true end
+        return EntityFlag and hasFlag(npc, EntityFlag.FLAG_BOSS) or false
+    end
+
+    local function segmentedMainBody(npc)
+        local child = present(npc and npc.ChildNPC) or present(npc and npc.Child)
+        local parent = present(npc and npc.ParentNPC) or present(npc and npc.Parent)
+        return child and not parent
+    end
+
+    local function isEligibleNpc(entity)
+        local npc = toNpc(entity)
+        if not npc or bossOrMiniBoss(npc) or segmentedMainBody(npc) then return false end
+
+        local enemy, enemyOk = safeCall(npc, "IsEnemy")
+        if enemyOk and enemy ~= true then return false end
+        local vulnerable, vulnerableOk = safeCall(npc, "IsVulnerableEnemy")
+        if not vulnerableOk or vulnerable ~= true then return false end
+        local active, activeOk = safeCall(npc, "IsActiveEnemy", false)
+        if not activeOk or active ~= true then return false end
+        local dead, deadOk = safeCall(npc, "IsDead")
+        if deadOk and dead == true then return false end
+
+        if EntityFlag then
+            if hasFlag(npc, EntityFlag.FLAG_FRIENDLY)
+                or hasFlag(npc, EntityFlag.FLAG_NO_KNOCKBACK)
+                or hasFlag(npc, EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK) then
+                return false
+            end
+        end
+
+        -- SpawnerEntity is intentionally not inspected: summons and ordinary
+        -- split children remain eligible. Only a segment-owning main body is
+        -- rejected above.
+        return true
+    end
+
+    local function monitorNpc(entity, reset)
+        local npc = toNpc(entity)
+        if not npc or not isEligibleNpc(npc) then return false end
+        local data = dataOf(npc)
+        if not data then return false end
+        if reset or data[DATA_MONITORED] ~= true then
+            data[DATA_DAMAGE_EVENTS] = 0
+            data[DATA_DEATH_PROCESSED] = false
+        end
+        data[DATA_MONITORED] = true
+        return true
+    end
+
+    local function monitorCurrentRoom(reset)
+        if not Isaac or type(Isaac.GetRoomEntities) ~= "function" then return end
+        for _, entity in ipairs(Isaac.GetRoomEntities() or {}) do
+            monitorNpc(entity, reset)
+        end
+    end
+
+    local function sameEntity(left, right)
+        if left == right then return true end
+        if not left or not right then return false end
+        local leftSeed = tonumber(left.InitSeed)
+        local rightSeed = tonumber(right.InitSeed)
+        return leftSeed and rightSeed and leftSeed == rightSeed
+    end
+
+    local function entryAccepted(entry)
+        local entity = entry and entry.entity
+        if not entity then return false end
+        local currentHp = tonumber(entity.HitPoints)
+        if currentHp and entry.beforeHp and currentHp < entry.beforeHp then return true end
+        local dead, deadOk = safeCall(entity, "IsDead")
+        if deadOk and dead == true then return true end
+        local mortal, mortalOk = safeCall(entity, "HasMortalDamage")
+        return mortalOk and mortal == true
+    end
+
+    local function settleEntry(entry)
+        if not entryAccepted(entry) then return false end
+        local data = dataOf(entry.entity)
+        if not data or data[DATA_MONITORED] ~= true then return false end
+        data[DATA_DAMAGE_EVENTS] = math.max(0, tonumber(data[DATA_DAMAGE_EVENTS]) or 0) + 1
+        return true
+    end
+
+    local function settlePendingForEntity(entity)
+        local settled = 0
+        for index = #runtime.pendingDamage, 1, -1 do
+            local entry = runtime.pendingDamage[index]
+            if sameEntity(entry.entity, entity) then
+                if settleEntry(entry) then settled = settled + 1 end
+                table.remove(runtime.pendingDamage, index)
+            end
+        end
+        return settled
+    end
+
+    local function settleAllPending()
+        for index = #runtime.pendingDamage, 1, -1 do
+            settleEntry(runtime.pendingDamage[index])
+            table.remove(runtime.pendingDamage, index)
+        end
+    end
+
+    local function triggerOneHitAudit(now)
+        if type(now) ~= "number" then return false end
+        runtime.lockUntilMs = now + AUDIT_DURATION_MS
+        applyRoomSlowdown()
+        pulseAuditPresentation(true)
+        logOnce("fps", "[neverbirth][ACE] Applying a bounded 300ms main-thread workload per update for five real seconds")
+        return true
+    end
+
+    local function requestFatalAudit()
+        if runtime.fatalTriggered then return false end
+        runtime.fatalTriggered = true
+        runtime.lastFatalMessage = FATAL_MESSAGE
+        clearAuditState()
+        local killed = killTeam()
+        DebugLog(FATAL_MESSAGE .. " Forced team death for " .. tostring(killed) .. " player(s).")
+        return true
+    end
+
+    local function recordOneHitDeath()
+        if runtime.fatalTriggered then return false end
+        runtime.roomOneHitKills = math.max(0, tonumber(runtime.roomOneHitKills) or 0) + 1
+        if runtime.roomOneHitKills >= DEATH_THRESHOLD then
+            return requestFatalAudit()
+        end
+        return false
+    end
+
+    local function handleNpcDeath(entity, now)
+        if not runtime.active or runtime.fatalTriggered then return false end
+        local npc = toNpc(entity)
+        if not npc then return false end
+        local data = dataOf(npc)
+        if not data then return false end
+        if data[DATA_MONITORED] ~= true and not monitorNpc(npc, false) then return false end
+        if data[DATA_DEATH_PROCESSED] == true then return false end
+
+        settlePendingForEntity(npc)
+        data[DATA_DEATH_PROCESSED] = true
+        if tonumber(data[DATA_DAMAGE_EVENTS]) ~= 1 then return true end
+
+        -- The room-owned third one-hit kill audit has priority over the
+        -- unsupported target-FPS audit.
+        if recordOneHitDeath() then return true end
+
+        local timestamp = tonumber(now)
+        if timestamp == nil then timestamp = realTimeMs() end
+        if timestamp ~= nil then
+            triggerOneHitAudit(timestamp)
+        end
+        return true
+    end
+
+    local function resetRoomState()
+        runtime.pendingDamage = {}
+        runtime.roomOneHitKills = 0
+    end
+
+    local function resetAll()
+        clearAuditState()
+        runtime.active = false
+        runtime.frame = 0
+        runtime.pendingDamage = {}
+        runtime.roomOneHitKills = 0
+        runtime.fatalTriggered = false
+        runtime.lastFatalMessage = nil
+        runtime.lastKilledPlayers = 0
+        runtime.presentationPulses = 0
+        runtime.workloadCalls = 0
+        runtime.workloadIterations = 0
+        runtime.workloadSink = 0
+        runtime.playerDamageReplacementDepth = {}
+        runtime.warnings = {}
+    end
+
+    local function activate()
+        resetRoomState()
+        runtime.active = true
+        runtime.fatalTriggered = false
+        runtime.lastFatalMessage = nil
+        monitorCurrentRoom(true)
+        logOnce("damage", "[neverbirth][ACE] Using guarded cancel-and-replace damage doubling because ordinary Repentance cannot rewrite the same hit amount")
+    end
+
+    local function deactivate()
+        resetAll()
+    end
+
+    local function playerDamage(_, entity, amount, flags, source, countdown)
+        local player = entity and entity.ToPlayer and entity:ToPlayer() or nil
+        local damageAmount = tonumber(amount) or 0
+        if not player or itemCount(player) <= 0 or damageAmount <= 0 then return nil end
+
+        local key = playerKey(player)
+        local depth = tonumber(runtime.playerDamageReplacementDepth[key]) or 0
+        if depth > 0 then return nil end
+
+        runtime.playerDamageReplacementDepth[key] = depth + 1
+        local ok, err = pcall(function()
+            player:TakeDamage(
+                damageAmount * 2,
+                tonumber(flags) or 0,
+                source,
+                tonumber(countdown) or 0
+            )
+        end)
+        runtime.playerDamageReplacementDepth[key] = nil
+
+        if not ok then
+            DebugLog("[neverbirth][ACE] Doubled replacement damage failed; preserving original hit: " .. tostring(err))
+            return nil
+        end
+
+        -- MC_ENTITY_TAKE_DMG: false cancels the original hit. The guarded
+        -- replacement above re-enters this callback once and is allowed through.
+        return false
+    end
+
+    local function npcDamage(_, entity, amount)
+        if not runtime.active or runtime.fatalTriggered or (tonumber(amount) or 0) <= 0 then return nil end
+        local npc = toNpc(entity)
+        if not npc then return nil end
+        local data = dataOf(npc)
+        if not data or data[DATA_MONITORED] ~= true then
+            if not monitorNpc(npc, false) then return nil end
+            data = dataOf(npc)
+        end
+        runtime.pendingDamage[#runtime.pendingDamage + 1] = {
+            entity = npc,
+            beforeHp = tonumber(npc.HitPoints),
+        }
+        return nil
+    end
+
+    local function npcInit(_, npc)
+        if runtime.active then monitorNpc(npc, false) end
+        return nil
+    end
+
+    local function npcDeath(_, npc)
+        handleNpcDeath(npc)
+        return nil
+    end
+
+    local function entityKill(_, entity)
+        handleNpcDeath(entity)
+        return nil
+    end
+
+    local function postUpdate()
+        runtime.frame = runtime.frame + 1
+        local held = anyHolder()
+        if held and not runtime.active then
+            activate()
+        elseif not held and runtime.active then
+            deactivate()
+            return nil
+        end
+        if not runtime.active then return nil end
+
+        settleAllPending()
+        updateAuditState()
+        runAuditWorkload()
+        return nil
+    end
+
+    local function newRoom()
+        resetRoomState()
+        if anyHolder() then
+            runtime.active = true
+            monitorCurrentRoom(true)
+            updateAuditState(nil, true)
+        else
+            deactivate()
+        end
+        return nil
+    end
+
+    local function newLevel()
+        return newRoom()
+    end
+
+    local function gameStarted()
+        resetAll()
+        return nil
+    end
+
+    local function preGameExit()
+        resetAll()
+        return nil
+    end
+
+    Neverbirth.ACEAntiCheatTestAPI = {
+        ItemId = ITEM_ID,
+        FatalMessage = FATAL_MESSAGE,
+        Capabilities = capabilities,
+        Runtime = runtime,
+        IsEligibleNpc = isEligibleNpc,
+        MonitorNpc = monitorNpc,
+        SettlePendingForEntity = settlePendingForEntity,
+        HandleNpcDeath = handleNpcDeath,
+        ResetAll = resetAll,
+        ResetRoomState = resetRoomState,
+        Activate = activate,
+        Deactivate = deactivate,
+        UpdateAuditState = updateAuditState,
+        RunAuditWorkload = runAuditWorkload,
+        Callbacks = {
+            PlayerDamage = playerDamage,
+            NpcDamage = npcDamage,
+            NpcInit = npcInit,
+            NpcDeath = npcDeath,
+            EntityKill = entityKill,
+            Update = postUpdate,
+            NewRoom = newRoom,
+            NewLevel = newLevel,
+            GameStarted = gameStarted,
+            PreGameExit = preGameExit,
+        },
+    }
+
+    Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, playerDamage, EntityType and EntityType.ENTITY_PLAYER or 1)
+    Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, npcDamage)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, postUpdate)
+    if ModCallbacks.MC_POST_NPC_INIT then Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_INIT, npcInit) end
+    if ModCallbacks.MC_POST_NPC_DEATH then Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, npcDeath) end
+    if ModCallbacks.MC_POST_ENTITY_KILL then Neverbirth:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, entityKill) end
+    if ModCallbacks.MC_POST_NEW_ROOM then Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, newRoom) end
+    if ModCallbacks.MC_POST_NEW_LEVEL then Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, newLevel) end
+    if ModCallbacks.MC_POST_GAME_STARTED then Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, gameStarted) end
+    if ModCallbacks.MC_PRE_GAME_EXIT then Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, preGameExit) end
+end)()
+-- ACE_ANTI_CHEAT_SYSTEM_END
+
+-- YINS_CURSE_BEGIN
+local initializeYinsCurse = include("yins_curse")
+initializeYinsCurse(Neverbirth, {
+    ItemId = Items.YinsCurse,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- YINS_CURSE_END
+
+-- BIG_DOG_BARK_BEGIN
+local initializeBigDogBark = include("big_dog_bark")
+initializeBigDogBark(Neverbirth, {
+    ItemIds = {
+        BigDogBark = Items.BigDogBark,
+        WindChargeRod = Items.WindChargeRod,
+        EchoShard = Items.EchoShard,
+    },
+    PillName = "Wind Charge Potion",
+    Variants = {
+        Dog = 3017,
+        Echo = 3018,
+        Trail = 3019,
+    },
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers,
+    GetCollectibleConfig = function(itemId)
+        return Neverbirth:GetCollectibleConfig(itemId)
+    end,
+    DebugLog = DebugLog,
+})
+-- BIG_DOG_BARK_END
+
+-- REVIVE_MY_LOVE_BEGIN
+local initializeReviveMyLove = include("revive_my_love")
+initializeReviveMyLove(Neverbirth, {
+    ItemId = Items.ReviveMyLove,
+    EffectVariant = 3020,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    IsIncomingDamageLethal = IsIncomingDamageLethal,
+    DebugLog = DebugLog,
+})
+-- REVIVE_MY_LOVE_END
+
+-- NIGHT_OF_THE_COWARDS_BEGIN
+local initializeNightOfTheCowards = include("night_of_the_cowards")
+initializeNightOfTheCowards(Neverbirth, {
+    ItemId = Items.NightOfTheCowards,
+    AuraVariant = (EffectVariant and EffectVariant.HALO) or 123,
+    AuraSubtype = 3,
+    FlightItemId = (CollectibleType and CollectibleType.COLLECTIBLE_TRANSCENDENCE) or 20,
+    GetPlayers = GetPlayers,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    DebugLog = DebugLog,
+})
+-- NIGHT_OF_THE_COWARDS_END
+
+-- ANNIHILATION_BEGIN
+local initializeAnnihilation = include("annihilation")
+initializeAnnihilation(Neverbirth, {
+    ItemId = Items.Annihilation,
+    Variants = {
+        Aura = 3022,
+        Shockwave = 3023,
+        Activate = 3024,
+    },
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- ANNIHILATION_END
+
+-- KAMIKAZE_SQUAD_BEGIN
+if include then
+    local initializeKamikazeSquad = include("kamikaze_squad")
+    initializeKamikazeSquad(Neverbirth, {
+        ItemId = Items.KamikazeSquad,
+        GetPlayers = GetPlayers,
+        DebugLog = DebugLog,
+    })
+end
+-- KAMIKAZE_SQUAD_END
+
+-- MEMORY_DISORDER_BEGIN
+local initializeMemoryDisorder = include("memory_disorder")
+initializeMemoryDisorder(Neverbirth, {
+    ItemId = Items.MemoryDisorder,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers,
+    GetCollectibleConfigs = function()
+        local itemConfig = Isaac.GetItemConfig()
+        return itemConfig and itemConfig:GetCollectibles() or {}
+    end,
+    Darken = function(amount)
+        local game = Game()
+        if game and game.Darken then game:Darken(amount or 0, 2) end
+    end,
+    DebugLog = DebugLog,
+})
+-- MEMORY_DISORDER_END
+
+-- RING_OF_THE_SEVEN_CURSES_BEGIN
+include("ring_of_the_seven_curses")(Neverbirth, {
+    ItemId = Items.RingOfSevenCurses,
+    TrinketId = (Isaac.GetTrinketIdByName and Isaac.GetTrinketIdByName("Seven Curses Slot Seal")) or -1,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- RING_OF_THE_SEVEN_CURSES_END
+
+-- DANTE_CHARACTER_BEGIN
+local initializeDanteCharacter = include("dante_character")
+initializeDanteCharacter(Neverbirth, {
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- DANTE_CHARACTER_END

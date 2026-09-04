@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "给 neverbrith 新增一个挑战：开局给指定主动和饰品，禁止宝箱房，到妈心结束。请写给代码 Codex 的提示词，别让挑战规则影响普通局。",
+      "prompt": "给一个 mod 新增挑战：开局给指定主动和饰品，禁止宝箱房，到妈心结束。请写给代码 Codex 的提示词，别让挑战规则影响普通局。",
       "expected_output": "应该要求读取 content/challenges.xml、选择未使用 id、添加 roomfilter/endstage/startingitems/startingtrinkets；如果有 Lua 规则必须使用 Isaac.GetChallenge() gate 并加加载入口；测试挑战开局和普通局不泄漏。",
       "files": [
         "docs/skills/isaac-challenges/references/challenge-xml.md",
@@ -26,7 +26,12 @@
         "docs/skills/isaac-challenges/references/room-floor-rules.md",
         "docs/skills/isaac-challenges/references/challenge-review-checklist.md"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "陌生项目的挑战逻辑在 modules/challenges，且不确定是否有 challenges.xml。我想加挑战限定奖励。",
+      "expected_output": "先用 isaac-mod-context 确认挑战 XML、加载入口和模块根；奖励内容按用户决定处理，挑战门禁与普通局不泄漏规则明确后再实现。",
+      "files": []
     }
   ]
 }
-

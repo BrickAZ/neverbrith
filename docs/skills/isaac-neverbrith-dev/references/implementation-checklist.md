@@ -4,7 +4,7 @@ Use this as the final review surface before handing off code or a prompt.
 
 ## Item Registration
 
-- Basic item spec is present: names, internal name, type, mechanic summary, trigger timing, stack behavior, quality, pools, tags, pickup text, art, EID, and visual carrier when relevant.
+- Basic item spec is present: names for discovered locales, internal name, type, mechanic summary, trigger timing, stack behavior, quality, pools, tags, pickup text, art, optional EID surface, and visual carrier when relevant.
 - Missing basic fields are reported as `TBD`; they are not guessed.
 - Item is present in all relevant XML language files.
 - Internal name matches Lua lookup.
@@ -33,11 +33,11 @@ Use this as the final review surface before handing off code or a prompt.
 
 When writing a prompt for another Codex agent, include:
 
-- Item name in Chinese and English.
+- Item names for the project's actual locale surfaces.
 - Internal item name.
 - Item type: active or passive.
 - Mechanic summary in one paragraph.
-- Quality, pools/weights, tags, pickup text, art path, EID text, and unresolved `TBD` fields.
+- Quality, pools/weights, tags, pickup text, art path, optional EID text, and unresolved `TBD` fields.
 - Active-item charge policy or passive-item cache/stack policy.
 - Visual carrier when the item has any visual effect.
 - Route(s): registration, stat cache, damage interception.

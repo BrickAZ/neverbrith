@@ -27,16 +27,17 @@ sprite:Play("ShopIdle", true)
 
 Only use `ReplaceSpritesheet` indices after inspecting the template or copying from a proven local reference.
 
-## Reference Examples
+## Known Vanilla Templates
 
-Reverie contains many examples that load vanilla pickup, trinket, coin, grid, and collectible animations from Lua. Search:
+Common built-in templates include:
 
 - `gfx/005.100_collectible.anm2`
 - `gfx/005.350_trinket.anm2`
 - `gfx/005.021_penny.anm2`
 - `gfx/grid/grid_rock.anm2`
 
-YSD and neverbrith are smaller; use them for custom `.anm2` examples, not broad vanilla reuse coverage.
+Inspect the chosen vanilla template and the current project's closest working
+use before selecting a spritesheet index or animation name.
 
 ## Decision Rule
 

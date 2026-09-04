@@ -1,11 +1,13 @@
 ---
 name: isaac-audio-render-feedback
-description: Add, review, or write handoff prompts for audiovisual feedback in Binding of Isaac Repentance mods, especially neverbrith. Use this whenever a task mentions sounds.xml, SFX, music.xml, shaders.xml, MC_GET_SHADER_PARAMS, MC_POST_RENDER, overlays, screen-space rendering, world-space rendering, input blocking, black-screen risk, render layers, or feedback effects that are not just anm2 hookup. Also use isaac-state-lifecycle when feedback has enable/disable state, timers, cached sprites, or input-lock release conditions.
+description: Add, review, or write handoff prompts for audiovisual feedback in Binding of Isaac Repentance mods. Use this whenever a task mentions sounds.xml, SFX, music.xml, shaders.xml, MC_GET_SHADER_PARAMS, MC_POST_RENDER, overlays, screen-space rendering, world-space rendering, input blocking, black-screen risk, render layers, or feedback effects that are not just anm2 hookup. Also use isaac-state-lifecycle when feedback has enable/disable state, timers, cached sprites, or input-lock release conditions. 中文触发：音效、BGM、音乐、shader、滤镜、全屏特效、渲染、屏幕叠层、输入拦截、黑屏、反馈效果。
 ---
 
 # Isaac Audio Render Feedback
 
 Use this skill for SFX, shader, render, overlay, and input-blocking feedback.
+
+Read `../isaac-mod-context/references/design-authority.md` before suggesting feedback style, intensity, duration, visual direction, or input-lock behavior. Preserve explicit user intent and label proposals as suggestions.
 
 The goal is to keep feedback effects from being wired as the wrong kind of asset. `.anm2` visuals are handled by `isaac-anm2-visuals`; this skill handles the surrounding audio, shader, render timing, screen/world coordinates, and input interception.
 
@@ -13,11 +15,12 @@ The goal is to keep feedback effects from being wired as the wrong kind of asset
 
 Before editing or writing a prompt:
 
-1. Decide whether the request is SFX, music, shader, screen-space render, world-space render, input interception, or a combination.
-2. If `.anm2` paths or sprite animation names are involved, also use `isaac-anm2-visuals`.
-3. If the feedback belongs to a complex active item, also use `isaac-active-item-mechanics`.
-4. If feedback state persists beyond one frame, also use `isaac-state-lifecycle`.
-5. Inspect local examples before inventing callback names or path conventions.
+1. In an unfamiliar mod, use `isaac-mod-context` to discover XML, asset roots, bootstrap files, and existing feedback routes. Do not assume `content/`, `resources/`, or `main.lua`.
+2. Decide whether the request is SFX, music, shader, screen-space render, world-space render, input interception, or a combination.
+3. If `.anm2` paths or sprite animation names are involved, also use `isaac-anm2-visuals`.
+4. If the feedback belongs to a complex active item, also use `isaac-active-item-mechanics`.
+5. If feedback state persists beyond one frame, also use `isaac-state-lifecycle`.
+6. Inspect current-project examples before inventing callback names or path conventions.
 
 ## Route The Feedback
 
@@ -35,12 +38,21 @@ Before editing or writing a prompt:
 - Do not block input without a clear release condition.
 - Do not assume shader safety. If a shader can black-screen or obscure gameplay, state fallback and verification.
 - Keep screen-space and world-space coordinates distinct.
+- For manual `Sprite:Render`, a world-space anchor is not a render coordinate:
+  calculate the live owner-relative anchor, convert it with
+  `Isaac.WorldToScreen`, then render. If an `ENTITY_EFFECT` owns world
+  tracking, verify its `PositionOffset` and `SpriteOffset` separately.
+- Require an anchor plan for above-owner visuals: player visual/flying offsets,
+  enemy size bands, Boss differences, ANM2 pivot, and in-game checks. A single
+  fixed Y offset is not a general solution.
 - Register sounds/shaders in XML and verify the referenced asset path exists.
 
-## Reference Mods
+## Self-Contained Fallback
 
-- YSD sound/shader/render/input: `E:/Isaac - Repentance/ysd/content/sounds.xml`, `E:/Isaac - Repentance/ysd/content/shaders.xml`, `E:/Isaac - Repentance/ysd/scripts/unlock_popup_renderer.lua`, `E:/Isaac - Repentance/ysd/scripts/items/untuned_piano.lua`.
-- Reverie broad examples: `E:/Isaac - Repentance/reverie/content/sounds.xml`, `E:/Isaac - Repentance/reverie/content/music.xml`, `E:/Isaac - Repentance/reverie/content/shaders.xml`, and render-heavy item scripts under `E:/Isaac - Repentance/reverie/scripts/items/`.
+When the current mod has no matching feedback path, use this skill's route
+references and review checklist. Keep sound/shader registration, render
+lifetime, input release, and in-game fallback explicit without requiring a
+third-party mod checkout.
 
 ## Handoff Prompt Template
 
@@ -54,6 +66,8 @@ Before editing or writing a prompt:
 - Shader name and params:
 - Render callback:
 - Coordinate space:
+- World anchor owner and offset policy:
+- World-to-screen or entity-follow route:
 - Input interception:
 - Related anm2 assets:
 - Fallback if optional/unsafe:

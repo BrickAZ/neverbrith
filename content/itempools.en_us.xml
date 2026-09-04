@@ -1,16 +1,23 @@
 <!-- weight 是权重，DecreaseBy 是每次道具被移除时权重减少，RemoveOn 是权重减少到对应数值时移出物品池 -->
 <ItemPools>
     <Pool Name="boss"> <!-- 首领房 -->
-        <Item Name="EssentialBalm" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Essential Balm" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Utility Knife" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Tower of Babel" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Protein Strip" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Energy Kibble" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Lean Can" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="DHA Fish Oil" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Dental Chew" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Lucky Liver Bites" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Goat Milk Pudding" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="devil"> <!-- 恶魔房 -->
         <Item Name="Aphrodisiac" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Angelbox" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Angel Box" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -18,11 +25,16 @@
         <Item Name="Burn Away the Resentment" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Little Leather Shoes" Weight="0.1" DecreaseBy="1" RemoveOn="1"/>
+        <Item Name="Night of the Cowards" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="greedDevil"> <!-- 贪婪恶魔房 -->
+        <Item Name="Night of the Cowards" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="angel"> <!-- 天使 -->
-        <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Devilbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Devil Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Empty Cradle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Good Girl of Babylon" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="The Moon Is Beautiful" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -30,7 +42,7 @@
     </Pool>
 
     <Pool Name="treasure"> <!-- 宝箱 -->
-        <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Uncut Cord" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Empty Cradle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -44,27 +56,39 @@
         <Item Name="Crazy Coconut" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Little Leather Shoes" Weight="1" DecreaseBy="1" RemoveOn="1"/>
+        <Item Name="Big Dog Bark" Weight="1" DecreaseBy="1" RemoveOn="1"/>
+        <Item Name="Annihilation" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Kamikaze Squad" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Protein Strip" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Energy Kibble" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Lean Can" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="DHA Fish Oil" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Dental Chew" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Lucky Liver Bites" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Goat Milk Pudding" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="shop"> <!-- 商店 -->
-        <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Sewn Sword" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Little Leather Shoes" Weight="1" DecreaseBy="1" RemoveOn="1"/>
+        <Item Name="Annihilation" Weight="0.4" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="secret"> <!-- 隐藏 -->
-        <Item Name="Musicbox" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Angelbox" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Devilbox" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Angel Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Devil Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Black Taisui" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="House VS Elephant" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
-        <Item Name="Devilbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Devil Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -93,23 +117,27 @@
     </Pool>
 
     <Pool Name="goldenChest"> <!-- 金箱子 -->
-        <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="oldChest"> <!-- 旧箱子 -->
-        <Item Name="Musicbox" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Condom" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="woodenChest"> <!-- 木箱子 -->
-        <Item Name="Musicbox" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Music Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
     <Pool Name="planetarium"> <!-- 星象房 -->
         <Item Name="The Moon Is Beautiful" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="greedTreasure"> <!-- 贪婪模式道具房 -->
+        <Item Name="Kamikaze Squad" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 </ItemPools>

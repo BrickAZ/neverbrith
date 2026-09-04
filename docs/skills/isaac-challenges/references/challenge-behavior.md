@@ -7,7 +7,7 @@ Use this for no-shooting, input restrictions, card replacement, boss/NPC modific
 - No shooting: prefer XML `canshoot="false"` when sufficient; use input/action callbacks only when the rule is dynamic.
 - Card replacement: use `MC_GET_CARD` or current repo helper.
 - Boss/NPC modification: use NPC update or damage callbacks, gated by challenge id.
-- Damage behavior: coordinate with `isaac-neverbrith-dev` damage interception rules.
+- Damage behavior: coordinate with the current project's item/damage implementation surface and `isaac-mechanic-contracts`.
 - Visual/audio feedback: coordinate with `isaac-audio-render-feedback`.
 
 ## Hard Rules
@@ -23,4 +23,3 @@ Use this for no-shooting, input restrictions, card replacement, boss/NPC modific
 - Callback target is narrow.
 - Normal runs and other challenges are unaffected.
 - Relevant sibling skill is used for damage, active mechanics, visuals, or compatibility text.
-

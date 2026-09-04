@@ -8,8 +8,7 @@ The purpose is to stop the agent from coding a mechanically plausible item with 
 
 Capture these fields before code work:
 
-- English display name.
-- Chinese display name.
+- Display names for every locale surface the project actually supports.
 - Internal Lua/XML name in the repo's existing English identifier style.
 - Item type: `passive` or `active`.
 - Mechanic summary in one short paragraph.
@@ -18,8 +17,8 @@ Capture these fields before code work:
 - Quality value.
 - Item pools and weights, or an explicit note that pool placement is not decided.
 - Tags such as `offensive`, `summonable`, or other existing repo-style tags, or an explicit note that no tag is decided.
-- Pickup description text for default, English, and Chinese XML.
-- EID description text if the repo's EID block needs it.
+- Pickup description text for the base and every discovered locale XML.
+- EID description text only if the project has an enabled EID integration.
 - Collectible art path under `resources/gfx/Items/Collectibles/`, or an explicit art handoff.
 - Visual carrier, if the item has a visual component: costume/body change, Lua sprite effect, UI/HUD, EID icon, vanilla template art, or registered entity.
 
@@ -44,7 +43,7 @@ For passive items, also capture:
 
 ## Do Not Guess
 
-Do not silently default to treasure pool, quality 3, English-only text, or placeholder art when the design did not say so.
+Do not silently default to treasure pool, quality 3, a language set, EID support, or placeholder art when the design did not say so.
 
 Do not treat "active item" as a complete implementation route. The active item shell only registers use input; the actual mechanic may still route to stat cache, damage interception, room state, spawning, visual effects, or another callback.
 
@@ -57,8 +56,7 @@ When writing a prompt for another Codex agent, include this block near the top:
 ```markdown
 ## Item Basic Spec
 
-- English name:
-- Chinese name:
+- Localized display names (locale -> text):
 - Internal name:
 - Type: passive | active
 - Mechanic summary:
@@ -67,10 +65,8 @@ When writing a prompt for another Codex agent, include this block near the top:
 - Quality:
 - Pools/weights:
 - Tags:
-- Default pickup text:
-- English pickup text:
-- Chinese pickup text:
-- EID text:
+- Pickup text (surface -> text):
+- Optional EID text:
 - Collectible art:
 - Visual carrier:
 - Open/TBD fields:
@@ -94,4 +90,3 @@ For passive items, add:
 - Multi-copy behavior:
 - Per-player state:
 ```
-

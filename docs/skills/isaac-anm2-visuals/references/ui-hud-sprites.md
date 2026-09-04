@@ -14,27 +14,24 @@ Read `lua-sprite-effects.md` first if the basic `Sprite` lifecycle is unclear.
 - Lua render callbacks, usually `MC_POST_RENDER`.
 - Tests that stub screen rendering.
 
-Reference examples:
-
-- neverbrith: `resources/gfx/UI/DebugController/DebugControllerKeys.anm2`
-- YSD: `resources/gfx/ui/active_count.anm2`
-- YSD: `resources/gfx/ui/ui_piano.anm2`
-- Reverie: `resources/gfx/reverie/ui/select_frame.anm2`
-- Reverie: `resources/gfx/reverie/ui/hunger.anm2`
+Use a current-project UI/HUD asset when one exists. Otherwise follow the
+screen-space runtime pattern and checklist below; no third-party asset is
+required.
 
 ## Runtime Pattern
 
 ```lua
+-- Mod is the current project's existing RegisterMod object.
 local uiSprite = Sprite()
 uiSprite:Load("gfx/UI/ItemName/ItemNamePanel.anm2", true)
 uiSprite:Play("Idle", true)
 
-function Neverbirth:RenderItemNameUI()
+function Mod:RenderItemNameUI()
     uiSprite:Update()
     uiSprite:Render(Vector(40, 32))
 end
 
-Neverbirth:AddCallback(ModCallbacks.MC_POST_RENDER, Neverbirth.RenderItemNameUI)
+Mod:AddCallback(ModCallbacks.MC_POST_RENDER, Mod.RenderItemNameUI)
 ```
 
 Use the repo's existing screen-coordinate helpers if available. Do not mix world positions and screen positions without an explicit conversion.

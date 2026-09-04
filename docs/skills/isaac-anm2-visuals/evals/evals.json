@@ -3,8 +3,8 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "给 neverbrith 的一个道具加一个临时头部外观，状态开始时戴上，状态结束时移除。请写给代码 Codex 的实现提示词，不要直接改代码。",
-      "expected_output": "应该路由到 costumes，要求读取 content/costumes2.xml 和现有 costume_*.anm2，说明 Isaac.GetCostumeIdByPath、AddNullCostume/TryRemoveNullCostume、路径和 priority 检查。",
+      "prompt": "给一个模组道具加一个临时头部外观，状态开始时戴上，状态结束时移除。请写给代码 Codex 的实现提示词，不要直接改代码。",
+      "expected_output": "应该路由到 costumes，先发现当前项目的 costume XML 和现有 costume .anm2；再说明 Isaac.GetCostumeIdByPath、AddNullCostume/TryRemoveNullCostume、路径和 priority 检查。",
       "files": [
         "content/costumes2.xml",
         "resources/gfx/characters/",
@@ -24,11 +24,9 @@
     {
       "id": 3,
       "prompt": "给一个变身效果加 EID 内联图标，图标是 16x16 的 anm2。请告诉代码 Codex 应该怎么接。",
-      "expected_output": "应该路由到 EID icons，要求读取 DiceSetIcon 参考，检查动画名、EID:addIcon 或 InlineIcons、尺寸、路径大小写和 EID 缺失 fallback。",
+      "expected_output": "应该路由到 EID icons，要求读取当前项目已有 EID 支持或通用参考，检查动画名、EID:addIcon 或 InlineIcons、尺寸、路径大小写和 EID 缺失 fallback。",
       "files": [
-        "resources/gfx/EID/DiceSetIcon.anm2",
-        "main.lua",
-        "tests/dice_set_behavior_test.lua"
+        "docs/skills/isaac-anm2-visuals/references/eid-icons.md"
       ]
     },
     {
@@ -47,6 +45,31 @@
         "main.lua",
         "resources/gfx/Effects/",
         "tests/"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "陌生模组把资源放在 assets/，Lua 入口是 src/init.lua。我要做一个玩家脚下光环，第一步应该做什么？",
+      "expected_output": "应该先用 isaac-mod-context 发现真实资源根、加载文件和已有视觉路径，再判断是 Lua Sprite effect、costume 还是注册实体；不能硬写 resources/ 或 main.lua。",
+      "files": [
+        "docs/skills/isaac-mod-context/SKILL.md",
+        "docs/skills/isaac-anm2-visuals/references/visual-carrier-decision.md"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "不要改文件。玩家受伤后头顶出现红点 20 帧，不改服装、不碰撞。没有给出任何项目文件或目录。请写实现提示词。",
+      "expected_output": "应该选择玩家锚定的 Lua Sprite 视觉反馈，并明确不改本体/不走 costume/不需实体注册；资源路径、动画名、回调模块和现有项目接入点必须列为发现项或 TBD，不能凭空写 resources/gfx、main.lua 或具体文件名。",
+      "files": [
+        "docs/skills/isaac-anm2-visuals/SKILL.md"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "审查红点代码：effect.sprite:Render(player.Position + Vector(0, -42))。它在玩家和 Boss 头上都用同一偏移，镜头移动时位置离谱。",
+      "expected_output": "应该指出手动 Sprite 收到了世界坐标；要求把 live world anchor 转成 Isaac.WorldToScreen 后再 Render，并拒绝一个固定 Y 值覆盖玩家飞行/PositionOffset、普通敌人与 Boss 尺寸差异；列出相机移动和不同 owner 的游戏内验证。",
+      "files": [
+        "docs/skills/isaac-anm2-visuals/references/lua-sprite-effects.md"
       ]
     }
   ]

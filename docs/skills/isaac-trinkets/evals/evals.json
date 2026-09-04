@@ -18,6 +18,12 @@
       "prompt": "饰品要加一个跟随玩家的视觉标记，还要有 EID 文本。",
       "expected_output": "Routes main work to trinkets and adds anm2 visuals plus compat descriptions for the visual/text surfaces.",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "陌生 mod 想加金饰品效果，但我不知道它的饰品 XML、吞下规则和语言文件。",
+      "expected_output": "先用 isaac-mod-context 发现实际内容和模块约定；明确 held/smelted/golden 行为与倍率，不要求不存在的 XML 或语言文件。",
+      "files": []
     }
   ]
 }

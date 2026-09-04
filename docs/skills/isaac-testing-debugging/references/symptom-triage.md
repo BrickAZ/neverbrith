@@ -14,4 +14,4 @@ Map the symptom to the likely failing surface before editing.
 | Works until room change | room reset, owner key, entity remove cleanup |
 | Works until reload | SaveData shape, runtime reconstruction, userdata serialization mistake |
 
-If multiple surfaces fit, use `isaac-neverbrith-router` to decide which sibling skills to load.
+If multiple surfaces fit, use `isaac-mod-context` to discover project structure, then choose the sibling skills named by the symptom routes.

@@ -1,5 +1,10 @@
 param([string]$Root = (Split-Path -Parent $PSScriptRoot))
 
+# Hair is now authored directly in native 64x64 cells. Keep this legacy entry
+# point, but delegate so it can no longer regenerate the oversized 32px masks.
+& (Join-Path $PSScriptRoot 'generate-reference-scale-creator-hair-atlases.ps1') -Root $Root
+return
+
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 

@@ -6,7 +6,8 @@ Use this when adding or reviewing a registered entity.
 
 1. Check whether `content/entities2.xml` exists in the current mod.
 2. Search existing code for `EntityType`, `Variant`, `Subtype`, `Isaac.Spawn`, `MC_POST_*_INIT`, `MC_POST_*_UPDATE`, and `MC_PRE_*_COLLISION`.
-3. Read reference mod examples only after checking neverbrith.
+3. When no local entity is comparable, use this registration checklist and
+   leave undecided allocations as `TBD`; do not require a third-party mod checkout.
 
 ## Registration Fields To Confirm
 
@@ -19,4 +20,5 @@ Use this when adding or reviewing a registered entity.
 
 ## Caution
 
-Variant/subtype collisions cause very confusing bugs. Never choose numbers by vibe. Use existing allocations, reference mod conventions, or an explicit `TBD`.
+Variant/subtype collisions cause very confusing bugs. Never choose numbers by
+vibe. Use current-project allocations or an explicit `TBD`.

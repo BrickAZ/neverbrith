@@ -143,20 +143,164 @@ function uniqueValues(rows, key) {
   return [...new Set(rows.map((row) => row[key]).filter(Boolean))];
 }
 
-const [itemsEnXml, itemsZhXml, poolsEnXml, poolsZhXml] = await Promise.all([
+function unescapeLuaString(value) {
+  return value
+    .replace(/\\"/g, "\"")
+    .replace(/\\n/g, "\n")
+    .replace(/\\t/g, "\t")
+    .replace(/\\\\/g, "\\");
+}
+
+function parseItemNameCandidates(lua) {
+  const result = new Map();
+  const block = lua.match(/local ITEM_NAME_CANDIDATES = \{([\s\S]*?)\n\}/);
+  if (!block) {
+    return result;
+  }
+
+  const entryRegex = /^\s*([A-Za-z0-9_]+)\s*=\s*\{([^}]*)\}/gm;
+  for (const match of block[1].matchAll(entryRegex)) {
+    const key = match[1];
+    for (const nameMatch of match[2].matchAll(/"((?:\\.|[^"])*)"/g)) {
+      result.set(unescapeLuaString(nameMatch[1]), key);
+    }
+  }
+  return result;
+}
+
+function findMatchingLuaBrace(text, openIndex) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+
+  for (let index = openIndex; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === "{") {
+      depth += 1;
+    } else if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return index;
+      }
+    }
+  }
+
+  return -1;
+}
+
+function parseEidLanguageTable(tableText) {
+  const fields = new Map();
+  const fieldRegex = /\b(name|eidDescription)\s*=\s*"((?:\\.|[^"])*)"/g;
+
+  for (const match of tableText.matchAll(fieldRegex)) {
+    fields.set(match[1], unescapeLuaString(match[2]));
+  }
+
+  return {
+    name: fields.get("name"),
+    eidDescription: fields.get("eidDescription"),
+  };
+}
+
+function parseEidDescriptions(lua) {
+  const candidates = parseItemNameCandidates(lua);
+  const byKey = new Map();
+  const byName = new Map();
+  const tableStart = lua.indexOf("local EID_DESCRIPTIONS = {");
+  if (tableStart === -1) {
+    return byName;
+  }
+
+  const tableOpen = lua.indexOf("{", tableStart);
+  const tableEnd = findMatchingLuaBrace(lua, tableOpen);
+  if (tableOpen === -1 || tableEnd === -1) {
+    return byName;
+  }
+
+  const tableText = lua.slice(tableOpen + 1, tableEnd);
+  const entryRegex = /\[Items\.([A-Za-z0-9_]+)\]\s*=\s*\{/g;
+
+  for (const entryMatch of tableText.matchAll(entryRegex)) {
+    const key = entryMatch[1];
+    const entryOpen = tableOpen + 1 + entryMatch.index + entryMatch[0].lastIndexOf("{");
+    const entryEnd = findMatchingLuaBrace(lua, entryOpen);
+    if (entryEnd === -1) {
+      continue;
+    }
+
+    const entryText = lua.slice(entryOpen + 1, entryEnd);
+    const localized = {};
+    const languageRegex = /\b(en_us|zh_cn)\s*=\s*\{/g;
+
+    for (const languageMatch of entryText.matchAll(languageRegex)) {
+      const languageOpen = entryOpen + 1 + languageMatch.index + languageMatch[0].lastIndexOf("{");
+      const languageEnd = findMatchingLuaBrace(lua, languageOpen);
+      if (languageEnd === -1) {
+        continue;
+      }
+
+      localized[languageMatch[1]] = parseEidLanguageTable(lua.slice(languageOpen + 1, languageEnd));
+    }
+
+    const en = localized.en_us;
+    const zh = localized.zh_cn;
+    if (!en?.name || !en?.eidDescription || !zh?.name || !zh?.eidDescription) {
+      continue;
+    }
+
+    const eid = {
+      key,
+      enName: en.name,
+      enDescription: en.eidDescription,
+      zhName: zh.name,
+      zhDescription: zh.eidDescription,
+    };
+    byKey.set(key, eid);
+    byName.set(eid.enName, eid);
+    byName.set(eid.zhName, eid);
+  }
+
+  for (const [name, key] of candidates.entries()) {
+    const eid = byKey.get(key);
+    if (eid) {
+      byName.set(name, eid);
+    }
+  }
+
+  return byName;
+}
+
+const [itemsEnXml, itemsZhXml, poolsEnXml, poolsZhXml, mainLua] = await Promise.all([
   fs.readFile(path.join(root, "content", "items.xml"), "utf8"),
   fs.readFile(path.join(root, "content", "items.zh_cn.xml"), "utf8"),
   fs.readFile(path.join(root, "content", "itempools.xml"), "utf8"),
   fs.readFile(path.join(root, "content", "itempools.zh_cn.xml"), "utf8"),
+  fs.readFile(path.join(root, "main.lua"), "utf8"),
 ]);
 
 const itemsEn = parseItems(itemsEnXml, "en");
 const itemsZh = parseItems(itemsZhXml, "zh_cn");
 const poolsEn = parsePools(poolsEnXml, "en");
 const poolsZh = parsePools(poolsZhXml, "zh_cn");
+const eidDescriptions = parseEidDescriptions(mainLua);
 
 const itemRows = itemsEn.map((item, index) => {
   const zh = itemsZh[index] ?? {};
+  const eid = eidDescriptions.get(item.name) ?? eidDescriptions.get(zh.name ?? "") ?? {};
   return [
     index + 1,
     item.typeZh,
@@ -177,6 +321,8 @@ const itemRows = itemsEn.map((item, index) => {
     poolSummary(poolsZh, zh.name ?? ""),
     item.description,
     zh.description ?? "",
+    eid.zhDescription ?? "",
+    eid.enDescription ?? "",
     item.gfx,
     "",
   ];
@@ -208,7 +354,7 @@ review.showGridLines = false;
 details.showGridLines = false;
 refs.showGridLines = false;
 
-review.getRange("A1:Q1").values = [[
+review.getRange("A1:S1").values = [[
   "序号",
   "类型",
   "英文名",
@@ -224,10 +370,12 @@ review.getRange("A1:Q1").values = [[
   "中文道具池/权重",
   "英文描述",
   "中文描述",
+  "中文EID描述",
+  "英文EID描述",
   "贴图",
   "审批备注",
 ]];
-review.getRange(`A2:Q${itemRows.length + 1}`).values = itemRows;
+review.getRange(`A2:S${itemRows.length + 1}`).values = itemRows;
 
 details.getRange("A1:H1").values = [[
   "序号",
@@ -249,7 +397,7 @@ refs.getRange("G1").values = [["来源/备注"]];
 refs.getRange("G2:G4").values = [
   ["标签参考：https://isaac.huijiwiki.com/wiki/%E6%A0%87%E7%AD%BE"],
   ["道具池中英对照来自用户截图资料。"],
-  ["主表来自 content/items.xml、content/items.zh_cn.xml、content/itempools.xml、content/itempools.zh_cn.xml。"],
+  ["主表来自 content/items.xml、content/items.zh_cn.xml、content/itempools.xml、content/itempools.zh_cn.xml、main.lua。"],
 ];
 
 for (const sheet of [review, details, refs]) {
@@ -258,7 +406,7 @@ for (const sheet of [review, details, refs]) {
   used.format.borders = { preset: "inside", style: "thin", color: "#E5E7EB" };
 }
 
-review.getRange("A1:Q1").format = {
+review.getRange("A1:S1").format = {
   fill: "#1D4ED8",
   font: { bold: true, color: "#FFFFFF", name: "Microsoft YaHei", size: 10 },
 };
@@ -281,7 +429,7 @@ refs.getRange("G1").format = {
 
 review.getRange(`E2:E${itemRows.length + 1}`).format.numberFormat = "0";
 details.getRange(`F2:H${poolRows.length + 1}`).format.numberFormat = "0.0";
-review.getRange(`A1:Q${itemRows.length + 1}`).format.wrapText = true;
+review.getRange(`A1:S${itemRows.length + 1}`).format.wrapText = true;
 details.getRange(`A1:H${poolRows.length + 1}`).format.wrapText = true;
 refs.getRange(`A1:G${Math.max(tagRows.length, poolRefRows.length) + 1}`).format.wrapText = true;
 
@@ -293,8 +441,9 @@ review.getRange("F:G").format.columnWidth = 24;
 review.getRange("H:K").format.columnWidth = 12;
 review.getRange("L:M").format.columnWidth = 28;
 review.getRange("N:O").format.columnWidth = 28;
-review.getRange("P:P").format.columnWidth = 24;
-review.getRange("Q:Q").format.columnWidth = 24;
+review.getRange("P:Q").format.columnWidth = 36;
+review.getRange("R:R").format.columnWidth = 24;
+review.getRange("S:S").format.columnWidth = 24;
 details.getRange("A:A").format.columnWidth = 6;
 details.getRange("B:C").format.columnWidth = 18;
 details.getRange("D:E").format.columnWidth = 28;
@@ -307,7 +456,7 @@ review.freezePanes.freezeRows(1);
 details.freezePanes.freezeRows(1);
 refs.freezePanes.freezeRows(1);
 
-const approvalTable = review.tables.add(`A1:Q${itemRows.length + 1}`, true, "ItemApprovalTable");
+const approvalTable = review.tables.add(`A1:S${itemRows.length + 1}`, true, "ItemApprovalTable");
 const poolDetailTable = details.tables.add(`A1:H${poolRows.length + 1}`, true, "ItemPoolDetailTable");
 const tagReferenceTable = refs.tables.add(`A1:B${tagRows.length + 1}`, true, "TagReferenceTable");
 const poolReferenceTable = refs.tables.add(`D1:E${poolRefRows.length + 1}`, true, "PoolReferenceTable");
@@ -318,16 +467,16 @@ for (const table of [approvalTable, poolDetailTable, tagReferenceTable, poolRefe
 review.getRange(`E2:E${itemRows.length + 1}`).dataValidation = {
   rule: { type: "list", values: ["0", "1", "2", "3", "4"] },
 };
-review.getRange(`Q2:Q${itemRows.length + 1}`).dataValidation = {
+review.getRange(`S2:S${itemRows.length + 1}`).dataValidation = {
   rule: { type: "list", values: ["通过", "待改名", "待改池", "待改权重", "待改标签", "待改品质"] },
 };
 
 const inspectReview = await workbook.inspect({
   kind: "table",
-  range: `道具审批!A1:Q${itemRows.length + 1}`,
+  range: `道具审批!A1:S${itemRows.length + 1}`,
   include: "values",
   tableMaxRows: 5,
-  tableMaxCols: 17,
+  tableMaxCols: 19,
   maxChars: 3000,
 });
 console.log(inspectReview.ndjson);
@@ -342,7 +491,7 @@ console.log(errors.ndjson);
 
 const preview = await workbook.render({
   sheetName: "道具审批",
-  range: `A1:Q${itemRows.length + 1}`,
+  range: `A1:S${itemRows.length + 1}`,
   scale: 1,
   format: "png",
 });

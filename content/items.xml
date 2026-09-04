@@ -138,7 +138,7 @@
     name="Cleansed Wavy Cap"
     maxcharges="900"
     chargetype="timed"
-    description="Placeholder logic for a purified mushroom."
+    description="A purified psychedelic mushroom."
     gfx="PurifiedMushroom.png"
     id="14"
     quality="0"
@@ -214,7 +214,7 @@
   <!-- 被动道具：虚空针尖 -->
   <passive
     name="Needletick"
-    description="vomit in buckets"
+    description="Next time, use a trash can..."
     gfx="Needletick.png"
     id="22"
     quality="3"
@@ -224,7 +224,7 @@
   <passive
     name="Crazy Coconut"
     cache="damage"
-    description="King of hollow earth"
+    description="King of the Hollow Earth"
     gfx="CrazyCoconut.png"
     id="23"
     quality="4"
@@ -271,7 +271,7 @@
   />
   <!-- 主动道具：八音盒 -->
   <active
-    name="Musicbox"
+    name="Music Box"
     cache="all"
     maxcharges="12"
     description="Your life, on a timer"
@@ -324,4 +324,38 @@
   <passive name="Traffic: Heat" cache="firedelay" description="Are you sure this is what you want?" gfx="traffic_heat.png" id="35" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
   <!-- Developer gallery active: Certificate of Neverbirth -->
   <active name="Certificate of Neverbirth" maxcharges="0" description="Enter the Neverbirth gallery" gfx="certificate_of_neverbirth.png" id="36" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <!-- One-use special selection active: House VS Elephant -->
+  <active name="House VS Elephant" maxcharges="0" description="Who wants a frantic game of House VS Elephant?" gfx="saikeissho.png" id="37" quality="4" tags="summonable offensive nochallenge" />
+  <!-- Passive visual system: Everchanging -->
+  <passive name="Everchanging" description="A different look for this run" gfx="Everchanging.png" id="38" quality="0" />
+  <!-- Simple passive dog food series -->
+  <passive name="Protein Strip" cache="damage" description="A stronger bite" gfx="protein_strip.png" id="39" quality="1" />
+  <passive name="Energy Kibble" cache="firedelay" description="Stay lively" gfx="energy_kibble.png" id="40" quality="1" />
+  <passive name="Lean Can" cache="speed" description="Light on your feet" gfx="lean_can.png" id="41" quality="1" />
+  <passive name="DHA Fish Oil" cache="range" description="See farther" gfx="dha_fish_oil.png" id="42" quality="1" />
+  <passive name="Dental Chew" description="Push back" gfx="dental_chew.png" id="43" quality="1" />
+  <passive name="Lucky Liver Bites" cache="luck" description="A lucky snack" gfx="lucky_liver_bites.png" id="44" quality="1" />
+  <passive name="Goat Milk Pudding" description="Soft and nourishing" gfx="goat_milk_pudding.png" id="45" quality="1" />
+  <!-- Passive audit item: ACE Anti-Cheat System -->
+  <passive name="ACE Anti-Cheat System" description="Built on 20+ years of experience" gfx="ace_anti_cheat_blue.png" id="46" quality="0" />
+  <!-- Passive run curse: Yin's Curse -->
+  <passive name="Yin's Curse" description="Darkness suppresses the curse" gfx="yins_curse.png" id="47" quality="0" />
+  <!-- Active: Big Dog Bark; upgrades intentionally have TBD quality/pool metadata. -->
+  <active name="Big Dog Bark" maxcharges="0" description="Charge up and let the big dog run" gfx="big_dog_bark.png" id="48" quality="3" />
+  <passive name="Wind Charge Rod" description="No charge, bark backwards" gfx="wind_charge_rod.png" id="49" />
+  <passive name="Echo Shard" description="The dash echoes once" gfx="echo_shard.png" id="50" />
+  <!-- Passive revival item; pool metadata is intentionally TBD. -->
+  <passive name="Revive My Love" description="Please open your eyes again." gfx="revive_my_beloved.png" id="51" quality="3" />
+  <!-- Passive enemy-conversion and fear-aura item. -->
+  <passive name="Night of the Cowards" description="Everybody is a Scaredy-Shroom." gfx="NightOfTheCowards.png" id="52" quality="0" />
+  <!-- Active radial aura and shockwave replacement item. -->
+  <active name="Annihilation" cache="firedelay range" maxcharges="8" description="Feel My Pain!" gfx="Annihilation.png" id="53" quality="3" tags="offensive" />
+  <!-- Passive friendly vanilla Mulliboom squad. -->
+  <passive name="Kamikaze Squad" description="For victory! Sacrifice!" gfx="KamikazeSquad.png" id="54" quality="0" tags="offensive summonable" />
+  <!-- Passive room-by-room identity disorder; pool/tag/weight metadata is intentionally TBD. -->
+  <passive name="Memory Disorder" description="Who am I?" gfx="Collectibles_025_Breakfast.png" id="55" quality="0" />
+  <!-- Active permanent run contract; intentionally absent from all item pools. -->
+  <active name="Ring of the Seven Curses" cache="damage firedelay shotspeed luck flying" maxcharges="0" description="This world isn't worth it." gfx="RingOfTheSevenCurses.png" id="56" quality="0" />
+  <!-- Hidden technical trinket used only to occupy the trinket HUD slot while the run contract is active. -->
+  <trinket name="Seven Curses Slot Seal" description="" gfx="447586_trinket.png" id="1" hidden="true" />
 </items>

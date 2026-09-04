@@ -16,6 +16,8 @@ Use this checklist to translate a natural-language Isaac mod request into implem
 10. What can be left as `TBD` instead of guessed?
 11. Does the task ask for validation, debugging, proof, or a reproducible test plan?
 12. Does the task risk changing module boundaries, callback ownership, load order, or shared helpers?
+13. Is `main.lua` the implementation owner, or is it only the bootstrap that loads the actual owner module?
+14. Does the mechanic spawn, morph, replace, or resolve an entity/pickup/card? If yes, who owns the target and what happens when its registration lookup fails?
 
 ## Common Misroutes
 
@@ -26,3 +28,5 @@ Use this checklist to translate a natural-language Isaac mod request into implem
 - "Active item" is not one template. Decide charge policy, slot, continuing callbacks, UI/input, and state lifetime.
 - "Save this" should not mean serializing Isaac userdata. Store plain data and reconstruct runtime references.
 - "Looks correct" is not verification. Use validators, tests, and explicit in-game checks.
+- "Read main.lua" does not mean "put the new code in main.lua". Use it to find the current load path, then edit the file that owns the requested behavior.
+- "Prevent blank entities" does not mean reject every unknown entity. Validate neverbrith-owned targets before spawning them and leave third-party entities alone.

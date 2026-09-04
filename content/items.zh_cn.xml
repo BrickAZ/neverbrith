@@ -324,4 +324,38 @@
   <passive name="流量：热度" cache="firedelay" description="你确定这是你想要的吗？" gfx="traffic_heat.png" id="35" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
   <!-- 开发者陈列主动道具：未生证明 -->
   <active name="未生证明" maxcharges="0" description="进入未生陈列室" gfx="certificate_of_neverbirth.png" id="36" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <!-- 一次性特殊选择主动道具：再契象 -->
+  <active name="再契象" maxcharges="0" description="谁不想急头白脸来一把房子VS大象呢？" gfx="saikeissho.png" id="37" quality="4" tags="summonable offensive nochallenge" />
+  <!-- 被动外观系统：千变万化 -->
+  <passive name="千变万化" description="本局换个模样" gfx="Everchanging.png" id="38" quality="0" />
+  <!-- 简单被动道具：狗粮系列 -->
+  <passive name="高蛋白肉条" cache="damage" description="更有力的一口" gfx="protein_strip.png" id="39" quality="1" />
+  <passive name="活力狗饼干" cache="firedelay" description="活力满满" gfx="energy_kibble.png" id="40" quality="1" />
+  <passive name="轻盈低脂罐头" cache="speed" description="身轻步快" gfx="lean_can.png" id="41" quality="1" />
+  <passive name="DHA 鱼油" cache="range" description="看得更远" gfx="dha_fish_oil.png" id="42" quality="1" />
+  <passive name="护齿磨牙骨" description="顶回去" gfx="dental_chew.png" id="43" quality="1" />
+  <passive name="幸运肝粒" cache="luck" description="幸运零食" gfx="lucky_liver_bites.png" id="44" quality="1" />
+  <passive name="羊奶布丁" description="柔软滋养" gfx="goat_milk_pudding.png" id="45" quality="1" />
+  <!-- 被动审查道具：ACE 反作弊系统 -->
+  <passive name="ACE 反作弊系统" description="基于20+年的经验沉淀" gfx="ace_anti_cheat_blue.png" id="46" quality="0" />
+  <!-- 被动本局诅咒：阴的诅咒 -->
+  <passive name="阴的诅咒" description="唯有黑暗能压制诅咒" gfx="yins_curse.png" id="47" quality="0" />
+  <!-- 主动道具：大狗叫；两个强化的品质与道具池元数据暂未指定。 -->
+  <active name="大狗叫" maxcharges="0" description="蓄力，放狗" gfx="big_dog_bark.png" id="48" quality="3" />
+  <passive name="蓄风棒" description="即刻反向出击" gfx="wind_charge_rod.png" id="49" />
+  <passive name="回响碎片" description="冲刺后留下回响" gfx="echo_shard.png" id="50" />
+  <!-- 被动复活道具；道具池元数据暂未指定。 -->
+  <passive name="复活吧，我的爱人！" description="请再次睁开眼睛。" gfx="revive_my_beloved.png" id="51" quality="3" />
+  <!-- 被动敌人转换与恐惧光环道具。 -->
+  <passive name="胆小鬼之夜" description="人人都是胆小菇" gfx="NightOfTheCowards.png" id="52" quality="0" />
+  <!-- 主动环形光环与冲击波替换道具。 -->
+  <active name="诛" cache="firedelay range" maxcharges="8" description="感受！我的痛苦！" gfx="Annihilation.png" id="53" quality="3" tags="offensive" />
+  <!-- 被动友好原版炸弹棉花怪小队。 -->
+  <passive name="神风特攻队" description="为胜利！献身！" gfx="KamikazeSquad.png" id="54" quality="0" tags="offensive summonable" />
+  <!-- 被动逐房身份紊乱；道具池、标签和权重元数据暂未指定。 -->
+  <passive name="记忆紊乱" description="我是谁？" gfx="Collectibles_025_Breakfast.png" id="55" quality="0" />
+  <!-- 主动永久本局契约；刻意不加入任何道具池。 -->
+  <active name="七咒之戒" cache="damage firedelay shotspeed luck flying" maxcharges="0" description="人间不值得" gfx="RingOfTheSevenCurses.png" id="56" quality="0" />
+  <!-- 隐藏技术饰品：仅用于在本局契约生效时占据饰品 HUD 栏位。 -->
+  <trinket name="Seven Curses Slot Seal" description="" gfx="447586_trinket.png" id="1" hidden="true" />
 </items>

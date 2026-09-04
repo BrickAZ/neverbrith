@@ -1,6 +1,6 @@
 # neverbrith
 
-A The Binding of Isaac: Repentance mod by brick.
+A mod for The Binding of Isaac: Repentance by brick.
 
 ## Author
 

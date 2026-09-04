@@ -1,0 +1,11 @@
+<sounds root="sfx/">
+	<sound name="Big Dog Bark Charge">
+		<sample weight="1" path="big_dog_bark/big_dog_charge.wav" />
+	</sound>
+	<sound name="Big Dog Bark Release">
+		<sample weight="1" path="big_dog_bark/big_dog_release.wav" />
+	</sound>
+	<sound name="Revive My Love">
+		<sample weight="1" path="revive_my_love/revive_my_love.wav" />
+	</sound>
+</sounds>

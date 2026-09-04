@@ -26,7 +26,23 @@
         "docs/skills/isaac-audio-render-feedback/references/render-overlay.md",
         "docs/skills/isaac-audio-render-feedback/references/input-interception.md"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "陌生模组的资源根是 media/，渲染代码在 src/ui/。我要新增一次受伤的全屏闪白，最先该确认什么？",
+      "expected_output": "应该先用 isaac-mod-context 发现真实资源/XML/加载路径和已有渲染生命周期；不能假设 content/sounds.xml、resources/ 或 main.lua，再选择 shader 或 Sprite feedback。",
+      "files": [
+        "docs/skills/isaac-mod-context/SKILL.md",
+        "docs/skills/isaac-audio-render-feedback/SKILL.md"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "一个世界反馈用 MC_POST_RENDER 手动 Sprite:Render(entity.Position + offset)，在屏幕滚动和大型 Boss 上位置不对。怎么修？",
+      "expected_output": "应该区分世界锚点与屏幕渲染坐标：每帧计算 live anchor、Isaac.WorldToScreen 后 Render；按 owner 的位置偏移和尺寸策略处理，或在已发现的实体架构下评估 ENTITY_EFFECT，并要求实测。",
+      "files": [
+        "docs/skills/isaac-audio-render-feedback/references/render-overlay.md"
+      ]
     }
   ]
 }
-

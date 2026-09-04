@@ -14,7 +14,7 @@ Use this for MCM, Encyclopedia, Boss Bars, StageAPI, CuerLib translation support
 
 - Keep compatibility code in a clearly named compatibility location when the project already has one.
 - Separate config state from gameplay state.
-- When using CuerLib helpers, state whether neverbrith already depends on CuerLib. If it does not, do not make it a hidden requirement.
+- When using CuerLib helpers, state whether the current project already depends on CuerLib. If it does not, do not make it a hidden requirement.
 - Avoid making MCM or wiki support the only place a mechanic is documented.
 
 ## Prompt Checklist
@@ -25,4 +25,3 @@ Use this for MCM, Encyclopedia, Boss Bars, StageAPI, CuerLib translation support
 - Fallback behavior.
 - Language coverage.
 - Manual in-game check.
-

@@ -6,26 +6,15 @@ Use this for EID inline icons, transformation icons, card/pill icons, item marke
 
 - `.anm2` icon file.
 - PNG spritesheet, usually 16x16, 24x24, or 32x32.
-- EID registration code in `main.lua`.
+- EID registration code in the discovered bootstrap or compatibility module.
 - Tests that stub `EID.InlineIcons` or `EID:addIcon`.
 
-Reference examples:
-
-- neverbrith: `resources/gfx/EID/DiceSetIcon.anm2`
-- YSD: `resources/gfx/eid/player_icons.anm2`
-- YSD: `resources/gfx/eid/cardpill_icons.anm2`
-- Reverie: `resources/gfx/eid/reverie_inline_icons.anm2`
-- Reverie: `resources/gfx/eid/reverie_transformation_icons.anm2`
+Use a current-project EID icon when one exists. Otherwise use the icon shape,
+registration pattern, and checklist below; no third-party asset is required.
 
 ## Path Casing
 
-The current neverbrith Dice Set code loads:
-
-```lua
-"gfx/eid/DiceSetIcon.anm2"
-```
-
-while the repository path is under `resources/gfx/EID/`. Keep the existing convention for working code, but verify in tests when changing path casing.
+Keep the current project's verified path convention, including case. If its Lua load path and on-disk resource path differ, preserve only a proven working mapping and add or update a path test before changing it.
 
 ## Icon ANM2 Shape
 
@@ -39,7 +28,7 @@ Small icons should usually have:
 
 ## EID Registration Pattern
 
-Use existing neverbrith EID support as the local source of truth. A simplified form:
+Use existing current-project EID support as the local source of truth. A simplified form:
 
 ```lua
 local iconSprite = Sprite()
@@ -47,9 +36,9 @@ iconSprite:Load("gfx/eid/ItemIcon.anm2", true)
 iconSprite:Play("Icon", true)
 
 if EID and type(EID.addIcon) == "function" then
-    EID:addIcon("neverbirthItemIcon", "Icon", 0, 16, 16, 0, 0, iconSprite)
+    EID:addIcon("modItemIcon", "Icon", 0, 16, 16, 0, 0, iconSprite)
 elseif EID and type(EID.InlineIcons) == "table" then
-    EID.InlineIcons.neverbirthItemIcon = { "Icon", 0, 16, 16, 0, 0, iconSprite }
+    EID.InlineIcons.modItemIcon = { "Icon", 0, 16, 16, 0, 0, iconSprite }
 end
 ```
 

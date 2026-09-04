@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "给 neverbrith 新道具补 EID：中文和英文都要有，还要加一个内联图标。请写给代码 Codex 的提示词，别让它直接假设 EID 一定存在。",
+      "prompt": "给新道具补 EID：中文和英文都要有，还要加一个内联图标。请写给代码 Codex 的提示词，别让它直接假设 EID 一定存在。",
       "expected_output": "应该要求 if EID then guard，区分 items.xml/en_us/zh_cn 与 EID 文本，使用正确 collectible id，图标注册若用 anm2 要交给 anm2 skill，英文和中文分离。",
       "files": [
         "docs/skills/isaac-compat-descriptions/references/eid-descriptions.md",
@@ -26,7 +26,23 @@
       "files": [
         "docs/skills/isaac-compat-descriptions/SKILL.md"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "陌生模组只有 ja_jp 本地化，兼容模块在 src/integrations/。我要补一个可选百科条目，开始前不能假设什么？",
+      "expected_output": "应该先用 isaac-mod-context 发现实际 locale、描述 XML、加载顺序和可选依赖约定；不能硬写 en_us/zh_cn、main.lua 或把百科当作必装依赖。",
+      "files": [
+        "docs/skills/isaac-mod-context/SKILL.md",
+        "docs/skills/isaac-compat-descriptions/SKILL.md"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "为了省事，代码 Codex 想给一个没有声明前置的模组直接引入 CuerLib 来做两句提示文字。应该怎么处理？",
+      "expected_output": "应该先检查官方 API 与现有项目文本路径；未声明 CuerLib 时不能把它设为默认依赖。若仍需要联动，只能作为 guard 的独立兼容层，且核心机制有不依赖该库的 fallback。",
+      "files": [
+        "docs/skills/isaac-compat-descriptions/references/optional-dependency-gates.md"
+      ]
     }
   ]
 }
-

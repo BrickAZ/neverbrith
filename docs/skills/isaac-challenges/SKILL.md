@@ -1,11 +1,13 @@
 ---
 name: isaac-challenges
-description: Add, implement, review, or write handoff prompts for custom challenges in Binding of Isaac Repentance mods, especially neverbrith. Use this whenever the user mentions challenges, challenge id, content/challenges.xml, starting items, starting trinkets, challenge-only rules, roomfilter, cursefilter, endstage, canshoot, forced floors, challenge scripts, or Isaac.GetChallenge(). Also use isaac-state-lifecycle for once-per-room/floor challenge rules or any state that must not leak into normal runs.
+description: Add, implement, review, or write handoff prompts for custom challenges in Binding of Isaac Repentance mods. Use this whenever the user mentions challenges, challenge id, content/challenges.xml, starting items, starting trinkets, challenge-only rules, roomfilter, cursefilter, endstage, canshoot, forced floors, challenge scripts, or Isaac.GetChallenge(). Use isaac-mod-context first in an unfamiliar project. Also use isaac-state-lifecycle for once-per-room/floor challenge rules or any state that must not leak into normal runs. 中文触发：挑战、挑战开局、挑战规则、挑战限定、起始道具、起始饰品、起始卡牌、普通局泄漏、禁用房间、终点层。
 ---
 
 # Isaac Custom Challenges
 
 Use this skill for custom challenge work in Isaac Repentance mods.
+
+Read `../isaac-mod-context/references/design-authority.md` before deciding a challenge's starting kit, restrictions, reward, or intended difficulty. Explicit design choices are locked; omissions stay `TBD`.
 
 The goal is to stop a common failure: Codex adds `content/challenges.xml` metadata but forgets the Lua module, load entry, challenge-id lookup, or `Isaac.GetChallenge()` guard, causing rules to leak into normal runs.
 
@@ -13,16 +15,12 @@ The goal is to stop a common failure: Codex adds `content/challenges.xml` metada
 
 Before editing or writing a prompt:
 
-1. Read the current mod's `content/challenges.xml` if it exists.
-2. Read the current mod's challenge loading pattern in `main.lua` or the content registry.
-3. Read the closest challenge Lua script in the current mod. If none exists, use YSD as the small reference and Reverie as the broad reference.
+1. In an unfamiliar project, use `isaac-mod-context` to confirm challenge XML, bootstrap/load files, module roots, and language variants that actually exist.
+2. Read the current project's challenge XML if it exists.
+3. Read the current project's challenge loading pattern in its discovered bootstrap/load file or content registry.
+4. Read the closest challenge Lua script in the current project. If none exists, use this skill's XML, Lua-gate, inventory, and no-leak references instead of requiring another mod.
 4. If the challenge gives custom items, cards, visuals, sounds, stateful rules, or descriptions, use the relevant sibling skill for those surfaces. Use `isaac-cards-pockets` for custom starting cards, runes, soul stones, pills, or blank-card generation issues. Use `isaac-state-lifecycle` for once-per-room/floor/run rules and no-leak cleanup.
-5. After file changes, use `isaac-validators` for XML/path checks and `isaac-testing-debugging` for challenge leakage verification.
-
-## Reference Mods
-
-- YSD has one simple custom challenge: `E:/Isaac - Repentance/ysd/content/challenges.xml`, `E:/Isaac - Repentance/ysd/scripts/challenges/endless_r.lua`, and the load entry in `E:/Isaac - Repentance/ysd/main.lua`.
-- Reverie has ten custom challenges: `E:/Isaac - Repentance/reverie/content/challenges.xml`, challenge scripts under `E:/Isaac - Repentance/reverie/scripts/challenges/`, and load entries in `E:/Isaac - Repentance/reverie/scripts/contents.lua`.
+6. After file changes, use `isaac-validators` for XML/path checks and `isaac-testing-debugging` for challenge leakage verification.
 
 ## Route The Challenge
 

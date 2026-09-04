@@ -1,0 +1,61 @@
+<AnimatedActor>
+	<Info CreatedBy="codex" CreatedOn="01/08/2026" Fps="30" Version="104" />
+	<Content>
+		<Spritesheets>
+			<Spritesheet Id="0" Path="big_dog_echo.png" />
+		</Spritesheets>
+		<Layers>
+			<Layer Name="body" Id="0" SpritesheetId="0" />
+		</Layers>
+		<Nulls />
+		<Events />
+	</Content>
+	<Animations DefaultAnimation="DashDown">
+		<Animation Name="DashDown" FrameNum="4" Loop="true">
+			<RootAnimation>
+				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="4" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+			</RootAnimation>
+			<LayerAnimations>
+				<LayerAnimation LayerId="0" Visible="true">
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="0" YCrop="0" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="96" YCrop="0" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="192" YCrop="0" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="288" YCrop="0" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+				</LayerAnimation>
+			</LayerAnimations>
+			<NullAnimations />
+			<Triggers />
+		</Animation>
+		<Animation Name="DashUp" FrameNum="4" Loop="true">
+			<RootAnimation>
+				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="4" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+			</RootAnimation>
+			<LayerAnimations>
+				<LayerAnimation LayerId="0" Visible="true">
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="0" YCrop="96" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="96" YCrop="96" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="192" YCrop="96" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="288" YCrop="96" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+				</LayerAnimation>
+			</LayerAnimations>
+			<NullAnimations />
+			<Triggers />
+		</Animation>
+		<Animation Name="DashSide" FrameNum="4" Loop="true">
+			<RootAnimation>
+				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="4" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+			</RootAnimation>
+			<LayerAnimations>
+				<LayerAnimation LayerId="0" Visible="true">
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="0" YCrop="192" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="96" YCrop="192" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="192" YCrop="192" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+					<Frame XPosition="0" YPosition="0" XPivot="48" YPivot="88" XCrop="288" YCrop="192" Width="96" Height="96" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false" />
+				</LayerAnimation>
+			</LayerAnimations>
+			<NullAnimations />
+			<Triggers />
+		</Animation>
+	</Animations>
+</AnimatedActor>
+

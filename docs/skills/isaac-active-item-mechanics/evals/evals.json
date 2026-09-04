@@ -27,7 +27,15 @@
       "files": [
         "docs/skills/isaac-active-item-mechanics/SKILL.md"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "陌生模组的 Lua 都在 src/items/，启动文件叫 bootstrap.lua。新增一个长按选择主动道具前，第一步不应该猜什么？",
+      "expected_output": "应该先用 isaac-mod-context 发现 RegisterMod 对象、加载顺序、道具 XML 和现有主动道具；不能假设 main.lua、content/ 或既有项目的注册规则。",
+      "files": [
+        "docs/skills/isaac-mod-context/SKILL.md",
+        "docs/skills/isaac-active-item-mechanics/SKILL.md"
+      ]
     }
   ]
 }
-

@@ -10,7 +10,8 @@ local function assertTruthy(value, message)
     end
 end
 
-local function loadNeverbirth()
+local function loadNeverbirth(options)
+    options = options or {}
     local callbacks = {}
     local itemIds = {
         EssentialBalm = 733,
@@ -89,6 +90,7 @@ local function loadNeverbirth()
         SLOT_POCKET = 2,
         SLOT_POCKET2 = 3,
     }
+    Options = { Language = options.language or "en" }
 
     function MusicManager()
         return {
@@ -220,6 +222,32 @@ local function loadNeverbirth()
     })
     Color.Default = Color(1, 1, 1, 1, 0, 0, 0)
 
+    function KColor(r, g, b, a)
+        return { Red = r, Green = g, Blue = b, Alpha = a }
+    end
+
+    function Font()
+        local font = {}
+        function font:Load(path)
+            self.path = path
+            return true
+        end
+        local function draw(_, text, x, y, color)
+            renderedTexts[#renderedTexts + 1] = {
+                text = text,
+                x = x,
+                y = y,
+                r = color and color.Red,
+                g = color and color.Green,
+                b = color and color.Blue,
+                a = color and color.Alpha,
+            }
+        end
+        font.DrawString = draw
+        font.DrawStringUTF8 = draw
+        return font
+    end
+
     local vectorMeta = {
         __add = function(left, right)
             return Vector(left.X + right.X, left.Y + right.Y)
@@ -256,6 +284,10 @@ local function loadNeverbirth()
         function mod:SaveData() end
 
         return mod
+    end
+
+    function include()
+        return function() end
     end
 
     dofile("main.lua")
@@ -486,6 +518,22 @@ local function test_uncut_cord_renders_delay_popup_and_debt()
     assertRenderedText(env, "DEBT 1.0 0/2", "pending delayed damage should render debt status")
 end
 
+local function test_uncut_cord_runtime_feedback_uses_chinese_game_language()
+    local env = loadNeverbirth({ language = "zh" })
+    local player = env.newPlayer({ randomFloats = { 0.25 } })
+
+    env.runDamageCallbacks(player, 2)
+    env.runPostRender()
+
+    assertRenderedText(env, "延迟伤害 1.0", "Chinese game language should localize the delayed-damage popup")
+    assertRenderedText(env, "延迟伤害 1.0 0/2", "Chinese game language should localize the pending debt status")
+
+    env.clearRenderedTexts()
+    env.runDamageCallbacks(player, 1)
+    env.runPostRender()
+    assertRenderedText(env, "全部延迟伤害 1.0", "Chinese game language should localize full debt settlement")
+end
+
 local function test_uncut_cord_renders_room_progress()
     local env = loadNeverbirth()
     local player = env.newPlayer({ randomFloats = { 0.25 } })
@@ -660,6 +708,7 @@ end
 
 test_uncut_cord_delays_and_cancels_triggered_damage()
 test_uncut_cord_renders_delay_popup_and_debt()
+test_uncut_cord_runtime_feedback_uses_chinese_game_language()
 test_uncut_cord_renders_room_progress()
 test_uncut_cord_second_damage_settles_full_debt_and_allows_current_damage()
 test_uncut_cord_renders_full_paid_on_second_hit()
