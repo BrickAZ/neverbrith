@@ -106,6 +106,28 @@ foreach ($sourceBackedGuideRule in @(
     RequireContains $english $sourceBackedGuideRule 'COMPATIBILITY.md source-backed rule'
 }
 
+$dynamicHeading = '### Dynamic-threshold example'
+$dynamicHeadingOffset = $english.IndexOf($dynamicHeading, [System.StringComparison]::Ordinal)
+Require ($dynamicHeadingOffset -ge 0) 'COMPATIBILITY.md is missing the dynamic Fortune heading'
+$dynamicFenceStart = $english.IndexOf('```lua', $dynamicHeadingOffset + $dynamicHeading.Length, [System.StringComparison]::Ordinal)
+Require ($dynamicFenceStart -ge 0) 'COMPATIBILITY.md is missing the dynamic Fortune Lua block'
+$dynamicFenceEnd = $english.IndexOf('```', $dynamicFenceStart + 6, [System.StringComparison]::Ordinal)
+Require ($dynamicFenceEnd -ge 0) 'COMPATIBILITY.md has an unterminated dynamic Fortune Lua block'
+$dynamicFortuneBlock = $english.Substring($dynamicFenceStart, $dynamicFenceEnd - $dynamicFenceStart + 3)
+
+foreach ($dynamicRequirement in @(
+    'local fortuneResolverCompatRegistered = false',
+    'local function tryRegisterFortuneResolverCompat()',
+    'local myLuckyItem = Isaac.GetItemIdByName("My Lucky Item")',
+    'neverbirth:RegisterLuckCapResolver(myLuckyItem, function(',
+    'MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneResolverCompat)'
+)) {
+    RequireContains $dynamicFortuneBlock $dynamicRequirement 'dynamic Fortune Lua block'
+}
+
+Require ([regex]::IsMatch($dynamicFortuneBlock, 'if type\(myLuckyItem\) ~= "number" or myLuckyItem <= 0 then\r?\n\s+return false')) 'dynamic Fortune Lua block must return false for a missing or non-positive runtime ID'
+Require ([regex]::IsMatch($dynamicFortuneBlock, '(?m)^tryRegisterFortuneResolverCompat\(\)\r?$')) 'dynamic Fortune Lua block must attempt registration immediately'
+
 
 foreach ($signature in @(
     'function Neverbirth:RegisterLuckCap(',
