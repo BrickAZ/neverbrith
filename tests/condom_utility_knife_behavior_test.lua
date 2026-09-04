@@ -871,12 +871,63 @@ local function test_fortune_rivalling_heaven_gu_uses_complete_audit_registry()
     env.runEvaluate(needletick, CacheFlag.CACHE_LUCK)
     assertEquals(needletick.Luck, 10, "Needletick must raise Fortune Rivalling Heaven Gu's required luck to 10")
 end
+
+local function test_public_luck_cap_api_contracts()
+    local env = loadNeverbirth()
+    local mod = env.mod
+    local ownerId = 9001
+    local negativeOnlyOwnerId = 9002
+    local trinketId = 9003
+
+    assertEquals(mod:RegisterLuckCap(0, 5), false, "collectible fixed-cap registration must reject an invalid ID")
+    assertEquals(mod:RegisterLuckCap(ownerId, nil), false, "collectible fixed-cap registration must reject a missing threshold")
+    assertEquals(mod:RegisterLuckCapResolver(0, function() return 5 end), false, "collectible resolver registration must reject an invalid ID")
+    assertEquals(mod:RegisterLuckCapResolver(ownerId, "not a function"), false, "collectible resolver registration must reject a non-function")
+    assertEquals(mod:RegisterTrinketLuckCap(0, 5), false, "trinket fixed-cap registration must reject an invalid ID")
+    assertEquals(mod:RegisterTrinketLuckCap(trinketId, nil), false, "trinket fixed-cap registration must reject a missing threshold")
+    assertEquals(mod:RegisterTrinketLuckCapResolver(0, function() return 5 end), false, "trinket resolver registration must reject an invalid ID")
+    assertEquals(mod:RegisterTrinketLuckCapResolver(trinketId, "not a function"), false, "trinket resolver registration must reject a non-function")
+
+    assertEquals(mod:RegisterLuckCap(ownerId, 5), true, "collectible fixed-cap wrapper must return true for a valid registration")
+    assertEquals(mod:RegisterLuckCap(negativeOnlyOwnerId, -1), true, "negative fixed caps may register")
+    local resolverCalls = 0
+    local function resolver()
+        resolverCalls = resolverCalls + 1
+        return 7
+    end
+    assertEquals(mod:RegisterLuckCapResolver(ownerId, resolver), true, "collectible resolver wrapper must return true for a valid registration")
+    assertEquals(mod:RegisterLuckCapResolver(ownerId, resolver), true, "repeated resolver registrations remain independent entries")
+    assertEquals(mod:RegisterLuckCapResolver(ownerId, function() error("resolver error") end), true, "erroring resolvers may register")
+    assertEquals(mod:RegisterLuckCapResolver(ownerId, function() return "not numeric" end), true, "non-numeric resolvers may register")
+    assertEquals(mod:RegisterTrinketLuckCap(trinketId, 12), true, "trinket fixed-cap wrapper must return true for a valid registration")
+    assertEquals(mod:RegisterTrinketLuckCapResolver(trinketId, function() return -1 end), true, "trinket resolver wrapper must accept a valid function")
+
+    local withoutGu = env.newPlayer({ luck = 0, collectibles = { [ownerId] = 1 } })
+    env.runEvaluate(withoutGu, CacheFlag.CACHE_LUCK)
+    assertEquals(withoutGu.Luck, 0, "registered owners must not affect Luck without Fortune Rivalling Heaven Gu")
+
+    local negativeOnly = env.newPlayer({ luck = 0, collectibles = {
+        [env.items.FortuneRivallingHeavenGu] = 1,
+        [negativeOnlyOwnerId] = 1,
+    } })
+    env.runEvaluate(negativeOnly, CacheFlag.CACHE_LUCK)
+    assertEquals(negativeOnly.Luck, 0, "negative thresholds must be ignored during evaluation")
+
+    local active = env.newPlayer({ luck = 0, collectibles = {
+        [env.items.FortuneRivallingHeavenGu] = 1,
+        [ownerId] = 1,
+    }, trinkets = { [trinketId] = 1 } })
+    env.runEvaluate(active, CacheFlag.CACHE_LUCK)
+    assertEquals(resolverCalls, 2, "repeated registrations must invoke each resolver independently")
+    assertEquals(active.Luck, 12, "resolver errors and invalid results must be contained while the highest valid owner cap wins")
+end
 test_xml_registers_requested_items_and_pools()
 test_pickup_banner_immediately_uses_chinese_when_count_confirms_pickup()
 test_pickup_banner_immediately_uses_chinese_when_queue_confirms_pickup()
 test_pickup_banner_leaves_native_english_untouched_and_deduplicates_collision()
 test_pickup_banner_ignores_non_neverbirth_collectibles()
 test_fortune_rivalling_heaven_gu_uses_complete_audit_registry()
+test_public_luck_cap_api_contracts()
 test_utility_knife_adds_damage_and_grants_one_broken_heart_per_pickup()
 test_utility_knife_pickup_accepts_wrapped_player_argument()
 test_utility_knife_post_update_fallback_grants_broken_heart_for_new_copies()

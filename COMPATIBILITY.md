@@ -54,7 +54,7 @@ Do the lookup after both mods have loaded. The registration examples below try i
 
 ### What the integration does
 
-Fortune Rivalling Heaven Gu uses registered entries only when the player owns the matching collectible or trinket. It finds the highest applicable Luck threshold and raises the player's Luck to that value when needed; it never lowers a higher Luck value already produced by the cache chain.
+The effect applies only while the player has Fortune Rivalling Heaven Gu and owns the matching registered owner collectible or trinket. It finds the highest applicable Luck threshold and raises the player's Luck to that value when needed; it never lowers a higher Luck value already produced by the cache chain.
 
 ### Functions and parameters
 
@@ -104,12 +104,34 @@ MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneCompat)
 ### Dynamic-threshold example
 
 ```lua
-fortuneCompatRegistered = neverbirth:RegisterLuckCapResolver(myLuckyItem, function(player, itemId, count)
-    if count >= 2 then
-        return 8
+local fortuneResolverCompatRegistered = false
+
+local function tryRegisterFortuneResolverCompat()
+    if fortuneResolverCompatRegistered then
+        return true
     end
-    return 12
-end) == true
+
+    local neverbirth = _G and rawget(_G, "Neverbirth")
+    if not neverbirth or type(neverbirth.RegisterLuckCapResolver) ~= "function" then
+        return false
+    end
+
+    local myLuckyItem = Isaac.GetItemIdByName("My Lucky Item")
+    if type(myLuckyItem) ~= "number" or myLuckyItem <= 0 then
+        return false
+    end
+
+    fortuneResolverCompatRegistered = neverbirth:RegisterLuckCapResolver(myLuckyItem, function(player, itemId, count)
+        if count >= 2 then
+            return 8
+        end
+        return 12
+    end) == true
+    return fortuneResolverCompatRegistered
+end
+
+tryRegisterFortuneResolverCompat()
+MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneResolverCompat)
 ```
 
 Keep this resolver side-effect free. In particular, do not register again from the resolver; registration belongs in an idempotent load-time or game-start path.
