@@ -1,15 +1,17 @@
 # Neverbirth public compatibility documentation release design
 
 Date: 2026-09-04
-Status: approved direction, awaiting written-spec review
+Status: approved
 
 ## Goal
 
-Publish an English and Simplified Chinese guide for the compatibility hooks that are present in Neverbirth's public GitHub version. The guide must tell another Isaac mod author what each hook does, how to call it safely, and what Neverbirth does not promise.
+Promote the existing playable update to Neverbirth's default GitHub branch, then publish an English and Simplified Chinese guide for the two compatibility hooks in that update. The guide must tell another Isaac mod author what each hook does, how to call it safely, and what Neverbirth does not promise.
 
 ## Locked decisions
 
 - The public guide covers two integrations: Fortune Rivalling Heaven Gu luck thresholds and Dice Set custom dice active items.
+- The release uses `origin/multiple-language-support` commit `fcd6a8e` as its gameplay and API base. This is the existing playable update that contains both public hooks.
+- The current default branch commit `7350157` is an ancestor of `fcd6a8e`. Publishing this release intentionally promotes the complete playable update, rather than cherry-picking isolated compatibility functions into the older default branch.
 - Memory Disorder is not a public integration in this release. The detailed profile chapter, API status row, sample code, implementation link, and test link will be removed. A short note will state that the published version does not expose a Memory Disorder compatibility API.
 - `memory_disorder.lua` and `tests/memory_disorder_behavior_test.lua` remain outside this release. This work does not add, publish, or modify them.
 - Both language versions will have the same section order, API status, examples, limitations, and maintainer checks.
@@ -23,9 +25,9 @@ Publish an English and Simplified Chinese guide for the compatibility hooks that
 
 This would require publishing and loading the Memory Disorder module and its tests. It was rejected because the user selected the option that keeps this interface out of the public release.
 
-### Publish the two interfaces that exist on GitHub
+### Promote the playable update and publish its two interfaces
 
-This is the selected approach. It keeps the guide accurate for the version another author can download and avoids advertising a table that is absent from the public code.
+This is the selected approach. It makes the default branch match the playable code that already contains both documented interfaces and avoids advertising a function that exists only on a non-default branch.
 
 ### Split provisional and stable APIs into separate guides
 
@@ -78,12 +80,14 @@ The guide will not claim that an `API_VERSION`, `Neverbirth.Compat` namespace, o
 - `COMPATIBILITY.md`
 - `COMPATIBILITY.zh-CN.md`
 
-The release branch starts from the current remote `main`. After verification, it will be merged into `main` and pushed without including changes from the dirty `multiple-language-support` checkout.
+The release branch will be rebased onto the clean remote commit `origin/multiple-language-support` at `fcd6a8e`, not onto the dirty local checkout. After verification, the release branch will fast-forward the remote `main` branch. It will not include the later local-only commits or uncommitted changes from the dirty `multiple-language-support` checkout.
 
 ## Verification
 
 Before merging:
 
+- Confirm `origin/main` is an ancestor of the selected playable update and that the release branch contains `fcd6a8e`.
+- Confirm the release tree contains all four Fortune registration functions and `RegisterDiceItem` before publishing their documentation.
 - Confirm both documents contain the same ordered sections and the same executable Lua examples.
 - Confirm every relative Markdown link exists in the release tree.
 - Confirm neither guide advertises `MemoryDisorderCharacterProfiles` or links to absent Memory Disorder files.
@@ -91,7 +95,7 @@ Before merging:
 - Confirm the English guide does not use `seen or used` for Dice Set progress.
 - Confirm the examples do not call `RegisterMod`.
 - Confirm README contains both relative compatibility links.
-- Run all existing Lua tests in the clean release worktree.
+- Run all existing Lua tests from the promoted playable update in the clean release worktree.
 - Run `git diff --check` and review the exact diff before committing.
 - After merging, repeat the tests and link checks on the merged `main` result before pushing.
 
@@ -104,3 +108,4 @@ This is static repository verification. It does not replace an in-game two-mod l
 - Adding a compatibility namespace or API version to Lua
 - Changing EID behavior
 - Modifying XML, resources, localization XML, or the user's unrelated working-tree changes
+- Reworking or selectively extracting gameplay changes already contained in the approved `fcd6a8e` playable update
