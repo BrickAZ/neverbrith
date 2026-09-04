@@ -278,4 +278,11 @@ for ($index = 0; $index -lt $englishBlocks.Count; $index++) {
 }
 
 CheckRelativeLinks $chinesePath $chinese
+
+$readmePath = Join-Path $Root 'README.md'
+$readme = Get-Content -Raw -LiteralPath $readmePath
+RequireContains $readme '[English compatibility guide](COMPATIBILITY.md)' 'README.md'
+RequireContains $readme '[简体中文兼容指南](COMPATIBILITY.zh-CN.md)' 'README.md'
+RequireContains $readme 'The public compatibility scope covers only Fortune Rivalling Heaven Gu Luck thresholds and Dice Set custom dice active items. Memory Disorder has no public compatibility API.' 'README.md'
+
 Write-Host 'compatibility docs tests passed'

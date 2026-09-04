@@ -12,6 +12,13 @@ A The Binding of Isaac: Repentance mod by brick.
 
 neverbrith is a local mod project for The Binding of Isaac: Repentance.
 
+## Compatibility guides
+
+- [English compatibility guide](COMPATIBILITY.md)
+- [简体中文兼容指南](COMPATIBILITY.zh-CN.md)
+
+The public compatibility scope covers only Fortune Rivalling Heaven Gu Luck thresholds and Dice Set custom dice active items. Memory Disorder has no public compatibility API.
+
 ## Localization status
 
 Native pickup banner localization is paused. The current XML language-pack and
