@@ -808,6 +808,50 @@ end
 
 test_original_and_heuristic_dice_detection()
 test_collecting_or_using_three_different_dice_unlocks_set()
+
+local function test_public_dice_registration_api_contracts()
+    local env = loadNeverbirth()
+    local mod = env.mod
+
+    assertEquals(mod:RegisterDiceItem(0, {}), false, "public dice registration must reject zero IDs")
+    assertEquals(mod:RegisterDiceItem(-1, {}), false, "public dice registration must reject negative IDs")
+    assertEquals(mod:RegisterDiceItem(904, nil), true, "public dice registration must accept nil options")
+    assertEquals(mod:IsDiceActiveItem(904), true, "a successfully registered ID must be recognized as dice")
+    assertEquals(mod:RegisterDiceItem(904, { name = "No protection", protectStats = false }), true,
+        "re-registering a valid dice ID must return true")
+
+    local unprotected = env.newPlayer({ damage = 5, maxFireDelay = 10, range = 260 })
+    env.runPostAddCollectible(unprotected, CollectibleType.COLLECTIBLE_D6)
+    env.runPostAddCollectible(unprotected, CollectibleType.COLLECTIBLE_D8)
+    env.runPostAddCollectible(unprotected, CollectibleType.COLLECTIBLE_D20)
+    unprotected.activeItems[ActiveSlot.SLOT_PRIMARY] = 904
+    unprotected.activeCharges[ActiveSlot.SLOT_PRIMARY] = 3
+    env.runPreUse(unprotected, 904, ActiveSlot.SLOT_PRIMARY)
+    unprotected.Damage = 2
+    unprotected.MaxFireDelay = 20
+    unprotected.TearRange = 100
+    env.runUse(unprotected, 904, ActiveSlot.SLOT_PRIMARY)
+    assertEquals(unprotected.Damage, 2, "protectStats = false must disable damage protection")
+    assertEquals(unprotected.MaxFireDelay, 20, "protectStats = false must disable fire-rate protection")
+    assertEquals(unprotected.TearRange, 100, "protectStats = false must disable range protection")
+
+    assertEquals(mod:RegisterDiceItem(904, { name = "Replacement", protectStats = true }), true,
+        "same-ID registration must replace the previous options")
+    local protected = env.newPlayer({ damage = 5, maxFireDelay = 10, range = 260 })
+    env.runPostAddCollectible(protected, CollectibleType.COLLECTIBLE_D6)
+    env.runPostAddCollectible(protected, CollectibleType.COLLECTIBLE_D8)
+    env.runPostAddCollectible(protected, CollectibleType.COLLECTIBLE_D20)
+    protected.activeItems[ActiveSlot.SLOT_PRIMARY] = 904
+    protected.activeCharges[ActiveSlot.SLOT_PRIMARY] = 3
+    env.runPreUse(protected, 904, ActiveSlot.SLOT_PRIMARY)
+    protected.Damage = 2
+    protected.MaxFireDelay = 20
+    protected.TearRange = 100
+    env.runUse(protected, 904, ActiveSlot.SLOT_PRIMARY)
+    assertEquals(protected.Damage, 5, "same-ID replacement must restore stat protection when protectStats becomes true")
+    assertEquals(protected.MaxFireDelay, 10, "replacement stat protection must restore fire rate")
+    assertEquals(protected.TearRange, 260, "replacement stat protection must restore range")
+end
 test_repeating_same_dice_does_not_unlock_set()
 test_unlocked_set_does_not_modify_active_charge()
 test_players_track_dice_set_independently()
@@ -816,6 +860,7 @@ test_dice_stat_drop_is_protected_without_pre_use_callback()
 test_dice_stat_increase_is_preserved()
 test_non_dice_stat_drop_is_not_protected()
 test_public_registration_marks_mod_dice()
+test_public_dice_registration_api_contracts()
 test_dice_set_progress_reports_seen_count_and_unlock_state()
 test_eid_modifier_formats_independent_dice_set_module_for_dice_items()
 test_eid_modifier_uses_current_player_progress_without_cross_pollution()
