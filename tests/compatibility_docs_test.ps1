@@ -33,6 +33,21 @@ function CheckRelativeLinks([string]$DocumentPath, [string]$Text) {
     }
 }
 
+function GetHeadingLevels([string]$Text) {
+    return @([regex]::Matches($Text, '(?m)^(#{1,6})\s+') | ForEach-Object {
+        $_.Groups[1].Value.Length
+    })
+}
+
+function GetExecutableLuaBlocks([string]$Text) {
+    return @([regex]::Matches($Text, '(?ms)^```lua\s*\r?\n(.*?)^```\s*$') | ForEach-Object {
+        $lines = $_.Groups[1].Value -split '\r?\n' | ForEach-Object {
+            ($_ -replace '--.*$', '').TrimEnd()
+        } | Where-Object { $_ -ne '' }
+        $lines -join "`n"
+    })
+}
+
 $englishPath = Join-Path $Root 'COMPATIBILITY.md'
 Require (Test-Path -LiteralPath $englishPath) 'COMPATIBILITY.md does not exist'
 
@@ -70,8 +85,8 @@ foreach ($heading in $requiredHeadings) {
     $previousHeadingOffset = $headingOffset
 }
 
-$openingLines = @('# Neverbirth compatibility guide', '', '| Neverbirth item | What another mod can add | Status | Entry points |', '| --- | --- | --- | --- |', '| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver` |', '| Dice Set | Custom dice-themed active items | Provisional and unversioned | `RegisterDiceItem` |', '', 'Memory Disorder does not expose a public compatibility API in the published version.')
-$openingPattern = '\A' + [regex]::Escape($openingLines[0]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[2]) + '\r?\n' + [regex]::Escape($openingLines[3]) + '\r?\n' + [regex]::Escape($openingLines[4]) + '\r?\n' + [regex]::Escape($openingLines[5]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[7])
+$openingLines = @('# Neverbirth compatibility guide', '', '[简体中文](COMPATIBILITY.zh-CN.md)', '', '| Neverbirth item | What another mod can add | Status | Entry points |', '| --- | --- | --- | --- |', '| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver` |', '| Dice Set | Custom dice-themed active items | Provisional and unversioned | `RegisterDiceItem` |', '', 'Memory Disorder does not expose a public compatibility API in the published version.')
+$openingPattern = '\A' + [regex]::Escape($openingLines[0]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[2]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[4]) + '\r?\n' + [regex]::Escape($openingLines[5]) + '\r?\n' + [regex]::Escape($openingLines[6]) + '\r?\n' + [regex]::Escape($openingLines[7]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[9])
 Require ([regex]::IsMatch($english, $openingPattern)) 'COMPATIBILITY.md opening integration table is missing or differs from the two released integrations'
 Require (([regex]::Matches($normalizedEnglish, [regex]::Escape('| Neverbirth item | What another mod can add | Status | Entry points |'))).Count -eq 1) 'COMPATIBILITY.md must contain exactly one public integration table'
 
@@ -169,4 +184,54 @@ foreach ($forbidden in @(
 }
 
 CheckRelativeLinks $englishPath $english
+
+$chinesePath = Join-Path $Root 'COMPATIBILITY.zh-CN.md'
+Require (Test-Path -LiteralPath $chinesePath) 'COMPATIBILITY.zh-CN.md does not exist'
+$chinese = Get-Content -Raw -LiteralPath $chinesePath
+
+RequireContains $english '[简体中文](COMPATIBILITY.zh-CN.md)' 'COMPATIBILITY.md'
+RequireContains $chinese '[English](COMPATIBILITY.md)' 'COMPATIBILITY.zh-CN.md'
+
+foreach ($required in @(
+    '# Neverbirth 兼容接口指南',
+    '鸿运齐天蛊',
+    '骰子套装',
+    '最高触发概率不一定是 100%',
+    '主动道具',
+    '骰子类主动道具',
+    '拾取、持有或使用',
+    '`options` 必须是表或 `nil`',
+    '临时公开，尚未版本化',
+    '当前公开版本没有为记忆紊乱提供兼容接口。'
+)) {
+    RequireContains $chinese $required 'COMPATIBILITY.zh-CN.md'
+}
+
+foreach ($forbidden in @(
+    'RegisterMod(',
+    '满概率',
+    '兼容表面',
+    '目标能力',
+    '候选池',
+    '见过或使用过',
+    'MemoryDisorderCharacterProfiles',
+    'memory_disorder.lua',
+    'memory_disorder_behavior_test.lua',
+    '公共兼容版本'
+)) {
+    RequireNotContains $chinese $forbidden 'COMPATIBILITY.zh-CN.md'
+}
+
+$englishLevels = GetHeadingLevels $english
+$chineseLevels = GetHeadingLevels $chinese
+Require (($englishLevels -join ',') -eq ($chineseLevels -join ',')) 'English and Chinese heading levels differ'
+
+$englishBlocks = GetExecutableLuaBlocks $english
+$chineseBlocks = GetExecutableLuaBlocks $chinese
+Require ($englishBlocks.Count -eq $chineseBlocks.Count) 'English and Chinese Lua block counts differ'
+for ($index = 0; $index -lt $englishBlocks.Count; $index++) {
+    Require ($englishBlocks[$index] -eq $chineseBlocks[$index]) "Lua block $($index + 1) differs between languages"
+}
+
+CheckRelativeLinks $chinesePath $chinese
 Write-Host 'compatibility docs tests passed'

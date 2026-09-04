@@ -1,5 +1,7 @@
 # Neverbirth compatibility guide
 
+[简体中文](COMPATIBILITY.zh-CN.md)
+
 | Neverbirth item | What another mod can add | Status | Entry points |
 | --- | --- | --- | --- |
 | Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver` |
