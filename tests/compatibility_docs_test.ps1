@@ -39,6 +39,15 @@ function GetHeadingLevels([string]$Text) {
     })
 }
 
+function GetHeadings([string]$Text) {
+    return @([regex]::Matches($Text, '(?m)^(#{1,6})\s+(.+?)\s*$') | ForEach-Object {
+        [pscustomobject]@{
+            Level = $_.Groups[1].Value.Length
+            Text = $_.Groups[2].Value
+        }
+    })
+}
+
 function GetExecutableLuaBlocks([string]$Text) {
     return @([regex]::Matches($Text, '(?ms)^```lua\s*\r?\n(.*?)^```\s*$') | ForEach-Object {
         $lines = $_.Groups[1].Value -split '\r?\n' | ForEach-Object {
@@ -191,6 +200,7 @@ $chinese = Get-Content -Raw -LiteralPath $chinesePath
 
 RequireContains $english '[简体中文](COMPATIBILITY.zh-CN.md)' 'COMPATIBILITY.md'
 RequireContains $chinese '[English](COMPATIBILITY.md)' 'COMPATIBILITY.zh-CN.md'
+Require ([regex]::IsMatch($chinese, '\A# Neverbirth 兼容接口指南\r?\n\r?\n\[English\]\(COMPATIBILITY\.md\)')) 'COMPATIBILITY.zh-CN.md must place its English link immediately below the Chinese title'
 
 foreach ($required in @(
     '# Neverbirth 兼容接口指南',
@@ -225,6 +235,40 @@ foreach ($forbidden in @(
 $englishLevels = GetHeadingLevels $english
 $chineseLevels = GetHeadingLevels $chinese
 Require (($englishLevels -join ',') -eq ($chineseLevels -join ',')) 'English and Chinese heading levels differ'
+
+$headingPairs = @(
+    @{ Level = 1; English = 'Neverbirth compatibility guide'; Chinese = 'Neverbirth 兼容接口指南' },
+    @{ Level = 2; English = 'What another mod can add'; Chinese = '其他 Mod 可以接入什么' },
+    @{ Level = 2; English = 'Terms used in this guide'; Chinese = '本文术语' },
+    @{ Level = 2; English = 'API status and stability'; Chinese = '接口状态与稳定性' },
+    @{ Level = 2; English = 'Finding Neverbirth and using runtime IDs'; Chinese = '获取 Neverbirth 与运行时 ID' },
+    @{ Level = 3; English = 'Names and global object'; Chinese = '名称与全局对象' },
+    @{ Level = 3; English = 'Runtime IDs, not XML-local IDs'; Chinese = '使用运行时 ID，不要使用 XML 本地 ID' },
+    @{ Level = 2; English = 'Load order'; Chinese = '加载顺序' },
+    @{ Level = 2; English = 'Fortune Rivalling Heaven Gu'; Chinese = '鸿运齐天蛊' },
+    @{ Level = 3; English = 'What the integration does'; Chinese = '这项兼容有什么用' },
+    @{ Level = 3; English = 'Functions and parameters'; Chinese = '函数与参数' },
+    @{ Level = 3; English = 'Fixed-threshold example'; Chinese = '固定阈值示例' },
+    @{ Level = 3; English = 'Dynamic-threshold example'; Chinese = '动态阈值示例' },
+    @{ Level = 2; English = 'Dice Set'; Chinese = '骰子套装' },
+    @{ Level = 3; English = 'What the integration does'; Chinese = '这项兼容有什么用' },
+    @{ Level = 3; English = 'Function and parameters'; Chinese = '函数与参数' },
+    @{ Level = 3; English = 'Registration example'; Chinese = '注册示例' },
+    @{ Level = 3; English = 'Automatic detection and EID'; Chinese = '自动识别与 EID' },
+    @{ Level = 2; English = 'Interfaces that are not public'; Chinese = '不公开的接口' },
+    @{ Level = 2; English = 'Maintainer appendix'; Chinese = '维护者附录' }
+)
+$englishHeadings = GetHeadings $english
+$chineseHeadings = GetHeadings $chinese
+Require ($englishHeadings.Count -eq $headingPairs.Count) 'COMPATIBILITY.md heading count differs from the bilingual heading map'
+Require ($chineseHeadings.Count -eq $headingPairs.Count) 'COMPATIBILITY.zh-CN.md heading count differs from the bilingual heading map'
+for ($index = 0; $index -lt $headingPairs.Count; $index++) {
+    $pair = $headingPairs[$index]
+    Require ($englishHeadings[$index].Level -eq $pair.Level) "English heading $($index + 1) has an unexpected level"
+    Require ($englishHeadings[$index].Text -eq $pair.English) "English heading $($index + 1) differs from the bilingual heading map"
+    Require ($chineseHeadings[$index].Level -eq $pair.Level) "Chinese heading $($index + 1) has an unexpected level"
+    Require ($chineseHeadings[$index].Text -eq $pair.Chinese) "Chinese heading $($index + 1) differs from the bilingual heading map"
+}
 
 $englishBlocks = GetExecutableLuaBlocks $english
 $chineseBlocks = GetExecutableLuaBlocks $chinese
