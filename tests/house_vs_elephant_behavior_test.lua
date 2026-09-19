@@ -241,7 +241,9 @@ end
 local function activePedestals()
     local result = {}
     for _, entity in ipairs(roomEntities) do
-        if entity.exists and entity.Type == 5 and entity.Variant == 100 then result[#result + 1] = entity end
+        if entity.exists and entity.Type == 5 and entity.Variant == 100 and entity.SubType > 0 then
+            result[#result + 1] = entity
+        end
     end
     return result
 end
@@ -274,8 +276,10 @@ local function touchControl(role, both)
 end
 local function takeActiveCandidate(index, player)
     local target = assert(activePedestals()[index], "active House candidate " .. index)
-    assertEquals(callbacks.PickupCollision({}, target, player), nil, "candidate collision never cancels pickup")
-    target.exists = false
+    local itemId = target.SubType
+    assertEquals(callbacks.PickupCollision({}, target, player, false), nil, "eligible candidate allows pickup")
+    target.SubType = 0
+    player.counts[itemId] = player:GetCollectibleNum(itemId) + 1
     callbacks.Update({})
     return target:GetData().NeverbirthHouseCandidateIndex
 end
@@ -358,4 +362,351 @@ currentRoomIndex = 10
 roomEntities = {}
 callbacks.NewRoom({})
 assertEquals(api.GetPersistentData().session, nil, "early return closes the House session")
+-- Inventory grants are separate from collision and pedestal removal.
+local passed, failed = 0, 0
+local function pickupCase(name, body)
+    currentRoomIndex = 10
+    roomEntities = {}
+    callbacks.NewRoom({})
+    playerOne.counts, playerTwo.counts = {}, {}
+    playerOne.QueuedItem, playerTwo.QueuedItem = nil, nil
+    runtimePlayers = { playerOne, playerTwo }
+    playerOne.Position, playerTwo.Position = Vector(100, 200), Vector(540, 200)
+    assertEquals(callbacks.UseItem({}, api.GetItemId(), nil, playerOne, 0, 0, 0).Remove, true,
+        "regression session starts")
+    local ok, message = pcall(body, api.GetPersistentData().session, #transitions)
+    if ok then
+        passed = passed + 1
+        print("PASS House pickup: " .. name)
+    else
+        failed = failed + 1
+        print("FAIL House pickup: " .. name .. ": " .. tostring(message))
+    end
+end
+local function queueCandidate(pickup, player)
+    local itemId = pickup.SubType
+    assertEquals(callbacks.PickupCollision({}, pickup, player, false), nil, "valid candidate accepted")
+    pickup.SubType = 0
+    player.QueuedItem = { Item = { ID = itemId }, Charge = 0, Touched = false }
+    return itemId
+end
+local function grantQueued(player, itemId)
+    player.counts[itemId] = player:GetCollectibleNum(itemId) + 1
+    player.QueuedItem = nil
+    callbacks.Update({})
+end
+
+pickupCase("delayed grant survives an empty pedestal and a long pickup animation", function(session)
+    local target = activePedestals()[1]
+    local itemId = queueCandidate(target, playerOne)
+    advance(90)
+    assertEquals(session.selectedCount, 0, "queue alone must not finish acquisition")
+    grantQueued(playerOne, itemId)
+    assertEquals(session.selectedCount, 1, "delayed inventory grant counts once")
+    advance(10)
+    assertEquals(session.selectedCount, 1, "later updates must not count the same grant again")
+end)
+
+pickupCase("third queued choice blocks a fourth before returning after the grant", function(session, priorReturns)
+    takeActiveCandidate(1, playerOne)
+    takeActiveCandidate(1, playerTwo)
+    local itemId = queueCandidate(activePedestals()[1], playerOne)
+    local fourth = activePedestals()[1]
+    assertEquals(callbacks.PickupCollision({}, fourth, playerTwo, false), true,
+        "fourth candidate must be blocked even before the next update")
+    advance(30)
+    assertEquals(#transitions, priorReturns, "third item must be granted before returning")
+    grantQueued(playerOne, itemId)
+    assertEquals(session.selectedCount, 3, "shared count reaches exactly three")
+    assertEquals(#transitions, priorReturns + 1, "third grant starts one return")
+    assertEquals(transitions[#transitions].index, 10, "return uses saved origin")
+    assertEquals(#activePedestals(), 0, "remaining candidates are removed")
+    assertEquals(#activeControls(), 0, "controls are removed")
+    assertEquals(callbacks.PickupCollision({}, fourth, playerTwo, false), true,
+        "in-flight return cannot admit a stale fourth collision")
+    advance(10)
+    assertEquals(#transitions, priorReturns + 1, "return remains single-shot")
+end)
+
+pickupCase("three co-op reservations cap a same-update burst at three", function(session, priorReturns)
+    local thirdPlayer, fourthPlayer = newPlayer(3), newPlayer(4)
+    runtimePlayers = { playerOne, playerTwo, thirdPlayer, fourthPlayer }
+    local targets = activePedestals()
+    local first = queueCandidate(targets[1], playerOne)
+    local second = queueCandidate(targets[2], playerTwo)
+    local third = queueCandidate(targets[3], thirdPlayer)
+    assertEquals(callbacks.PickupCollision({}, targets[4], fourthPlayer, false), true,
+        "co-op cannot reserve a fourth selection in the same update")
+    advance(30)
+    grantQueued(playerOne, first)
+    grantQueued(playerTwo, second)
+    assertEquals(session.selectedCount, 2, "two players have settled")
+    assertEquals(#transitions, priorReturns, "remaining player is still raising the third item")
+    grantQueued(thirdPlayer, third)
+    assertEquals(session.selectedCount, 3, "all three players share one quota")
+    assertEquals(#transitions, priorReturns + 1, "final co-op grant returns exactly once")
+end)
+
+pickupCase("removed or rerolled unacquired pedestals do not consume quota", function(session)
+    local targets = activePedestals()
+    callbacks.PickupCollision({}, targets[1], playerOne, false)
+    targets[1].exists = false
+    callbacks.Update({})
+    assertEquals(session.selectedCount, 0, "removal without an inventory grant is not a pick")
+    callbacks.PickupCollision({}, targets[2], playerTwo, false)
+    targets[2].SubType = 999
+    advance(8)
+    assertEquals(session.selectedCount, 0, "reroll without acquisition is not a pick")
+    takeActiveCandidate(1, playerOne)
+    assertEquals(session.selectedCount, 1, "a later real acquisition still counts")
+end)
+
+pickupCase("failed collisions release reservations for retry", function(session)
+    local target = activePedestals()[1]
+    callbacks.PickupCollision({}, target, playerOne, false)
+    advance(8)
+    assertEquals(session.selectedCount, 0, "touching an unavailable pickup consumes nothing")
+    local itemId = queueCandidate(target, playerTwo)
+    advance(20)
+    grantQueued(playerTwo, itemId)
+    assertEquals(session.selectedCount, 1, "another player can collect after the failed attempt")
+end)
+
+pickupCase("same pedestal and same player cannot reserve twice", function(session)
+    local targets = activePedestals()
+    assertEquals(targets[1].SubType, targets[2].SubType, "fixture contains duplicate IDs")
+    assertEquals(callbacks.PickupCollision({}, targets[1], playerOne, false), nil, "first collision allowed")
+    assertEquals(callbacks.PickupCollision({}, targets[1], playerTwo, false), true,
+        "other player cannot steal the same pending pedestal")
+    assertEquals(callbacks.PickupCollision({}, targets[2], playerOne, false), true,
+        "one player cannot reserve two identical items before settling")
+    local itemId = targets[1].SubType
+    targets[1].SubType = 0
+    playerOne.counts[itemId] = 1
+    callbacks.Update({})
+    assertEquals(session.selectedCount, 1, "one grant consumes one slot")
+    takeActiveCandidate(1, playerOne)
+    assertEquals(session.selectedCount, 2, "another pedestal with the same item ID counts separately")
+end)
+
+for _, role in ipairs({ "next", "return" }) do
+    pickupCase("queued pickup prevents " .. role .. " from erasing its confirmation", function(session, priorReturns)
+        local itemId = queueCandidate(activePedestals()[1], playerOne)
+        touchControl(role, true)
+        advance(20)
+        assertEquals(session.pageIndex, 1, "page stays put during pickup")
+        assertEquals(#transitions, priorReturns, "no early return during pickup")
+        assertEquals(session.phase, "active", "pending grant keeps its session")
+        movePlayersAway()
+        grantQueued(playerOne, itemId)
+        assertEquals(session.selectedCount, 1, "pickup survives control contact")
+        touchControl(role, false)
+        advance(13)
+        if role == "next" then
+            assertEquals(session.pageIndex, 2, "paging resumes after grant")
+        else
+            assertEquals(#transitions, priorReturns + 1, "early return resumes after grant")
+        end
+    end)
+end
+
+pickupCase("cancelled queue releases the reservation without a false selection", function(session)
+    queueCandidate(activePedestals()[1], playerOne)
+    advance(20)
+    playerOne.QueuedItem = nil
+    advance(8)
+    assertEquals(session.selectedCount, 0, "cancelled queued item was not acquired")
+    takeActiveCandidate(1, playerOne)
+    assertEquals(session.selectedCount, 1, "cancelled queue does not lock later picks")
+end)
+
+pickupCase("unrelated pickups are allowed while owned page transitions are locked", function()
+    local stale = activePedestals()[1]
+    touchControl("next", false)
+    assertEquals(callbacks.PickupCollision({}, stale, playerTwo, false), true,
+        "page transition must reject late collisions with owned candidates")
+    local unrelated = pedestal(601, 56789)
+    assertEquals(callbacks.PickupCollision({}, unrelated, playerTwo, false), nil,
+        "unowned pickups retain their normal behavior")
+end)
+
+pickupCase("an unrelated same-ID grant does not select an untouched pedestal", function(session)
+    local target = activePedestals()[1]
+    callbacks.PickupCollision({}, target, playerOne, false)
+    playerOne.counts[target.SubType] = 1
+    advance(8)
+    assertEquals(session.selectedCount, 0, "inventory change alone lacks pedestal provenance")
+end)
+
+pickupCase("removed queued pedestal waits for inventory instead of returning early", function(session, priorReturns)
+    takeActiveCandidate(1, playerOne)
+    takeActiveCandidate(1, playerTwo)
+    local target = activePedestals()[1]
+    local itemId = queueCandidate(target, playerOne)
+    target.exists = false
+    advance(30)
+    assertEquals(session.selectedCount, 2, "removing queued source cannot settle the third item")
+    assertEquals(#transitions, priorReturns, "return must wait for the pending grant")
+    grantQueued(playerOne, itemId)
+    assertEquals(session.selectedCount, 3, "removed source still has a tracked legitimate grant")
+    assertEquals(#transitions, priorReturns + 1, "grant triggers return")
+end)
+
+pickupCase("continue aborts queued selection and releases its reservation", function(_, priorReturns)
+    local itemId = queueCandidate(activePedestals()[1], playerOne)
+    advance(10)
+    callbacks.GameStarted({}, true)
+    assertEquals(api.GetPersistentData().session, nil, "continue follows existing session-abort policy")
+    assertEquals(#transitions, priorReturns + 1, "continue requests recovery to original room")
+    currentRoomIndex = 10
+    roomEntities = {}
+    callbacks.NewRoom({})
+    grantQueued(playerOne, itemId)
+    assertEquals(#transitions, priorReturns + 1, "late grant from aborted session does not return again")
+    callbacks.UseItem({}, api.GetItemId(), nil, playerOne, 0, 0, 0)
+    takeActiveCandidate(1, playerOne)
+    assertEquals(api.GetPersistentData().session.selectedCount, 1, "new session gets a fresh quota")
+end)
+
+local function encounterCase(name, body)
+    currentRoomIndex = 10
+    roomEntities = {}
+    callbacks.NewRoom({})
+    local data = api.GetPersistentData()
+    data.encounters, data.seenKeys, data.nextSequence = {}, {}, 1
+    runtimePlayers = { playerOne, playerTwo }
+    playerOne.counts, playerTwo.counts = {}, {}
+    playerOne.QueuedItem, playerTwo.QueuedItem = nil, nil
+    callbacks.NewRoom({})
+    local ok, message = pcall(body, data)
+    if ok then
+        passed = passed + 1
+        print("PASS House encounter: " .. name)
+    else
+        failed = failed + 1
+        print("FAIL House encounter: " .. name .. ": " .. tostring(message))
+    end
+end
+local function updatePedestal(pickup)
+    -- Dispatch only the House handler through its actual registration/filter.
+    for _, registration in ipairs(NeverbirthLocalizationTestCallbacks[ModCallbacks.MC_POST_PICKUP_UPDATE] or {}) do
+        if registration.fn == callbacks.PickupUpdate
+            and (registration.param == nil or registration.param == pickup.Variant) then
+            assertEquals(registration.fn(Neverbirth, pickup), nil, "observation does not override pickup updates")
+        end
+    end
+end
+
+encounterCase("late reward pedestals are remembered without re-entering the room", function(data)
+    local late = pedestal(603, 92001)
+    roomEntities = { late }
+    local scan = Isaac.GetRoomEntities
+    Isaac.GetRoomEntities = function() error("pickup observation must not scan the whole room") end
+    local ok, message = pcall(function()
+        for _ = 1, 20 do updatePedestal(late) end
+    end)
+    Isaac.GetRoomEntities = scan
+    assertTruthy(ok, message)
+    assertEquals(#data.encounters, 1, "a reward born after room entry must be remembered")
+    assertEquals(data.encounters[1].itemId, 603, "remember the actual late item")
+    callbacks.NewRoom({})
+    assertEquals(#data.encounters, 1, "room re-entry does not duplicate the same instance")
+end)
+
+encounterCase("late candidates above three remain available across pages", function(data)
+    for index = 1, 8 do
+        local late = pedestal(610 + index, 92100 + index)
+        roomEntities[#roomEntities + 1] = late
+        updatePedestal(late)
+    end
+    assertEquals(#data.encounters, 8, "all eight late pedestals are remembered")
+    callbacks.UseItem({}, api.GetItemId(), nil, playerOne, 0, 0, 0)
+    assertEquals(#data.session.candidates, 8, "three-pick quota does not truncate the candidate list")
+    assertEquals(#activePedestals(), 6, "first page displays six")
+    touchControl("next", false)
+    advance(10)
+    assertEquals(#activePedestals(), 2, "next page displays the remaining two")
+    for _, pickup in ipairs(activePedestals()) do updatePedestal(pickup) end
+    assertEquals(#data.encounters, 8, "selection copies never feed back into history")
+end)
+
+encounterCase("duplicate item IDs on different late pedestals retain both instances", function(data)
+    updatePedestal(pedestal(603, 92201))
+    updatePedestal(pedestal(603, 92202))
+    updatePedestal(pedestal(603, 92201))
+    assertEquals(#data.encounters, 2, "instance keys preserve duplicates but reject repeated observations")
+end)
+
+encounterCase("late initialization waits for a valid collectible subtype", function(data)
+    local late = pedestal(0, 92301)
+    updatePedestal(late)
+    assertEquals(#data.encounters, 0, "empty pedestal has no candidate")
+    late.SubType = 604
+    updatePedestal(late)
+    assertEquals(#data.encounters, 1, "resolved subtype is observed on a later update")
+    late.SubType = 605
+    updatePedestal(late)
+    assertEquals(#data.encounters, 1, "same instance keeps the established first-encounter rule")
+    assertEquals(data.encounters[1].itemId, 604, "first seen subtype remains authoritative")
+end)
+
+encounterCase("temporary galleries and non-collectible pickups do not pollute history", function(data)
+    local owned = pedestal(606, 92401)
+    owned:GetData().NeverbirthHouseSessionToken = "old-house"
+    updatePedestal(owned)
+    local certificate = pedestal(607, 92402)
+    certificate:GetData().NeverbirthCertificateSessionToken = "certificate"
+    updatePedestal(certificate)
+    updatePedestal(entityBase(5, 10, 1, 92403))
+    currentRoomIndex = -3
+    callbacks.NewRoom({})
+    updatePedestal(pedestal(608, 92404))
+    assertEquals(#data.encounters, 0, "temporary and unrelated pickups are excluded")
+end)
+
+encounterCase("late history survives continue without duplication", function(data)
+    local late = pedestal(609, 92501)
+    roomEntities = { late }
+    updatePedestal(late)
+    assertEquals(#data.encounters, 1, "late encounter is present before continue")
+    callbacks.GameStarted({}, true)
+    updatePedestal(late)
+    assertEquals(#api.GetPersistentData().encounters, 1, "same-run reload retains exactly one encounter")
+end)
+
+encounterCase("use snapshots a pedestal before its first update callback", function(data)
+    roomEntities = { pedestal(620, 92601) }
+    assertEquals(#data.encounters, 0, "no update event has delivered the new pedestal")
+    callbacks.UseItem({}, api.GetItemId(), nil, playerOne, 0, 0, 0)
+    assertEquals(#data.encounters, 1, "use observes the actual room before building candidates")
+    assertEquals(data.session.candidates[1].itemId, 620, "new item is available immediately")
+    assertEquals(data.session.candidates[1].isMilkFallback, false, "actual item is not replaced by fallback")
+end)
+
+encounterCase("saved six-item scenario still filters the three active items", function(data)
+    local ids = { 44, 788, 480, 150, 278, 51 }
+    local active = { [44] = true, [788] = true, [480] = true }
+    local originalConfig = Isaac.GetItemConfig
+    Isaac.GetItemConfig = function()
+        return { GetCollectible = function(_, id) return { Type = active[id] and 3 or (id == 278 and 2 or 1) } end }
+    end
+    local ok, message = pcall(function()
+        for index, id in ipairs(ids) do
+            local item = pedestal(id, 92700 + index)
+            roomEntities[#roomEntities + 1] = item
+            updatePedestal(item)
+        end
+        assertEquals(#data.encounters, 6, "all six historical sources are recorded")
+        callbacks.UseItem({}, api.GetItemId(), nil, playerOne, 0, 0, 0)
+        assertEquals(#data.session.candidates, 3, "user-confirmed active exclusion remains in effect")
+        assertEquals(data.session.candidates[1].itemId, 150, "Tough Love retained")
+        assertEquals(data.session.candidates[2].itemId, 278, "Dark Bum retained")
+        assertEquals(data.session.candidates[3].itemId, 51, "Pentagram retained")
+    end)
+    Isaac.GetItemConfig = originalConfig
+    assertTruthy(ok, message)
+end)
+
+print(string.format("House pickup/encounter regressions: %d passed, %d failed", passed, failed))
+assertEquals(failed, 0, "House pickup regressions")
 print("house vs elephant behavior tests passed")

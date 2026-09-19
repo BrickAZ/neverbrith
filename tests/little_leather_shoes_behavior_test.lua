@@ -422,3 +422,7 @@ local chainCount = 0
 for _ in pairs(state.rooms[originalRoomKey].chains) do chainCount = chainCount + 1 end
 assertEquals(chainCount, 1, "NPC init during Isaac.Spawn must not create an orphan chain for the returned body")
 print("little leather shoes behavior tests passed")
+if ... == "--fixture" then
+    return { api = api, state = state, room = room, players = runtimePlayers, newNpc = newNpc,
+        setRoomType = function(value) currentRoomType = value end }
+end

@@ -74,7 +74,7 @@ PlayerType = {
 ActiveSlot = { SLOT_PRIMARY = 0, SLOT_SECONDARY = 1, SLOT_POCKET = 2 }
 PocketItemSlot = { SLOT_PRIMARY = 0, SLOT_SECONDARY = 1 }
 EffectVariant = { PORTAL_TELEPORT = 161 }
-EntityType = { ENTITY_EFFECT = 1000 }
+EntityType = { ENTITY_EFFECT = 1000, ENTITY_MEGA_SATAN_2 = 275 }
 GridEntityType = { GRID_TRAPDOOR = 17 }
 ModCallbacks = {
     MC_POST_UPDATE = 1,
@@ -82,7 +82,15 @@ ModCallbacks = {
     MC_POST_GAME_STARTED = 3,
     MC_PRE_GAME_EXIT = 4,
     MC_POST_PLAYER_INIT = 5,
+    MC_POST_NPC_DEATH = 6,
 }
+
+function GetPtrHash(entity) return entity.pointerHash or entity.InitSeed end
+
+-- Isaac can return a fresh Lua reference to the same native player on each call.
+local function playerReference(player)
+    return setmetatable({}, { __index = player, __newindex = player })
+end
 
 local function makePlayer(seed, playerType)
     local player = {
@@ -187,7 +195,7 @@ local function makePlayer(seed, playerType)
     return player
 end
 
-local function makeEnvironment()
+local function makeEnvironment(freshReferences)
     local callbacks = {}
     local saves = 0
     local saveRoot = {}
@@ -205,7 +213,12 @@ local function makeEnvironment()
     local initialize = assert(dofile("memory_disorder.lua"))
     local api = initialize(mod, {
         ItemId = 9000,
-        GetPlayers = function() return players end,
+        GetPlayers = function()
+            if not freshReferences then return players end
+            local references = {}
+            for index, player in ipairs(players) do references[index] = playerReference(player) end
+            return references
+        end,
         GetSaveRoot = function() return saveRoot end,
         Save = function() saves = saves + 1 end,
         GetCurrentRunSeed = function() return runSeed end,
@@ -230,6 +243,11 @@ local function makeEnvironment()
         setUnlocked = function(id, value) unlocked[id] = value end,
         setIconConfigs = function(value) iconConfigs = value end,
         setPlayers = function(value) players = value end,
+        dispatch = function(callbackId, ...)
+            for _, callback in ipairs(callbacks) do
+                if callback.id == callbackId then callback.fn(mod, ...) end
+            end
+        end,
         runPostUpdate = function()
             for _, callback in ipairs(callbacks) do
                 if callback.id == ModCallbacks.MC_POST_UPDATE then callback.fn(mod) end
@@ -258,6 +276,72 @@ local function test_pickup_arms_next_room_and_switches_on_frame_fifteen()
     env.api.BeginRoomTransitions("room-a-revisit")
     for _ = 1, 15 do env.api.AdvanceFrame() end
     assertEquals(#player.changeCalls, 2, "re-entering an old room switches again")
+end
+
+local function test_registered_room_transition_survives_fresh_player_references()
+    local env = makeEnvironment(true)
+    local player, other = env.players[1], env.players[2]
+    player.collectibleCounts[env.api.Constants.ITEM_ID] = 1
+    env.dispatch(ModCallbacks.MC_POST_PLAYER_INIT, playerReference(player))
+    env.runPostUpdate()
+    assertEquals(#player.changeCalls, 0, "pickup room does not transform")
+    local savesBeforeRoom = env.saves()
+
+    env.dispatch(ModCallbacks.MC_POST_NEW_ROOM)
+    for _ = 1, 14 do env.runPostUpdate() end
+    assertEquals(#player.changeCalls, 0, "fresh references preserve the 15-frame delay")
+    env.runPostUpdate()
+    assertEquals(#player.changeCalls, 1, "registered update must switch at frame 15 across fresh references")
+    assertEquals(#other.changeCalls, 0, "a co-op non-holder is unaffected")
+    for _ = 1, 15 do env.runPostUpdate() end
+    assertEquals(#player.changeCalls, 1, "one room transforms exactly once")
+    assertEquals(env.saves(), savesBeforeRoom + 1, "fresh references must not trigger a save every frame")
+
+    env.dispatch(ModCallbacks.MC_POST_NEW_ROOM)
+    for _ = 1, 15 do env.runPostUpdate() end
+    assertEquals(#player.changeCalls, 2, "the next actual room transforms again")
+    player.collectibleCounts[env.api.Constants.ITEM_ID] = 0
+    env.runPostUpdate()
+    assertEquals(player:GetPlayerType(), PlayerType.PLAYER_ISAAC, "loss via a fresh reference restores the original character")
+    assertEquals(env.api.GetRuntimeState(playerReference(player)), nil, "loss releases the state across references")
+    env.runPostUpdate()
+    assertEquals(#player.changeCalls, 3, "restoration happens exactly once")
+end
+
+local function test_fresh_references_keep_coop_holders_independent()
+    local env = makeEnvironment(true)
+    local first, second = env.players[1], env.players[2]
+    first.collectibleCounts[env.api.Constants.ITEM_ID] = 1
+    second.collectibleCounts[env.api.Constants.ITEM_ID] = 1
+    env.runPostUpdate()
+    env.dispatch(ModCallbacks.MC_POST_NEW_ROOM)
+    for _ = 1, 14 do env.runPostUpdate() end
+    first.collectibleCounts[env.api.Constants.ITEM_ID] = 0
+    env.runPostUpdate()
+    assertEquals(first:GetPlayerType(), PlayerType.PLAYER_ISAAC, "one holder's loss restores only that holder")
+    assertEquals(#second.changeCalls, 1, "the other holder still completes the transition")
+    env.setPlayers({ second })
+    env.runPostUpdate()
+    assertTruthy(env.api.GetRuntimeState(playerReference(second)), "player reordering keeps the surviving holder")
+end
+
+local function test_registered_game_start_receives_continue_flag()
+    local env = makeEnvironment()
+    local player = env.players[1]
+    player.collectibleCounts[env.api.Constants.ITEM_ID] = 1
+    env.runPostUpdate()
+    player.collectibleCounts[env.api.Constants.ITEM_ID] = 0
+    env.runPostUpdate()
+    env.dispatch(ModCallbacks.MC_POST_GAME_STARTED, true)
+    assertEquals(env.api.GetSavedState().memoryDisorderVoidUnlockedThisRun, true, "registered continue preserves run entitlement")
+    env.dispatch(ModCallbacks.MC_POST_GAME_STARTED, false)
+    assertEquals(env.api.GetSavedState().memoryDisorderVoidUnlockedThisRun, false, "registered same-seed restart clears entitlement")
+end
+
+local function test_registered_npc_death_receives_boss()
+    local env = makeEnvironment()
+    env.dispatch(ModCallbacks.MC_POST_NPC_DEATH, { Type = EntityType.ENTITY_MEGA_SATAN_2 })
+    assertEquals(env.api.Runtime.terminalKind, "mega_satan", "registered death callback receives the NPC after the mod argument")
 end
 
 local function test_unlock_filter_and_internal_types()
@@ -530,12 +614,20 @@ local function test_registration_contract()
     assertTruthy(generated:find('localId = 55', 1, true) and generated:find('englishName = "Memory Disorder"', 1, true), "generated registration")
     for _, path in ipairs({ "content/itempools.xml", "content/itempools.en_us.xml", "content/itempools.zh_cn.xml" }) do
         local pools = readFile(path)
-        assertEquals(pools:find("Memory Disorder", 1, true), nil, path .. " must not invent a pool")
-        assertEquals(pools:find("记忆紊乱", 1, true), nil, path .. " must not invent a pool")
+        local itemName = path:find("zh_cn", 1, true) and "记忆紊乱" or "Memory Disorder"
+        for _, poolName in ipairs({ "treasure", "shop" }) do
+            local pool = pools:match('<Pool Name="' .. poolName .. '">.-</Pool>')
+            assertTruthy(pool and pool:find('<Item Name="' .. itemName .. '" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+                path .. " should include " .. itemName .. " in " .. poolName .. " at weight 0.1")
+        end
     end
 end
 
 local tests = {
+    test_registered_room_transition_survives_fresh_player_references,
+    test_fresh_references_keep_coop_holders_independent,
+    test_registered_game_start_receives_continue_flag,
+    test_registered_npc_death_receives_boss,
     test_pickup_arms_next_room_and_switches_on_frame_fifteen,
     test_unlock_filter_and_internal_types,
     test_mod_character_whitelist_is_explicit,

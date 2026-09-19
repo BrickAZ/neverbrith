@@ -41,6 +41,7 @@ local function loadNeverbirth(options)
     }
     local spawned = {}
     local players = {}
+    local nativeVectors, nativeEntities = {}, {}
 
     package.loaded.json = nil
     package.preload.json = function()
@@ -68,6 +69,7 @@ local function loadNeverbirth(options)
         MC_POST_PICKUP_INIT = 11,
         MC_POST_NPC_DEATH = 12,
         MC_POST_ENTITY_KILL = 13,
+        MC_PRE_GAME_EXIT = 14,
     }
 
     CollectibleType = { COLLECTIBLE_NULL = 0, COLLECTIBLE_PLAN_C = 475 }
@@ -100,15 +102,15 @@ local function loadNeverbirth(options)
         ENTITY_GURDY = 36,
         ENTITY_MONSTRO = 20,
         ENTITY_LARRYJR = 19,
-        ENTITY_DUKE = 30,
+        ENTITY_DUKE = 67,
         ENTITY_FAMINE = 63,
         ENTITY_PESTILENCE = 64,
         ENTITY_WAR = 65,
         ENTITY_DEATH = 66,
         ENTITY_PIN = 62,
-        ENTITY_LOKI = 81,
+        ENTITY_LOKI = 69,
         ENTITY_MONSTRO2 = 43,
-        ENTITY_GURDYJR = 97,
+        ENTITY_GURDY_JR = 99,
         ENTITY_MOM = 45,
         ENTITY_MOMS_HEART = 78,
         ENTITY_SATAN = 84,
@@ -192,15 +194,26 @@ local function loadNeverbirth(options)
             Velocity = velocity,
             Spawner = spawner,
             InitSeed = seed or (#spawned + 900),
+            spawnOrdinal = #spawned + 1,
             data = {},
             boss = options.forceSpawnedBoss == true or entityType == EntityType.ENTITY_MONSTRO,
             champion = options.forceSpawnedChampion == true,
             makeChampionCalls = {},
+            dead = false,
+            removed = false,
         }
+        nativeEntities[entity] = true
 
         function entity:GetData()
+            if options.invalidDataAt == self.spawnOrdinal then return nil end
             return self.data
         end
+        function entity:Exists() return not self.removed end
+        function entity:IsDead()
+            assert(not self.removed, "must not read native state after entity removal")
+            return self.dead
+        end
+        function entity:Remove() self.removed = true end
         function entity:ToNPC()
             return self
         end
@@ -319,8 +332,21 @@ local function loadNeverbirth(options)
         end,
     }
 
+    Isaac.FindByType = function(entityType, variant, subtype)
+        local matches = {}
+        for _, npc in ipairs(spawned) do
+            if npc.Type == entityType and npc.Variant == variant and npc.SubType == subtype
+                and not npc.removed and not npc.dead then matches[#matches + 1] = npc end
+        end
+        return matches
+    end
+
     if not options.disableIsaacSpawn then
         Isaac.Spawn = function(entityType, variant, subtype, position, velocity, spawner, seed)
+            assert(nativeVectors[position] and nativeVectors[velocity], "Spawn requires constructed engine Vectors")
+            assert(spawner == nil or nativeEntities[spawner], "Spawn requires a native Entity or nil, never a snapshot table")
+            assert(spawner == nil or not spawner.removed, "Spawn must not receive a removed Entity")
+            if options.failSpawnAt == #spawned + 1 then error("controlled spawn failure") end
             return makeSpawnedEntity(entityType, variant, subtype, position, velocity, spawner, seed)
         end
     end
@@ -355,6 +381,7 @@ local function loadNeverbirth(options)
     }
     function Vector(x, y)
         local value = { X = x or 0, Y = y or 0 }
+        nativeVectors[value] = true
         function value:Length()
             return math.sqrt(self.X * self.X + self.Y * self.Y)
         end
@@ -382,6 +409,8 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    function include(path) return dofile(path .. ".lua") end
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallback(callbackId, param)
@@ -410,6 +439,7 @@ local function loadNeverbirth(options)
             activeItems = { [ActiveSlot.SLOT_PRIMARY] = itemIds.BossOrder },
             activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 3 },
         }
+        nativeEntities[player] = true
         function player:ToPlayer()
             return self
         end
@@ -441,15 +471,28 @@ local function loadNeverbirth(options)
     end
 
     local function runNpcDeath(npc)
+        npc.dead = true
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_NPC_DEATH)) do
             callback(mod, npc)
         end
     end
 
     local function runEntityKill(entity)
+        entity.dead = true
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_ENTITY_KILL)) do
             callback(mod, entity)
         end
+    end
+
+    local function runOwnedCallback(callbackId, handler)
+        assertTruthy(type(handler) == "function", "BossOrder handler should exist")
+        for _, registration in ipairs(callbacks[callbackId] or {}) do
+            if registration.fn == handler then
+                handler(mod)
+                return
+            end
+        end
+        error("BossOrder handler must be registered")
     end
 
     return {
@@ -462,6 +505,9 @@ local function loadNeverbirth(options)
         runUseBossOrder = runUseBossOrder,
         runNpcDeath = runNpcDeath,
         runEntityKill = runEntityKill,
+        runUpdate = function() runOwnedCallback(ModCallbacks.MC_POST_UPDATE, mod.UpdateBossOrderEncounters) end,
+        runNewRoom = function() runOwnedCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.ResetBossOrderPendingEncounters) end,
+        runGameStarted = function() runOwnedCallback(ModCallbacks.MC_POST_GAME_STARTED, mod.ResetBossOrderRun) end,
     }
 end
 
@@ -576,7 +622,10 @@ local function test_use_fails_gracefully_when_spawn_api_is_missing()
 
     local result = env.runUseBossOrder(player)
 
-    assertEquals(result, false, "missing spawn API should fail the use without crashing")
+    assertEquals(type(result), "table", "failed use must explicitly preserve charge")
+    assertEquals(result.Discharge, false)
+    assertEquals(result.Remove, false)
+    assertEquals(result.ShowAnim, false)
     assertEquals(#env.spawned, 0, "failed use should not spawn anything")
 end
 
@@ -717,6 +766,177 @@ local function test_marked_boss_target_rewards_on_entity_kill_callback()
     assertEquals(countCardSpawns(env), 3, "boss marked target should drop three cards on entity kill")
 end
 
+local function test_segmented_bosses_spawn_complete_bodies()
+    -- Per-boss counts from vanilla ambush.xml; Pin initializes its own body.
+    for _, case in ipairs({ { 1, 19, 5 }, { 4, 28, 3 }, { 5, 62, 1 }, { 12, 99, 1 } }) do
+        local env = loadNeverbirth({ rngValues = { 2, case[1] } })
+        assertEquals(env.runUseBossOrder(env.newPlayer()), true)
+        assertEquals(#env.spawned, case[3], "complete boss member count for type " .. case[2])
+        for _, npc in ipairs(env.spawned) do
+            assertEquals(npc.Type, case[2], "correct vanilla boss identity")
+            assertEquals(npc.Position.X, env.spawned[1].Position.X, "segments share native assembly position")
+            assertEquals(npc.Position.Y, env.spawned[1].Position.Y, "segments share native assembly position")
+        end
+    end
+end
+
+local function test_segmented_boss_rewards_after_last_member_only()
+    for _, index in ipairs({ 1, 4 }) do
+        local env = loadNeverbirth({ rngValues = { 2, index } })
+        env.runUseBossOrder(env.newPlayer())
+        local members = { table.unpack(env.spawned) }
+        env.runEntityKill(members[1])
+        env.runNpcDeath(members[1])
+        members[1]:Remove()
+        env.runUpdate()
+        assertEquals(countCardSpawns(env), 0, "head death must not settle a live boss")
+        for i = #members, 2, -1 do
+            env.runNpcDeath(members[i])
+            env.runEntityKill(members[i])
+        end
+        assertEquals(countCardSpawns(env), 0, "deaths queue one end-of-update settlement")
+        env.runUpdate()
+        assertEquals(countCardSpawns(env), 3, "entire boss earns exactly three cards")
+        env.runUpdate()
+        env.runNpcDeath(members[2])
+        env.runUpdate()
+        assertEquals(countCardSpawns(env), 3, "duplicate callbacks cannot repeat the group reward")
+    end
+end
+
+local function test_two_summons_do_not_share_reward_state()
+    local env = loadNeverbirth({ rngValues = { 2, 1, 2, 1 } })
+    local player = env.newPlayer()
+    env.runUseBossOrder(player)
+    env.runUseBossOrder(player)
+    assertEquals(#env.spawned, 10)
+    assertVectorDistanceAtLeast(env.spawned[1].Position, env.spawned[6].Position, 80,
+        "a second body must not spawn on top of the first and join its native chain")
+    local members = { table.unpack(env.spawned) }
+    env.runNpcDeath({ GetData = function() return {} end })
+    for i = 1, 5 do env.runNpcDeath(members[i]) end
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 3, "first summon settles independently")
+    for i = 6, 10 do env.runNpcDeath(members[i]) end
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 6, "second summon earns its own three cards")
+end
+
+local function test_partial_spawn_failure_rolls_back_only_owned_members()
+    local env = loadNeverbirth({ rngValues = { 0, 0, 99, 2, 1 }, failSpawnAt = 4 })
+    local player = env.newPlayer()
+    env.runUseBossOrder(player)
+    local result = env.runUseBossOrder(player)
+    assertEquals(type(result), "table", "partial boss failure must preserve charge")
+    assertEquals(result.Discharge, false)
+    assertEquals(env.spawned[1].removed, false, "previous summon survives rollback")
+    assertEquals(env.spawned[2].removed, true)
+    assertEquals(env.spawned[3].removed, true)
+    env.runNpcDeath(env.spawned[2])
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 0, "rollback is not a kill reward")
+end
+
+local function test_removed_or_morphed_member_cancels_group_reward()
+    for _, change in ipairs({ "remove", "morph" }) do
+        local env = loadNeverbirth({ rngValues = { 2, 1 } })
+        env.runUseBossOrder(env.newPlayer())
+        local members = { table.unpack(env.spawned) }
+        if change == "remove" then members[5]:Remove() else members[5].Type = 10 end
+        for i = 1, 4 do env.runNpcDeath(members[i]) end
+        env.runUpdate()
+        env.runNpcDeath(members[5])
+        env.runUpdate()
+        assertEquals(countCardSpawns(env), 0, "removal/replacement is not a completed boss kill")
+    end
+end
+
+local function test_room_change_does_not_pay_pending_reward_in_next_room()
+    local env = loadNeverbirth({ rngValues = { 2, 1 } })
+    env.runUseBossOrder(env.newPlayer())
+    local members = { table.unpack(env.spawned) }
+    for _, npc in ipairs(members) do env.runNpcDeath(npc) end
+    env.room.spawnSeed = 8000
+    env.runNewRoom()
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 0, "pending reward cannot leak into another room")
+    env.runGameStarted()
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 0, "new run cannot revive pending rewards")
+end
+
+local function test_old_run_live_members_cannot_reward_after_restart()
+    local env = loadNeverbirth({ rngValues = { 2, 1 } })
+    env.runUseBossOrder(env.newPlayer())
+    local members = { table.unpack(env.spawned) }
+    env.runGameStarted()
+    for _, npc in ipairs(members) do env.runNpcDeath(npc) end
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 0, "old run entities cannot settle in a new run")
+end
+
+local function test_native_linked_deaths_need_not_repeat_every_callback()
+    local env = loadNeverbirth({ rngValues = { 2, 4 } })
+    env.runUseBossOrder(env.newPlayer())
+    local members = { table.unpack(env.spawned) }
+    env.runEntityKill(members[1])
+    members[2].dead, members[3].dead = true, true
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 3, "native shared death still settles once")
+    env.runNpcDeath(members[2])
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 3)
+end
+
+local function test_body_first_and_revisit_preserve_remaining_members()
+    local env = loadNeverbirth({ rngValues = { 2, 1 } })
+    env.runUseBossOrder(env.newPlayer())
+    local members = { table.unpack(env.spawned) }
+    env.runNpcDeath(members[3])
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 0)
+    env.runNewRoom()
+    -- If native entities retain GetData on return, their encounter stays coherent.
+    env.runNewRoom()
+    for _, i in ipairs({ 1, 2, 4, 5 }) do env.runNpcDeath(members[i]) end
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 3)
+end
+
+local function test_failed_member_marking_rolls_back_whole_spawn()
+    local env = loadNeverbirth({ rngValues = { 2, 1 }, invalidDataAt = 2 })
+    local result = env.runUseBossOrder(env.newPlayer())
+    assertEquals(type(result), "table")
+    assertEquals(result.Discharge, false)
+    assertEquals(#env.spawned, 2)
+    for _, npc in ipairs(env.spawned) do assertEquals(npc.removed, true) end
+    env.runUpdate()
+    assertEquals(countCardSpawns(env), 0)
+end
+
+local function test_segmented_spawn_rejects_invalid_room_positions()
+    for _, blockedBy in ipairs({ "boundary", "obstacle" }) do
+        local env = loadNeverbirth({ rngValues = { 2, 1 } })
+        function env.room:IsPositionInRoom() return blockedBy ~= "boundary" end
+        function env.room:GetGridCollisionAtPos() return blockedBy == "obstacle" and 1 or 0 end
+        local result = env.runUseBossOrder(env.newPlayer())
+        assertEquals(type(result), "table", "no valid body position must fail without spending charge")
+        assertEquals(result.Discharge, false)
+        assertEquals(#env.spawned, 0, "never fall back into a wall or outside the room")
+    end
+end
+
+test_old_run_live_members_cannot_reward_after_restart()
+test_segmented_bosses_spawn_complete_bodies()
+test_segmented_boss_rewards_after_last_member_only()
+test_two_summons_do_not_share_reward_state()
+test_partial_spawn_failure_rolls_back_only_owned_members()
+test_removed_or_morphed_member_cancels_group_reward()
+test_room_change_does_not_pay_pending_reward_in_next_room()
+test_native_linked_deaths_need_not_repeat_every_callback()
+test_body_first_and_revisit_preserve_remaining_members()
+test_failed_member_marking_rolls_back_whole_spawn()
+test_segmented_spawn_rejects_invalid_room_positions()
 test_xml_registers_active_item_and_treasure_pool()
 test_use_spawns_one_marked_hostile_non_final_target()
 test_normal_target_comes_from_current_floor_pool()

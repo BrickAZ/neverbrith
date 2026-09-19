@@ -126,17 +126,13 @@ assertEquals(api.ProcessCandidate(bonusQ4, {
 assertEquals(bonusQ4.SubType, 900, "bonus route preserves the Q4")
 assertEquals(spawnedIpecac, 1, "bonus route spawns exactly one Ipecac")
 
--- Later Black Candle changes only explosion immunity, never the locked Q4 route.
+-- Later Black Candle never changes the locked Q4 route.
 api.ResetForTest("late-candle-run")
 api.RecordFirstAcquisition(makePlayer(false))
 assertEquals(api.GetSavedState().q4Mode, "replace_root", "late-candle route starts as replacement")
-assertEquals(api.DecideExplosionDamage(makePlayer(true), api.ExplosionDamageFlag), false,
-    "Black Candle directly cancels delivered explosion damage")
+assertEquals(api.RecordFirstAcquisition(makePlayer(true)), false,
+    "later Black Candle cannot reactivate an existing curse")
 assertEquals(api.GetSavedState().q4Mode, "replace_root", "late Black Candle does not change Q4 route")
-assertEquals(api.DecideExplosionDamage(makePlayer(false), api.ExplosionDamageFlag), nil,
-    "without Black Candle, delivered explosion damage is not cancelled")
-assertEquals(api.DecideExplosionDamage(makePlayer(true), 0), nil,
-    "non-explosion damage is untouched")
 
 -- Removing the item or clearing runtime-only tables cannot clear the saved run curse.
 local beforeRuntimeReset = api.GetSavedState()
@@ -160,13 +156,11 @@ assertEquals(continuedState.firstQ4Resolved, true, "continued run keeps the reso
 assertEquals(api.RecordFirstAcquisition(makePlayer(true)), false, "later copies do not reactivate")
 assertEquals(api.GetSavedState().q4Mode, "replace_root", "later copy cannot change route")
 
--- Callback contracts: collision and normal damage paths must not cancel pickups/hits.
+-- Callback contract: collision must not cancel pickups.
 local collisionResult = api.Callbacks.PrePickupCollision(nil, makePickup(api.ItemId), makePlayer(false), false)
 assertEquals(collisionResult, nil, "pickup collision callback must not cancel the pedestal")
-local damageResult = api.Callbacks.PlayerDamage(nil, makePlayer(false), 1, 0, nil, 0)
-assertEquals(damageResult, nil, "ordinary damage callback remains nil")
 
--- Registration and implementation stay scoped: Q0 passive, no pool entry, no global ItemConfig scan.
+-- Registration and implementation stay scoped: Q0 passive, approved treasure/shop pools, no global ItemConfig scan.
 local itemsXml = readFile("content/items.xml")
 local yinBlock = itemsXml:match('<passive[^>]-name="Yin&apos;s Curse"[^>]*/>')
     or itemsXml:match('<passive[^>]-name="Yin\'s Curse"[^>]*/>')
@@ -179,8 +173,13 @@ for _, poolPath in ipairs({
     "content/itempools.en_us.xml",
     "content/itempools.zh_cn.xml",
 }) do
-    assertEquals(readFile(poolPath):find("Yin's Curse", 1, true), nil, poolPath .. " must not contain Yin's Curse")
-    assertEquals(readFile(poolPath):find("阴的诅咒", 1, true), nil, poolPath .. " must not contain 阴的诅咒")
+    local pools = readFile(poolPath)
+    local itemName = poolPath:find("zh_cn", 1, true) and "阴的诅咒" or "Yin's Curse"
+    for _, poolName in ipairs({ "treasure", "shop" }) do
+        local pool = pools:match('<Pool Name="' .. poolName .. '">.-</Pool>')
+        assertTruthy(pool and pool:find('<Item Name="' .. itemName .. '" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+            poolPath .. " should include " .. itemName .. " in " .. poolName .. " at weight 0.1")
+    end
 end
 
 local source = readFile("main.lua")

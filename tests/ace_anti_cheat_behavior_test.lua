@@ -68,7 +68,15 @@ assertTruthy(xmlEn:find('gfx="ace_anti_cheat_blue.png"', 1, true), "English ACE 
 assertTruthy(xmlZh:find('gfx="ace_anti_cheat_blue.png"', 1, true), "Chinese ACE should use the approved blue icon")
 assertTruthy(xml:find('description="Built on 20%+ years of experience"'), "default subtitle should be registered")
 assertTruthy(xmlZh:find('description="基于20%+年的经验沉淀"'), "Chinese subtitle should be registered")
-assertEquals(pools:find("ACE Anti-Cheat System", 1, true), nil, "ACE must not be in any item pool yet")
+for _, path in ipairs({ "content/itempools.xml", "content/itempools.en_us.xml", "content/itempools.zh_cn.xml" }) do
+    local poolText = path == "content/itempools.xml" and pools or readFile(path)
+    local itemName = path:find("zh_cn", 1, true) and "ACE 反作弊系统" or "ACE Anti-Cheat System"
+    for _, poolName in ipairs({ "treasure", "shop" }) do
+        local pool = poolText:match('<Pool Name="' .. poolName .. '">.-</Pool>')
+        assertTruthy(pool and pool:find('<Item Name="' .. itemName .. '" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+            path .. " should include " .. itemName .. " in " .. poolName .. " at weight 0.1")
+    end
+end
 
 local block = source:match("%-%- ACE_ANTI_CHEAT_SYSTEM_BEGIN(.-)%-%- ACE_ANTI_CHEAT_SYSTEM_END")
 assertTruthy(block, "main.lua should contain an isolated ACE runtime block")
@@ -80,7 +88,6 @@ assertTruthy(block:find("MC_POST_ENTITY_KILL", 1, true), "ACE should deduplicate
 assertTruthy(block:find("MC_POST_NEW_ROOM", 1, true), "ACE should reset room-owned state")
 assertTruthy(block:find("MC_POST_NEW_LEVEL", 1, true), "ACE should reset floor-owned state")
 assertTruthy(block:find("MC_PRE_GAME_EXIT", 1, true), "ACE should reset run state on exit")
-assertTruthy(block:find(":TakeDamage", 1, true), "ordinary Repentance fallback should replace the original hit with one guarded doubled hit")
 assertEquals(block:find("os.execute", 1, true), nil, "ACE must not invoke external programs")
 assertEquals(block:find("while true", 1, true), nil, "ACE must not use a busy loop")
 assertTruthy(block:find("AUDIT_FRAME_BUDGET_MS", 1, true), "ACE should centrally define its bounded per-frame workload budget")
@@ -96,8 +103,6 @@ dofile("tests/localization_test.lua")
 local api = assert(Neverbirth and Neverbirth.ACEAntiCheatTestAPI, "ACE runtime API should load through main.lua")
 local runtime = assert(api.Runtime, "ACE runtime state should be exposed")
 
-assertEquals(api.Capabilities.sameHitDamageRewrite, false, "ordinary Repentance cannot rewrite the amount of the same damage event")
-assertEquals(api.Capabilities.guardedDamageReplacement, true, "ordinary Repentance fallback should cancel and replace the hit with doubled damage")
 assertEquals(api.Capabilities.targetFps, false, "ordinary Repentance has no verified target-FPS API")
 assertEquals(api.Capabilities.safeRoomSlowdown, true, "the supported room-wide slowdown fallback should be enabled")
 assertEquals(api.Capabilities.boundedFrameThrottle, true, "ACE should deliberately block each audit update within a strict time and iteration budget")
@@ -107,40 +112,32 @@ assertEquals(api.Capabilities.fatalTeamKill, true, "the supported fatal audit sh
 assertEquals(api.FatalMessage, "ACE Anti-Cheat: suspicious combat behavior detected.", "fatal audit text should stay fixed")
 
 local playerTakeDamageCalls = 0
-local replacementArgs = nil
-local reentryResult = "unset"
 local player = {
     InitSeed = 12345,
     ToPlayer = function(self) return self end,
     GetCollectibleNum = function(_, itemId) return itemId == api.ItemId and 1 or 0 end,
-    TakeDamage = function(self, amount, flags, source, countdown)
+    TakeDamage = function()
         playerTakeDamageCalls = playerTakeDamageCalls + 1
-        replacementArgs = { amount, flags, source, countdown }
-        reentryResult = api.Callbacks.PlayerDamage(nil, self, amount, flags, source, countdown)
+        error("same-hit rewrite must not replay TakeDamage")
     end,
 }
 local sourceRef = { Entity = {} }
-assertEquals(api.Callbacks.PlayerDamage(nil, player, 0.5, 17, sourceRef, 23), false, "eligible original damage should be cancelled after the doubled replacement succeeds")
-assertEquals(playerTakeDamageCalls, 1, "player damage fallback should apply exactly one replacement damage event")
-assertEquals(replacementArgs[1], 1, "half-heart damage should become one heart of damage")
-assertEquals(replacementArgs[2], 17, "replacement damage should preserve flags")
-assertEquals(replacementArgs[3], sourceRef, "replacement damage should preserve the source reference")
-assertEquals(replacementArgs[4], 23, "replacement damage should preserve the countdown")
-assertEquals(reentryResult, nil, "owned replacement damage must pass through without recursive doubling")
-
-local secondPlayerCalls = 0
+for _, amount in ipairs({ 0.5, 1, 2 }) do
+    local result = api.Callbacks.PlayerDamage(nil, player, amount, 17, sourceRef, 23)
+    assertEquals(playerTakeDamageCalls, 0, "same-hit rewrite must not call TakeDamage")
+    assertEquals(type(result), "table", "eligible damage contributes a rewrite table")
+    assertEquals(result.Damage, amount * 2, "incoming damage doubles in the same event")
+    assertEquals(result.DamageFlags, nil, "flags must remain untouched")
+    assertEquals(result.DamageCountdown, nil, "countdown must remain untouched")
+    assertEquals(result.Source, nil, "source must remain untouched")
+end
 local secondPlayer = {
     InitSeed = 67890,
     ToPlayer = function(self) return self end,
     GetCollectibleNum = function(_, itemId) return itemId == api.ItemId and 1 or 0 end,
-    TakeDamage = function() secondPlayerCalls = secondPlayerCalls + 1 end,
+    TakeDamage = player.TakeDamage,
 }
-player.TakeDamage = function(self, amount, flags, source, countdown)
-    playerTakeDamageCalls = playerTakeDamageCalls + 1
-    assertEquals(api.Callbacks.PlayerDamage(nil, secondPlayer, 1, flags, source, countdown), false, "another co-op player should have an independent replacement guard")
-end
-assertEquals(api.Callbacks.PlayerDamage(nil, player, 1, 0, sourceRef, 0), false, "first co-op player's original hit should still be replaced")
-assertEquals(secondPlayerCalls, 1, "nested co-op damage should be doubled independently")
+assertEquals(api.Callbacks.PlayerDamage(nil, secondPlayer, 1, 0, sourceRef, 0).Damage, 2, "co-op holder doubles independently")
 
 local noAcePlayer = {
     InitSeed = 24680,
@@ -150,6 +147,9 @@ local noAcePlayer = {
 }
 assertEquals(api.Callbacks.PlayerDamage(nil, noAcePlayer, 1, 0, sourceRef, 0), nil, "non-holder damage should remain untouched")
 assertEquals(api.Callbacks.PlayerDamage(nil, player, 0, 0, sourceRef, 0), nil, "zero damage should remain untouched")
+assertEquals(block:find(":TakeDamage", 1, true), nil, "ACE same-hit doubling must not replay damage")
+assertEquals(api.Capabilities.sameHitDamageRewrite, true, "required REPENTOGON supports same-hit rewrite")
+assertEquals(api.Capabilities.guardedDamageReplacement, false, "damage replacement must be disabled")
 
 local normal = newNpc()
 local summon = newNpc({ spawnerEntity = {} })

@@ -63,6 +63,7 @@ local function loadNeverbirth(options)
         PLAYER_CREEP_GREEN = 9,
         PLAYER_CREEP_BLACK = 10,
         PLAYER_CREEP_WHITE = 11,
+        PLAYER_CREEP_HOLYWATER_TRAIL = 54,
     }
     GridEntityType = { GRID_POOP = 14 }
     PickupVariant = { PICKUP_COLLECTIBLE = 100 }
@@ -73,6 +74,8 @@ local function loadNeverbirth(options)
     ItemPoolType = { POOL_TREASURE = 0 }
     ActiveSlot = { SLOT_PRIMARY = 0 }
     CollectibleType = { COLLECTIBLE_NULL = 0 }
+    TearFlags = { TEAR_NORMAL = 0 }
+    WeaponType = { WEAPON_TEARS = 1, WEAPON_BRIMSTONE = 2 }
 
     local roomIndex = options.roomIndex or 1
     local spawnSeed = options.spawnSeed or 5000
@@ -209,6 +212,11 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    ModCallbacks.MC_PRE_GAME_EXIT = ModCallbacks.MC_PRE_GAME_EXIT or 1070
+    function include(path)
+        return dofile((path:gsub("%.", "/")) .. ".lua")
+    end
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function newPlayer(opts)
@@ -224,6 +232,10 @@ local function loadNeverbirth(options)
         function player:ToPlayer() return self end
         function player:GetCollectibleNum(itemId) return self.collectibles[itemId] or 0 end
         function player:HasCollectible(itemId) return (self.collectibles[itemId] or 0) > 0 end
+        function player:GetTearPoisonDamage() return self.Damage end
+        function player:GetTearHitParams(_, scale)
+            return {TearFlags=0,TearDamage=self.Damage*scale,TearColor=Color(1,1,1,1,0,0,0)}
+        end
         function player:GetCollectibleRNG()
             return { RandomInt = function(_, max) return nextRngValue(max) end }
         end
@@ -270,7 +282,16 @@ local function test_xml_registers_tower_of_babel_item_and_pools()
     local pools = readFile("content/itempools.xml")
 
     assertTruthy(items:find('<passive%s+name="Tower of Babel".-quality="1"', 1), "Tower of Babel should be a quality 1 passive")
-    assertTruthy(items:find('<passive%s+name="Tower of Babel".-tags="defensive anti%-terrain"', 1), "Tower of Babel should use defensive anti-terrain tags")
+    for _, xml in ipairs({ items, zhItems, enItems }) do
+        local tower
+        for block in xml:gmatch("<passive%s.-/>") do
+            if block:match('id="(.-)"') == "19" then tower = block end
+        end
+        assertTruthy(tower, "each locale must register Tower of Babel at local id 19")
+        local tags = " " .. (tower:match('tags="(.-)"') or "") .. " "
+        assertEquals(tags:find("%sdefensive%s"), nil, "defensive is not a native item tag")
+        assertEquals(tags:find("%santi%-terrain%s"), nil, "anti-terrain is not a native item tag")
+    end
     assertTruthy(zhItems:find('name="通天塔"', 1), "zh item xml should register Tower of Babel")
     assertTruthy(enItems:find('name="Tower of Babel"', 1), "en item xml should register Tower of Babel")
     assertTruthy(pools:find('<Pool Name="treasure".-<Item Name="Tower of Babel" Weight="1"', 1), "Tower of Babel should be in treasure")
@@ -327,6 +348,10 @@ local function test_strong_laxative_poop_stays_but_creep_is_removed_with_tower_o
 end
 
 test_xml_registers_tower_of_babel_item_and_pools()
+if arg and arg[1] == "--registration-only" then
+    print("Tower of Babel registration tests passed")
+    return
+end
 test_tower_of_babel_removes_new_enemy_player_and_neutral_creep()
 test_tower_of_babel_does_not_remove_existing_creep_or_non_creep_effects()
 test_no_tower_of_babel_keeps_creep()

@@ -40,7 +40,7 @@ TrinketType = { TRINKET_MONKEY_PAW = 20, TRINKET_KEEPERS_BARGAIN = 171 }
 PlayerType = { PLAYER_KEEPER = 14, PLAYER_KEEPER_B = 33 }
 ItemType = { ITEM_ACTIVE = 3 }
 EntityType = { ENTITY_PLAYER = 1, ENTITY_PICKUP = 5, ENTITY_NPC = 10 }
-PickupVariant = { PICKUP_COLLECTIBLE = 100, PICKUP_TRINKET = 350 }
+PickupVariant = { PICKUP_COLLECTIBLE = 100, PICKUP_TRINKET = 350, PICKUP_BED = 380 }
 EntityFlag = { FLAG_FRIENDLY = 1, FLAG_CHARM = 2 }
 LevelCurse = {
     CURSE_OF_DARKNESS = 1,
@@ -94,6 +94,11 @@ local debugMessages = {}
 function mod:AddCallback(callbackId, fn, filter)
     callbacks[#callbacks + 1] = { id = callbackId, fn = fn, filter = filter }
 end
+CallbackPriority = { EARLY = -100 }
+function mod:AddPriorityCallback(callbackId, priority, fn, filter)
+    self:AddCallback(callbackId, fn, filter)
+    callbacks[#callbacks].priority = priority
+end
 
 local function makePlayer(seed, playerType)
     local player = {
@@ -102,6 +107,8 @@ local function makePlayer(seed, playerType)
         playerType = playerType or 0,
         activeItems = { [0] = 9000, [1] = 700, [2] = 0 },
         activeCharges = { [0] = 0, [1] = 0, [2] = 0 },
+        nativeChargeCalls = {},
+        nativeMaxCharges = {},
         collectibles = {},
         trinkets = { [15] = 1 },
         heldTrinkets = { [0] = 15, [1] = 0 },
@@ -124,6 +131,24 @@ local function makePlayer(seed, playerType)
     function player:GetActiveItem(slot) return self.activeItems[slot] or 0 end
     function player:GetActiveCharge(slot) return self.activeCharges[slot] or 0 end
     function player:SetActiveCharge(value, slot) self.activeCharges[slot] = value end
+    function player:AddActiveCharge(amount, slot, flashHUD, overcharge, force)
+        self.nativeChargeCalls[#self.nativeChargeCalls + 1] = {
+            amount = amount, slot = slot, flashHUD = flashHUD, overcharge = overcharge, force = force,
+        }
+        if self.rejectNativeCharge then return 0 end
+        local config = itemConfigs[self:GetActiveItem(slot)]
+        local maximum = self.nativeMaxCharges[slot] or (config and config.MaxCharges) or 0
+        -- Verified native positive-charge gate: special rejects; timed fills.
+        local chargeType = self.nativeChargeTypes and self.nativeChargeTypes[slot] or 0
+        if amount > 0 and not force then
+            if chargeType == 2 then return 0 end
+            if chargeType == 1 then amount = maximum end
+        end
+        local current = self:GetActiveCharge(slot)
+        local added = math.max(0, math.min(amount, maximum - current))
+        self.activeCharges[slot] = current + added
+        return added
+    end
     function player:AddCollectible(id, charge, firstTime, slot)
         self.collectibles[id] = (self.collectibles[id] or 0) + 1
         if slot ~= nil then self.activeItems[slot] = id end
@@ -363,9 +388,21 @@ api.Callbacks.PostNewRoom()
 assertEquals(player.activeCharges[1], 2, "player one keeps independent room-charge state")
 assertEquals(playerTwo.activeCharges[1], 1, "player two keeps independent room-charge state")
 
-api.Callbacks.EntityTakeDamage(nil, player, 1, 0, { Ref = nil }, 30)
-assertEquals(#player.damageCalls, 1, "incoming hit is rewritten once")
-assertEquals(player.damageCalls[1].amount, 2, "incoming damage is doubled")
+local savedTakeDamage = player.TakeDamage
+local replayCalls = 0
+player.TakeDamage = function() replayCalls = replayCalls + 1; error("must not replay damage") end
+for _, amount in ipairs({ 1, 2 }) do
+    local result = api.Callbacks.EntityTakeDamage(nil, player, amount, 17, { Entity = nil }, 30)
+    assertEquals(replayCalls, 0, "ring must not call TakeDamage")
+    assertEquals(type(result), "table", "ring must rewrite the same damage event")
+    assertEquals(result.Damage, amount * 2, "incoming damage doubles")
+    assertEquals(result.DamageFlags, nil, "flags unchanged")
+    assertEquals(result.DamageCountdown, nil, "countdown unchanged")
+    assertEquals(result.Source, nil, "source unchanged")
+end
+assertEquals(api.Callbacks.EntityTakeDamage(nil, player, 0, 0, {}, 30), nil, "zero damage unchanged")
+assertEquals(api.Callbacks.EntityTakeDamage(nil, makePlayer(9876), 1, 0, {}, 30), nil, "inactive player unchanged")
+player.TakeDamage = savedTakeDamage
 
 -- The starting pedestal is run-owned, not one reward per co-op player.
 local startPlayerOne = makePlayer(303)
@@ -473,6 +510,7 @@ local function makePedestal(seed)
     function pickup:ToPickup() return self end
     function pickup:Remove() self.removed = true end
     function pickup:GetDropRNG() return { GetSeed = function() return self.dropSeed end } end
+    function pickup:GetCollectibleCycle() return self.collectibleCycle or {} end
     function pickup:GetData() return data end
     function pickup:Morph(kind, variant, subtype)
         self.Variant, self.SubType = variant, subtype
@@ -668,7 +706,7 @@ local function assertPlain(value, seen)
     seen[value] = nil
 end
 assertPlain(saveRoot)
-local reloadMod = { AddCallback = function() end }
+local reloadMod = { AddCallback = function() end, AddPriorityCallback = function() end }
 initialize(reloadMod, {
     ItemId = 9000, TrinketId = 9900,
     GetPlayers = function() return players end,
@@ -684,11 +722,82 @@ restoredModded.SubType = 800
 reloadAPI.Callbacks.PostPickupUpdate(nil, restoredModded)
 assertEquals(#rewards, rewardCountBeforeReload, "module reload does not duplicate a completed compensation")
 
+-- Soul of Isaac changes the displayed candidate, not the pedestal's reroll
+-- generation. Exercise the real pickup callback and count actual reward spawns.
+do
+    local before = #rewards
+    local cycling = makePedestal(8501)
+    api.Callbacks.PostPickupUpdate(nil, cycling)
+    assertEquals(#rewards, before + 1, "original Q4 is compensated before Soul of Isaac")
+    cycling.collectibleCycle = { 500, 25 }
+    for _ = 1, 20 do
+        cycling.SubType = 25
+        api.Callbacks.PostPickupUpdate(nil, cycling)
+        assertEquals(api.Callbacks.PrePickupCollision(nil, cycling, player), nil,
+            "the legal cycling candidate remains collectible")
+        cycling.SubType = 500
+        cycling.collectibleCycle = { 25, 500 }
+        api.Callbacks.PostPickupUpdate(nil, cycling)
+        assertEquals(api.Callbacks.PrePickupCollision(nil, cycling, player), true,
+            "the Q4 cycling candidate remains blocked")
+    end
+    assertEquals(#rewards, before + 1, "Soul of Isaac must not compensate the same Q4 on every switch")
+
+    local hiddenQ4 = makePedestal(8502)
+    hiddenQ4.SubType, hiddenQ4.collectibleCycle = 25, { 25, 500 }
+    api.Callbacks.PostPickupUpdate(nil, hiddenQ4)
+    assertEquals(#rewards, before + 1, "a hidden Q4 candidate is not compensated before being shown")
+    hiddenQ4.SubType = 500
+    api.Callbacks.PostPickupUpdate(nil, hiddenQ4)
+    assertEquals(#rewards, before + 2, "another pedestal has its own compensation record")
+    hiddenQ4.SubType = 25
+    api.Callbacks.PostPickupUpdate(nil, hiddenQ4)
+    reloadAPI.Callbacks.PostGameStarted(nil, true)
+    local restoredCycle = makePedestal(8502)
+    restoredCycle.collectibleCycle = { 500, 25 }
+    reloadAPI.Callbacks.PostPickupUpdate(nil, restoredCycle)
+    assertEquals(#rewards, before + 2, "continue preserves the previously compensated cycling candidate")
+
+    itemConfigs[501].Quality = 4
+    local twoQ4 = makePedestal(8503)
+    twoQ4.collectibleCycle = { 500, 501 }
+    api.Callbacks.PostPickupUpdate(nil, twoQ4)
+    twoQ4.SubType = 501
+    api.Callbacks.PostPickupUpdate(nil, twoQ4)
+    for _ = 1, 10 do
+        twoQ4.SubType = 500
+        api.Callbacks.PostPickupUpdate(nil, twoQ4)
+        twoQ4.SubType = 501
+        api.Callbacks.PostPickupUpdate(nil, twoQ4)
+    end
+    assertEquals(#rewards, before + 4, "two different Q4 choices each compensate once, not once per animation cycle")
+    twoQ4.dropSeed = twoQ4.dropSeed + 1
+    api.Callbacks.PostPickupUpdate(nil, twoQ4)
+    assertEquals(#rewards, before + 5, "a real reseeded reroll can compensate the same Q4 again")
+    api.Callbacks.PostPickupUpdate(nil, twoQ4)
+    assertEquals(#rewards, before + 5, "unchanged state after a reroll cannot compensate twice")
+    twoQ4.collectibleCycle, twoQ4.SubType = { 25, 500 }, 500
+    api.Callbacks.PostPickupUpdate(nil, twoQ4)
+    assertEquals(#rewards, before + 6, "a replaced candidate set starts a new compensation generation")
+
+    local legacy = makePedestal(8504)
+    local records = api.GetSavedState().pedestalRooms[tostring(currentRoomKey)]
+    records[tostring(legacy.InitSeed)] = {
+        itemId = 500, dropSeed = legacy.dropSeed, attempted = true, compensated = true,
+    }
+    legacy.SubType, legacy.collectibleCycle = 25, { 500, 25 }
+    api.Callbacks.PostPickupUpdate(nil, legacy)
+    legacy.SubType = 500
+    api.Callbacks.PostPickupUpdate(nil, legacy)
+    assertEquals(#rewards, before + 6, "legacy compensation survives entering a native choice cycle")
+    assertPlain(saveRoot)
+end
+
 local pickupUpdateRegistered, collisionRegistered = false, false
 for _, callback in ipairs(callbacks) do
     if callback.id == ModCallbacks.MC_POST_PICKUP_UPDATE and callback.filter == 100 then
         pickupUpdateRegistered = callback.fn == api.Callbacks.PostPickupUpdate
-    elseif callback.id == ModCallbacks.MC_PRE_PICKUP_COLLISION then
+    elseif callback.id == ModCallbacks.MC_PRE_PICKUP_COLLISION and callback.filter == nil then
         collisionRegistered = callback.fn == api.Callbacks.PrePickupCollision
     end
 end
@@ -718,5 +827,176 @@ end
 
 local pools = readFile("content/itempools.xml")
 assertEquals(pools:find("Ring of the Seven Curses", 1, true), nil, "the item is intentionally absent from every item pool")
+
+-- Inspect the existing callback closure without adding a production-only test API.
+do
+    local addSecondaryCharge
+    for index = 1, math.huge do
+        local name, value = debug.getupvalue(api.Callbacks.PostNewRoom, index)
+        if not name then break end
+        if name == "AddSecondaryCharge" then addSecondaryCharge = value; break end
+    end
+    assertTruthy(addSecondaryCharge, "room callback owns the secondary charging helper")
+    local failures = {}
+    local function checkChargeCase(name, check)
+        local ok, message = pcall(check)
+        if not ok then failures[#failures + 1] = name .. ": " .. tostring(message) end
+    end
+    checkChargeCase("dynamic maximum above item config", function()
+        local owner = makePlayer(9101)
+        owner.nativeMaxCharges[1], owner.activeCharges[1] = 8, 6
+        owner.activeCharges[0], owner.activeCharges[2] = 2, 3
+        assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), true,
+            "native capacity beyond static MaxCharges accepts the reward")
+        assertEquals(owner.activeCharges[1], 7, "native engine owns the dynamic maximum")
+        assertEquals(owner.activeCharges[0], 2, "primary slot is untouched")
+        assertEquals(owner.activeCharges[2], 3, "pocket slot is untouched")
+        local call = owner.nativeChargeCalls[1]
+        assertEquals(#owner.nativeChargeCalls, 1, "one reward makes one native call")
+        assertEquals(call.amount, 1, "reward remains one charge")
+        assertEquals(call.slot, ActiveSlot.SLOT_SECONDARY, "only retained secondary is targeted")
+        assertEquals(call.flashHUD, true, "native charge feedback is enabled")
+        assertEquals(call.overcharge, false, "reward does not force overcharge; native extra capacity still applies")
+        assertEquals(call.force, true, "fixed one-charge reward bypasses charge-type conversion, not capacity")
+    end)
+    for _, chargeType in ipairs({ 1, 2 }) do
+        checkChargeCase("fixed one charge for native type " .. chargeType, function()
+            local owner = makePlayer(9120 + chargeType)
+            owner.nativeChargeTypes = { [1] = chargeType }
+            assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), true,
+                "timed and special retained actives accept the fixed reward")
+            assertEquals(owner.activeCharges[1], 1, "reward is exactly one, never a timed full recharge")
+            owner.activeCharges[1] = 6
+            assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), false,
+                "forcing the charge type never bypasses a full native slot")
+            assertEquals(owner.activeCharges[1], 6, "full native capacity is preserved")
+        end)
+    end
+    checkChargeCase("dynamic maximum below item config", function()
+        local owner = makePlayer(9102)
+        owner.nativeMaxCharges[1], owner.activeCharges[1] = 4, 4
+        assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), false,
+            "native full charge reports no accepted reward")
+        assertEquals(owner.activeCharges[1], 4, "static config cannot overfill dynamic capacity")
+    end)
+    checkChargeCase("zero actually accepted", function()
+        local owner = makePlayer(9103)
+        owner.rejectNativeCharge = true
+        assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), false,
+            "zero actual addition is not reported as success")
+        assertEquals(owner.activeCharges[1], 0, "zero acceptance is not replaced by a manual write")
+        assertEquals(#owner.nativeChargeCalls, 1, "native rules decide acceptance")
+    end)
+    checkChargeCase("missing native method", function()
+        local owner = makePlayer(9104)
+        owner.AddActiveCharge = nil
+        assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), false,
+            "missing native API skips charging without a setter fallback")
+        assertEquals(owner.activeCharges[1], 0, "missing native API leaves charge untouched")
+    end)
+    checkChargeCase("retained slot identity", function()
+        local owner = makePlayer(9105)
+        owner.activeItems[1] = 105
+        assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), false,
+            "replacement secondary cannot receive the retained item reward")
+        owner.activeItems[1] = 0
+        assertEquals(addSecondaryCharge(owner, { nativeSecondary = 700 }), false,
+            "empty secondary cannot receive charge")
+        assertEquals(addSecondaryCharge(owner, { nativeSecondary = 0 }), false,
+            "no retained item cannot receive charge")
+        assertEquals(#owner.nativeChargeCalls, 0, "invalid retained slots never reach native charging")
+    end)
+    checkChargeCase("owner and interval isolation", function()
+        local owner, inactive = makePlayer(9106), makePlayer(9107)
+        inactive.activeItems[0] = 0
+        currentRoomKey = "native-charge:0"
+        players = { owner, inactive }
+        api.ActivatePlayer(owner)
+        currentRoomKey = "native-charge:1"
+        api.Callbacks.PostNewRoom()
+        assertEquals(#owner.nativeChargeCalls, 0, "first room still only advances progress")
+        currentRoomKey = "native-charge:2"
+        api.Callbacks.PostNewRoom()
+        api.Callbacks.PostNewRoom()
+        assertEquals(owner.activeCharges[1], 1, "owner receives one charge after two unique rooms")
+        assertEquals(#owner.nativeChargeCalls, 1, "duplicate room callback never repeats native reward")
+        assertEquals(inactive.activeCharges[1], 0, "inactive co-op player receives no charge")
+        assertEquals(#inactive.nativeChargeCalls, 0, "inactive player never reaches native charging")
+    end)
+    assertEquals(#failures, 0, table.concat(failures, "\n"))
+end
+
+-- Exercise the registered collision callbacks: physical beds remain solid,
+-- ordinary sleep is blocked per player, and the Home story bed is untouched.
+do
+    local bedOwner, teammate = makePlayer(9201), makePlayer(9202)
+    teammate.activeItems[0] = 0
+    local bedSave, bedRunSeed = {}, "bed-run"
+    local bedContext = {
+        ItemId = 9000, TrinketId = 9900,
+        GetPlayers = function() return { bedOwner, teammate } end,
+        GetSaveRoot = function() return bedSave end,
+        GetCurrentRunSeed = function() return bedRunSeed end,
+        GetRoomKey = function() return "bed-room" end,
+    }
+    local function loadBedModule()
+        local registered = {}
+        local bedMod = {}
+        function bedMod:AddCallback(id, fn, filter)
+            registered[#registered + 1] = { id = id, fn = fn, filter = filter }
+        end
+        function bedMod:AddPriorityCallback(id, _, fn, filter) self:AddCallback(id, fn, filter) end
+        initialize(bedMod, bedContext)
+        local bedAPI = bedMod.RingOfSevenCursesTestAPI
+        local count = 0
+        for _, callback in ipairs(registered) do
+            if callback.id == ModCallbacks.MC_PRE_PICKUP_COLLISION and callback.filter == 380 then
+                count = count + 1
+                assertEquals(callback.fn, bedAPI.Callbacks.PreBedCollision, "bed handler owns the narrow registration")
+            end
+        end
+        assertEquals(count, 1, "bed collision callback is registered exactly once")
+        local function collide(bed, actor, low)
+            for _, callback in ipairs(registered) do
+                if callback.id == ModCallbacks.MC_PRE_PICKUP_COLLISION
+                    and (callback.filter == nil or callback.filter == bed.Variant) then
+                    local result = callback.fn(bedMod, bed, actor, low)
+                    if result ~= nil then return result end
+                end
+            end
+        end
+        return bedAPI, collide
+    end
+    local bedAPI, collide = loadBedModule()
+    local cleanBed = { Type = 5, Variant = 380, SubType = 0, appearance = "clean" }
+    local dirtyBed = { Type = 5, Variant = 380, SubType = 0, appearance = "dirty" }
+    local momsBed = { Type = 5, Variant = 380, SubType = 10 }
+    assertEquals(collide(cleanBed, bedOwner), nil, "before activation the ordinary bed remains usable")
+    bedAPI.ActivatePlayer(bedOwner)
+    for _, bed in ipairs({ cleanBed, dirtyBed }) do
+        for _, low in ipairs({ false, true }) do
+            assertEquals(collide(bed, bedOwner, low), false, bed.appearance .. " bed cancels sleep but retains physical collision")
+            assertEquals(collide(bed, teammate, low), nil, bed.appearance .. " bed remains usable by an unaffected co-op player")
+        end
+        assertEquals(collide(bed, { ToPlayer = function() return nil end }), nil, "non-player collision is unchanged")
+        assertEquals(collide(bed, nil), nil, "missing collider is ignored")
+    end
+    -- Story-bed appearances share 5.380.10; neither appearance can be blocked.
+    for _, appearance in ipairs({ "made", "unmade" }) do
+        momsBed.appearance = appearance
+        assertEquals(collide(momsBed, bedOwner, false), nil, appearance .. " Mom's Bed preserves story progression")
+        assertEquals(collide(momsBed, bedOwner, true), nil, "story-bed exception applies in either collision order")
+    end
+    assertEquals(collide({ Type = 5, Variant = 10, SubType = 1 }, bedOwner), nil, "unrelated heart pickups are unchanged")
+    bedOwner.activeItems[0] = 0
+    assertEquals(collide(cleanBed, bedOwner), false, "temporary inventory removal cannot bypass the permanent run contract")
+    bedAPI, collide = loadBedModule()
+    bedAPI.Callbacks.PostGameStarted(nil, true)
+    assertEquals(collide(dirtyBed, bedOwner), false, "continue restores the ordinary-bed restriction")
+    assertEquals(collide(momsBed, bedOwner), nil, "continue preserves the Mom's Bed exception")
+    assertEquals(collide(cleanBed, teammate), nil, "continue does not curse an unaffected teammate")
+    bedRunSeed = "next-bed-run"
+    assertEquals(collide(cleanBed, bedOwner), nil, "a new run does not inherit the previous run's bed restriction")
+end
 
 print("ring_of_the_seven_curses_behavior_test: ok")

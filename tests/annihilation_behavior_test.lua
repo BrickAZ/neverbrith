@@ -112,7 +112,24 @@ local function makePlayer(seed, position)
     function player:HasCollectible(itemId) return (self.collectibles[itemId] or 0) > 0 end
     function player:GetActiveItem(slot) return self.activeItems[slot] or 0 end
     function player:GetActiveCharge(slot) return self.activeCharges[slot] or 0 end
-    function player:SetActiveCharge(charge, slot) self.activeCharges[slot] = charge end
+    function player:SetActiveCharge() error("manual charging is forbidden") end
+    function player:AddActiveCharge(charge, slot, flashHud, overcharge, force)
+        self.nativeChargeCalls = self.nativeChargeCalls or {}
+        self.nativeChargeCalls[#self.nativeChargeCalls + 1] = { charge, slot, flashHud, overcharge, force }
+        if self.nativeChargeError then error("native charge failure") end
+        if self.nativeChargeResult ~= nil then return self.nativeChargeResult end
+        local config = self.nativeConfigs[self.activeItems[slot] or 0]
+        local maximum = config and config.MaxCharges or 0
+        -- Match the current engine's charge-type gate before its capacity clamp.
+        local chargeType = config and config.ChargeType or 0
+        if charge > 0 and not force then
+            if chargeType == 2 then return 0 end
+            if chargeType == 1 then charge = maximum end
+        end
+        local added = math.max(0, math.min(charge, maximum - (self.activeCharges[slot] or 0)))
+        self.activeCharges[slot] = (self.activeCharges[slot] or 0) + added
+        return added
+    end
     return player
 end
 
@@ -157,8 +174,10 @@ local function makeTear(player)
 end
 
 function EntityRef(entity) return { Entity = entity } end
+function GetPtrHash(entity) return entity.ptr or entity.InitSeed end
 
-local function makeEnvironment()
+local function makeEnvironment(options)
+    options = options or {}
     local callbacks = {}
     local players = { makePlayer(1, Vector(100, 100)), makePlayer(2, Vector(300, 100)) }
     local effects = {}
@@ -170,13 +189,14 @@ local function makeEnvironment()
         [6002] = { MaxCharges = 5 },
         [6003] = { MaxCharges = 5 },
     }
+    for _, player in ipairs(players) do player.nativeConfigs = collectibleConfigs end
 
     function mod:AddCallback(callbackId, fn, param)
         callbacks[#callbacks + 1] = { id = callbackId, fn = fn, param = param }
     end
 
     local initialize = assert(dofile("annihilation.lua"))
-    local api = initialize(mod, {
+    local settings = {
         ItemId = 9053,
         Variants = { Aura = 3022, Shockwave = 3023, Activate = 3024 },
         GetPlayers = function() return players end,
@@ -188,7 +208,10 @@ local function makeEnvironment()
             effects[#effects + 1] = effect
             return effect
         end,
-    })
+    }
+    for key, value in pairs(options) do settings[key] = value end
+    if options.NativeSpawn then settings.SpawnEffect = nil end
+    local api = initialize(mod, settings)
 
     local function getCallbacks(id)
         local result = {}
@@ -257,6 +280,67 @@ local function makeEnvironment()
             end
         end,
     }
+end
+
+-- Native API mock proves invocation/return handling only, not engine HUD semantics.
+for _, chargeType in ipairs({ 1, 2 }) do
+    local env = makeEnvironment()
+    local player = env.players[1]
+    player.collectibles[356] = 1
+    env.collectibleConfigs[6001].ChargeType = chargeType
+    env.collectibleConfigs[6002].ChargeType = chargeType
+    env.use(player)
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 2, "timed/special main and secondary accept one charge")
+    assertEquals(player:GetActiveCharge(0), 1, "timed/special primary gains exactly one charge")
+    assertEquals(player:GetActiveCharge(1), 1, "timed/special secondary gains exactly one charge")
+    assertEquals(player:GetActiveCharge(2), 0, "timed/special charging never touches the pocket")
+end
+do
+    local logs = {}
+    local env = makeEnvironment({ DebugLog = function(message) logs[#logs + 1] = message end })
+    local player = env.players[1]
+    player.collectibles[356] = 1
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 0, "inactive owner cannot charge")
+    env.use(player)
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 2, "native calls should charge both slots")
+    assertEquals(#(player.nativeChargeCalls or {}), 2, "must use AddActiveCharge for each slot")
+    for i, call in ipairs(player.nativeChargeCalls) do
+        assertEquals(call[1], 1, "exactly one native charge")
+        assertEquals(call[2], i - 1, "only primary and secondary")
+        assertEquals(call[3], true, "flash HUD requested")
+        assertEquals(call[4], false, "no forced overcharge; native extra capacity still applies")
+        assertEquals(call[5], true, "fixed charge bypasses native type conversion but not the capacity clamp")
+    end
+    assertEquals(player:GetActiveCharge(2), 0, "pocket untouched")
+    for _, value in ipairs({ 0, -1, false, "not a number" }) do
+        player.nativeChargeResult = value
+        assertEquals(env.api.ChargeCarBatterySynergy(player), 0, "no positive native result means no charge")
+    end
+    player.nativeChargeResult = 0.5
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 2, "positive actual amount counts")
+    player.nativeChargeResult = nil
+    player.activeItems[0] = 0
+    player.activeCharges[1] = 5
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 0, "empty and full slots are delegated to native API")
+    env.collectibleConfigs[6002].MaxCharges = 6
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 1, "dynamic native maximum is respected")
+    player.activeItems[1] = 999999
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 0, "unknown active with zero capacity rejects charging")
+    player.nativeChargeError = true
+    env.api.ChargeCarBatterySynergy(player)
+    env.api.ChargeCarBatterySynergy(player)
+    assertEquals(#logs, 1, "native charge exception logs once")
+end
+do
+    local logs = {}
+    local env = makeEnvironment({ DebugLog = function(message) logs[#logs + 1] = message end })
+    local player = env.players[1]
+    player.collectibles[356] = 1
+    env.use(player)
+    player.AddActiveCharge = nil
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 0, "missing native API must not fall back")
+    assertEquals(env.api.ChargeCarBatterySynergy(player), 0, "repeated missing native API remains safe")
+    assertEquals(#logs, 1, "missing native API logs once")
 end
 
 local function countDamage(npc, amount)
@@ -528,7 +612,212 @@ local function test_registration_and_resource_contract()
     end
 end
 
+local function fresh(entity)
+    return setmetatable({}, { __index = entity, __newindex = entity })
+end
+
+local function test_callable_entityref()
+    local original = EntityRef
+    local calls = 0
+    EntityRef = setmetatable({}, { __call = function(_, entity)
+        calls = calls + 1
+        return { Entity = entity }
+    end })
+    local env = makeEnvironment()
+    env.roomEntities[1] = makeNpc()
+    env.use(env.players[1])
+    env.update(4)
+    EntityRef = original
+    assertEquals(calls, 1, "callable EntityRef must execute")
+end
+
+local function test_fresh_wrapper_identity()
+    local env = makeEnvironment()
+    local player = env.players[1]
+    player.ControllerIndex = 0
+    env.players[2].ControllerIndex = 0
+    env.use(player)
+    local wrapper = fresh(player)
+    assertEquals(env.api.GetState(wrapper), env.api.GetState(player), "fresh wrapper state")
+    assertEquals(env.use(wrapper).Discharge, false, "fresh wrapper repeat use")
+    env.evaluate(wrapper, CacheFlag.CACHE_RANGE)
+    assertEquals(player.TearRange, 45, "fresh cache wrapper")
+    local tear = makeTear(fresh(player))
+    env.fireTear(tear)
+    assertTruthy(tear.removed, "fresh tear owner")
+    assertEquals(env.api.GetState(env.players[2]), nil, "same controller isolation")
+    local npc = makeNpc({ size = 100 })
+    env.npcInit(npc)
+    env.npcUpdate(fresh(npc))
+    env.update(2)
+    assertEquals(countDamage(npc, 10), 1, "fresh NPC wave deduplication")
+    env.npcDeath(fresh(npc))
+    env.entityKill(fresh(npc))
+    assertEquals(env.api.GetState(player).remaining, 157, "fresh death deduplication")
+    env.newRoom()
+    assertEquals(env.api.GetState(wrapper), nil, "fresh cleanup")
+end
+
+local function test_native_spawn_failure_and_diagnostics()
+    local oldIsaac = Isaac
+    local converted, effects, logs = 0, {}, {}
+    Isaac = { Spawn = function(_, variant, _, position, velocity, owner)
+        assertEquals(getmetatable(position), VectorMt, "native typed position")
+        assertEquals(getmetatable(velocity), VectorMt, "native typed velocity")
+        local effect = makeEffect(variant, position, owner)
+        effects[#effects + 1] = effect
+        return { ToEffect = function() converted = converted + 1; return effect end }
+    end }
+    local env = makeEnvironment({ NativeSpawn = true })
+    env.use(env.players[1])
+    assertEquals(converted, 2, "native spawn ToEffect conversion")
+    env.newRoom()
+    assertTruthy(effects[1].removed, "converted aura cleanup")
+    Isaac.Spawn = function() error("original spawn failure") end
+    env = makeEnvironment({ NativeSpawn = true, Diagnostics = true,
+        DebugLog = function(message) logs[#logs + 1] = message end })
+    env.roomEntities[1] = makeNpc()
+    assertEquals(env.use(env.players[1]), true, "failed visuals preserve damage state")
+    env.update(4)
+    env.fireTear(makeTear(env.players[1]))
+    env.newRoom()
+    assertEquals(countDamage(env.roomEntities[1], 4), 1, "damage survives spawn failure")
+    assertEquals(env.use(env.players[1]), true, "failure cannot leave stuck state")
+    local text = table.concat(logs, "\n")
+    for _, phase in ipairs({ "init", "use", "first-update", "first-damage", "first-shot", "end:room" }) do
+        assertTruthy(text:find(phase, 1, true), "diagnostics phase " .. phase)
+    end
+    Isaac = oldIsaac
+end
+
+local function test_constructor_and_damage_errors_are_once_only()
+    local original = EntityRef
+    local logs, hits = {}, 0
+    local env = makeEnvironment({ DebugLog = function(message) logs[#logs + 1] = message end })
+    local player, npc = env.players[1], makeNpc()
+    player.collectibles[356] = 1
+    function npc:TakeDamage(_, _, source)
+        assertTruthy(source and source.Entity, "native source required")
+        hits = hits + 1
+        if self.throws then error("original damage failure") end
+        return self.result
+    end
+    env.roomEntities[1] = npc
+    env.use(player)
+    EntityRef = function() error("original constructor failure") end
+    env.update(8)
+    assertEquals(hits, 0, "constructor error skips damage")
+    assertEquals(#logs, 1, "constructor failure logs once")
+    assertTruthy(logs[1]:find("original constructor failure", 1, true), "preserves constructor error")
+    EntityRef = original
+    npc.result = false
+    env.update(4)
+    assertEquals(player:GetActiveCharge(0), 0, "cancelled damage no charge")
+    npc.throws = true
+    env.update(8)
+    assertEquals(#logs, 2, "damage error logs once")
+    assertEquals(player:GetActiveCharge(0), 0, "throwing damage no charge")
+    npc.throws = false
+    npc.result = true
+    env.update(4)
+    assertEquals(player:GetActiveCharge(0), 1, "valid damage charges primary")
+    assertEquals(player:GetActiveCharge(1), 1, "valid damage charges secondary")
+end
+
+local function test_visual_setup_errors_and_foreign_tears()
+    for _, failure in ipairs({ "sprite", "load", "play", "update" }) do
+        local effects = {}
+        local env = makeEnvironment({ SpawnEffect = function(variant, position, owner)
+            local effect = makeEffect(variant, position, owner)
+            effects[#effects + 1] = effect
+            if failure == "sprite" then effect.GetSprite = function() error("sprite failure") end end
+            if failure == "load" then effect.sprite.Load = function() return false end end
+            if failure == "play" then effect.sprite.Play = function() error("play failure") end end
+            return effect
+        end })
+        local player, npc = env.players[1], makeNpc()
+        env.roomEntities[1] = npc
+        env.use(player)
+        if failure == "update" then
+            effects[1].Position = nil
+            setmetatable(effects[1], { __newindex = function(_, key) error("invalid visual write " .. key) end })
+        end
+        env.update(4)
+        assertEquals(countDamage(npc, 4), 1, "visual errors preserve aura damage: " .. failure)
+        env.newRoom()
+        assertEquals(env.use(player), true, "visual errors permit reuse")
+    end
+    local env = makeEnvironment()
+    local player = env.players[1]
+    env.use(player)
+    local tear = makeTear({ Type = 3, Parent = player })
+    tear.Parent = player
+    env.fireTear(tear)
+    assertEquals(tear.removed, false, "familiar-spawned tears remain untouched")
+    local missing = makePlayer(99)
+    missing.InitSeed = nil
+    assertEquals(env.use(missing).Discharge, false, "missing stable identity refuses activation")
+    player.activeItems = {}
+    env.update(4)
+    assertTruthy(env.api.GetState(player), "losing active does not cancel state")
+end
+
+local function test_invalid_owner_cleanup_uses_saved_identity(boundary)
+    local originalHash = GetPtrHash
+        local env = makeEnvironment()
+        local player = env.players[1]
+        env.use(player)
+        env.fireTear(makeTear(player))
+        assertEquals(#env.effects, 3, "aura activation and wave are live")
+        player.Exists = function() return false end
+        GetPtrHash = function(entity)
+            if entity == player then error("owner native handle no longer valid") end
+            return originalHash(entity)
+        end
+        if boundary == "update" then env.update(1) else env.newRoom() end
+        GetPtrHash = originalHash
+        assertEquals(next(env.api.Runtime.states), nil, boundary .. " must remove invalid owner state")
+        assertEquals(next(env.api.Runtime.roomNpcs), nil, boundary .. " must clear NPC collection")
+        for _, effect in ipairs(env.effects) do
+            assertTruthy(effect.removed, boundary .. " must remove every invalid owner visual")
+        end
+end
+
+local function test_native_toeffect_failure_removes_raw_entity()
+    local originalIsaac = Isaac
+    for _, failure in ipairs({ "nil", "throw" }) do
+        local raws = {}
+        Isaac = { Spawn = function()
+            local raw = { removed = false }
+            function raw:Exists() return not self.removed end
+            function raw:Remove() self.removed = true end
+            function raw:ToEffect()
+                if failure == "throw" then error("original ToEffect failure") end
+                return nil
+            end
+            raws[#raws + 1] = raw
+            return raw
+        end }
+        local env = makeEnvironment({ NativeSpawn = true })
+        local npc = makeNpc()
+        env.roomEntities[1] = npc
+        assertEquals(env.use(env.players[1]), true, "failed ToEffect preserves activation")
+        env.update(4)
+        assertEquals(countDamage(npc, 4), 1, "failed ToEffect preserves damage")
+        for _, raw in ipairs(raws) do assertTruthy(raw.removed, "failed ToEffect raw entity cleanup") end
+    end
+    Isaac = originalIsaac
+end
+
 local tests = {
+    function() test_invalid_owner_cleanup_uses_saved_identity("update") end,
+    function() test_invalid_owner_cleanup_uses_saved_identity("room") end,
+    test_native_toeffect_failure_removes_raw_entity,
+    test_visual_setup_errors_and_foreign_tears,
+    test_native_spawn_failure_and_diagnostics,
+    test_constructor_and_damage_errors_are_once_only,
+    test_callable_entityref,
+    test_fresh_wrapper_identity,
     test_activation_is_independent_and_exactly_150_frames,
     test_aura_ticks_every_four_frames_with_live_damage_and_collision_radius,
     test_enemy_deaths_extend_once_without_any_cap_and_extend_all_active_players,
@@ -542,5 +831,10 @@ local tests = {
     test_registration_and_resource_contract,
 }
 
-for _, test in ipairs(tests) do test() end
+local failures = 0
+for _, test in ipairs(tests) do
+    local ok, err = pcall(test)
+    if not ok then failures = failures + 1; print("FAIL: " .. tostring(err)) end
+end
+assertEquals(failures, 0, "test failures")
 print("annihilation_behavior_test: ok")

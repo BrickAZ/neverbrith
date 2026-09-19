@@ -393,6 +393,9 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    -- This legacy unit fixture covers main.lua's cradle, not independent modules.
+    function include() return function() end end
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallbacks(callbackId, param)

@@ -42,6 +42,14 @@
     </Pool>
 
     <Pool Name="treasure"> <!-- 宝箱 -->
+        <Item Name="千变万化" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="ACE 反作弊系统" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="阴的诅咒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="蓄风棒" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="回响碎片" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="复活吧，我的爱人！" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="记忆紊乱" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="阿瓦达啃大瓜" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="未剪断的脐带" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="绝育证明" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -69,6 +77,12 @@
     </Pool>
 
     <Pool Name="shop"> <!-- 商店 -->
+        <Item Name="千变万化" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="ACE 反作弊系统" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="阴的诅咒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="复活吧，我的爱人！" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="记忆紊乱" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="阿瓦达啃大瓜" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱剑" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>

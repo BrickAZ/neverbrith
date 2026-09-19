@@ -7,14 +7,16 @@ local function initializeKamikazeSquad(Neverbirth, context)
     -- Verified against the installed vanilla entities2.xml: Mulliboom is Mulligan type 16, variant 2.
     local MULLIBOOM_TYPE = (EntityType and EntityType.ENTITY_MULLIGAN) or 16
     local MULLIBOOM_VARIANT = 2
-    -- Vanilla Mullibooms use the standard 40-damage enemy-bomb explosion.
+    -- Preserved existing dispatch value; native Mulliboom equivalence is not yet measured.
     local MULLIBOOM_EXPLOSION_DAMAGE = 40
     local EXPLOSION_RADIUS_MULTIPLIER = 2
 
     local OWNED_KEY = "NeverbirthKamikazeSquadOwned"
     local OWNER_KEY = "NeverbirthKamikazeSquadOwner"
+    local OWNER_ID_KEY = "NeverbirthKamikazeSquadOwnerId"
     local TARGET_KEY = "NeverbirthKamikazeSquadTarget"
     local DETONATED_KEY = "NeverbirthKamikazeSquadDetonated"
+    local FAILED_KEY = "NeverbirthKamikazeSquadExplosionFailed"
 
     local runtime = {
         holders = {},
@@ -22,6 +24,23 @@ local function initializeKamikazeSquad(Neverbirth, context)
         hostileSet = {},
         roomSeeded = false,
     }
+
+    local diagnosticsSeen = {}
+    local function diagnostic(message, once)
+        if (context.DiagnosticsEnabled ~= true and Neverbirth.KamikazeSquadDiagnosticsEnabled ~= true)
+            or type(context.DebugLog) ~= "function" then return end
+        if once and diagnosticsSeen[message] then return end
+        if once then diagnosticsSeen[message] = true end
+        context.DebugLog("Kamikaze Squad: " .. message)
+    end
+    diagnostic("initialized", true)
+
+    local function entityKey(entity)
+        if not entity or type(GetPtrHash) ~= "function" then return nil end
+        local ok, hash = pcall(GetPtrHash, entity)
+        if not ok or type(hash) ~= "number" then return nil end
+        return tostring(hash) .. ":" .. tostring(entity.InitSeed)
+    end
 
     local function entityExists(entity)
         if entity == nil then return false end
@@ -51,17 +70,19 @@ local function initializeKamikazeSquad(Neverbirth, context)
     end
 
     local function trackEnemy(entity)
-        if not isValidHostile(entity) or runtime.hostileSet[entity] then return false end
-        runtime.hostileSet[entity] = true
+        local key = entityKey(entity)
+        if not key or not isValidHostile(entity) or runtime.hostileSet[key] then return false end
+        runtime.hostileSet[key] = true
         runtime.hostiles[#runtime.hostiles + 1] = entity
         return true
     end
 
     local function removeTrackedEnemy(entity)
-        if not runtime.hostileSet[entity] then return end
-        runtime.hostileSet[entity] = nil
+        local key = entityKey(entity)
+        if not key or not runtime.hostileSet[key] then return end
+        runtime.hostileSet[key] = nil
         for index = #runtime.hostiles, 1, -1 do
-            if runtime.hostiles[index] == entity then
+            if entityKey(runtime.hostiles[index]) == key then
                 table.remove(runtime.hostiles, index)
                 break
             end
@@ -72,7 +93,8 @@ local function initializeKamikazeSquad(Neverbirth, context)
         for index = #runtime.hostiles, 1, -1 do
             local entity = runtime.hostiles[index]
             if not isValidHostile(entity) then
-                runtime.hostileSet[entity] = nil
+                local key = entityKey(entity)
+                if key then runtime.hostileSet[key] = nil end
                 table.remove(runtime.hostiles, index)
             end
         end
@@ -110,11 +132,15 @@ local function initializeKamikazeSquad(Neverbirth, context)
     end
 
     local function getHolderState(player, create)
-        local state = runtime.holders[player]
+        local key = entityKey(player)
+        if not key then return nil end
+        local state = runtime.holders[key]
         if not state and create then
-            state = { player = player, timer = 0, units = {} }
-            runtime.holders[player] = state
+            state = { player = player, key = key, timer = 0, units = {} }
+            runtime.holders[key] = state
+            diagnostic("owner recognized " .. key)
         end
+        if state then state.player = player end
         return state
     end
 
@@ -122,7 +148,7 @@ local function initializeKamikazeSquad(Neverbirth, context)
         if not entityExists(unit) or isDead(unit) then return false end
         local data = unit.GetData and unit:GetData() or nil
         if not data or not data[OWNED_KEY] or data[DETONATED_KEY] then return false end
-        if owner and data[OWNER_KEY] ~= owner then return false end
+        if owner and data[OWNER_ID_KEY] ~= entityKey(owner) then return false end
         return true
     end
 
@@ -137,43 +163,59 @@ local function initializeKamikazeSquad(Neverbirth, context)
     local function removeUnitReference(unit)
         for _, state in pairs(runtime.holders) do
             for index = #state.units, 1, -1 do
-                if state.units[index] == unit then table.remove(state.units, index) end
+                if entityKey(state.units[index]) == entityKey(unit) then table.remove(state.units, index) end
             end
         end
     end
 
-    local function triggerExplosion(position, owner)
+    local function prepareExplosion(position, owner)
         if context.TriggerExplosion then
-            context.TriggerExplosion(position, MULLIBOOM_EXPLOSION_DAMAGE, EXPLOSION_RADIUS_MULTIPLIER, owner)
-            return
+            return function()
+                context.TriggerExplosion(position, MULLIBOOM_EXPLOSION_DAMAGE, EXPLOSION_RADIUS_MULTIPLIER, owner)
+            end
         end
 
         local game = Game and Game() or nil
-        if not game or not game.BombExplosionEffects then return end
-        game:BombExplosionEffects(
-            position,
+        if not game or type(game.BombExplosionEffects) ~= "function" then error("explosion API unavailable") end
+        if not entityExists(owner) or not entityKey(owner) or not owner.ToPlayer or not owner:ToPlayer() then
+            error("explosion source unavailable")
+        end
+        -- Construct through the engine API before Remove; do not fabricate Lua Vector/Color tables.
+        local nativePosition = Vector(position.X, position.Y)
+        local nativeColor = Color(1, 1, 1, 1)
+        if nativePosition == nil or nativeColor == nil then error("explosion native values unavailable") end
+        return function() game:BombExplosionEffects(
+            nativePosition,
             MULLIBOOM_EXPLOSION_DAMAGE,
             (TearFlags and TearFlags.TEAR_NORMAL) or 0,
-            (Color and Color.Default) or nil,
+            nativeColor,
             owner,
             EXPLOSION_RADIUS_MULTIPLIER,
             true,
             true,
             (DamageFlag and DamageFlag.DAMAGE_EXPLOSION) or 0
-        )
+        ) end
     end
 
     local function detonate(unit)
         if not isOwnedUnit(unit) then return false end
         local data = unit:GetData()
+        if data[FAILED_KEY] then return false end
+        local ownerState = runtime.holders[data[OWNER_ID_KEY]]
+        local owner = ownerState and ownerState.player or data[OWNER_KEY]
+        local ready, explode = pcall(prepareExplosion, unit.Position, owner)
+        if not ready or type(explode) ~= "function" or type(unit.Remove) ~= "function" then
+            data[FAILED_KEY] = true
+            diagnostic("explosion preflight failed; unit retained, no retry", true)
+            return false
+        end
         data[DETONATED_KEY] = true
-        local owner = data[OWNER_KEY]
-        local position = unit.Position
         removeUnitReference(unit)
         -- Remove instead of Kill/TakeDamage so the hard-coded Mulliboom death explosion cannot fire as a second hit.
         if unit.Remove then unit:Remove() end
-        triggerExplosion(position, owner)
-        return true
+        local ok = pcall(explode)
+        if not ok then diagnostic("explosion call failed after removal; no retry", true) end
+        return ok
     end
 
     local function silentlyRemoveUnit(unit)
@@ -186,6 +228,7 @@ local function initializeKamikazeSquad(Neverbirth, context)
     local function clearHolder(player)
         local state = runtime.holders[player]
         if not state then return end
+        diagnostic("owner cleanup " .. tostring(player))
         for index = #state.units, 1, -1 do silentlyRemoveUnit(state.units[index]) end
         runtime.holders[player] = nil
     end
@@ -223,6 +266,7 @@ local function initializeKamikazeSquad(Neverbirth, context)
     end
 
     local function spawnForHolder(state)
+        diagnostic("spawn attempt " .. state.key)
         pruneUnits(state)
         if #state.units >= MAX_LIVE_PER_OWNER then return nil end
         local owner = state.player
@@ -232,6 +276,7 @@ local function initializeKamikazeSquad(Neverbirth, context)
         local data = unit:GetData()
         data[OWNED_KEY] = true
         data[OWNER_KEY] = owner
+        data[OWNER_ID_KEY] = state.key
         data[TARGET_KEY] = nil
         data[DETONATED_KEY] = false
         if unit.AddCharmed then unit:AddCharmed(EntityRef(owner), -1) end
@@ -259,13 +304,15 @@ local function initializeKamikazeSquad(Neverbirth, context)
 
     local function updateOwnedUnit(unit)
         if not isOwnedUnit(unit) then return end
-        local target = nearestHostile(unit.Position)
+        local data = unit:GetData()
+        if data[FAILED_KEY] then return end
+        local target = data[TARGET_KEY]
+        if not isValidHostile(target) then target = nearestHostile(unit.Position) end
         if not target then
             detonate(unit)
             return
         end
 
-        local data = unit:GetData()
         data[TARGET_KEY] = target
         unit.Target = target
         if unit.Pathfinder and unit.Pathfinder.FindGridPath then
@@ -286,12 +333,13 @@ local function initializeKamikazeSquad(Neverbirth, context)
         local seenPlayers = {}
         local hasHolder = false
         for _, player in ipairs(players) do
-            seenPlayers[player] = true
-            if isPlayerUsable(player) and hasItem(player) then
+            local key = entityKey(player)
+            if key then seenPlayers[key] = true end
+            if key and isPlayerUsable(player) and hasItem(player) then
                 hasHolder = true
                 getHolderState(player, true)
             else
-                clearHolder(player)
+                clearHolder(key)
             end
         end
 
@@ -318,6 +366,9 @@ local function initializeKamikazeSquad(Neverbirth, context)
             pruneUnits(state)
             if #state.units < MAX_LIVE_PER_OWNER then
                 state.timer = state.timer + 1
+                if state.timer == 1 or state.timer == 89 or state.timer == 90 then
+                    diagnostic("timer " .. state.timer .. " owner " .. state.key)
+                end
                 if state.timer >= SPAWN_INTERVAL then
                     state.timer = 0
                     spawnForHolder(state)
@@ -330,7 +381,7 @@ local function initializeKamikazeSquad(Neverbirth, context)
         local data = npc.GetData and npc:GetData() or nil
         if data and data[OWNED_KEY] then
             updateOwnedUnit(npc)
-        elseif next(runtime.holders) ~= nil and not runtime.hostileSet[npc] then
+        elseif next(runtime.holders) ~= nil and not runtime.hostileSet[entityKey(npc)] then
             trackEnemy(npc)
         end
     end
@@ -374,9 +425,9 @@ local function initializeKamikazeSquad(Neverbirth, context)
     if ModCallbacks.MC_PRE_GAME_EXIT then Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, preGameExit) end
 
     return {
-        GetState = function(player) return runtime.holders[player] end,
+        GetState = function(player) return getHolderState(player, false) end,
         GetLiveCount = function(player)
-            local state = runtime.holders[player]
+            local state = getHolderState(player, false)
             if not state then return 0 end
             pruneUnits(state)
             return #state.units

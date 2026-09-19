@@ -66,6 +66,8 @@ local function loadNeverbirth(options)
         MC_POST_GAME_STARTED = 10,
         MC_POST_PICKUP_INIT = 11,
         MC_POST_ADD_COLLECTIBLE = 13,
+        MC_POST_PICKUP_MORPH = 1215,
+        MC_PRE_GAME_EXIT = 17,
     }
     CollectibleType = { COLLECTIBLE_NULL = 0, COLLECTIBLE_PLAN_C = 475 }
     CacheFlag = { CACHE_DAMAGE = 1, CACHE_SHOTSPEED = 2, CACHE_TEARCOLOR = 4, CACHE_SPEED = 8, CACHE_FIREDELAY = 16, CACHE_TEARFLAG = 32, CACHE_RANGE = 64, CACHE_LUCK = 1024 }
@@ -85,9 +87,9 @@ local function loadNeverbirth(options)
     Options = { Language = options.language or "en" }
 
     local itemConfigs = {
-        [itemIds.BabyA] = { ID = itemIds.BabyA, Tags = ItemConfig.TAG_BABY },
-        [itemIds.BabyB] = { ID = itemIds.BabyB, Tags = ItemConfig.TAG_BABY },
-        [itemIds.BabyC] = { ID = itemIds.BabyC, Tags = ItemConfig.TAG_BABY },
+        [itemIds.BabyA] = { ID = itemIds.BabyA, Tags = ItemConfig.TAG_BABY, Name = "#BROTHER_BOBBY_NAME" },
+        [itemIds.BabyB] = { ID = itemIds.BabyB, Tags = ItemConfig.TAG_BABY, Name = "#SISTER_MAGGY_NAME" },
+        [itemIds.BabyC] = { ID = itemIds.BabyC, Tags = ItemConfig.TAG_BABY, Name = "Mod Baby" },
         [itemIds.NonBaby] = { ID = itemIds.NonBaby, Tags = 0, CacheFlags = 0 },
         [itemIds.DamageItem] = { ID = itemIds.DamageItem, Tags = 0, CacheFlags = CacheFlag.CACHE_DAMAGE },
         [itemIds.DamageDeclaredNonDamage] = { ID = itemIds.DamageDeclaredNonDamage, Tags = 0, CacheFlags = CacheFlag.CACHE_DAMAGE },
@@ -105,7 +107,7 @@ local function loadNeverbirth(options)
     function Game()
         return {
             GetSeeds = function()
-                return { GetStartSeedString = function() return "TEST RUN" end }
+                return { GetStartSeedString = function() return options.runSeed or "TEST RUN" end }
             end,
             GetNumPlayers = function()
                 return #players
@@ -115,6 +117,10 @@ local function loadNeverbirth(options)
                     GetCollectible = function()
                         poolIndex = poolIndex + 1
                         return poolSequence[poolIndex] or itemIds.NonBaby
+                    end,
+                    CanSpawnCollectible = function(_, itemId, ignoreLocked)
+                        assertEquals(ignoreLocked, false, "locked items must not be eligible")
+                        return not (options.unavailableItems and options.unavailableItems[itemId])
                     end,
                 }
             end,
@@ -175,6 +181,14 @@ local function loadNeverbirth(options)
             return roomEntities
         end,
         DebugString = function(message) debugMessages[#debugMessages + 1] = tostring(message) end,
+        GetString = function(category, key)
+            assertEquals(category, "Items", "collectible names use the Items string category")
+            local names = {
+                BROTHER_BOBBY_NAME = { en = "Brother Bobby", zh = "波比兄弟" },
+                SISTER_MAGGY_NAME = { en = "Sister Maggy", zh = "玛姬姐妹" },
+            }
+            return names[key] and names[key][Options.Language] or key
+        end,
         Spawn = function() end,
         GetItemConfig = function()
             return {
@@ -182,6 +196,12 @@ local function loadNeverbirth(options)
                     return itemConfigs[itemId]
                 end,
                 GetCollectibles = function()
+                    if options.nativeItemList then
+                        return options.nativeItemList
+                    end
+                    if options.sizeOnlyItemList then
+                        return { Size = 749 }
+                    end
                     return {
                         Size = 749,
                         itemConfigs[itemIds.BabyA],
@@ -230,6 +250,7 @@ local function loadNeverbirth(options)
         return dofile(name .. ".lua")
     end
 
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallbacks(callbackId, param)
@@ -346,15 +367,22 @@ local function loadNeverbirth(options)
         function pickup:GetData() self.data = self.data or {}; return self.data end
         function pickup:Exists() return not self.removed end
         function pickup:Remove() self.removed = true end
-        function pickup:Morph(entityType, variant, subtype, seed, preservePrice, preserveSeed, ignoreModifiers)
-            self.morphs[#self.morphs + 1] = { entityType = entityType, variant = variant, subtype = subtype, seed = seed, preservePrice = preservePrice, preserveSeed = preserveSeed, ignoreModifiers = ignoreModifiers }
+        function pickup:Morph(entityType, variant, subtype, keepPrice, keepSeed, ignoreModifiers)
+            local previousType, previousVariant, previousSubtype = self.Type, self.Variant, self.SubType
+            self.morphs[#self.morphs + 1] = { entityType = entityType, variant = variant, subtype = subtype, keepPrice = keepPrice, keepSeed = keepSeed, ignoreModifiers = ignoreModifiers }
+            self.Type = entityType
+            self.Variant = variant
             self.SubType = subtype
+            for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_PICKUP_MORPH)) do
+                callback(mod, self, previousType, previousVariant, previousSubtype, keepPrice, keepSeed, ignoreModifiers)
+            end
         end
         return pickup
     end
 
     return {
         items = itemIds,
+        itemConfigs = itemConfigs,
         hudMessages = hudMessages,
         debugMessages = debugMessages,
         newPlayer = newPlayer,
@@ -697,16 +725,94 @@ end
 
 local function test_condom_runtime_feedback_uses_game_language()
     local english = loadNeverbirth({ language = "en" })
-    english.mod:ShowCondomFeedback(2)
+    english.runUseCondom(english.newPlayer())
     assertEquals(english.hudMessages[1].title, "Condom", "English runtime should keep the Condom feedback title")
-    assertEquals(english.hudMessages[1].subtitle, "2 baby items banned", "English runtime should keep the Condom count feedback")
+    assertEquals(english.hudMessages[1].subtitle, "Banned Brother Bobby and Sister Maggy", "feedback must name the two actual bans")
 
     local chinese = loadNeverbirth({ language = "zh" })
-    chinese.mod:ShowCondomFeedback(2)
+    local player = chinese.newPlayer()
+    chinese.runUseCondom(player)
     assertEquals(chinese.hudMessages[1].title, "避孕套", "Chinese runtime should localize the Condom feedback title")
-    assertEquals(chinese.hudMessages[1].subtitle, "已禁用2件宝宝道具", "Chinese runtime should localize the Condom count feedback")
-    chinese.mod:ShowCondomFeedback(0)
-    assertEquals(chinese.hudMessages[2].subtitle, "没有剩余宝宝道具", "Chinese runtime should localize the empty-pool feedback")
+    assertEquals(chinese.hudMessages[1].subtitle, "禁用了波比兄弟和玛姬姐妹", "Chinese feedback must resolve native name keys")
+    chinese.runUseCondom(player)
+    assertEquals(chinese.hudMessages[2].subtitle, "禁用了Mod Baby", "one remaining item must not produce an empty second name")
+    chinese.runUseCondom(player)
+    assertEquals(chinese.hudMessages[3].subtitle, "没有剩余宝宝道具", "Chinese runtime should localize the empty-pool feedback")
+end
+
+local function test_condom_reads_the_native_sized_item_list()
+    local env = loadNeverbirth({ sizeOnlyItemList = true })
+    env.runUseCondom(env.newPlayer({ rngSequence = { 2, 0 } }))
+    assertEquals(env.mod:IsCondomBanned(env.items.BabyC), true, "tagged mod items outside the hardcoded vanilla list must be eligible")
+    assertEquals(env.mod:IsCondomBanned(env.items.BabyA), true, "sparse config IDs must be enumerated by Size")
+    assertEquals(env.mod:IsCondomBanned(env.items.NonBaby), false, "untagged items must not be banned")
+end
+
+local function test_condom_excludes_unavailable_items_and_coop_inventory()
+    local env = loadNeverbirth({ unavailableItems = { [101] = true } })
+    env.newPlayer({ collectibles = { [env.items.BabyB] = 1 } })
+    local player = env.newPlayer()
+    env.runUseCondom(player)
+    assertEquals(env.mod:IsCondomBanned(env.items.BabyA), false, "locked or removed pool items must not waste a ban")
+    assertEquals(env.mod:IsCondomBanned(env.items.BabyB), false, "another player's owned baby must be retained")
+    assertEquals(env.mod:IsCondomBanned(env.items.BabyC), true, "the only spawnable unowned baby must be banned")
+    assertEquals(env.hudMessages[1].subtitle, "Banned Mod Baby", "feedback must describe only the ban that happened")
+end
+
+local function test_condom_accepts_userdata_item_lists()
+    -- A real Lua userdata with the native list's Size contract, not an engine object.
+    local list = assert(io.tmpfile())
+    local originalMetatable = getmetatable(list)
+    debug.setmetatable(list, { __index = { Size = 749 } })
+    local ok, err = pcall(function()
+        assertEquals(type(list), "userdata", "fixture must exercise the original table-only bug")
+        local env = loadNeverbirth({ nativeItemList = list })
+        env.runUseCondom(env.newPlayer())
+        assertEquals(env.mod:IsCondomBanned(env.items.BabyA), true, "native userdata lists must be supported")
+        assertEquals(env.mod:IsCondomBanned(env.items.BabyB), true, "userdata traversal must find the second tagged item")
+    end)
+    debug.setmetatable(list, originalMetatable)
+    list:close()
+    assertTruthy(ok, err)
+end
+
+local function test_condom_ignores_morphs_to_other_entity_types()
+    local env = loadNeverbirth()
+    env.runUseCondom(env.newPlayer())
+    local pickup = env.newPickup(env.items.NonBaby)
+    pickup:Morph(EntityType.ENTITY_EFFECT, PickupVariant.PICKUP_COLLECTIBLE, env.items.BabyA, true, true, false)
+    assertEquals(pickup.Type, EntityType.ENTITY_EFFECT, "the global morph hook must leave other entity types alone")
+    assertEquals(#pickup.morphs, 1, "non-pickup morph must not trigger a collectible replacement")
+end
+
+local function test_condom_feedback_uses_project_translations_without_eid()
+    local env = loadNeverbirth({ language = "zh" })
+    EID = nil
+    env.mod:RegisterPickupBannerText(env.items.BabyC, "Mod Baby", "", "模组宝宝", "")
+    env.runUseCondom(env.newPlayer({ collectibles = { [env.items.BabyA] = 1, [env.items.BabyB] = 1 } }))
+    assertEquals(env.hudMessages[1].subtitle, "禁用了模组宝宝", "project names must follow the game language without EID")
+end
+
+local function test_condom_intercepts_rerolled_pedestals_without_recursion()
+    local env = loadNeverbirth({ poolSequence = { 101, 201 } })
+    env.runUseCondom(env.newPlayer())
+    local pickup = env.newPickup(env.items.NonBaby)
+    pickup:Morph(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, env.items.BabyA, true, true, false)
+    assertEquals(pickup.SubType, env.items.NonBaby, "a reroll to a banned baby must be intercepted after Morph")
+    assertEquals(#pickup.morphs, 2, "the original morph and exactly one replacement must run")
+    assertEquals(pickup.morphs[2].keepPrice, true, "replacement must retain shop price")
+    assertEquals(pickup.morphs[2].keepSeed, true, "replacement must retain pickup seed")
+end
+
+local function test_condom_saved_bans_survive_continue_but_not_a_new_seed()
+    local saved = { condom = { runSeed = "TEST RUN", banned = { ["101"] = true } } }
+    local continued = loadNeverbirth({ hasData = true, decodedData = saved })
+    assertEquals(continued.mod:IsCondomBanned(continued.items.BabyA), true, "continued run must retain its bans")
+    local pickup = continued.newPickup(continued.items.BabyA)
+    continued.runPickupInit(pickup)
+    assertEquals(pickup.SubType, continued.items.BabyB, "restored bans must still intercept future pedestals")
+    local restarted = loadNeverbirth({ hasData = true, decodedData = saved, runSeed = "NEW RUN" })
+    assertEquals(restarted.mod:IsCondomBanned(restarted.items.BabyA), false, "another run seed must clear bans")
 end
 
 local function test_condom_replaces_future_banned_collectible_pedestals()
@@ -939,6 +1045,38 @@ local function test_public_luck_cap_api_contracts()
     assertEquals(resolverCalls, 2, "repeated registrations must invoke each resolver independently")
     assertEquals(active.Luck, 12, "resolver errors and invalid results must be contained while the highest valid owner cap wins")
 end
+local condomTests = {
+    test_condom_bans_up_to_two_unowned_baby_items_without_repeats,
+    test_condom_repeated_uses_can_exhaust_targets_and_show_feedback,
+    test_condom_runtime_feedback_uses_game_language,
+    test_condom_reads_the_native_sized_item_list,
+    test_condom_accepts_userdata_item_lists,
+    test_condom_excludes_unavailable_items_and_coop_inventory,
+    test_condom_ignores_morphs_to_other_entity_types,
+    test_condom_feedback_uses_project_translations_without_eid,
+    test_condom_replaces_future_banned_collectible_pedestals,
+    test_condom_intercepts_rerolled_pedestals_without_recursion,
+    test_condom_saved_bans_survive_continue_but_not_a_new_seed,
+}
+
+local function runCondomTests()
+    local failures = 0
+    for _, test in ipairs(condomTests) do
+        local ok, err = xpcall(test, debug.traceback)
+        if not ok then
+            failures = failures + 1
+            print("FAIL: " .. tostring(err))
+        end
+    end
+    assertEquals(failures, 0, "Condom focused regression failures")
+    print("Condom focused regression tests passed: " .. #condomTests)
+end
+
+if arg and arg[1] == "--condom-only" then
+    runCondomTests()
+    return
+end
+
 test_xml_registers_requested_items_and_pools()
 test_pickup_banner_immediately_uses_chinese_when_count_confirms_pickup()
 test_pickup_banner_immediately_uses_chinese_when_queue_confirms_pickup()
@@ -958,9 +1096,6 @@ test_crazy_coconut_does_not_reward_the_same_pedestal_twice()
 test_crazy_coconut_waits_for_a_delayed_pedestal_pickup()
 test_crazy_coconut_confirms_a_pedestal_through_the_player_item_queue()
 test_crazy_coconut_discards_a_removed_pedestal_without_a_pickup()
-test_condom_bans_up_to_two_unowned_baby_items_without_repeats()
-test_condom_repeated_uses_can_exhaust_targets_and_show_feedback()
-test_condom_runtime_feedback_uses_game_language()
-test_condom_replaces_future_banned_collectible_pedestals()
+runCondomTests()
 
 print("condom and utility knife behavior tests passed")

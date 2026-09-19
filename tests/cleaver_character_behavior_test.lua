@@ -307,6 +307,7 @@ local function loadNeverbirth(options)
         return function() end
     end
 
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function newPlayer(opts)
@@ -588,7 +589,7 @@ end
 local function test_stranger_is_unregistered_but_cleaver_assets_remain_available()
     local players = readFile("content/players.xml")
     assertEquals(players:match('<player name="Stranger"'), nil, "players.xml must keep Stranger unregistered")
-    assertTruthy(players:match('<player name="Dante"'), "Dante may register without re-enabling Stranger or Cleaver character support")
+    assertEquals(players:match('<player name="Dante"'), nil, "players.xml must keep Dante unregistered while custom characters are disabled")
 
     local characterMenu = readFile("content/gfx/CharacterMenu.anm2")
     assertTruthy(characterMenu:match('<Spritesheet Id="1" Path="stranger_not_yet_name%.png"'),

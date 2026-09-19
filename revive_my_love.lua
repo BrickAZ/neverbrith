@@ -1,502 +1,305 @@
 return function(Neverbirth, context)
     context = context or {}
-
     local ITEM_ID = tonumber(context.ItemId) or -1
-    local PLAYER_ENTITY = (EntityType and EntityType.ENTITY_PLAYER) or 1
-    local EFFECT_ENTITY = (EntityType and EntityType.ENTITY_EFFECT) or 1000
     local REVIVE_EFFECT_VARIANT = tonumber(context.EffectVariant) or -1
     local REVIVE_ANIMATION = "Revive"
-    local FAKE_DAMAGE = DamageFlag and DamageFlag.DAMAGE_FAKE or nil
-    local NOKILL_DAMAGE = DamageFlag and DamageFlag.DAMAGE_NOKILL or nil
     local INVINCIBILITY_FRAMES = 60
     local SOUND_NAME = "Revive My Love"
-    local DEATH_ANIMATION_SUFFIX = "Death"
-
-    -- Live EntityPlayer/Effect userdata belongs only to this runtime table. The
-    -- once-per-run settlement stays in SaveData, but an interrupted death
-    -- animation is deliberately not serialized.
-    local sequencesByPlayer = {}
+    local EFFECT_WATCHDOG_FRAMES = 90 -- 30 Hz game updates, not 60 Hz player updates.
+    local sequencesByPlayer = {} -- Runtime userdata only; never serialized.
+    local livingStateByPlayer = {} -- Never snapshot transient native death/Revive flags.
 
     local function debugLog(message)
-        if context.DebugLog then
-            context.DebugLog("[Revive My Love] " .. tostring(message))
-        end
+        if context.DebugLog then context.DebugLog("[Revive My Love] " .. tostring(message)) end
+    end
+
+    -- The XML reviveeffect tag, callbacks and semantics were checked against the
+    -- installed REPENTOGON 1.0.12a scripts/changelog. No vanilla fallback.
+    if not REPENTOGON or not REPENTOGON.MeetsVersion
+        or not REPENTOGON.MeetsVersion("1.0.12a")
+        or not ModCallbacks.MC_TRIGGER_PLAYER_DEATH_POST_CHECK_REVIVES
+        or not ModCallbacks.MC_PRE_PLAYER_UPDATE
+        or not ModCallbacks.MC_PRE_PLAYER_TAKE_DMG then
+        debugLog("requires REPENTOGON 1.0.12a or newer; revive module not registered")
+        return nil
     end
 
     local function currentRunSeed()
-        if context.GetCurrentRunSeed then
-            local ok, seed = pcall(context.GetCurrentRunSeed)
-            if ok then return tostring(seed or "") end
-        end
-        return ""
+        return tostring(context.GetCurrentRunSeed and context.GetCurrentRunSeed() or "")
     end
-
     local function save()
-        if context.Save then
-            local ok, err = pcall(context.Save)
-            if not ok then debugLog("save failed: " .. tostring(err)) end
-        end
+        if context.Save then context.Save() end
     end
-
     local function getSaveRoot()
-        if not context.GetSaveRoot then return nil end
-        local ok, root = pcall(context.GetSaveRoot)
-        if not ok or type(root) ~= "table" then return nil end
-        return root
+        return context.GetSaveRoot and context.GetSaveRoot() or nil
     end
-
-    local function resetState(root, seed)
-        root.reviveMyLove = {
-            runSeed = tostring(seed or ""),
-            triggeredByPlayer = {},
-        }
+    local function resetState(root)
+        root.reviveMyLove = {runSeed = currentRunSeed(), triggeredByPlayer = {}}
         return root.reviveMyLove
     end
-
     local function getState()
         local root = getSaveRoot()
         if not root then return nil end
         local state = root.reviveMyLove
         if type(state) ~= "table" or tostring(state.runSeed or "") ~= currentRunSeed() then
-            state = resetState(root, currentRunSeed())
+            state = resetState(root)
         end
         if type(state.triggeredByPlayer) ~= "table" then state.triggeredByPlayer = {} end
         return state
     end
-
     local function playerKey(player)
         return tostring(player and player.InitSeed or "")
     end
-
-    local function toPlayer(entity)
-        if not entity then return nil end
-        if entity.ToPlayer then
-            local ok, player = pcall(function() return entity:ToPlayer() end)
-            if ok and player then return player end
-        end
-        if entity.Type == PLAYER_ENTITY then return entity end
-        return nil
-    end
-
     local function hasItem(player)
-        if ITEM_ID <= 0 or not player then return false end
-        if player.GetCollectibleNum then
-            local ok, count = pcall(function() return player:GetCollectibleNum(ITEM_ID) end)
-            if ok then return (tonumber(count) or 0) > 0 end
+        return ITEM_ID > 0 and player and player:GetCollectibleNum(ITEM_ID, true) > 0
+    end
+
+    local function syncExtraLife(player)
+        if not player then return end
+        local state = getState()
+        if not state then return end
+        local key = playerKey(player)
+        local wanted = hasItem(player) and not state.triggeredByPlayer[key]
+            and not sequencesByPlayer[key] and 1 or 0
+        if wanted == 1 and not player:IsDead() then
+            livingStateByPlayer[key] = {
+                controlsEnabled = player.ControlsEnabled, visible = player.Visible,
+                collisionClass = player.EntityCollisionClass,
+            }
+        elseif wanted == 0 then
+            livingStateByPlayer[key] = nil
         end
-        if player.HasCollectible then
-            local ok, result = pcall(function() return player:HasCollectible(ITEM_ID) end)
-            return ok and result == true
+        local effects = player:GetEffects()
+        local count = effects:GetCollectibleEffectNum(ITEM_ID)
+        -- Own only this collectible's effect. One effect advertises x1 even
+        -- with duplicate copies; it adds no costume or stats.
+        if count < wanted then
+            effects:AddCollectibleEffect(ITEM_ID, false, wanted - count)
+        elseif count > wanted then
+            effects:RemoveCollectibleEffect(ITEM_ID, count - wanted)
         end
-        return false
-    end
-
-    local function hasFlag(flags, flag)
-        return type(flags) == "number" and type(flag) == "number" and (flags & flag) ~= 0
-    end
-
-    local function isIgnoredDamage(amount, flags)
-        if (tonumber(amount) or 0) <= 0 then return true end
-        return hasFlag(flags, FAKE_DAMAGE) or hasFlag(flags, NOKILL_DAMAGE)
-    end
-
-    local function hasPendingEngineRevive(player)
-        if not player or not player.WillPlayerRevive then return false end
-        local ok, result = pcall(function() return player:WillPlayerRevive() end)
-        return ok and result == true
-    end
-
-    local function isPlayerDead(player)
-        if not player or not player.IsDead then return false end
-        local ok, result = pcall(function() return player:IsDead() end)
-        return ok and result == true
-    end
-
-    local function getFinishedDeathAnimation(player)
-        if not player or not player.GetSprite then return nil end
-        local okSprite, sprite = pcall(function() return player:GetSprite() end)
-        if not okSprite or not sprite or not sprite.GetAnimation or not sprite.IsFinished then
-            return nil
+        if count ~= wanted then
+            debugLog("extra life entitlement for player " .. key .. ": " .. count .. " -> " .. wanted)
         end
-
-        local okAnimation, animation = pcall(function() return sprite:GetAnimation() end)
-        if not okAnimation or type(animation) ~= "string" then return nil end
-        if animation:sub(-#DEATH_ANIMATION_SUFFIX) ~= DEATH_ANIMATION_SUFFIX then
-            return nil
-        end
-
-        local okFinished, finished = pcall(function()
-            return sprite:IsFinished(animation)
-        end)
-        if okFinished and finished == true then return animation end
-        return nil
-    end
-
-    local function conventionalHealth(player)
-        local total = 0
-        for method, multiplier in pairs({ GetHearts = 1, GetSoulHearts = 1, GetBoneHearts = 2 }) do
-            if player and player[method] then
-                local ok, value = pcall(function() return player[method](player) end)
-                if ok then total = total + math.max(0, tonumber(value) or 0) * multiplier end
-            end
-        end
-        return total
-    end
-
-    local function isLethal(player, amount)
-        if context.IsIncomingDamageLethal then
-            local ok, result = pcall(context.IsIncomingDamageLethal, player, tonumber(amount) or 0)
-            if ok and result == true then return true end
-        end
-
-        if player and player.HasMortalDamage then
-            local ok, result = pcall(function() return player:HasMortalDamage() end)
-            if ok and result == true then return true end
-        end
-
-        -- Zero-heart characters do not expose a conventional heart layer for
-        -- comparison. If positive damage reaches this callback after shields
-        -- and other immunity checks, cancelling it is the safe survival path.
-        return (tonumber(amount) or 0) > 0 and conventionalHealth(player) <= 0
-    end
-
-    local function removeOneCopy(player)
-        if not player or not player.RemoveCollectible then return false end
-        local ok, err = pcall(function() player:RemoveCollectible(ITEM_ID) end)
-        if not ok then debugLog("failed to remove one copy: " .. tostring(err)) end
-        return ok
-    end
-
-    local function makeColor(...)
-        if not Color then return nil end
-        local ok, value = pcall(Color, ...)
-        if ok then return value end
-        debugLog("failed to construct Color: " .. tostring(value))
-        return nil
-    end
-
-    local function makeZeroVector()
-        if Vector and Vector.Zero then return Vector.Zero end
-        if not Vector then return nil end
-        local ok, value = pcall(Vector, 0, 0)
-        if ok then return value end
-        debugLog("failed to construct Vector.Zero: " .. tostring(value))
-        return nil
     end
 
     local function giveSurvivalHealth(player)
-        local maxHearts = 0
-        if player and player.GetMaxHearts then
-            local ok, value = pcall(function() return player:GetMaxHearts() end)
-            if ok then maxHearts = math.max(0, tonumber(value) or 0) end
-        end
-
-        local soulHearts = 0
-        if player and player.GetSoulHearts then
-            local ok, value = pcall(function() return player:GetSoulHearts() end)
-            if ok then soulHearts = math.max(0, tonumber(value) or 0) end
-        end
-
-        if maxHearts > 0 and player.AddHearts then
-            local hearts = 0
-            if player.GetHearts then
-                local ok, value = pcall(function() return player:GetHearts() end)
-                if ok then hearts = math.max(0, tonumber(value) or 0) end
-            end
-            if soulHearts > 0 and player.AddSoulHearts then
-                pcall(function() player:AddSoulHearts(-soulHearts) end)
-            end
-            pcall(function() player:AddHearts(2 - hearts) end)
-            return
-        end
-
-        if player and player.AddSoulHearts then
-            pcall(function() player:AddSoulHearts(2 - soulHearts) end)
+        local maxHearts = player:GetMaxHearts()
+        local soulHearts = player:GetSoulHearts()
+        if maxHearts > 0 then
+            if soulHearts > 0 then player:AddSoulHearts(-soulHearts) end
+            player:AddHearts(2 - player:GetHearts())
+        else
+            -- Soul-heart characters get one full soul heart. Lost-style
+            -- characters ignore AddSoulHearts and retain their native life model.
+            player:AddSoulHearts(2 - soulHearts)
         end
     end
-
     local function giveInvincibility(player)
-        if player and player.SetMinDamageCooldown then
-            pcall(function() player:SetMinDamageCooldown(INVINCIBILITY_FRAMES) end)
-        end
-        if player and player.SetColor then
-            local color = makeColor(1.0, 0.55, 0.78, 1.0, 0.35, 0.08, 0.22)
-            if not color then return end
-            pcall(function()
-                player:SetColor(color, INVINCIBILITY_FRAMES, 1, true, false)
-            end)
-        end
+        player:SetMinDamageCooldown(INVINCIBILITY_FRAMES)
+        player:SetColor(Color(1.0, 0.55, 0.78, 1.0, 0.35, 0.08, 0.22),
+            INVINCIBILITY_FRAMES, 1, true, false)
     end
-
     local function playSound(player)
         if context.PlaySound then
-            local ok, err = pcall(context.PlaySound, player)
-            if not ok then debugLog("audio hook failed: " .. tostring(err)) end
+            context.PlaySound(player)
             return
         end
-        if not Isaac or not Isaac.GetSoundIdByName or type(SFXManager) ~= "function" then return end
-        local okId, soundId = pcall(Isaac.GetSoundIdByName, SOUND_NAME)
-        if not okId or type(soundId) ~= "number" or soundId < 0 then return end
-        local okManager, manager = pcall(SFXManager)
-        if okManager and manager and manager.Play then
-            pcall(function() manager:Play(soundId, 1.0, 0, false, 1.0) end)
-        end
+        local soundId = Isaac.GetSoundIdByName(SOUND_NAME)
+        if soundId and soundId > 0 then SFXManager():Play(soundId, 1.0, 0, false, 1.0) end
     end
-
+    local function removeEffect(effect)
+        if effect and effect:Exists() then effect:Remove() end
+    end
     local function spawnEffect(player)
-        if REVIVE_EFFECT_VARIANT <= 0 then
-            debugLog("registered revive effect variant is unavailable")
-            return nil
-        end
-        if not Isaac or not Isaac.Spawn or not player or not player.Position then return nil end
-
-        local velocity = makeZeroVector()
-        if not velocity then
-            debugLog("revive effect spawn skipped because Vector.Zero is unavailable")
-            return nil
-        end
-
-        local ok, effect = pcall(
-            Isaac.Spawn,
-            EFFECT_ENTITY,
-            REVIVE_EFFECT_VARIANT,
-            0,
-            player.Position,
-            velocity,
-            player
-        )
-        if not ok then
+        if REVIVE_EFFECT_VARIANT <= 0 then return nil end
+        local ok, effect = pcall(Isaac.Spawn, EntityType.ENTITY_EFFECT,
+            REVIVE_EFFECT_VARIANT, 0, player.Position, Vector.Zero, player)
+        if not ok or not effect then
             debugLog("revive effect spawn failed: " .. tostring(effect))
             return nil
         end
-        if not effect then return nil end
-
-        if effect.GetSprite then
-            local okSprite, sprite = pcall(function() return effect:GetSprite() end)
-            if okSprite and sprite and sprite.Play then
-                pcall(function() sprite:Play(REVIVE_ANIMATION, true) end)
-            end
-        end
-
-        local color = makeColor(1.0, 0.32, 0.68, 1.0, 0.45, 0.05, 0.22)
-        if color and effect.SetColor then
-            pcall(function()
-                effect:SetColor(color, 48, 1, true, false)
-            end)
-        end
+        effect:GetSprite():Play(REVIVE_ANIMATION, true)
+        effect:SetColor(Color(1.0, 0.32, 0.68, 1.0, 0.45, 0.05, 0.22), 48, 1, true, false)
         return effect
     end
 
-    local function removeEffect(effect)
-        if effect and effect.Remove then
-            pcall(function() effect:Remove() end)
-        end
-    end
-
-    local function finishRevival(player, key, effect)
+    local function finishRevival(player, key, reason)
         local sequence = sequencesByPlayer[key]
-        if not sequence or sequence.phase ~= "revive_effect" or sequence.effect ~= effect then
-            removeEffect(effect)
-            return false
-        end
-
-        if not player or not player.Revive then
-            debugLog("engine Revive API unavailable for player " .. tostring(key))
-            return false
-        end
-
-        local ok, err = pcall(function() player:Revive() end)
-        if not ok then
-            debugLog("engine revive failed for player " .. tostring(key) .. ": " .. tostring(err))
-            return false
-        end
-
+        if not sequence then return end
+        sequencesByPlayer[key] = nil
+        player.ControlsEnabled = sequence.controlsEnabled
+        player.Visible = sequence.visible
+        player.EntityCollisionClass = sequence.collisionClass
+        player.Velocity = Vector.Zero
         giveSurvivalHealth(player)
         giveInvincibility(player)
-        sequencesByPlayer[key] = nil
-        removeEffect(effect)
-        debugLog("revived player " .. tostring(key) .. " after both animations")
-        return true
+        removeEffect(sequence.effect)
+        syncExtraLife(player)
+        debugLog("revival presentation finished for player " .. key .. ": " .. tostring(reason)
+            .. "; visible=" .. tostring(player.Visible)
+            .. "; controls=" .. tostring(player.ControlsEnabled))
     end
 
     local function effectUpdate(_, effect)
-        if not effect or tonumber(effect.Variant) ~= REVIVE_EFFECT_VARIANT then return end
-        local player = toPlayer(effect.SpawnerEntity)
+        if not effect or effect.Variant ~= REVIVE_EFFECT_VARIANT then return end
+        local player = effect.SpawnerEntity and effect.SpawnerEntity:ToPlayer()
         local key = playerKey(player)
         local sequence = sequencesByPlayer[key]
-        if not player or not sequence or sequence.phase ~= "revive_effect" or sequence.effect ~= effect then
+        -- Use engine identity, not equality of separate Lua userdata wrappers.
+        if not player or not sequence or sequence.effectSeed ~= effect.InitSeed then
             removeEffect(effect)
             return
         end
-
-        if not effect.GetSprite then
-            finishRevival(player, key, effect)
-            return
-        end
-
-        local okSprite, sprite = pcall(function() return effect:GetSprite() end)
-        if not okSprite or not sprite then
-            finishRevival(player, key, effect)
-            return
-        end
-
-        if sprite.IsFinished then
-            local okFinished, finished = pcall(function()
-                return sprite:IsFinished(REVIVE_ANIMATION)
-            end)
-            if okFinished and finished then
-                finishRevival(player, key, effect)
-            end
+        if effect:GetSprite():IsFinished(REVIVE_ANIMATION) then
+            finishRevival(player, key, "Revive animation complete")
         end
     end
 
-    local function beginConfirmedDeath(player, state, key, sequence)
-        state.triggeredByPlayer[key] = true
-        removeOneCopy(player)
-        save()
-        sequence.phase = "death_animation"
-        debugLog("confirmed real death for player " .. tostring(key))
-    end
-
-    local function playerUpdate(_, player)
+    local function prePlayerUpdate(_, player)
         local key = playerKey(player)
         local sequence = sequencesByPlayer[key]
         if not sequence then return end
-        sequence.player = player
-
-        if sequence.phase == "pending_death" then
-            if not isPlayerDead(player) then
-                -- Another callback, shield, or immunity prevented the predicted
-                -- lethal hit. Do not consume or lock the item.
-                sequencesByPlayer[key] = nil
-                debugLog("predicted lethal hit was cancelled for player " .. tostring(key))
-                return
-            end
-
-            local state = getState()
-            if not state or state.triggeredByPlayer[key] or not hasItem(player) or hasPendingEngineRevive(player) then
-                sequencesByPlayer[key] = nil
-                return
-            end
-            beginConfirmedDeath(player, state, key, sequence)
-        end
-
-        if sequence.phase == "death_animation" then
-            if not isPlayerDead(player) then
-                sequencesByPlayer[key] = nil
-                debugLog("death sequence was superseded before the custom animation for player " .. tostring(key))
-                return
-            end
-
-            local finishedAnimation = getFinishedDeathAnimation(player)
-            if not finishedAnimation then return end
-
-            local effect = spawnEffect(player)
-            if not effect then
-                -- The registered visual is expected to exist, but a resource
-                -- failure must not strand a dead player forever.
-                debugLog("custom revive effect unavailable; reviving without it for player " .. tostring(key))
-                sequence.phase = "revive_effect"
-                sequence.effect = false
-                if player.Revive then
-                    local ok = pcall(function() player:Revive() end)
-                    if ok then
-                        giveSurvivalHealth(player)
-                        giveInvincibility(player)
-                        sequencesByPlayer[key] = nil
-                    end
-                end
-                return
-            end
-
-            sequence.phase = "revive_effect"
-            sequence.effect = effect
-            sequence.deathAnimation = finishedAnimation
-            playSound(player)
-            debugLog("playing custom revive animation after " .. finishedAnimation .. " for player " .. tostring(key))
+        if not sequence.effect or not sequence.effect:Exists() then
+            finishRevival(player, key, "visual removed early")
             return
         end
+        player.Position = sequence.position
+        player.Velocity = Vector.Zero
+        player.ControlsEnabled = false
+        player.Visible = false
+        -- REPENTOGON 1160: true skips this player's native update. The room and
+        -- effects keep updating; this player's shooting/use input cannot run.
+        return true
+    end
 
-        if sequence.phase == "revive_effect" and not isPlayerDead(player) then
-            -- A foreign revival won the race after our death confirmation.
-            -- Remove only our visual and do not rewrite the other revival.
-            removeEffect(sequence.effect)
-            sequencesByPlayer[key] = nil
-            debugLog("custom revive sequence was superseded for player " .. tostring(key))
+    local function postUpdate()
+        -- Player updates run twice as often as the effect's animation updates.
+        -- Only the 30 Hz game callback owns this timeout, including in co-op.
+        for key, sequence in pairs(sequencesByPlayer) do
+            if not sequence.player or not sequence.player:Exists() then
+                removeEffect(sequence.effect)
+                sequencesByPlayer[key] = nil
+                livingStateByPlayer[key] = nil
+            else
+                sequence.logicFrames = sequence.logicFrames + 1
+                if sequence.logicFrames > EFFECT_WATCHDOG_FRAMES then
+                    finishRevival(sequence.player, key, "animation watchdog recovery")
+                end
+            end
         end
     end
 
-    local function playerDamage(_, entity, amount, flags, source, countdown)
-        local player = toPlayer(entity)
-        if not player or isIgnoredDamage(amount, flags) or not hasItem(player) then return nil end
-
+    local function triggerDeath(_, player)
+        if Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.IsFailureDeath(player) then return end
         local state = getState()
         local key = playerKey(player)
-        if not state or state.triggeredByPlayer[key] then return nil end
-        if not isLethal(player, amount) then return nil end
+        if not state or state.triggeredByPlayer[key] or sequencesByPlayer[key]
+            or not hasItem(player) or not player:IsDead() then return end
 
-        -- Let engine-registered revival sources resolve first. The custom item
-        -- stays intact and may still trigger on a later true death.
-        if hasPendingEngineRevive(player) then return nil end
-
-        sequencesByPlayer[key] = {
-            phase = "pending_death",
-            player = player,
+        -- 1051 runs after the actual death animation and after vanilla revives.
+        -- Never test WillPlayerRevive here: our own reviveeffect makes it true.
+        -- Revive at this boundary prevents Game Over; visual awakening remains
+        -- locked until the custom animation ends. No lethal damage is cancelled.
+        local ok, err = pcall(function() player:Revive() end)
+        if not ok or player:IsDead() then
+            debugLog("engine revival failed or was vetoed for player " .. key .. ": " .. tostring(err))
+            return
+        end
+        -- Revive() is inside native death resolution: its immediate Visible,
+        -- controls and collision can still be the death-animation values.
+        -- Restore the last living snapshot instead. If loading while already
+        -- dead, no snapshot exists; release to normal live player defaults.
+        local living = livingStateByPlayer[key] or {
+            controlsEnabled = true, visible = true,
+            collisionClass = EntityCollisionClass.ENTCOLL_ALL,
         }
-        debugLog("armed real-death observation for player " .. tostring(key))
-        -- Do not cancel or rewrite the lethal hit. The engine owns the real
-        -- death state, death animation, and its movement/shooting lock.
-        return nil
+        local sequence = {
+            phase = "revive_effect", player = player, position = player.Position,
+            controlsEnabled = living.controlsEnabled, visible = living.visible,
+            collisionClass = living.collisionClass, logicFrames = 0,
+        }
+        sequencesByPlayer[key] = sequence
+        state.triggeredByPlayer[key] = true
+        player:RemoveCollectible(ITEM_ID)
+        syncExtraLife(player)
+        giveSurvivalHealth(player)
+        save()
+        player.ControlsEnabled = false
+        player.Visible = false
+        player.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+        player.Velocity = Vector.Zero
+        sequence.effect = spawnEffect(player)
+        sequence.effectSeed = sequence.effect and sequence.effect.InitSeed
+        playSound(player)
+        debugLog("native death completed; playing Revive for player " .. key)
+        if not sequence.effect then finishRevival(player, key, "effect spawn failed") end
+        -- Already revived: REPENTOGON stops later death callbacks automatically.
     end
 
+    local function playerDamage(_, player)
+        -- Protect only an already-revived owner during the presentation, before
+        -- Holy Mantle and other damage-negation effects can be consumed.
+        if sequencesByPlayer[playerKey(player)] then return false end
+    end
+    local function playerUpdate(_, player) syncExtraLife(player) end
+    local function collectibleAdded(_, collectible, charge, firstTime, slot, varData, player)
+        if collectible == ITEM_ID then syncExtraLife(player) end
+    end
+    local function collectibleRemoved(_, player, collectible)
+        if collectible == ITEM_ID then syncExtraLife(player) end
+    end
+
+    local function cleanupSequences()
+        for key, sequence in pairs(sequencesByPlayer) do
+            if sequence.player and sequence.player:Exists() then
+                finishRevival(sequence.player, key, "room/exit cleanup")
+            else
+                removeEffect(sequence.effect)
+                sequencesByPlayer[key] = nil
+            end
+        end
+        livingStateByPlayer = {}
+    end
+    local function syncAllPlayers()
+        local game = Game()
+        for i = 0, game:GetNumPlayers() - 1 do syncExtraLife(Isaac.GetPlayer(i)) end
+    end
     local function gameStarted(_, isContinued)
         sequencesByPlayer = {}
+        livingStateByPlayer = {}
         local root = getSaveRoot()
         if not root then return end
-        if not isContinued then
-            resetState(root, currentRunSeed())
-            save()
-        else
-            getState()
-        end
+        if not isContinued then resetState(root); save() else getState() end
+        syncAllPlayers()
     end
-
     local function preGameExit()
-        sequencesByPlayer = {}
+        cleanupSequences()
         save()
     end
 
-    Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, playerDamage, PLAYER_ENTITY)
-    if ModCallbacks.MC_POST_GAME_STARTED then
-        Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, gameStarted)
-    end
-    if ModCallbacks.MC_PRE_GAME_EXIT then
-        Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, preGameExit)
-    end
-    if ModCallbacks.MC_POST_PLAYER_UPDATE then
-        Neverbirth:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, playerUpdate)
-    end
-    if ModCallbacks.MC_POST_EFFECT_UPDATE and REVIVE_EFFECT_VARIANT > 0 then
-        Neverbirth:AddCallback(
-            ModCallbacks.MC_POST_EFFECT_UPDATE,
-            effectUpdate,
-            REVIVE_EFFECT_VARIANT
-        )
-    end
+    Neverbirth:AddCallback(ModCallbacks.MC_TRIGGER_PLAYER_DEATH_POST_CHECK_REVIVES, triggerDeath)
+    Neverbirth:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, playerDamage)
+    Neverbirth:AddCallback(ModCallbacks.MC_PRE_PLAYER_UPDATE, prePlayerUpdate)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, postUpdate)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, collectibleAdded, ITEM_ID)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, collectibleRemoved)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, cleanupSequences)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, gameStarted)
+    Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, preGameExit)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, playerUpdate)
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, effectUpdate, REVIVE_EFFECT_VARIANT)
 
     local api = {
-        ItemId = ITEM_ID,
-        EffectVariant = REVIVE_EFFECT_VARIANT,
-        EffectAnimation = REVIVE_ANIMATION,
-        InvincibilityFrames = INVINCIBILITY_FRAMES,
-        SoundName = SOUND_NAME,
-        GetState = getState,
-        IsLethal = isLethal,
-        PlayerDamage = playerDamage,
-        PlayerUpdate = playerUpdate,
-        EffectUpdate = effectUpdate,
-        GameStarted = gameStarted,
+        ItemId = ITEM_ID, EffectVariant = REVIVE_EFFECT_VARIANT,
+        EffectAnimation = REVIVE_ANIMATION, InvincibilityFrames = INVINCIBILITY_FRAMES,
+        SoundName = SOUND_NAME, GetState = getState, TriggerDeath = triggerDeath,
+        SyncExtraLife = syncExtraLife, PrePlayerUpdate = prePlayerUpdate,
+        PlayerDamage = playerDamage, PlayerUpdate = playerUpdate,
+        EffectUpdate = effectUpdate, GameStarted = gameStarted,
     }
     Neverbirth.ReviveMyLoveTestAPI = api
+    debugLog("registered REPENTOGON revive route; version=" .. tostring(REPENTOGON.Version)
+        .. "; item=" .. ITEM_ID .. "; effect=" .. REVIVE_EFFECT_VARIANT)
     return api
 end

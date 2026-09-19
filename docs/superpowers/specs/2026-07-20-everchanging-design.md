@@ -24,19 +24,19 @@
 - 道具池镜像为三个 `content/itempools*.xml`；本物品不写入其中任何一个。
 - EID 描述由 `main.lua` 内的 `EID_DESCRIPTIONS` 可选注册，不把 EID 设为强依赖。
 - 本局保存统一存放在 `musicboxSaveData`，通过 `EnsureMusicboxDataLoaded()` 与 `SaveMusicboxData()` 管理。
-- 当前外观采用 `content/costumes2.xml` 注册的 null costume，并通过 `AddNullCostume` / `TryRemoveNullCostume` 应用和移除。已有资源优先级为 98。
+- 局部挂饰采用 `content/costumes2.xml` 注册的 null costume，并通过 `AddNullCostume` / `TryRemoveNullCostume` 应用和移除；完整皮肤改用标准玩家 Sprite 第 0 层基础图集。已有局部资源优先级为 98。
 - 当前 costume ANM2 证明了 `head2`、`head4` 等头部叠层可用，但项目没有通用的 head/face/body/legs/accessory/full 插槽实现。
 - `content/players.xml` 当前只注册 Stranger；它必须作为项目已知不兼容角色排除。
 
 ## 3. 选定方案
 
-采用组合式 null costume，不修改玩家基础 spritesheet。
+采用双载体方案：局部样式继续使用组合式 null costume；`full` 样式替换标准玩家 Sprite 的第 0 层基础 spritesheet。
 
 一个样式条目只声明自己拥有的 slots，每个声明的 slot 映射到一个已注册的 costume ANM2。应用样式时只挂载这些 costume；未声明的部位不调用替换或清理，因此继续由角色基础外观和普通道具 costume 管理。
 
-`full` 也使用专门制作的完整 null-costume ANM2；不得在运行时粗暴替换玩家基础 spritesheet。完整 ANM2 必须由美术/ANM2 流程保证方向、受伤闪白、无敌闪烁、武器锚点与角色可读性。
+`full` 不再注册完整 null costume，而是复用当前标准玩家 ANM2，使用 `ReplaceSpritesheet(0, path, true)` 即时提交第 0 层图集。运行时必须保存并恢复进入样式前的基础图集；方向、D6/拾取/举起、受伤与死亡动作由标准玩家 ANM2 驱动。
 
-现有香蕉皮 costume 使用项目当前高优先级 98。未来样式沿用项目已经验证的高优先级约定；Lua 不会在每帧调用 `LoadGraphics` 或 `ReplaceSpritesheet`。
+现有香蕉皮 costume 使用项目当前高优先级 98。未来局部样式沿用项目已经验证的高优先级约定；`ReplaceSpritesheet` 只允许出现在完整皮肤的应用、恢复或检测到引擎重置后的单次修复中。
 
 ## 4. StyleRegistry
 
@@ -162,7 +162,7 @@ local STYLE_SPECS = {
 9. 局部样式只调用声明 slot 对应的 costume，不触碰未声明部位。
 10. Stranger、非标准骨架和无法识别骨架不应用且不报错。
 11. 缺失 costume 路径时整套样式回退，并记录 style ID、slot 和路径。
-12. 更新热路径不调用 LoadGraphics 或 ReplaceSpritesheet，也不重复 AddNullCostume。
+12. 普通更新帧只读取当前第 0 层路径，不调用 ReplaceSpritesheet 或重复 AddNullCostume；仅样式转换、恢复或检测到真实路径漂移时刷新一次。
 
 静态验证包括 Lua 语法、独立行为测试、本地化测试、XML 解析、项目 validator 和 `git diff --check`。
 
@@ -176,12 +176,14 @@ local STYLE_SPECS = {
 
 用户已批准将 RingoTsuga 作为 `full` 样式加入千变万化。锁定造型为红苹果头、棕色果梗、绿色叶片、青色眼睛和深蓝连帽衫；只修改游戏内完整皮肤，不新增角色头像、名字图、选择界面、合作头像、死亡肖像或 HUD 素材。
 
-完整皮肤必须以原版 `Character_001_Isaac.png` 的 `512x512` 图集为唯一技术模板：
+完整皮肤以标准玩家 `001.000_player.anm2` 的第 0 层和原版 `Character_001_Isaac.png` 的 `512x512` 布局作为技术模板；现有 RingoTsuga ANM2 只保留为美术裁切参考，不再作为运行时 Null Costume 载体：
 
-- 保持 8×8 的 `64x64` 帧格、帧顺序、枢轴和像素密度。
-- 输出透明度必须逐像素等于原版模板，禁止像素越过原版占用轮廓或跨入相邻帧格。
-- 概念图只提供颜色和角色身份，不得整体缩放、去底后直接安装，也不得用其独立轮廓替换原版 alpha。
-- 苹果头、果梗、叶片、眼睛和连帽衫必须在原版各头部/身体部件的占用区域内逐帧重画。
-- 现有 `costume_ringotsuga_apple_storyteller.anm2`、`costumes2.xml`、`full` 样式注册和运行时逻辑保持不变；本次只替换模组自有 PNG 并加强视觉测试。
+- 保持 `512x512` 画布、现有 ANM2 的混合裁切矩形、帧顺序、枢轴、脚底位置和像素密度；不得把图集误当成统一的 `64x64` 网格。
+- 允许在每个已发现的 ANM2 裁切矩形内部扩展或收缩 alpha，制作原创苹果头、果梗、叶片、帽领、肩线和袖口；任何可见像素不得落到所有有效裁切矩形之外。
+- 概念图只提供颜色和角色身份，不得整体缩放、去底后直接安装，也不得改变图集画布、裁切坐标或动画锚点。
+- 苹果头必须改变原版圆头外轮廓：顶部略扁、两侧形成苹果肩部，并带有从轮廓伸出的棕色果梗和非对称绿色叶片。脸部缩进苹果内部。
+- 深蓝连帽衫必须通过帽领、肩线和袖口形成服装轮廓，不得只把原版身体区域改成深蓝色。
+- 正面、侧面、背面、移动、开火、拾取、受伤和死亡等所有现有可见帧都必须保持同一套角色身份。
+- `costumes2.xml` 不注册 RingoTsuga 完整服装；`full` 样式直接登记 PNG 路径。运行时保存原基础图集、切换时恢复；缓存状态与真实层路径一致时不刷新，被引擎重置时下一次更新修复一次。
 
-自动检查至少包括：输出尺寸为 `512x512`、透明轮廓哈希与原版一致、每个 64×64 单元格的占用边界不超出原版、无大面积近白底色，并保留可识别的红、绿、青和深蓝调色板。四方向移动、开火、拾取、受伤和死亡帧仍需实机验证。
+自动检查至少包括：输出尺寸为 `512x512`、所有可见像素位于 ANM2 有效裁切矩形并且没有跨格、轮廓明确不同于原版 alpha、无大面积近白底色，并保留可识别的红、棕、绿、青和深蓝调色板。四方向移动、开火、拾取、受伤和死亡帧仍需实机验证。

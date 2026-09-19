@@ -58,9 +58,13 @@ local function loadNeverbirth(options)
         MC_POST_PICKUP_INIT = 11,
         MC_POST_ADD_COLLECTIBLE = 13,
         MC_POST_EFFECT_UPDATE = 14,
+        MC_PRE_GAME_EXIT = 16,
     }
     EntityType = { ENTITY_PLAYER = 1, ENTITY_PICKUP = 5, ENTITY_EFFECT = 1000 }
-    EffectVariant = { POOF01 = 1, PLAYER_CREEP_BLACK = 3, CREEP_RED = 4, CREEP_GREEN = 5, PLAYER_CREEP_GREEN = 6 }
+    EffectVariant = { POOF01 = 1, PLAYER_CREEP_BLACK = 3, CREEP_RED = 4, CREEP_GREEN = 5, PLAYER_CREEP_GREEN = 6, PLAYER_CREEP_HOLYWATER_TRAIL = 54 }
+    TearFlags = { TEAR_NORMAL = 0, TEAR_HOMING = 4, TEAR_POISON = 16, TEAR_BURN = 512 }
+    WeaponType = { WEAPON_TEARS = 1, WEAPON_BRIMSTONE = 2 }
+    EntityGridCollisionClass = { GRIDCOLL_NONE = 0 }
     GridEntityType = { GRID_POOP = 14 }
     PickupVariant = { PICKUP_COLLECTIBLE = 100 }
     CacheFlag = { CACHE_DAMAGE = 1, CACHE_LUCK = 1024 }
@@ -69,7 +73,7 @@ local function loadNeverbirth(options)
     RoomType = { ROOM_DEFAULT = 1 }
     ItemPoolType = { POOL_TREASURE = 0 }
     ActiveSlot = { SLOT_PRIMARY = 0 }
-    CollectibleType = { COLLECTIBLE_NULL = 0 }
+    CollectibleType = { COLLECTIBLE_NULL = 0, COLLECTIBLE_PLAYDOUGH_COOKIE = 570 }
 
     local roomIndex = options.roomIndex or 1
     local spawnSeed = options.spawnSeed or 5000
@@ -139,10 +143,12 @@ local function loadNeverbirth(options)
                 FrameCount = 0,
                 data = {},
                 removed = false,
+                CollisionDamage = 2,
             }
             function entity:GetData() return self.data end
             function entity:ToEffect() return self end
             function entity:Remove() self.removed = true end
+            function entity:Exists() return not self.removed end
             function entity:SetColor(color) self.color = color end
             spawns[#spawns + 1] = entity
             if entityType == EntityType.ENTITY_EFFECT then
@@ -195,7 +201,11 @@ local function loadNeverbirth(options)
         return mod
     end
 
-    dofile("main.lua")
+    function include(path)
+        return dofile((path:gsub("%.", "/")) .. ".lua")
+    end
+    dofile("tests/repentogon_test_fixture.lua")()
+    dofile(arg[1] or "main.lua")
 
     local function getCallbacks(callbackId, param)
         local found = {}
@@ -219,10 +229,22 @@ local function loadNeverbirth(options)
             nullCostumes = {},
             addedNullCostumes = {},
             removedNullCostumes = {},
+            tearFlags = opts.tearFlags or 0,
+            poisonDamage = opts.poisonDamage,
+            paramsSamples = 0,
+            alive = true,
         }
         function player:ToPlayer() return self end
         function player:GetCollectibleNum(itemId) return self.collectibles[itemId] or 0 end
         function player:HasCollectible(itemId) return (self.collectibles[itemId] or 0) > 0 end
+        function player:Exists() return self.alive end
+        function player:IsDead() return not self.alive end
+        function player:GetTearPoisonDamage() return self.poisonDamage or self.Damage end
+        function player:GetTearHitParams(_, scale)
+            self.paramsSamples = self.paramsSamples + 1
+            return { TearFlags = self.tearFlags, TearDamage = self.Damage * scale,
+                TearColor = Color(1, 0.5, 0.2, 1, 0, 0, 0) }
+        end
         function player:GetCollectibleRNG()
             return { RandomInt = function(_, max) return nextRngValue(max) end }
         end
@@ -239,13 +261,19 @@ local function loadNeverbirth(options)
         return player
     end
 
-    local function newEnemy(pos)
-        local enemy = { Type = 10, InitSeed = #roomEntities + 300, Position = pos or Vector(120, 100), damageTaken = 0, slowed = 0, data = {} }
+    local function newEnemy(pos, opts)
+        opts = opts or {}
+        local enemy = { Type = 10, InitSeed = #roomEntities + 300, Position = pos or Vector(120, 100), damageTaken = 0, slowed = 0, data = {}, statuses = {} }
         function enemy:IsVulnerableEnemy() return true end
         function enemy:ToNPC() return self end
         function enemy:GetData() return self.data end
         function enemy:TakeDamage(amount) self.damageTaken = self.damageTaken + amount end
         function enemy:AddSlowing(_, duration) self.slowed = self.slowed + (duration or 0) end
+        function enemy:IsFlying() return opts.flying == true end
+        function enemy:HasEntityFlags() return opts.friendly == true end
+        function enemy:AddBurn(source, duration, damage)
+            self.statuses[#self.statuses + 1] = { source = source.Entity, duration = duration, damage = damage }
+        end
         roomEntities[#roomEntities + 1] = enemy
         return enemy
     end
@@ -466,6 +494,60 @@ local function test_costume_is_applied_and_removed_when_item_state_changes()
     assertTruthy(player.nullCostumes[env.costumes["gfx/characters/costume_strong_laxative.anm2"]], "costume should refresh after appearance reload/update")
 end
 
+local function test_synergy_contact_has_one_damage_authority_and_keeps_tick_cadence()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({damage=20, velocity=Vector(2,0), tearFlags=TearFlags.TEAR_BURN,
+        collectibles={[env.items.StrongLaxative]=1}})
+    local enemy = env.newEnemy(player.Position)
+    local flying = env.newEnemy(player.Position, {flying=true})
+    local friendly = env.newEnemy(player.Position, {friendly=true})
+    env.runPostUpdate(1)
+    local creep = lastStrongLaxativeCreep(env)
+    assertEquals(creep.CollisionDamage, 0, "native collision damage must be disabled")
+    assertEquals(creep.Timeout, 150, "native visual must survive the original item lifetime")
+    env.runEffectUpdate(creep,9)
+    assertEquals(enemy.damageTaken,0); assertEquals(#enemy.statuses,0)
+    env.runEffectUpdate(creep,1)
+    assertNear(enemy.damageTaken,2,0.00001); assertEquals(#enemy.statuses,1)
+    assertEquals(enemy.statuses[1].source,player)
+    assertEquals(flying.damageTaken,0); assertEquals(#flying.statuses,0)
+    assertEquals(friendly.damageTaken,0); assertEquals(#friendly.statuses,0)
+    assertEquals(player.paramsSamples,1,"do not reroll the snapshot on each tick")
+end
+
+local function test_removal_affects_new_creep_and_invalid_owner_removes_old_creep()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({velocity=Vector(2,0),tearFlags=TearFlags.TEAR_BURN,
+        collectibles={[env.items.StrongLaxative]=1}})
+    local enemy=env.newEnemy(player.Position)
+    env.runPostUpdate(1); local old=lastStrongLaxativeCreep(env)
+    player.tearFlags=0
+    env.runPostUpdate(6); local fresh=lastStrongLaxativeCreep(env)
+    env.runEffectUpdate(fresh,10); assertEquals(#enemy.statuses,0,"new creep reflects lost synergy")
+    env.runEffectUpdate(old,10); assertEquals(#enemy.statuses,1,"old creep keeps its creation snapshot")
+    player.collectibles[env.items.StrongLaxative]=0
+    env.runPostUpdate(12); assertEquals(countStrongLaxativeCreeps(env),2,"item loss stops new creep")
+    player.alive=false
+    env.runEffectUpdate(old,1); assertEquals(old.removed,true,"do not retain invalid player references")
+end
+
+local function test_foreign_aquarius_effect_and_teammate_are_untouched()
+    local env=loadNeverbirth()
+    local a=env.newPlayer({velocity=Vector(2,0),tearFlags=TearFlags.TEAR_BURN,collectibles={[env.items.StrongLaxative]=1}})
+    local b=env.newPlayer({position=Vector(500,500),velocity=Vector(2,0),collectibles={[env.items.StrongLaxative]=1}})
+    local enemy=env.newEnemy(b.Position)
+    env.runPostUpdate(1)
+    local own=lastStrongLaxativeCreep(env)
+    env.runEffectUpdate(own,10); assertEquals(#enemy.statuses,0,"teammate does not inherit fire mind")
+    local foreign=Isaac.Spawn(EntityType.ENTITY_EFFECT,54,0,a.Position,Vector(1,0),a)
+    env.runEffectUpdate(foreign,10)
+    assertEquals(foreign.CollisionDamage,2,"foreign Aquarius retains native damage")
+    assertEquals(foreign.Velocity.X,1,"foreign Aquarius movement remains untouched")
+end
+
+test_synergy_contact_has_one_damage_authority_and_keeps_tick_cadence()
+test_removal_affects_new_creep_and_invalid_owner_removes_old_creep()
+test_foreign_aquarius_effect_and_teammate_are_untouched()
 test_xml_registers_strong_laxative_item_and_pools()
 test_costume_anm2_uses_static_head_animations()
 test_moving_player_leaves_creep_but_standing_still_does_not_stack()

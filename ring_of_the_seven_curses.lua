@@ -16,6 +16,10 @@ return function(Neverbirth, context)
     local SLOT_SECONDARY = (ActiveSlot and ActiveSlot.SLOT_SECONDARY) or 1
     local PICKUP_COLLECTIBLE = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
     local PICKUP_TRINKET = (PickupVariant and PickupVariant.PICKUP_TRINKET) or 350
+    local PICKUP_BED = (PickupVariant and PickupVariant.PICKUP_BED) or 380
+    -- resources-dlc3/entities2.xml: Mom's Bed is 5.380.10. The shipped
+    -- BedSubType.BED_MOM enum incorrectly says 1 in Repentance 1.7.9b.
+    local MOMS_BED_SUBTYPE = 10
     local ENTITY_PICKUP = (EntityType and EntityType.ENTITY_PICKUP) or 5
     local ENTITY_PLAYER = (EntityType and EntityType.ENTITY_PLAYER) or 1
     local ITEM_ACTIVE = (ItemType and ItemType.ITEM_ACTIVE) or 3
@@ -59,7 +63,6 @@ return function(Neverbirth, context)
     for _, id in ipairs(PROTECTED_COLLECTIBLES) do PROTECTED_SET[id] = true end
 
     local runtime = {
-        damageRewrite = {},
         pendingTrades = {},
         pendingRingPickups = {},
         spawningCompensation = false,
@@ -173,6 +176,24 @@ return function(Neverbirth, context)
         return game and game.GetFrameCount and game:GetFrameCount() or 0
     end
 
+    local function GetPedestalCycle(pickup)
+        -- REPENTOGON 1.0.12a exposes the native choice list (Soul of Isaac,
+        -- etc.). Merely displaying another choice is not a new reroll.
+        local cycle = pickup.GetCollectibleCycle and pickup:GetCollectibleCycle()
+        if type(cycle) ~= "table" or #cycle == 0 then return nil end
+        local members, ids = {}, {}
+        local function Add(id)
+            if type(id) == "number" and id > 0 and not members[tostring(id)] then
+                members[tostring(id)] = true
+                ids[#ids + 1] = id
+            end
+        end
+        Add(pickup.SubType)
+        for _, id in ipairs(cycle) do Add(id) end
+        table.sort(ids)
+        return table.concat(ids, ":"), members
+    end
+
     local function GetPedestalRecord(pickup)
         local saved = GetSavedState()
         local game = Game and Game()
@@ -198,7 +219,32 @@ return function(Neverbirth, context)
         local rng = pickup.GetDropRNG and pickup:GetDropRNG()
         local dropSeed = rng and rng.GetSeed and rng:GetSeed() or pickup.InitSeed
         local record = records[seedKey]
-        if type(record) ~= "table" or record.itemId ~= pickup.SubType or record.dropSeed ~= dropSeed then
+        local cycleKey, members = GetPedestalCycle(pickup)
+        if cycleKey then
+            if type(record) ~= "table" or record.dropSeed ~= dropSeed or record.cycleKey ~= cycleKey then
+                local candidates = {}
+                -- Soul of Isaac can add a choice after we already paid for the
+                -- original pedestal. Migrate that record, including old saves
+                -- and the native starting-active exclusion, without paying again.
+                if type(record) == "table" and record.dropSeed == dropSeed
+                    and not record.cycleKey and members[tostring(record.itemId)] then
+                    candidates[tostring(record.itemId)] = record
+                end
+                record = { dropSeed = dropSeed, cycleKey = cycleKey, candidates = candidates }
+                records[seedKey] = record
+            end
+            local key = tostring(pickup.SubType)
+            local candidate = record.candidates[key]
+            if not candidate then
+                candidate = { itemId = pickup.SubType, dropSeed = dropSeed, attempted = false }
+                record.candidates[key] = candidate
+            end
+            -- Only the visible choice is checked. Keep only this generation's
+            -- bounded native choices; genuine reseeds/replaced cycles reset it.
+            return candidate
+        end
+        if type(record) ~= "table" or record.cycleKey
+            or record.itemId ~= pickup.SubType or record.dropSeed ~= dropSeed then
             record = { itemId = pickup.SubType, dropSeed = dropSeed, attempted = false }
             records[seedKey] = record
         end
@@ -701,13 +747,10 @@ return function(Neverbirth, context)
     local function AddSecondaryCharge(player, state)
         local itemId = tonumber(state.nativeSecondary) or 0
         if itemId <= 0 or not player.GetActiveItem or player:GetActiveItem(SLOT_SECONDARY) ~= itemId then return false end
-        if not player.GetActiveCharge or not player.SetActiveCharge then return false end
-        local config = GetCollectibleConfig(itemId)
-        local maxCharge = config and tonumber(config.MaxCharges) or 0
-        local current = player:GetActiveCharge(SLOT_SECONDARY) or 0
-        if maxCharge > 0 and current >= maxCharge then return false end
-        player:SetActiveCharge(maxCharge > 0 and math.min(maxCharge, current + 1) or current + 1, SLOT_SECONDARY)
-        return true
+        if type(player.AddActiveCharge) ~= "function" then return false end
+        -- Force preserves a fixed +1 for timed/special actives; native capacity still applies.
+        local added = player:AddActiveCharge(1, SLOT_SECONDARY, true, false, true)
+        return (tonumber(added) or 0) > 0
     end
 
     local function ReconcilePlayer(player)
@@ -824,7 +867,6 @@ return function(Neverbirth, context)
     end
 
     local function OnPostGameStarted(_, isContinue)
-        runtime.damageRewrite = {}
         runtime.pendingTrades = {}
         runtime.pendingRingPickups = {}
         runtime.spawningCompensation = false
@@ -864,13 +906,7 @@ return function(Neverbirth, context)
     local function OnEntityTakeDamage(_, entity, amount, flags, source, countdown)
         local player = entity and entity.ToPlayer and entity:ToPlayer() or nil
         if not player or not IsPlayerActive(player) or (tonumber(amount) or 0) <= 0 then return nil end
-        local key = GetPlayerKey(player)
-        if runtime.damageRewrite[key] then return nil end
-        runtime.damageRewrite[key] = true
-        local ok, err = pcall(player.TakeDamage, player, amount * 2, flags, source, countdown)
-        runtime.damageRewrite[key] = nil
-        if not ok then DebugLog("failed to rewrite incoming damage: " .. tostring(err)); return nil end
-        return false
+        return { Damage = amount * 2 }
     end
 
     local function OnPostGetCollectible(_, selected, poolType, decrease, seed)
@@ -887,6 +923,15 @@ return function(Neverbirth, context)
         if SLOT_TRINKET_ID <= 0 or not AnyPlayerActive() or not pickup
             or pickup.Variant ~= PICKUP_TRINKET or pickup.SubType ~= SLOT_TRINKET_ID then return end
         if pickup.Remove then pickup:Remove() end
+    end
+
+    local function OnPreBedCollision(_, pickup, collider)
+        if not pickup or pickup.Variant ~= PICKUP_BED or pickup.SubType == MOMS_BED_SUBTYPE then return nil end
+        local player = collider and collider.ToPlayer and collider:ToPlayer() or nil
+        if not IsPlayerActive(player) then return nil end
+        -- Both clean and dirty Isaac beds use the same pickup variant.
+        -- false keeps the physical collision but skips the native sleep code.
+        return false
     end
 
     local function OnPrePickupCollision(_, pickup, collider)
@@ -928,11 +973,12 @@ return function(Neverbirth, context)
         if ModCallbacks.MC_PRE_GAME_EXIT then Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, OnPreGameExit) end
         if ModCallbacks.MC_POST_CURSE_EVAL then Neverbirth:AddCallback(ModCallbacks.MC_POST_CURSE_EVAL, OnPostCurseEval) end
         if ModCallbacks.MC_POST_NPC_INIT then Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_INIT, OnPostNpcInit) end
-        if ModCallbacks.MC_ENTITY_TAKE_DMG then Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnEntityTakeDamage, ENTITY_PLAYER) end
+        if ModCallbacks.MC_ENTITY_TAKE_DMG then Neverbirth:AddPriorityCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, CallbackPriority.EARLY, OnEntityTakeDamage, ENTITY_PLAYER) end
         if ModCallbacks.MC_POST_GET_COLLECTIBLE then Neverbirth:AddCallback(ModCallbacks.MC_POST_GET_COLLECTIBLE, OnPostGetCollectible) end
         if ModCallbacks.MC_POST_PICKUP_UPDATE then Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, OnPostPickupUpdate, PICKUP_COLLECTIBLE) end
         if ModCallbacks.MC_POST_PICKUP_UPDATE then Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, OnPostTrinketUpdate, PICKUP_TRINKET) end
         if ModCallbacks.MC_PRE_PICKUP_COLLISION then Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, OnPrePickupCollision) end
+        if ModCallbacks.MC_PRE_PICKUP_COLLISION then Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, OnPreBedCollision, PICKUP_BED) end
     end
 
     Neverbirth.RingOfSevenCursesTestAPI = {
@@ -968,11 +1014,11 @@ return function(Neverbirth, context)
             PostPickupUpdate = OnPostPickupUpdate,
             PostTrinketUpdate = OnPostTrinketUpdate,
             PrePickupCollision = OnPrePickupCollision,
+            PreBedCollision = OnPreBedCollision,
         },
         ResetForTest = function()
             local root = GetSaveRoot()
             root.ringOfSevenCurses = { runSeed = GetRunSeed(), players = {} }
-            runtime.damageRewrite = {}
             runtime.pendingTrades = {}
             runtime.pendingRingPickups = {}
             runtime.spawningCompensation = false

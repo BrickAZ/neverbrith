@@ -267,6 +267,7 @@ EID = {
     addDescriptionModifier = function() end,
 }
 
+dofile("tests/repentogon_test_fixture.lua")()
 dofile("main.lua")
 
 local function findCallback(callbackId, param)

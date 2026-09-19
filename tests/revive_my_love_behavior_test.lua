@@ -1,415 +1,221 @@
-local function assertEquals(actual, expected, message)
-    if actual ~= expected then
-        error((message or "values differ") .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual), 2)
-    end
+-- Engine boundary fixture: death resolution happens after the native animation,
+-- and returning false revives immediately (it does not postpone Game Over).
+local function eq(a, b, why)
+    assert(a == b, (why or "mismatch") .. ": expected " .. tostring(b) .. ", got " .. tostring(a))
 end
+ModCallbacks = { MC_ENTITY_TAKE_DMG=1, MC_POST_GAME_STARTED=2, MC_PRE_GAME_EXIT=3,
+    MC_POST_EFFECT_UPDATE=4, MC_POST_PLAYER_UPDATE=5, MC_TRIGGER_PLAYER_DEATH_POST_CHECK_REVIVES=1051,
+    MC_PRE_PLAYER_UPDATE=1160, MC_PRE_PLAYER_TAKE_DMG=1008, MC_POST_NEW_ROOM=19,
+    MC_POST_ADD_COLLECTIBLE=1005, MC_POST_TRIGGER_COLLECTIBLE_REMOVED=1095, MC_POST_UPDATE=6 }
+EntityType = { ENTITY_PLAYER=1, ENTITY_EFFECT=1000 }
+EntityCollisionClass = { ENTCOLL_NONE=0, ENTCOLL_ALL=4 }
+DamageFlag = { DAMAGE_FAKE=1, DAMAGE_NOKILL=2 }
+Vector = setmetatable({Zero={X=0,Y=0}}, {__call=function(_,x,y) return {X=x,Y=y} end})
+Color = setmetatable({}, {__call=function(_,...) return {...} end})
+REPENTOGON = {Version="1.0.12a", MeetsVersion=function(v) return v == "1.0.12a" end}
 
-local function assertTruthy(value, message)
-    if not value then
-        error(message or "expected a truthy value", 2)
-    end
-end
-
-ModCallbacks = {
-    MC_ENTITY_TAKE_DMG = 1,
-    MC_POST_GAME_STARTED = 2,
-    MC_PRE_GAME_EXIT = 3,
-    MC_POST_EFFECT_UPDATE = 4,
-    MC_POST_PLAYER_UPDATE = 5,
-}
-EntityType = { ENTITY_PLAYER = 1, ENTITY_EFFECT = 1000 }
-DamageFlag = { DAMAGE_FAKE = 1, DAMAGE_NOKILL = 2 }
-
-local function makeEngineVector(x, y)
-    return { X = x, Y = y, __engineVector = true }
-end
-
-Vector = setmetatable({ Zero = makeEngineVector(0, 0) }, {
-    __call = function(_, x, y)
-        return makeEngineVector(x, y)
-    end,
-})
-
-Color = setmetatable({}, {
-    __call = function(_, ...)
-        return { __engineColor = true, values = { ... } }
-    end,
-})
-
-local function makePlayer(options)
+local function environment(options)
     options = options or {}
-    local player = {
-        Type = EntityType.ENTITY_PLAYER,
-        InitSeed = options.seed or 100,
-        collectibleCount = options.collectibleCount or 1,
-        hearts = options.hearts == nil and 2 or options.hearts,
-        maxHearts = options.maxHearts == nil and 6 or options.maxHearts,
-        soulHearts = options.soulHearts or 0,
-        boneHearts = options.boneHearts or 0,
-        mortal = options.mortal == true,
-        otherRevive = options.otherRevive == true,
-        dead = options.dead == true,
-        removeCalls = 0,
-        reviveCalls = 0,
-        cooldown = 0,
-        Position = makeEngineVector(options.x or 120, options.y or 160),
-        colorCalls = 0,
-        sprite = {
-            animation = options.deathAnimation or "Death",
-            finished = options.deathAnimationFinished == true,
-        },
-    }
-
-    function player:ToPlayer() return self end
-    function player:HasCollectible() return self.collectibleCount > 0 end
-    function player:GetCollectibleNum() return self.collectibleCount end
-    function player:RemoveCollectible()
-        self.removeCalls = self.removeCalls + 1
-        self.collectibleCount = math.max(0, self.collectibleCount - 1)
-    end
-    function player:HasMortalDamage() return self.mortal end
-    function player:WillPlayerRevive() return self.otherRevive end
-    function player:IsDead() return self.dead end
-    function player:GetSprite() return self.sprite end
-    function player.sprite:GetAnimation() return self.animation end
-    function player.sprite:IsFinished(animation)
-        return animation == self.animation and self.finished
-    end
-    function player:Revive()
-        self.reviveCalls = self.reviveCalls + 1
-        self.dead = false
-    end
-    function player:GetHearts() return self.hearts end
-    function player:GetMaxHearts() return self.maxHearts end
-    function player:GetSoulHearts() return self.soulHearts end
-    function player:GetBoneHearts() return self.boneHearts end
-    function player:AddHearts(amount) self.hearts = self.hearts + amount end
-    function player:AddSoulHearts(amount) self.soulHearts = self.soulHearts + amount end
-    function player:SetMinDamageCooldown(frames) self.cooldown = frames end
-    function player:SetColor(color)
-        assertTruthy(color and color.__engineColor, "player SetColor requires an engine Color")
-        self.colorCalls = self.colorCalls + 1
-    end
-    return player
-end
-
-local function makeEnvironment()
-    local callbacks = {}
-    local saveRoot = {}
-    local saved = 0
-    local sounds = 0
-    local spawns = {}
-    local runSeed = 12345
+    local callbacks, players, effects, root = {}, {}, {}, {}
+    local soundCount, seed = 0, 12345
     local mod = {}
-
-    Isaac = {
-        Spawn = function(entityType, variant, subtype, position, velocity, spawner)
-            assertTruthy(position and position.__engineVector,
-                "Isaac.Spawn position must be an engine Vector, not a Lua-table lookalike")
-            assertTruthy(velocity and velocity.__engineVector,
-                "Isaac.Spawn velocity must be an engine Vector, not a Lua-table lookalike")
-
-            local sprite = {
-                playCalls = 0,
-                animation = nil,
-                force = nil,
-                finished = false,
-            }
-            function sprite:Play(animation, force)
-                self.playCalls = self.playCalls + 1
-                self.animation = animation
-                self.force = force
-            end
-            function sprite:IsFinished(animation)
-                return animation == self.animation and self.finished
-            end
-
-            local effect = {
-                Type = entityType,
-                Variant = variant,
-                SubType = subtype,
-                Position = position,
-                SpawnerEntity = spawner,
-                sprite = sprite,
-                removeCalls = 0,
-                colorCalls = 0,
-            }
-            function effect:GetSprite() return self.sprite end
-            function effect:SetColor(color)
-                assertTruthy(color and color.__engineColor, "effect SetColor requires an engine Color")
-                self.colorCalls = self.colorCalls + 1
-            end
-            function effect:Remove() self.removeCalls = self.removeCalls + 1 end
-
-            spawns[#spawns + 1] = effect
-            return effect
-        end,
-    }
-
-    function mod:AddCallback(callbackId, fn, variant)
-        callbacks[#callbacks + 1] = { id = callbackId, fn = fn, variant = variant }
+    function mod:AddCallback(id, fn, filter) callbacks[id]={fn=fn,filter=filter} end
+    Game = function() return {GetNumPlayers=function() return #players end} end
+    Isaac = {GetPlayer=function(i) return players[i+1] end}
+    function Isaac.Spawn(t,v,s,pos,vel,owner)
+        if options.noEffect then return nil end
+        local e={Type=t,Variant=v,SubType=s,Position=pos,SpawnerEntity=owner,
+            InitSeed=1000+#effects,removed=false,sprite={finished=false,plays=0}}
+        function e:GetSprite() return self.sprite end
+        function e.sprite:Play(name) self.animation=name; self.plays=self.plays+1 end
+        function e.sprite:IsFinished(name) return self.animation==name and self.finished end
+        function e:Exists() return not self.removed end
+        function e:Remove() self.removed=true end
+        function e:SetColor() end
+        effects[#effects+1]=e
+        return e
     end
-
-    local initialize = assert(dofile("revive_my_love.lua"))
-    local api = initialize(mod, {
-        ItemId = 9001,
-        EffectVariant = 3020,
-        GetSaveRoot = function() return saveRoot end,
-        Save = function() saved = saved + 1 end,
-        GetCurrentRunSeed = function() return runSeed end,
-        IsIncomingDamageLethal = function(player, amount)
-            if player:HasMortalDamage() then return true end
-            local total = player:GetHearts() + player:GetSoulHearts() + player:GetBoneHearts() * 2
-            return total > 0 and amount >= total
-        end,
-        PlaySound = function() sounds = sounds + 1 end,
-    })
-
-    local function findCallback(callbackId)
-        for _, callback in ipairs(callbacks) do
-            if callback.id == callbackId then return callback.fn, callback.variant end
+    local api = dofile("revive_my_love.lua")(mod, {ItemId=9001,EffectVariant=3020,
+        GetSaveRoot=function() return root end, Save=function() end,
+        GetCurrentRunSeed=function() return seed end,
+        PlaySound=function() soundCount=soundCount+1 end})
+    local function call(id,...)
+        local c=callbacks[id]
+        if c then return c.fn(mod,...) end
+    end
+    local function player(count)
+        local p={Type=1,InitSeed=10+#players,held=count or 1,dead=false,hearts=2,maxHearts=6,soul=0,
+            ControlsEnabled=true,Visible=true,EntityCollisionClass=4,Position=Vector(100,120),
+            Velocity=Vector(0,0),FrameCount=0,revives=0,removed=0,effectCount=0}
+        function p:ToPlayer() return self end
+        function p:GetCollectibleNum(id) eq(id,9001); return self.held end
+        function p:IsDead() return self.dead end
+        function p:Exists() return true end
+        function p:WillPlayerRevive() return self.effectCount>0 or self.otherRevive==true end
+        function p:RemoveCollectible(id)
+            eq(id,9001); self.held=self.held-1; self.removed=self.removed+1
+            call(1095,self,id) -- Synchronous removal callback must not re-arm the revive.
         end
-        error("missing callback " .. tostring(callbackId), 2)
+        function p:Revive()
+            if self.vetoRevive then return end
+            self.revives=self.revives+1; self.dead=false; self.hearts=1
+            if options.deathPresentation then
+                self.Visible=false; self.ControlsEnabled=false; self.EntityCollisionClass=0
+            end
+        end
+        function p:GetHearts() return self.hearts end
+        function p:GetMaxHearts() return self.maxHearts end
+        function p:GetSoulHearts() return self.soul end
+        function p:AddHearts(n) self.hearts=self.hearts+n end
+        function p:AddSoulHearts(n) self.soul=self.soul+n end
+        function p:SetMinDamageCooldown(n) self.cooldown=n end
+        function p:SetColor() end
+        local fx={}
+        function fx:GetCollectibleEffectNum(id) eq(id,9001); return p.effectCount end
+        function fx:AddCollectibleEffect(id,costume,n)
+            eq(id,9001); eq(costume,false); p.effectCount=p.effectCount+n
+        end
+        function fx:RemoveCollectibleEffect(id,n) eq(id,9001); p.effectCount=math.max(0,p.effectCount-n) end
+        function p:GetEffects() return fx end
+        players[#players+1]=p
+        return p
     end
-
-    return {
-        api = api,
-        callbacks = callbacks,
-        saveRoot = saveRoot,
-        getSavedCount = function() return saved end,
-        getSoundCount = function() return sounds end,
-        getEffectCount = function() return #spawns end,
-        getEffect = function(index) return spawns[index] end,
-        setRunSeed = function(value) runSeed = value end,
-        damage = function(player, amount, flags)
-            local callback, variant = findCallback(ModCallbacks.MC_ENTITY_TAKE_DMG)
-            assertEquals(variant, EntityType.ENTITY_PLAYER, "damage callback should be filtered to players")
-            return callback(mod, player, amount, flags or 0, nil, 0)
-        end,
-        updatePlayer = function(player)
-            local callback = findCallback(ModCallbacks.MC_POST_PLAYER_UPDATE)
-            return callback(mod, player)
-        end,
-        gameStarted = function(continued)
-            local callback = findCallback(ModCallbacks.MC_POST_GAME_STARTED)
-            return callback(mod, continued == true)
-        end,
-        updateEffect = function(effect)
-            local callback, variant = findCallback(ModCallbacks.MC_POST_EFFECT_UPDATE)
-            assertEquals(variant, 3020, "effect callback should be filtered to the registered revive variant")
-            return callback(mod, effect)
-        end,
-    }
+    return {api=api,call=call,player=player,effects=effects,root=root,callbacks=callbacks,
+        sounds=function() return soundCount end,
+        newSeed=function() seed=seed+1 end}
 end
 
-local function confirmDeath(env, player, animation)
-    player.dead = true
-    player.hearts = 0
-    player.soulHearts = 0
-    player.sprite.animation = animation or "Death"
-    player.sprite.finished = false
-    env.updatePlayer(player)
+local tests={}
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(3)
+    e.call(2,false); e.call(5,p); e.call(5,p)
+    eq(p.effectCount,1,"three copies must advertise only one usable extra life")
+    p.held=0; e.call(1095,p,9001)
+    eq(p.effectCount,0,"removal must immediately remove the HUD/save-protection entitlement")
+    p.held=1; e.call(1005,9001,0,true,0,0,p)
+    eq(p.effectCount,1,"adding the item must register the extra life before the next damage")
 end
-
-local function finishDeathAnimation(env, player)
-    player.sprite.finished = true
-    env.updatePlayer(player)
-    return env.getEffect(env.getEffectCount())
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(2); e.call(2,false)
+    e.call(5,p) -- No death: ordinary updates must not consume or lock anything.
+    eq(p.removed,0); eq(p.ControlsEnabled,true); eq(#e.effects,0)
+    p.dead=true; p.hearts=0
+    e.call(5,p) -- During the native death animation, do not consume the reserve.
+    eq(p.effectCount,1); eq(p.revives,0); eq(#e.effects,0)
+    e.call(1051,p) -- Engine's authoritative post-animation/post-vanilla-revive boundary.
+    eq(p.revives,1,"must rescue from Game Over at the real-death callback")
+    eq(p.removed,1); eq(p.held,1); eq(p.effectCount,0)
+    eq(p.ControlsEnabled,false); eq(p.Visible,false); eq(p.EntityCollisionClass,0)
+    eq(e.call(1160,p),true,"native player update/shooting must be suspended during the visual")
+    eq(e.call(1008,p,1,0,nil,0),false,"animation lock must protect without spending a shield")
+    eq(#e.effects,1); eq(e.sounds(),1); eq(e.effects[1].sprite.animation,"Revive")
+    e.call(1051,p); eq(p.revives,1,"duplicate death delivery must not double revive")
+    e.call(4,e.effects[1]); eq(p.ControlsEnabled,false)
+    e.effects[1].sprite.finished=true; e.call(4,e.effects[1])
+    eq(p.ControlsEnabled,true); eq(p.Visible,true); eq(p.EntityCollisionClass,4)
+    eq(p.hearts,2); eq(p.cooldown,60); eq(e.effects[1].removed,true)
+    eq(e.call(1008,p,1,0,nil,0),nil); eq(e.call(1160,p),nil)
+    e.call(5,p); eq(p.effectCount,0,"spare copy must not falsely advertise another revival")
+    p.dead=true; e.call(1051,p); eq(p.revives,1)
 end
-
-local function test_nonlethal_damage_is_untouched()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local player = makePlayer({ hearts = 4 })
-    assertEquals(env.damage(player, 1), nil, "ordinary damage must not be cancelled")
-    assertEquals(player.removeCalls, 0, "ordinary damage must not consume the item")
-    assertEquals(env.getSoundCount(), 0, "ordinary damage must not play revive audio")
+tests[#tests+1]=function()
+    local e=environment(); local a=e.player(); local b=e.player(); e.call(2,false)
+    a.dead=true; e.call(1051,a)
+    eq(b.effectCount,1); eq(b.removed,0); eq(b.ControlsEnabled,true)
+    b.dead=true; e.call(1051,b); eq(#e.effects,2)
+    e.effects[1].sprite.finished=true; e.call(4,e.effects[1])
+    eq(a.ControlsEnabled,true); eq(b.ControlsEnabled,false)
+    e.call(19); eq(b.ControlsEnabled,true); eq(e.effects[2].removed,true)
 end
-
-local function test_lethal_damage_is_allowed_and_only_confirmed_death_consumes_the_item()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local player = makePlayer({ hearts = 6, soulHearts = 2, collectibleCount = 2 })
-
-    assertEquals(env.damage(player, 8), nil, "lethal damage must be allowed to kill the player")
-    assertEquals(player.removeCalls, 0, "a merely predicted death must not consume the item")
-    assertEquals(player.hearts, 6, "the damage callback must not restore or rewrite health")
-    assertEquals(env.getSoundCount(), 0, "audio must wait until after the real death animation")
-    assertEquals(env.getEffectCount(), 0, "the custom animation must wait until real death finishes")
-
-    confirmDeath(env, player, "Death")
-    assertEquals(player.removeCalls, 1, "a confirmed real death should consume exactly one copy")
-    assertEquals(player.collectibleCount, 1, "one duplicate should remain")
-    assertEquals(player.reviveCalls, 0, "the player must remain truly dead during the death animation")
-    assertEquals(player.hearts, 0, "health must not return during the death animation")
-    assertEquals(env.getEffectCount(), 0, "the custom animation must not overlap the death animation")
-
-    local effect = finishDeathAnimation(env, player)
-    assertEquals(env.getSoundCount(), 1, "revive audio should start with the custom animation")
-    assertEquals(env.getEffectCount(), 1, "the custom revive effect should spawn after death finishes")
-    assertEquals(player.reviveCalls, 0, "the player must remain dead while the custom animation plays")
-
-    assertEquals(effect.Type, EntityType.ENTITY_EFFECT, "revive visual should be an Effect entity")
-    assertEquals(effect.Variant, 3020, "revive visual should use the registered cocoon variant")
-    assertEquals(effect.SubType, 0, "revive visual should use subtype zero")
-    assertEquals(effect.SpawnerEntity, player, "revive visual should be attributed to the revived player")
-    assertEquals(effect.sprite.playCalls, 1, "the registered animation should be started exactly once")
-    assertEquals(effect.sprite.animation, "Revive", "the registered Revive animation should play")
-    assertEquals(effect.sprite.force, true, "the one-shot animation should restart at frame zero")
-    assertEquals(effect.colorCalls, 1, "the world effect should receive the approved pink tint")
-    assertEquals(player.colorCalls, 0, "the player flash must wait until the actual revival")
-
-    env.updateEffect(effect)
-    assertEquals(player.reviveCalls, 0, "an unfinished custom animation must not revive the player")
-    effect.sprite.finished = true
-    env.updateEffect(effect)
-    assertEquals(player.reviveCalls, 1, "finishing the custom animation should perform one engine revive")
-    assertEquals(player.hearts, 2, "the revived player should have one full red heart")
-    assertEquals(player.soulHearts, 0, "red-heart revival should not retain a lethal soul-heart layer")
-    assertTruthy(player.cooldown >= 1, "the revived player should receive brief invincibility")
-    assertEquals(player.colorCalls, 1, "the revived player should receive the approved pink flash")
-
-    assertEquals(env.damage(player, 2), nil, "a second lethal hit in the same run must not be cancelled")
-    assertEquals(player.removeCalls, 1, "remaining duplicates must not grant a second revive")
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(2); e.call(2,false)
+    p.dead=true; e.call(1051,p); e.call(3,true)
+    eq(p.ControlsEnabled,true,"exit must not save a hidden/locked player")
+    eq(p.hearts,2); e.call(2,true); eq(p.effectCount,0)
+    e.newSeed(); e.call(2,false); eq(p.effectCount,1)
 end
-
-local function test_cancelled_lethal_prediction_does_not_consume_or_lock_the_item()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local player = makePlayer({ hearts = 2 })
-    assertEquals(env.damage(player, 2), nil, "the predicted lethal hit should remain uncancelled")
-    env.updatePlayer(player)
-    assertEquals(player.removeCalls, 0, "a hit cancelled later in the callback chain must not consume the item")
-    assertEquals(env.getEffectCount(), 0, "a surviving player must not start the revive sequence")
-
-    assertEquals(env.damage(player, 2), nil, "the item should be able to arm again on a later real death")
-    confirmDeath(env, player, "LostDeath")
-    assertEquals(player.removeCalls, 1, "death animations ending in Death should be accepted")
-    assertEquals(env.getEffectCount(), 0, "LostDeath must finish before the custom visual starts")
-    finishDeathAnimation(env, player)
-    assertEquals(env.getEffectCount(), 1, "LostDeath completion should start the custom visual")
+tests[#tests+1]=function()
+    local e=environment({noEffect=true}); local p=e.player(); e.call(2,false)
+    p.dead=true; e.call(1051,p)
+    eq(p.dead,false); eq(p.ControlsEnabled,true); eq(p.hearts,2)
 end
-
-local function test_other_revive_sources_are_not_consumed_or_blocked()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local player = makePlayer({ hearts = 2, otherRevive = true })
-    assertEquals(env.damage(player, 2), nil, "an already pending engine revive should keep control")
-    assertEquals(player.removeCalls, 0, "this item should remain when another revive source handles death")
-    assertEquals(env.getSoundCount(), 0, "the custom revive should not falsely announce a trigger")
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(); e.call(2,false)
+    p.dead=true; e.call(1051,p); e.effects[1]:Remove(); e.call(1160,p)
+    eq(p.ControlsEnabled,true,"removed visual must not strand the owner")
+    eq(p.hearts,2)
 end
-
-local function test_coop_players_have_independent_once_per_run_state()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local first = makePlayer({ seed = 101, hearts = 2 })
-    local second = makePlayer({ seed = 202, hearts = 2 })
-
-    assertEquals(env.damage(first, 2), nil, "first player's death must be allowed")
-    assertEquals(env.damage(second, 2), nil, "second player's death must be allowed independently")
-    confirmDeath(env, first)
-    confirmDeath(env, second)
-    assertEquals(first.removeCalls, 1, "first player should consume only their own item")
-    assertEquals(second.removeCalls, 1, "second player should consume only their own item")
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(); e.call(2,false)
+    p.dead=true; p.vetoRevive=true; e.call(1051,p)
+    eq(p.removed,0,"foreign veto must not consume the item or fake success")
+    eq(p.ControlsEnabled,true); eq(#e.effects,0)
 end
-
-local function test_no_red_heart_character_has_a_survivable_fallback()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local player = makePlayer({ hearts = 0, maxHearts = 0, soulHearts = 0, boneHearts = 0 })
-
-    assertEquals(env.damage(player, 1), nil, "zero-heart characters must still pass through a real death")
-    confirmDeath(env, player)
-    local effect = finishDeathAnimation(env, player)
-    effect.sprite.finished = true
-    env.updateEffect(effect)
-    assertTruthy(player.soulHearts >= 2 or player.cooldown > 0,
-        "zero-heart characters should receive fallback health or invincibility")
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(); e.call(2,false)
+    p.maxHearts=0; p.hearts=0; p.dead=true; e.call(1051,p)
+    e.effects[1].sprite.finished=true; e.call(4,e.effects[1]); eq(p.soul,2)
 end
-
-local function test_continue_keeps_state_but_new_run_resets_it()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local player = makePlayer({ seed = 303, hearts = 2, collectibleCount = 2 })
-    assertEquals(env.damage(player, 2), nil, "first run death should be allowed")
-    confirmDeath(env, player)
-
-    env.gameStarted(true)
-    assertEquals(env.damage(player, 2), nil, "continued run should remember that the player already revived")
-
-    env.setRunSeed(54321)
-    env.gameStarted(false)
-    player.dead = false
-    player.hearts = 2
-    assertEquals(env.damage(player, 2), nil, "a new run should reset and allow the next real death")
-    confirmDeath(env, player)
-    assertEquals(player.removeCalls, 2, "the new run should consume a new copy after death is confirmed")
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(); e.call(2,false)
+    eq(e.callbacks[ModCallbacks.MC_ENTITY_TAKE_DMG],nil,
+        "ordinary damage must not be used as a speculative death trigger")
+    -- A native/earlier revival already won. Even an unexpected late delivery
+    -- must not consume this item, hide the player, or start a second sequence.
+    e.call(1051,p)
+    eq(p.removed,0); eq(#e.effects,0); eq(p.effectCount,1)
 end
-
-local function test_fake_and_nokill_damage_are_ignored()
-    local env = makeEnvironment()
-    env.gameStarted(false)
-    local player = makePlayer({ hearts = 2 })
-    assertEquals(env.damage(player, 2, DamageFlag.DAMAGE_FAKE), nil, "fake damage must not revive")
-    assertEquals(env.damage(player, 2, DamageFlag.DAMAGE_NOKILL), nil, "nonlethal damage flags must not revive")
-    assertEquals(player.removeCalls, 0, "ignored damage must not consume the item")
-end
-
-local function readFile(path)
-    local file = assert(io.open(path, "rb"))
-    local text = file:read("*a")
-    file:close()
-    return text
-end
-
-local function test_registration_audio_and_room_safety_contract()
-    local items = readFile("content/items.xml")
-    local pools = readFile("content/itempools.xml")
-    local sounds = readFile("content/sounds.xml")
-    local source = readFile("revive_my_love.lua")
-    local main = readFile("main.lua")
-    local entities = readFile("content/entities2.xml")
-    local anm2 = readFile("resources/gfx/Effects/ReviveMyLove/revive_my_love_cocoon.anm2")
-    local wav = io.open("resources/sfx/revive_my_love/revive_my_love.wav", "rb")
-
-    assertTruthy(items:find('<passive name="Revive My Love"', 1, true), "item should be registered as a passive")
-    assertTruthy(items:find('gfx="revive_my_beloved.png" id="51" quality="3"', 1, true), "item should use local id 51 and quality 3")
-    assertEquals(pools:find('Revive My Love', 1, true), nil, "pool metadata must remain TBD")
-    assertTruthy(sounds:find('name="Revive My Love"', 1, true), "custom sound should be registered")
-    assertTruthy(sounds:find('revive_my_love/revive_my_love.wav', 1, true), "registered sound should use the converted WAV")
-    assertTruthy(wav ~= nil, "converted full-length WAV should exist")
-    if wav then wav:close() end
-    for _, forbidden in ipairs({ "StartRoomTransition", "ChangeRoom", "ExecuteCommand" }) do
-        assertEquals(source:find(forbidden, 1, true), nil, "revive logic must not alter rooms: " .. forbidden)
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(); e.call(2,false)
+    p.dead=true; e.call(1051,p)
+    for i=1,90 do
+        eq(e.call(1160,p),true); eq(e.call(1160,p),true)
+        e.call(6) -- 30 Hz logic, 60 Hz player updates.
     end
-    assertTruthy(source:find("player:Revive()", 1, true), "the final stage must use the engine revive path")
-    assertTruthy(source:find("MC_POST_PLAYER_UPDATE", 1, true), "the module must observe the native death animation")
-    assertTruthy(main:find("first true death", 1, true), "English EID should describe a true death, not cancelled damage")
-    assertTruthy(main:find("首次真正死亡", 1, true), "Chinese EID should describe a true death, not cancelled damage")
-    assertTruthy(source:find("Color(1.0, 0.55, 0.78", 1, true), "player revival flash should use the approved pink tint")
-    assertTruthy(source:find("Color(1.0, 0.32, 0.68", 1, true), "world revival effect should use the approved pink tint")
-    assertEquals(source:find("Color(0.30, 0.68, 1.0", 1, true), nil, "the previous blue-silver poof tint must be removed")
-    assertEquals(source:find("POOF_EFFECT", 1, true), nil, "the native poof must not replace the custom ANM2")
-    assertTruthy(main:find("EffectVariant = 3020", 1, true), "main should inject the registered revive effect variant")
-    assertTruthy(entities:find('variant="3020"', 1, true), "the revive effect variant should be registered")
-    assertTruthy(entities:find('anm2path="Effects/ReviveMyLove/revive_my_love_cocoon.anm2"', 1, true),
-        "the entity registration should point at the real cocoon ANM2")
-    assertTruthy(anm2:find('DefaultAnimation="Revive"', 1, true), "the cocoon ANM2 should default to Revive")
-    assertTruthy(anm2:find('<Animation Name="Revive" FrameNum="48" Loop="false">', 1, true),
-        "Revive should remain a 48-frame one-shot animation")
+    e.call(6)
+    eq(e.call(1160,p),nil,"stalled animation must release the player via recovery watchdog")
+    eq(p.ControlsEnabled,true); eq(p.Visible,true); eq(p.hearts,2)
 end
-
-local tests = {
-    test_nonlethal_damage_is_untouched,
-    test_lethal_damage_is_allowed_and_only_confirmed_death_consumes_the_item,
-    test_cancelled_lethal_prediction_does_not_consume_or_lock_the_item,
-    test_other_revive_sources_are_not_consumed_or_blocked,
-    test_coop_players_have_independent_once_per_run_state,
-    test_no_red_heart_character_has_a_survivable_fallback,
-    test_continue_keeps_state_but_new_run_resets_it,
-    test_fake_and_nokill_damage_are_ignored,
-    test_registration_audio_and_room_safety_contract,
-}
-
-for _, test in ipairs(tests) do test() end
-print("revive_my_love_behavior_test: ok")
+tests[#tests+1]=function()
+    local e=environment({deathPresentation=true}); local p=e.player(); e.call(2,false)
+    e.call(5,p) -- Save a living player's presentation, not the death callback's values.
+    p.dead=true; p.Visible=false; p.ControlsEnabled=false; p.EntityCollisionClass=0
+    e.call(5,p); e.call(1051,p)
+    e.effects[1].sprite.finished=true; e.call(4,e.effects[1])
+    eq(p.Visible,true,"death-time invisibility must not be restored after the cocoon")
+    eq(p.ControlsEnabled,true,"death-time control lock must not survive the cocoon")
+    eq(p.EntityCollisionClass,4,"restore living collision, not death collision")
+end
+tests[#tests+1]=function()
+    local e=environment(); local p=e.player(); e.call(2,false)
+    p.dead=true; e.call(1051,p)
+    for frame=1,48 do
+        eq(e.call(1160,p),true); eq(e.call(1160,p),true)
+        eq(e.effects[1].removed,false,"48-frame visual must survive all 96 player updates")
+        e.effects[1].sprite.finished=frame==48
+        e.call(4,e.effects[1]); e.call(6)
+    end
+    eq(p.Visible,true); eq(p.ControlsEnabled,true); eq(e.effects[1].removed,true)
+end
+tests[#tests+1]=function()
+    local e=environment({deathPresentation=true}); local p=e.player(); e.call(2,false)
+    p.Visible=false; p.ControlsEnabled=false; p.EntityCollisionClass=2
+    e.call(5,p) -- A foreign living state must not be replaced with blanket true/ALL.
+    p.dead=true; e.call(1051,p)
+    e.effects[1].sprite.finished=true; e.call(4,e.effects[1])
+    eq(p.Visible,false); eq(p.ControlsEnabled,false); eq(p.EntityCollisionClass,2)
+end
+tests[#tests+1]=function()
+    local rg=REPENTOGON; REPENTOGON=nil
+    local e=environment(); eq(next(e.callbacks),nil,"missing required extension must not partially register")
+    REPENTOGON={MeetsVersion=function() return false end}
+    e=environment(); eq(next(e.callbacks),nil,"unsupported build must not register")
+    REPENTOGON=rg
+end
+local failures=0
+for index,test in ipairs(tests) do
+    local ok,err=pcall(test)
+    if not ok then failures=failures+1; print("FAIL " .. index .. ": " .. tostring(err)) end
+end
+assert(failures==0, tostring(failures) .. " revive regressions failed")
+print("revive_my_love_behavior_test: " .. #tests .. " passed")

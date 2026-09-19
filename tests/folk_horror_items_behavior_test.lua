@@ -94,6 +94,10 @@ local function loadNeverbirth(options)
         MC_POST_FIRE_TEAR = 15,
         MC_POST_CURSE_EVAL = 16,
         MC_POST_PICKUP_UPDATE = 17,
+        MC_INPUT_ACTION = 18,
+        MC_PRE_PLAYER_UPDATE = 1160,
+        MC_PRE_GAME_EXIT = 21,
+        MC_POST_ENTITY_REMOVE = 67,
     }
     CollectibleType = { COLLECTIBLE_NULL = 0, COLLECTIBLE_SPOON_BENDER = 3, COLLECTIBLE_1UP = 11, COLLECTIBLE_LOST_CONTACT = 213, COLLECTIBLE_PLAN_C = 475, COLLECTIBLE_WAVY_CAP = 582, COLLECTIBLE_DEATH_CERTIFICATE = 628 }
     CacheFlag = { CACHE_DAMAGE = 1, CACHE_SHOTSPEED = 2, CACHE_TEARCOLOR = 4, CACHE_SPEED = 8, CACHE_FIREDELAY = 16, CACHE_TEARFLAG = 32, CACHE_RANGE = 64, CACHE_LUCK = 1024 }
@@ -116,6 +120,8 @@ local function loadNeverbirth(options)
     Card = { RUNE_HAGALAZ = 32, RUNE_BLACK = 41, RUNE_SHARD = 55, CARD_SOUL_ISAAC = 81, CARD_SOUL_JACOB = 97 }
     EffectVariant = { POOF01 = 1, BLOOD_EXPLOSION = 2, PLAYER_CREEP_BLACK = 3, CREEP_RED = 4 }
     Options = { Language = options.language or "en" }
+    InputHook = { IS_ACTION_PRESSED = 0, IS_ACTION_TRIGGERED = 1, GET_ACTION_VALUE = 2 }
+    ButtonAction = { ACTION_SHOOTLEFT = 4, ACTION_SHOOTRIGHT = 5, ACTION_SHOOTUP = 6, ACTION_SHOOTDOWN = 7, ACTION_LEFT = 0 }
     local coinSwordQiVariant = options.coinSwordQiVariant
     if coinSwordQiVariant == nil then
         coinSwordQiVariant = 3001
@@ -301,8 +307,16 @@ local function loadNeverbirth(options)
         __sub = function(left, right) return Vector(left.X - right.X, left.Y - right.Y) end,
         __mul = function(left, scalar) return Vector(left.X * scalar, left.Y * scalar) end,
     }
+    local userdataVectorValues = setmetatable({}, { __mode = "k" })
+    local userdataVectorMeta = {
+        __add = vectorMeta.__add,
+        __sub = vectorMeta.__sub,
+        __mul = vectorMeta.__mul,
+        __index = function(self, key) return userdataVectorValues[self][key] end,
+        __newindex = function(self, key, value) userdataVectorValues[self][key] = value end,
+    }
     function Vector(x, y)
-        return setmetatable({
+        local fields = {
             X = x or 0,
             Y = y or 0,
             Length = function(self) return math.sqrt(self.X * self.X + self.Y * self.Y) end,
@@ -314,7 +328,16 @@ local function loadNeverbirth(options)
             Resized = function(self, length)
                 return self:Normalized() * length
             end,
-        }, vectorMeta)
+        }
+        if options.userdataVectors or (arg and arg[2] == "--userdata-vectors") then
+            -- A closed file supplies a real Lua userdata without a native module.
+            -- This models the Vector type boundary, not the game's C++ renderer.
+            local vector = assert(io.tmpfile())
+            vector:close()
+            userdataVectorValues[vector] = fields
+            return debug.setmetatable(vector, userdataVectorMeta)
+        end
+        return setmetatable(fields, vectorMeta)
     end
     function EntityRef(entity) return { Entity = entity } end
 
@@ -335,6 +358,7 @@ local function loadNeverbirth(options)
         return function() end
     end
 
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallbacks(callbackId, param)
@@ -353,7 +377,28 @@ local function loadNeverbirth(options)
         return callback(mod, itemId, nil, player, 0, activeSlot or ActiveSlot.SLOT_PRIMARY, 0)
     end
 
+    local function runPrePlayer(player)
+        for _, callback in ipairs(getCallbacks(ModCallbacks.MC_PRE_PLAYER_UPDATE)) do callback(mod, player) end
+    end
+    local function inputResult(player, hook, action)
+        for _, callback in ipairs(getCallbacks(ModCallbacks.MC_INPUT_ACTION)) do
+            local result = callback(mod, player, hook, action)
+            if result ~= nil then return result end
+        end
+    end
+    Input = { GetActionValue = function(action, controller)
+        local player = players[controller + 1]
+        local overridden = inputResult(player, InputHook.GET_ACTION_VALUE, action)
+        if overridden ~= nil then return overridden end
+        local v = player.testOptions.shootingInput or Vector(0, 0)
+        if action == ButtonAction.ACTION_SHOOTLEFT then return math.max(0, -v.X) end
+        if action == ButtonAction.ACTION_SHOOTRIGHT then return math.max(0, v.X) end
+        if action == ButtonAction.ACTION_SHOOTUP then return math.max(0, -v.Y) end
+        if action == ButtonAction.ACTION_SHOOTDOWN then return math.max(0, v.Y) end
+        return 0
+    end }
     local function runPostUpdate()
+        for _, player in ipairs(players) do runPrePlayer(player) end
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_POST_UPDATE)) do callback(mod) end
     end
 
@@ -361,7 +406,7 @@ local function loadNeverbirth(options)
         local result
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_ENTITY_TAKE_DMG, EntityType.ENTITY_PLAYER)) do
             local value = callback(mod, player, amount or 1, flags or 0, EntityRef(sourceEntity or player), 0)
-            if value == false then result = false end
+            if value == false then return false end
         end
         return result
     end
@@ -428,6 +473,8 @@ local function loadNeverbirth(options)
         opts = opts or {}
         local player = {
             Type = EntityType.ENTITY_PLAYER,
+            ControllerIndex = #players,
+            ControlsEnabled = true,
             InitSeed = opts.initSeed or (#players + 100),
             Position = opts.position or Vector(100, 100),
             Damage = opts.damage or 3.5,
@@ -531,6 +578,10 @@ local function loadNeverbirth(options)
         function player:AddCacheFlags(flag) self.cacheFlags[#self.cacheFlags + 1] = flag end
         function player:EvaluateItems() end
         function player:SetColor(color) self.lastColor = color end
+        function player:SetMinDamageCooldown(frames)
+            self.damageCooldown = math.max(self.damageCooldown or 0, frames)
+        end
+        function player:GetDamageCooldown() return self.damageCooldown or 0 end
         function player:IsDead() return self.dead == true end
         function player:Revive() self.revived = (self.revived or 0) + 1; self.dead = false end
         function player:GetEffects() return self.effects end
@@ -633,6 +684,7 @@ local function loadNeverbirth(options)
     end
 
     return {
+        getCallbacks = getCallbacks,
         items = itemIds,
         spawns = spawns,
         roomEntities = roomEntities,
@@ -644,6 +696,16 @@ local function loadNeverbirth(options)
         newHeart = newHeart,
         runUse = runUse,
         runPostUpdate = runPostUpdate,
+        runPrePlayer = runPrePlayer,
+        inputResult = inputResult,
+        runInputReset = function(event)
+            -- Call only this mechanic's registered cleanup: unrelated save/HUD
+            -- callbacks do not belong to this focused lifecycle fixture.
+            local id = event == "exit" and ModCallbacks.MC_PRE_GAME_EXIT or ModCallbacks.MC_POST_GAME_STARTED
+            for _, callback in ipairs(getCallbacks(id)) do
+                if callback == mod.CancelCoinSewnSwordHolds then callback(mod) end
+            end
+        end,
         runDamage = runDamage,
         runNewRoom = runNewRoom,
         runNewLevel = runNewLevel,
@@ -1000,7 +1062,7 @@ local function test_coin_sword_qi_does_not_write_effect_rotation()
     assertEquals(effect:GetSprite().Rotation, 0, "Coin Sword Qi should rotate the sprite object instead")
 end
 
-local function test_coin_sewn_sword_removes_tears_while_held_and_release_shot_only()
+local function test_coin_sewn_sword_leaves_existing_attacks_untouched()
     local env = loadNeverbirth()
     local player = env.newPlayer({ coins = 6, damage = 5, shootingInput = Vector(0, 0), fireDirection = -1, moveDirection = -1 })
 
@@ -1008,14 +1070,14 @@ local function test_coin_sewn_sword_removes_tears_while_held_and_release_shot_on
     local heldTear = { Type = EntityType.ENTITY_TEAR, SpawnerEntity = player, removed = false }
     function heldTear:Remove() self.removed = true end
     env.runPostFireTear(heldTear)
-    assertEquals(heldTear.removed, true, "Coin-Sewn Sword should remove normal tears while raised")
+    assertEquals(heldTear.removed, false, "existing/item-created tears must not be deleted while raised")
 
     player.testOptions.shootingInput = Vector(1, 0)
     env.runPostUpdate()
     local releaseTear = { Type = EntityType.ENTITY_TEAR, SpawnerEntity = player, removed = false }
     function releaseTear:Remove() self.removed = true end
     env.runPostFireTear(releaseTear)
-    assertEquals(releaseTear.removed, true, "Coin-Sewn Sword should remove the normal tear from the release input")
+    assertEquals(releaseTear.removed, false, "input replacement must not delete independent attacks")
 
     local laterTear = { Type = EntityType.ENTITY_TEAR, SpawnerEntity = player, removed = false }
     function laterTear:Remove() self.removed = true end
@@ -1745,13 +1807,13 @@ end
 
 local function test_meat_lump_grants_custom_life_without_visible_c11_on_pickup()
     local env = loadNeverbirth()
-    local player = env.newPlayer({})
+    local player = env.newPlayer({ collectibles = { [env.items.MeatLump] = 1 } })
 
     env.runPostAddCollectible(env.items.MeatLump, player)
 
     assertEquals(#(player.addedCollectibles or {}), 0, "Meat Lump should not add visible c11 to the item list")
     assertEquals(#player.removedCollectibles, 0, "Meat Lump should not add and then remove visible c11")
-    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 1, "Meat Lump should add a hidden c11 backup effect")
+    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 0, "Meat Lump should own its charge without a hidden c11 effect")
 
     player.hearts = 1
     local result = env.runDamage(player, 2, 0)
@@ -1768,7 +1830,7 @@ local function test_meat_lump_grants_custom_life_from_held_copy_even_if_pickup_c
 
     assertEquals(player.collectibles[CollectibleType.COLLECTIBLE_1UP] or 0, 0, "held-copy tracking should not leave c11 in the visible item list")
     assertEquals(#(player.addedCollectibles or {}), 0, "held Meat Lump should not call AddCollectible for visible c11")
-    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 1, "held Meat Lump should grant a hidden c11 backup effect")
+    assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 0, "held Meat Lump must not borrow a hidden c11 effect")
 
     env.runPostUpdate()
     player.hearts = 1
@@ -1800,7 +1862,7 @@ local function test_black_taisui_stage_three_renders_custom_life_marker_until_us
             sawWard = true
         end
     end
-    assertTruthy(sawWard, "stage three should render a Black Taisui ward marker")
+    assertTruthy(not sawWard, "stage three must not render the removed WARD label")
     assertEquals(player.effects.counts[CollectibleType.COLLECTIBLE_1UP] or 0, 0, "Black Taisui ward should not fake a c11 temp effect")
 
     player.hearts = 1
@@ -1839,7 +1901,7 @@ local function test_black_taisui_runtime_feedback_uses_chinese_game_language()
             sawWard = true
         end
     end
-    assertTruthy(sawWard, "Chinese runtime should render the localized Black Taisui ward marker")
+    assertTruthy(not sawWard, "Chinese runtime must not render the removed ward label")
 
     player.hearts = 1
     env.runDamage(player, 2, DamageFlag.DAMAGE_RED_HEARTS)
@@ -1918,8 +1980,126 @@ local function test_black_taisui_multiple_players_are_independent()
     assertEquals(getBlackTaisuiParasite(env, playerB), 8, "player B should keep separate parasite value")
 end
 
+local function test_coin_sword_userdata_vectors_release_and_restore_input()
+    local cases = {
+        { coins = 1, x = 0, y = -1, count = 1, mode = "normal", animation = "Slash", backlash = 0 },
+        { coins = 0, x = 1, y = 0, count = 1, mode = "blood", animation = "BloodSlash", backlash = 1 },
+        { coins = 6, x = 0.3, y = 0.4, count = 7, mode = "empowered", animation = "EmpoweredSlash", backlash = 0 },
+    }
+    for _, case in ipairs(cases) do
+        local env = loadNeverbirth({ userdataVectors = true })
+        local player = env.newPlayer({ coins = case.coins, shootingInput = Vector(0, 0) })
+        assertEquals(type(player.Position), "userdata", "regression must exercise real userdata instead of a table vector")
+        env.runUse(env.items.CoinSewnSword, player)
+        env.runPrePlayer(player)
+        assertEquals(#coinSwordEffects(env), 0, "zero input must preserve the holding state")
+        assertEquals(env.inputResult(player, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTRIGHT), 0, "holding must suppress the owner's native weapon")
+
+        player.testOptions.shootingInput = Vector(case.x, case.y)
+        env.runPrePlayer(player)
+        local effects = coinSwordEffects(env)
+        assertEquals(#effects, case.count, "userdata direction must release the expected sword qi")
+        local lastEffect = effects[#effects]
+        assertEquals(lastEffect:GetData().Mode, case.mode, "release must preserve the existing attack mode")
+        assertEquals(lastEffect:GetSprite().current, case.animation, "release must start the matching custom animation")
+        assertEquals(player.coins, 0, "release must spend the original coin amount")
+        assertEquals(#player.damageCalls, case.backlash, "only the no-coin mode should backlash")
+        assertEquals(#player.dischargedSlots, 1, "release must discharge exactly once")
+        if case.mode == "empowered" then
+            assertTruthy(math.abs(lastEffect.Velocity.X - 7.2) < 0.000001, "analog horizontal input must be normalized")
+            assertTruthy(math.abs(lastEffect.Velocity.Y - 9.6) < 0.000001, "analog vertical input must be normalized")
+        end
+        assertEquals(env.inputResult(player, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTRIGHT), 0, "release frame must still block native firing")
+        env.runPrePlayer(player)
+        assertEquals(env.inputResult(player, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTRIGHT), nil, "normal input must return after release")
+        assertEquals(#coinSwordEffects(env), case.count, "held input must not release the sword a second time")
+    end
+end
+
+local function test_coin_sword_native_input_is_owner_scoped_and_preempts_release()
+    local env = loadNeverbirth()
+    local a = env.newPlayer({ coins = 1, shootingInput = Vector(0, 0) })
+    local b = env.newPlayer({ coins = 1, shootingInput = Vector(1, 0) })
+    env.runUse(env.items.CoinSewnSword, a)
+    assertEquals(env.inputResult(a, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTRIGHT), 0, "armed owner input must be zero before native firing")
+    assertEquals(env.inputResult(a, InputHook.IS_ACTION_PRESSED, ButtonAction.ACTION_SHOOTRIGHT), false, "pressed input must be suppressed")
+    assertEquals(env.inputResult(a, InputHook.IS_ACTION_TRIGGERED, ButtonAction.ACTION_SHOOTRIGHT), false, "trigger input must be suppressed")
+    assertEquals(env.inputResult(a, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_LEFT), nil, "movement must be untouched")
+    assertEquals(env.inputResult(b, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTRIGHT), nil, "co-op partner input must be untouched")
+    a.testOptions.shootingInput = Vector(0, -1)
+    env.runPrePlayer(a)
+    assertEquals(#coinSwordEffects(env), 1, "raw direction must release before the native player update, without eating itself")
+    assertEquals(coinSwordEffects(env)[1].Velocity.Y, -12, "release must use raw aim")
+    assertEquals(env.inputResult(a, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTUP), 0, "release frame stays blocked for its complete native weapon pass")
+    env.runPrePlayer(a)
+    assertEquals(env.inputResult(a, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTUP), nil, "next update must restore normal firing")
+    assertEquals(#coinSwordEffects(env), 1, "no repeated release")
+end
+
+local function test_coin_sword_input_cleans_up_and_yields_to_avada()
+    for _, ending in ipairs({ "cancel", "room", "level", "death", "removed", "controls", "exit", "start" }) do
+        local env = loadNeverbirth()
+        local p = env.newPlayer({ coins = 1, shootingInput = Vector(0, 0) })
+        env.runUse(env.items.CoinSewnSword, p)
+        if ending == "cancel" then env.runUse(env.items.CoinSewnSword, p)
+        elseif ending == "room" then env.runNewRoom()
+        elseif ending == "level" then env.runNewLevel()
+        elseif ending == "death" then p.dead = true; env.runPrePlayer(p)
+        elseif ending == "removed" then p.activeItems[0] = 0; env.runPrePlayer(p)
+        elseif ending == "exit" or ending == "start" then env.runInputReset(ending)
+        else p.ControlsEnabled = false; env.runPrePlayer(p) end
+        assertEquals(env.inputResult(p, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTRIGHT), nil, "cleanup " .. ending .. " must release input ownership")
+        assertEquals(#coinSwordEffects(env), 0, "cleanup must not fire or spend")
+        assertEquals(p.coins, 1, "cleanup preserves coins")
+    end
+    local env = loadNeverbirth()
+    local p = env.newPlayer({ coins = 1, shootingInput = Vector(1, 0) })
+    env.mod.AvadaKedavra = { OwnsAttack = function() return true end }
+    env.runUse(env.items.CoinSewnSword, p)
+    env.runPrePlayer(p)
+    assertEquals(env.inputResult(p, InputHook.GET_ACTION_VALUE, ButtonAction.ACTION_SHOOTRIGHT), nil, "Avada owns its input")
+    assertEquals(#coinSwordEffects(env), 0, "Avada priority prevents sword attack")
+end
+
+if arg and arg[1] == "--fixture" then return loadNeverbirth end
+
+if arg and arg[1] == "--black-taisui" then
+    local selected = {
+        test_black_taisui_effect_resources_exist,
+        test_black_taisui_stage_one_penalties_stack_and_respect_floors,
+        test_black_taisui_stage_two_softens_penalty_and_filters_curses,
+        test_black_taisui_spawns_effects_for_growth_curse_and_fear,
+        test_black_taisui_stage_two_removes_existing_level_curses_after_activation,
+        test_black_taisui_stage_two_removes_wavy_cap_effects_and_keeps_positive_stats,
+        test_black_taisui_stage_two_replaces_wavy_cap_with_cleansed_cap,
+        test_black_taisui_stage_two_refreshes_hidden_collectible_pedestals,
+        test_black_taisui_stage_two_refreshes_shop_hidden_collectible_sprite_without_breaking_shop_data,
+        test_black_taisui_stage_two_reveals_rerolled_collectible_without_room_reload,
+        test_black_taisui_stage_two_reapplies_sprite_if_game_restores_question_mark,
+        test_black_taisui_stage_two_does_not_guess_unknown_collectibles,
+        test_black_taisui_stage_three_damage_and_spawns_meat_lump_once,
+        test_black_taisui_stage_three_spawns_meat_lump_when_crossing_threshold,
+        test_meat_lump_grants_custom_life_without_visible_c11_on_pickup,
+        test_meat_lump_grants_custom_life_from_held_copy_even_if_pickup_callback_missed,
+        test_black_taisui_stage_three_renders_custom_life_marker_until_used,
+        test_black_taisui_runtime_feedback_uses_chinese_game_language,
+        test_black_taisui_stage_three_does_not_block_cost_damage,
+        test_black_taisui_parasite_value_grows_from_red_healing_container_and_damage,
+        test_black_taisui_no_red_container_uses_soul_black_at_half_efficiency,
+        test_black_taisui_multiple_players_are_independent,
+    }
+    for _, run in ipairs(selected) do run() end
+    print("Black Taisui existing behavior tests passed: " .. #selected)
+    return
+end
+
+test_coin_sword_userdata_vectors_release_and_restore_input()
+test_coin_sword_native_input_is_owner_scoped_and_preempts_release()
+test_coin_sword_input_cleans_up_and_yields_to_avada()
+if not (arg and arg[1] == "--coin-sword") then
 test_xml_registers_folk_horror_items_and_pools()
 test_purified_mushroom_icon_resource_is_collectible_ready()
+end
 test_coin_sewn_sword_spends_six_coins_for_six_slashes_and_empowered_slash()
 test_coin_sewn_sword_spreads_six_qi_visibly()
 test_coin_sewn_sword_holds_without_spending_until_direction_input()
@@ -1933,7 +2113,7 @@ test_coin_sword_debug_hitbox_renders_only_when_enabled()
 test_coin_sword_qi_fallback_effect_still_updates_when_variant_lookup_fails()
 test_coin_sword_qi_uses_player_shooting_direction_and_entity_rotation()
 test_coin_sword_qi_does_not_write_effect_rotation()
-test_coin_sewn_sword_removes_tears_while_held_and_release_shot_only()
+test_coin_sewn_sword_leaves_existing_attacks_untouched()
 test_coin_sewn_sword_cancel_allows_tears_again()
 test_empowered_coin_sword_qi_pierces_multiple_enemies()
 test_coin_sword_qi_inherits_spoon_bender_homing()
@@ -1943,6 +2123,10 @@ test_empowered_lost_contact_coin_sword_qi_blocks_without_disappearing()
 test_lost_contact_coin_sword_qi_does_not_remove_player_tears_or_pickups()
 test_coin_sword_qi_can_home_and_block_projectiles_together()
 test_coin_sword_qi_expires()
+if arg and arg[1] == "--coin-sword" then
+    print("coin sword behavior tests passed")
+    return
+end
 test_coin_faced_mask_enters_room_with_mask_and_confuses_enemies()
 test_coin_faced_mask_active_costume_appears_when_room_mask_is_active()
 test_coin_faced_mask_active_costume_appears_when_picked_up_mid_room()

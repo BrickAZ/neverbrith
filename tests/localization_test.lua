@@ -72,10 +72,12 @@ local function loadNeverbirthWithEID(options)
         KamikazeSquad = 786,
         MemoryDisorder = 787,
         RingOfSevenCurses = 788,
+        AvadaKedavra = 789,
         CleansedWavyCap = 767,
         FortuneRivallingHeavenGu = 768,
     }
     local defaultItemIdsByLoadedName = {}
+    defaultItemIdsByLoadedName['健康睡眠'] = 990 -- approved Chinese-only registration
     for name, itemId in pairs(logicalItemIds) do
         defaultItemIdsByLoadedName[name] = itemId
     end
@@ -171,12 +173,15 @@ local function loadNeverbirthWithEID(options)
     defaultItemIdsByLoadedName["记忆紊乱"] = logicalItemIds.MemoryDisorder
     defaultItemIdsByLoadedName["Ring of the Seven Curses"] = logicalItemIds.RingOfSevenCurses
     defaultItemIdsByLoadedName["七咒之戒"] = logicalItemIds.RingOfSevenCurses
+    defaultItemIdsByLoadedName["Avada Kedavra"] = logicalItemIds.AvadaKedavra
+    defaultItemIdsByLoadedName["阿瓦达啃大瓜"] = logicalItemIds.AvadaKedavra
     defaultItemIdsByLoadedName["Cleansed Wavy Cap"] = logicalItemIds.CleansedWavyCap
     defaultItemIdsByLoadedName["净化迷幻菇"] = logicalItemIds.CleansedWavyCap
     defaultItemIdsByLoadedName["Fortune Rivalling Heaven Gu"] = logicalItemIds.FortuneRivallingHeavenGu
     defaultItemIdsByLoadedName["鸿运齐天蛊"] = logicalItemIds.FortuneRivallingHeavenGu
 
     local itemIdsByLoadedName = options.itemIdsByLoadedName or defaultItemIdsByLoadedName
+    itemIdsByLoadedName['健康睡眠'] = itemIdsByLoadedName['健康睡眠'] or 990
     local eidCalls = {}
 
     package.loaded.json = nil
@@ -211,6 +216,7 @@ local function loadNeverbirthWithEID(options)
         MC_POST_NPC_INIT = 17,
         MC_POST_ENTITY_REMOVE = 18,
         MC_POST_PLAYER_RENDER = 19,
+        MC_POST_PICKUP_UPDATE = 35,
     }
 
     UseFlag = { USE_MIMIC = 1 }
@@ -237,7 +243,16 @@ local function loadNeverbirthWithEID(options)
     PickupVariant = { PICKUP_HEART = 10, PICKUP_PILL = 70, PICKUP_COLLECTIBLE = 100, PICKUP_TAROTCARD = 300 }
     EntityPartition = { ENEMY = 1 }
     ItemConfig = { TAG_FOOD = 1 }
-    ButtonAction = { ACTION_ITEM = 5, ACTION_PILLCARD = 6 }
+    ButtonAction = { ACTION_ITEM = 5, ACTION_PILLCARD = 6,
+        ACTION_SHOOTLEFT = 14, ACTION_SHOOTRIGHT = 15, ACTION_SHOOTUP = 16, ACTION_SHOOTDOWN = 17 }
+    EffectVariant = { BRIMSTONE_SWIRL = 71 }
+    -- Unique fixture IDs: this suite tests localization, not native dispatch.
+    for index, name in ipairs({
+        "MC_PRE_PLAYER_UPDATE", "MC_INPUT_ACTION", "MC_POST_EFFECT_INIT", "MC_PRE_EFFECT_UPDATE",
+        "MC_POST_LASER_INIT", "MC_POST_FIRE_BRIMSTONE", "MC_PRE_LASER_COLLISION", "MC_POST_LASER_COLLISION",
+        "MC_POST_ENTITY_TAKE_DMG", "MC_PRE_PLAYER_REVIVE", "MC_EXECUTE_CMD", "MC_POST_FIRE_TEAR",
+        "MC_POST_FIRE_KNIFE", "MC_POST_FIRE_BONE_CLUB", "MC_POST_FIRE_SWORD", "MC_POST_FIRE_BOMB",
+    }) do ModCallbacks[name] = 2100 + index end
     Input = { IsActionPressed = function() return false end }
     HeartSubType = { HEART_SOUL = 3, HEART_BLACK = 6 }
     ItemPoolType = { POOL_TREASURE = 0, POOL_DEVIL = 3, POOL_ANGEL = 4 }
@@ -351,8 +366,15 @@ local function loadNeverbirthWithEID(options)
         }
 
         function mod:AddCallback(callbackId, fn, param)
+            self:AddPriorityCallback(callbackId, 0, fn, param)
+        end
+
+        function mod:AddPriorityCallback(callbackId, priority, fn, param)
             callbacks[callbackId] = callbacks[callbackId] or {}
-            callbacks[callbackId][#callbacks[callbackId] + 1] = { fn = fn, param = param }
+            callbacks[callbackId][#callbacks[callbackId] + 1] = {
+                fn = fn, param = param, Priority = priority,
+                AddOrder = #callbacks[callbackId] + 1, Mod = self, Function = fn,
+            }
         end
 
         function mod:HasData()
@@ -381,6 +403,7 @@ local function loadNeverbirthWithEID(options)
         end,
     }
 
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
     _G.NeverbirthLocalizationTestCallbacks = callbacks
 
@@ -392,6 +415,7 @@ local function loadNeverbirthWithEID(options)
 end
 
 local expectedXmlItems = {
+    AvadaKedavra = { enName = "Avada Kedavra", zhName = "阿瓦达啃大瓜", description = "", zhDescription = "" },
     RingOfSevenCurses = {
         enName = "Ring of the Seven Curses",
         zhName = "七咒之戒",
@@ -696,14 +720,18 @@ local expectedXmlItems = {
 }
 
 local expectedEID = {
+    AvadaKedavra = {
+        en_us = { name = "Avada Kedavra", description = "Replaces your weapon with Anti-Gravity Brimstone#While enemies remain, hold fire to charge for 1 second, then release to cast#Multiplies your damage stat by 5; tears do not change the charge time#Keep holding to retain full charge and change aim; releasing early cancels#If a completed cast kills no enemy directly, you die and cannot revive from that death#In co-op, only the caster dies" },
+        zh_cn = { name = "阿瓦达啃大瓜", description = "攻击替换为原版反重力硫磺火#有敌人时按住射击蓄力1秒，蓄满后松键施法#面板攻击力翻5倍；蓄力不受射速影响#蓄满可持续按住并调整方向；未蓄满松键取消#一次攻击完全结束后若未直接击杀敌人，施法者死亡且本次无法复活#合作模式只杀死施法者" },
+    },
     RingOfSevenCurses = {
         en_us = {
             name = "Ring of the Seven Curses",
-            description = "Permanently binds itself to your primary active slot for this run#Forces Darkness, Lost, Unknown, and Maze; blocks trinkets and flight#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Enemy health and damage taken are doubled#Maximum: 6 hearts, 2 keys, 1 bomb, and 20 coins#Every 2 rooms, charges the retained character-native secondary active by 1#Quality 4 and modded items stay uncollectible; a separate legal item appears beside them#Rerolling the original pedestal checks its new item again; pre-ring active drops are excluded#Trade items add a broken heart",
+            description = "Permanently binds itself to your primary active slot for this run#Forces Darkness, Lost, Unknown, and Maze; blocks trinkets and flight#Cannot use beds, except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Enemy health and damage taken are doubled#Maximum: 6 hearts, 2 keys, 1 bomb, and 20 coins#Every 2 rooms, charges the retained character-native secondary active by 1#Quality 4 and modded items stay uncollectible; a separate legal item appears beside them#Rerolling the original pedestal checks its new item again; pre-ring active drops are excluded#Trade items add a broken heart",
         },
         zh_cn = {
             name = "七咒之戒",
-            description = "本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
+            description = "本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#无法使用床，妈妈的床除外#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
         },
     },
     MemoryDisorder = {
@@ -815,11 +843,11 @@ local expectedEID = {
     YinsCurse = {
         en_us = {
             name = "Yin's Curse",
-            description = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If Black Candle was held when this item was picked up, Ipecac instead appears beside it#Lose all explosion immunity; {{Collectible260}} Black Candle temporarily makes you immune to explosions",
+            description = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If Black Candle was held when this item was picked up, Ipecac instead appears beside it#Existing explosion immunity currently remains active; {{Collectible260}} Black Candle itself does not grant it",
         },
         zh_cn = {
             name = "阴的诅咒",
-            description = "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#失去所有防爆；{{Collectible260}}黑蜡烛暂时使你免疫爆炸",
+            description = "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#已有防爆效果目前仍会生效；{{Collectible260}}黑蜡烛本身不提供防爆",
         },
     },
     Everchanging = {
@@ -1095,21 +1123,21 @@ local expectedEID = {
     BlackTaisui = {
         en_us = {
             name = "Black Taisui",
-            description = "Gain parasite value from red-heart healing, red heart containers, and red-heart damage#Each red heart container: +4 parasite; red-heart healing: +1 per half heart; red-heart damage: +2 per half heart#Without red heart containers: soul/black healing +1 per full heart; soul/black damage +1 per half heart#0-7: {{Damage}} -0.5, {{Speed}} -0.2, {{Luck}} -3 per copy (damage cannot fall below 1; speed cannot fall below 0.5)#8-15: {{Damage}} -0.5; reveal question-mark item pedestals and suppress Blind, Lost, Unknown, and Wavy Cap side effects#At 16+, all 8-15 effects remain; each copy grants {{Damage}} +1.5 damage, and Meat Lump is created once#Multiple copies share parasite value; Meat Lump still appears only once",
+            description = "Gain parasite value from red-heart healing, red heart containers, and red-heart damage#Each red heart container: +4 parasite; red-heart healing: +1 per half heart; red-heart damage: +2 per half heart#Without red heart containers: soul/black healing +1 per full heart; soul/black damage +1 per half heart#0-7: {{Damage}} -0.5, {{Speed}} -0.2, {{Luck}} -3 per copy (damage cannot fall below 1; speed cannot fall below 0.5)#8-15: {{Damage}} -0.5; reveal question-mark item pedestals and suppress Blind, Lost, Unknown, and Wavy Cap side effects#At 16+, all 8-15 effects remain; each copy grants {{Damage}} +1.5 damage, and Meat Lump is created once#At 16+, also blocks one lethal hit per floor, except IV Bag, devil deals, and cursed doors#Multiple copies share parasite value; Meat Lump still appears only once",
         },
         zh_cn = {
             name = "黑太岁",
-            description = "红心治疗、红心容器和红心伤害会积累寄生值#每个红心容器+4；红心治疗每半心+1；红心伤害每半心+2#无红心容器时：魂心/黑心治疗每整心+1；魂心/黑心伤害每半心+1#0-7：每个黑太岁 {{Damage}} -0.5、{{Speed}} -0.2、{{Luck}} -3（攻击最低1，移速最低0.5）#8-15：{{Damage}} -0.5；揭示问号道具，并压制致盲/迷途/未知和波浪帽副作用#16+：继承二阶段；每个黑太岁 {{Damage}} +1.5；生成1次肉块#多个黑太岁共享寄生值；肉块仍只生成一次",
+            description = "红心治疗、红心容器和红心伤害会积累寄生值#每个红心容器+4；红心治疗每半心+1；红心伤害每半心+2#无红心容器时：魂心/黑心治疗每整心+1；魂心/黑心伤害每半心+1#0-7：每个黑太岁 {{Damage}} -0.5、{{Speed}} -0.2、{{Luck}} -3（攻击最低1，移速最低0.5）#8-15：{{Damage}} -0.5；揭示问号道具，并压制致盲/迷途/未知和波浪帽副作用#16+：继承二阶段；每个黑太岁 {{Damage}} +1.5；生成1次肉块#三阶段本体每层可挡1次致命伤；不挡献血袋、恶魔交易和诅咒门代价#多个黑太岁共享寄生值；肉块仍只生成一次",
         },
     },
     MeatLump = {
         en_us = {
             name = "Meat Lump",
-            description = "Grants one extra life#On lethal damage, consume it and return with a little health#This item does not appear in any item pool",
+            description = "Blocks one lethal hit per copy#On trigger, keeps a little health and briefly grants invincibility#HUD +N shows remaining Meat Lump charges#This item does not appear in any item pool",
         },
         zh_cn = {
             name = "肉块",
-            description = "有条件抵挡一次来自敌人的致死伤害#这个道具不存在于任何道具池里",
+            description = "每个肉块可抵挡1次致命伤害#触发后保留少量生命，并获得短暂无敌#HUD +N 显示肉块剩余挡死次数#这个道具不存在于任何道具池里",
         },
     },
     GoodGirlOfBabylon = {
@@ -1135,11 +1163,11 @@ local expectedEID = {
     StrongLaxative = {
         en_us = {
             name = "Strong Laxative",
-            description = "All creep is treated as friendly#Leave slippery creep while moving#Slippery creep slows enemies and deals 10% of your damage every 10 frames#Each copy gives a 5% chance per second to spawn random poop (max 100%)#Up to 15 poops per room",
+            description = "All creep is treated as friendly#Leave slippery creep while moving#Slippery creep slows grounded enemies and deals a base 10% of your damage every 10 frames#Aquarius-style synergies: poison, burning, homing and Playdough Cookie effects#Proptosis: 3x creep damage; Ipecac: uses Aquarius damage basis#Coal and acid do not break obstacles or add distance damage; no explosions or Godhead aura#Each copy gives a 5% chance per second to spawn random poop (max 100%)#Up to 15 poops per room",
         },
         zh_cn = {
             name = "强力泻药",
-            description = "所有水迹视为己方水迹#移动时留下打滑水迹#打滑水迹使敌人减速，并每10帧造成10%角色伤害#每个副本每秒+5%概率生成随机大便（最高100%）#每个房间最多生成15个大便",
+            description = "所有水迹视为己方水迹#移动时留下打滑水迹#打滑水迹使地面敌人减速，每10帧造成基础10%角色伤害#继承宝瓶座式协同：中毒、燃烧、追踪及黏土饼干随机效果#眼球突出：水迹伤害×3；吐根酊：使用宝瓶座的伤害计算基数#煤块与硫酸不破坏障碍物、不增加距离伤害；无爆炸和神性光环#每个副本每秒+5%概率生成随机大便（最高100%）#每个房间最多生成15个大便",
         },
     },
     TowerOfBabel = {
@@ -1234,7 +1262,8 @@ local function test_eid_registers_explicit_english_and_chinese_descriptions()
             expectedCallCount = expectedCallCount + 1
         end
     end
-    assertEquals(#env.eidCalls, expectedCallCount, "EID should register exactly two languages for each item")
+    assertEquals(#env.eidCalls, expectedCallCount + 1,
+        "EID should register bilingual items plus Healthy Sleep's approved Chinese only")
     for _, call in ipairs(env.eidCalls) do
         assertTruthy(call.language == "en_us" or call.language == "zh_cn", "EID language should be explicit for every registration")
         if call.language == "en_us" then
@@ -1357,7 +1386,7 @@ local function test_language_templates_are_parseable_and_localize_pickup_names()
             assertTruthy(containsHan(expected.zhName), itemName .. " Chinese pickup name should contain Chinese")
         end
         assertEquals(containsHan(englishDescription), false, itemName .. " English template should not contain Chinese")
-        if itemName ~= "ds4" then
+        if itemName ~= "ds4" and expected.zhDescription ~= "" then
             assertTruthy(containsHan(chineseDescription), itemName .. " Chinese template should contain Chinese")
         end
     end
@@ -1385,7 +1414,9 @@ local function test_runtime_pickup_banner_table_matches_all_language_templates()
     local registeredNames = collectItemNamesFromItemsXml(readFile("content/items.xml"))
     local registeredCount = 0
     for _ in pairs(registeredNames) do registeredCount = registeredCount + 1 end
-    assertEquals(expectedCount, registeredCount,
+    -- Healthy Sleep has explicitly undecided English copy. Its approved Chinese
+    -- registration is verified separately below, not invented to fit this table.
+    assertEquals(expectedCount + 1, registeredCount,
         "localization baseline should contain every collectible currently registered in content/items.xml")
     assertEquals(registrationCount, expectedCount,
         "runtime pickup banner table should register exactly one entry per Neverbirth collectible")
@@ -1545,6 +1576,33 @@ local function test_player_facing_english_copy_is_natural_and_synchronized()
         end
     end
 end
+local function test_healthy_sleep_keeps_english_undecided()
+    local previousGlobals = {}
+    for key, value in pairs(_G) do previousGlobals[key] = value end
+    local env = loadNeverbirthWithEID({ itemIdsByLoadedName = { ['健康睡眠'] = 990 } })
+    assertEquals(findEIDCall(env.eidCalls, 990, 'en_us'), nil, 'unapproved English must not be registered')
+    local zh = findEIDCall(env.eidCalls, 990, 'zh_cn')
+    assertTruthy(zh, 'healthy sleep Chinese EID')
+    assertEquals(zh.itemName, '健康睡眠')
+    assertTruthy(zh.description:find('15帧', 1, true))
+    assertTruthy(zh.description:find('3颗魂心', 1, true))
+    assertEquals(Neverbirth.PickupBannerTexts[990].en_us, nil)
+    assertEquals(Neverbirth.PickupBannerTexts[990].zh_cn.subtitle, '睡够八小时')
+    for _, path in ipairs({'content/items.xml','content/items.en_us.xml','content/items.zh_cn.xml'}) do
+        local xml = readFile(path)
+        local entry = xml:match('<passive%s+name="健康睡眠"(.-)/>')
+        assertTruthy(entry, path .. ' healthy sleep registration')
+        assertTruthy(entry:find('id="58"', 1, true))
+        assertTruthy(entry:find('quality="0"', 1, true))
+        assertTruthy(entry:find('description="睡够八小时"', 1, true))
+        assertTruthy(entry:find('gfx="healthy_sleep.png"', 1, true))
+        assertEquals(entry:find('tags=', 1, true), nil)
+    end
+    -- Existing suites import the last fixture's localized lookup environment.
+    -- Preserve that exact environment, including its aliases and closures.
+    for key, value in pairs(previousGlobals) do _G[key] = value end
+end
+
 test_eid_registers_explicit_english_and_chinese_descriptions()
 test_item_ids_are_resolved_from_english_or_chinese_loaded_names()
 test_items_xml_uses_stable_registration_names_and_english_descriptions()
@@ -1555,5 +1613,6 @@ test_playable_files_do_not_depend_on_neverbirth_stringtable_tokens()
 test_failed_stringtable_experiment_is_documented()
 test_little_leather_shoes_registration_contract()
 test_player_facing_english_copy_is_natural_and_synchronized()
+test_healthy_sleep_keeps_english_undecided()
 
 print("localization tests passed")

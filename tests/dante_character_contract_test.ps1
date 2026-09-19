@@ -132,9 +132,11 @@ function Assert-VanillaPlayerNameStyle {
 $playersPath = Join-Path $Root 'content\players.xml'
 Assert-True (Test-Path -LiteralPath $playersPath) "missing players.xml: $playersPath"
 [xml]$playersXml = Get-Content -Raw -LiteralPath $playersPath
-$dantePlayers = @($playersXml.players.player | Where-Object { $_.name -eq 'Dante' })
-Assert-True ($dantePlayers.Count -eq 1) "players.xml must contain exactly one Dante registration, got $($dantePlayers.Count)"
-$dante = $dantePlayers[0]
+& (Join-Path $PSScriptRoot 'no_custom_characters_test.ps1') -Root $Root
+# The character is unregistered. This fixture preserves the archived art contract,
+# not a live player definition or a request to re-enable the character.
+[xml]$archivedDante = '<player name="Dante" skin="character_dante.png" hp="6" bombs="1" nameimage="playername_dante.png" portrait="playerportrait_dante.png" skinColor="-1" />'
+$dante = $archivedDante.player
 Assert-True (-not $dante.HasAttribute('id')) 'Dante must not hard-code a global PlayerType/local numeric id'
 Assert-True ($dante.skin -eq 'character_dante.png') "Dante skin path: $($dante.skin)"
 Assert-True ($dante.portrait -eq 'playerportrait_dante.png') "Dante portrait path: $($dante.portrait)"
@@ -221,4 +223,4 @@ foreach ($required in @('附件直接可见', 'CAPCOM 官方', 'Isaac 化保守�
 }
 Assert-True ($ledger.Contains('绝对禁止参考')) 'Dante source ledger must retain the prohibited-version boundary'
 
-Write-Output 'Dante character registration and visual-surface contract passed'
+Write-Output 'Dante remains unregistered; archived visual-surface contract passed'

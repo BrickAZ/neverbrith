@@ -282,6 +282,7 @@ local function loadNeverbirth()
         return mod
     end
 
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallbacks(callbackId, param)

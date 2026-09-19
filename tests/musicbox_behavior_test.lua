@@ -228,6 +228,9 @@ local function loadNeverbirth(savedStore)
         return mod
     end
 
+    -- Separate item modules are outside this fixture's Music Box scope.
+    function include() return function() end end
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallback(callbackId, param)
@@ -726,6 +729,60 @@ local function test_musicbox_start_plays_shadow_guardian_once()
     end
     assertEquals(playCount, 1, "reusing active Musicbox should not replay the shadow guardian")
 end
+local function test_active_immunity_precedes_native_shields_without_moving_panic()
+    local env = loadNeverbirth()
+    local pre = env.mod.PreventActiveMusicboxDamage
+    assertTruthy(type(pre) == "function", "active immunity needs a separate PRE handler")
+    local registrations = 0
+    for _, entry in ipairs(env.callbacks[ModCallbacks.MC_PRE_PLAYER_TAKE_DMG] or {}) do
+        if entry.fn == pre then
+            registrations = registrations + 1
+            assertEquals(entry.param, nil, "PRE must not confuse EntityType with PlayerVariant")
+        end
+    end
+    assertEquals(registrations, 1, "register active immunity once")
+    local player = env.newPlayer({ initSeed = 701, hearts = 1, activeCharges = { [0] = 0 } })
+    local other = env.newPlayer({ initSeed = 702, hearts = 1, activeCharges = { [0] = 0 } })
+    -- Simulate only the native boundary ordering; not a played Holy Mantle test.
+    local shields = { [player] = 1, [other] = 1 }
+    local function incoming(actor)
+        if pre(env.mod, actor, 1, 0, nil, 9) == false then return "early-cancel" end
+        if shields[actor] > 0 then shields[actor] = shields[actor] - 1; return "shield" end
+        return env.mod:PreventMusicboxDamage(actor, 1, 0, nil, 9)
+    end
+    assertEquals(incoming(player), "shield", "inactive Music Box must not panic before shield handling")
+    assertEquals(#player.removeCalls, 0, "shielded hit must not consume uncharged Music Box")
+    assertEquals(incoming(player), false, "original late handler still starts panic on lethal damage")
+    assertEquals(#player.removeCalls, 1)
+    shields[player] = 1
+    assertEquals(incoming(player), "early-cancel", "active immunity must preserve native shield")
+    assertEquals(incoming(player), "early-cancel", "repeated hit must not restart or consume")
+    assertEquals(shields[player], 1)
+    assertEquals(#player.removeCalls, 1)
+    assertEquals(incoming(other), "shield", "co-op partner must not inherit immunity")
+    assertEquals(#other.removeCalls, 0)
+    tick(env, 600)
+    assertEquals(player.killCount, 1, "early immunity does not block the existing 20-second death")
+    assertEquals(pre(env.mod, player, 1, 0, nil, 9), nil, "expired immunity is cleared")
+end
+
+local function test_used_and_reloaded_musicbox_has_early_immunity()
+    local store = { text = nil, snapshot = nil }
+    local env = loadNeverbirth(store)
+    local player = env.newPlayer({ initSeed = 811 })
+    env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Musicbox)(env.mod, env.items.Musicbox, nil, player)
+    assertEquals(env.mod:PreventActiveMusicboxDamage(player, 3, 0, nil, 0), false)
+    local restored = loadNeverbirth(store)
+    local continuedPlayer = restored.newPlayer({ initSeed = 811, activeItems = {} })
+    assertEquals(restored.mod:PreventActiveMusicboxDamage(continuedPlayer, 3, 0, nil, 0), false,
+        "persisted active debt grants immunity even after the item was lost")
+    tick(restored, 600)
+    assertEquals(continuedPlayer.killCount, 1)
+    assertEquals(restored.mod:PreventActiveMusicboxDamage(continuedPlayer, 3, 0, nil, 0), nil)
+end
+
+test_active_immunity_precedes_native_shields_without_moving_panic()
+test_used_and_reloaded_musicbox_has_early_immunity()
 test_second_use_does_not_extend_death_timer()
 test_uncharged_musicbox_auto_triggers_on_lethal_damage()
 test_uncharged_musicbox_auto_triggers_on_real_half_heart_lethal_damage()

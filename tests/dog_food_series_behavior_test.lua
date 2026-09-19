@@ -205,6 +205,7 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallbacks(callbackId, param)
@@ -376,6 +377,8 @@ local function test_xml_and_pool_registration()
             assertEquals(block:match('id="(.-)"'), spec[5], file .. " local id")
             assertEquals(block:match('quality="(.-)"'), "1", file .. " quality")
             assertEquals(block:match('gfx="(.-)"'), spec[3], file .. " icon")
+            local tags = " " .. (block:match('tags="(.-)"') or "") .. " "
+            assertTruthy(tags:find("%sfood%s"), file .. " " .. name .. " must have the native food tag")
             if spec[4] then assertEquals(block:match('cache="(.-)"'), spec[4], file .. " cache") end
         end
     end
@@ -520,6 +523,10 @@ local function test_dental_chew_direct_tear_cooldown_cap_and_filters()
 end
 
 test_xml_and_pool_registration()
+if arg and arg[1] == "--registration-only" then
+    print("dog food series registration tests passed")
+    return
+end
 test_pickup_benefits_and_reacquisition()
 test_continue_and_coop_independence()
 test_stat_cache_stacks_and_retracts()

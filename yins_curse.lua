@@ -4,10 +4,8 @@ return function(Neverbirth, context)
     local ITEM_ID = tonumber(context.ItemId) or -1
     local BLACK_CANDLE_ID = (CollectibleType and CollectibleType.COLLECTIBLE_BLACK_CANDLE) or 260
     local IPECAC_ID = (CollectibleType and CollectibleType.COLLECTIBLE_IPECAC) or 149
-    local PLAYER_ENTITY = (EntityType and EntityType.ENTITY_PLAYER) or 1
     local PICKUP_ENTITY = (EntityType and EntityType.ENTITY_PICKUP) or 5
     local COLLECTIBLE_PICKUP = (PickupVariant and PickupVariant.PICKUP_COLLECTIBLE) or 100
-    local EXPLOSION_DAMAGE_FLAG = (DamageFlag and DamageFlag.DAMAGE_EXPLOSION) or (1 << 2)
     local NO_ENTITY_COLLISION = (EntityCollisionClass and EntityCollisionClass.ENTCOLL_NONE) or 0
     local NO_GRID_COLLISION = (GridCollisionClass and GridCollisionClass.COLLISION_NONE) or 0
     local PENDING_PICKUP_TIMEOUT = 8
@@ -17,6 +15,7 @@ return function(Neverbirth, context)
         serial = 0,
         playerCounts = {},
         pending = {},
+        failedBonusCandidates = {},
         resolvingQ4 = false,
         testRunSeed = nil,
     }
@@ -126,7 +125,7 @@ return function(Neverbirth, context)
         if not player or type(player.GetCollectibleNum) ~= "function" or ITEM_ID <= 0 then
             return 0
         end
-        local ok, count = pcall(player.GetCollectibleNum, player, ITEM_ID)
+        local ok, count = pcall(player.GetCollectibleNum, player, ITEM_ID, true)
         return ok and math.max(0, math.floor(tonumber(count) or 0)) or 0
     end
 
@@ -170,6 +169,22 @@ return function(Neverbirth, context)
             end
         end
         return true
+    end
+
+    local function isIpecacPedestal(pickup)
+        return pickupExists(pickup)
+            and tonumber(pickup.Type) == PICKUP_ENTITY
+            and tonumber(pickup.Variant) == COLLECTIBLE_PICKUP
+            and tonumber(pickup.SubType) == IPECAC_ID
+    end
+
+    local function markGeneratedIpecac(pickup)
+        if type(pickup.GetData) == "function" then
+            local ok, data = pcall(pickup.GetData, pickup)
+            if ok and type(data) == "table" then
+                data.NeverbirthYinGeneratedIpecac = true
+            end
+        end
     end
 
     local function isVisibleInteractableCollectible(pickup)
@@ -328,13 +343,7 @@ return function(Neverbirth, context)
                 pickup = converted
             end
         end
-        if type(pickup.GetData) == "function" then
-            local okData, data = pcall(pickup.GetData, pickup)
-            if okData and type(data) == "table" then
-                data.NeverbirthYinGeneratedIpecac = true
-            end
-        end
-        if pickup.OptionsPickupIndex ~= nil then
+        if isIpecacPedestal(pickup) and pickup.OptionsPickupIndex ~= nil then
             pickup.OptionsPickupIndex = 0
         end
         return pickup
@@ -364,16 +373,23 @@ return function(Neverbirth, context)
         runtime.resolvingQ4 = true
         local resolved = false
         if state.q4Mode == "bonus_root" then
+            local key = pickup.InitSeed or pickup
+            if runtime.failedBonusCandidates[key] == itemId then
+                runtime.resolvingQ4 = false
+                return false
+            end
             local spawner = options.spawnBonusIpecac or spawnBonusIpecac
             local ok, ipecacPickup = pcall(spawner, pickup)
-            resolved = ok and ipecacPickup ~= nil
-        elseif state.q4Mode == "replace_root" and type(pickup.Morph) == "function" then
-            if type(pickup.GetData) == "function" then
-                local okData, data = pcall(pickup.GetData, pickup)
-                if okData and type(data) == "table" then
-                    data.NeverbirthYinGeneratedIpecac = true
-                end
+            resolved = ok and isIpecacPedestal(ipecacPickup)
+            if resolved then
+                markGeneratedIpecac(ipecacPickup)
+            else
+                -- A spawn modifier may redirect/remove the result. Do not
+                -- duplicate that side effect every frame; retry on room re-entry
+                -- or a different pedestal subtype without spending the reward.
+                runtime.failedBonusCandidates[key] = itemId
             end
+        elseif state.q4Mode == "replace_root" and type(pickup.Morph) == "function" then
             local ok = pcall(
                 pickup.Morph,
                 pickup,
@@ -384,7 +400,11 @@ return function(Neverbirth, context)
                 true,
                 true
             )
-            resolved = ok
+            -- REPENTOGON PRE_PICKUP_MORPH can veto/redirect without throwing.
+            resolved = ok and isIpecacPedestal(pickup)
+            if resolved then
+                markGeneratedIpecac(pickup)
+            end
         end
         if resolved then
             state.firstQ4Resolved = true
@@ -425,34 +445,6 @@ return function(Neverbirth, context)
         return false
     end
 
-    local function decideExplosionDamage(player, damageFlags)
-        local state = getSavedState()
-        if not state or not state.yinCurseActive then
-            return nil
-        end
-        local numericFlags = tonumber(damageFlags) or 0
-        if (numericFlags & EXPLOSION_DAMAGE_FLAG) == 0 then
-            return nil
-        end
-        if hasCollectible(player, BLACK_CANDLE_ID) then
-            return false
-        end
-
-        -- Returning nil lets every explosion hit that reached Lua resolve normally.
-        -- Native Host Hat/Pyromaniac immunity can short-circuit before this callback;
-        -- ordinary Repentance exposes no safe way to resurrect such a cancelled hit
-        -- without removing items or generating a second TakeDamage event.
-        return nil
-    end
-
-    local function playerDamage(_, entity, amount, damageFlags, source, countdown)
-        local player = toPlayer(entity)
-        if not player then
-            return nil
-        end
-        return decideExplosionDamage(player, damageFlags)
-    end
-
     local function prePickupCollision(_, pickup, collider, low)
         if ITEM_ID <= 0
             or not pickup
@@ -476,6 +468,29 @@ return function(Neverbirth, context)
                 serial = runtime.serial,
             }
         end
+        return nil
+    end
+
+    local function postAddCollectible(_, itemId, charge, firstTime, slot, varData, player)
+        if itemId ~= ITEM_ID or not player then
+            return nil
+        end
+        local current = collectibleCount(player)
+        if current <= 0 then
+            return nil
+        end
+        local key = playerKey(player)
+        local pending = runtime.pending[key]
+        local hadBlackCandle
+        if pending and current > pending.beforeCount then
+            hadBlackCandle = pending.hadBlackCandle
+        end
+        -- REPENTOGON 1.0.12a calls POST_ADD after native AddCollectible.
+        -- Commit before another callback can remove Yin or change Black Candle.
+        -- Normal pedestals retain their pre-collision Black Candle snapshot.
+        recordFirstAcquisition(player, hadBlackCandle)
+        runtime.playerCounts[key] = current
+        runtime.pending[key] = nil
         return nil
     end
 
@@ -531,6 +546,7 @@ return function(Neverbirth, context)
 
     local function newRoom()
         runtime.pending = {}
+        runtime.failedBonusCandidates = {}
         processCurrentRoom()
         return nil
     end
@@ -546,6 +562,7 @@ return function(Neverbirth, context)
         runtime.frame = 0
         runtime.serial = 0
         runtime.pending = {}
+        runtime.failedBonusCandidates = {}
         runtime.resolvingQ4 = false
         runtime.testRunSeed = nil
         if not isContinued then
@@ -582,6 +599,7 @@ return function(Neverbirth, context)
         runtime.serial = 0
         runtime.playerCounts = {}
         runtime.pending = {}
+        runtime.failedBonusCandidates = {}
         runtime.resolvingQ4 = false
     end
 
@@ -596,19 +614,17 @@ return function(Neverbirth, context)
         ItemId = ITEM_ID,
         BlackCandleId = BLACK_CANDLE_ID,
         IpecacId = IPECAC_ID,
-        ExplosionDamageFlag = EXPLOSION_DAMAGE_FLAG,
         Runtime = runtime,
         GetSavedState = getSavedState,
         ResetForTest = resetForTest,
         ResetRuntimeOnly = resetRuntimeOnly,
         RecordFirstAcquisition = recordFirstAcquisition,
-        DecideExplosionDamage = decideExplosionDamage,
         IsVisibleInteractableCollectible = isVisibleInteractableCollectible,
         ProcessCandidate = processCandidate,
         ProcessCurrentRoom = processCurrentRoom,
         Callbacks = {
-            PlayerDamage = playerDamage,
             PrePickupCollision = prePickupCollision,
+            PostAddCollectible = postAddCollectible,
             PostUpdate = postUpdate,
             PickupInit = pickupInit,
             PickupUpdate = pickupUpdate,
@@ -623,7 +639,14 @@ return function(Neverbirth, context)
         return
     end
 
-    Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, playerDamage, PLAYER_ENTITY)
+    -- TODO: suppress only explosion immunity when the curse is active and the
+    -- damaged player lacks Black Candle, preserving every source's other effects.
+    -- 1.0.12a PRE damage can cancel a hit but cannot bypass native immunity.
+    -- Black Candle must never grant immunity itself. Do not cancel hits here or
+    -- disable whole items as a substitute; see reports/yins-curse/2026-09-16-black-candle-contract.md.
+    if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, postAddCollectible, ITEM_ID)
+    end
     Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, postUpdate)
     if ModCallbacks.MC_PRE_PICKUP_COLLISION then
         Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, prePickupCollision, COLLECTIBLE_PICKUP)

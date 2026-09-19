@@ -265,6 +265,7 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function newPlayer(opts)

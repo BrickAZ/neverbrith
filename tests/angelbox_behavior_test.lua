@@ -60,6 +60,8 @@ local function loadNeverbirth(savedStore)
         MC_POST_NEW_ROOM = 8,
         MC_POST_NEW_LEVEL = 9,
         MC_POST_PICKUP_INIT = 10,
+        MC_NPC_UPDATE = 11,
+        MC_PRE_GRID_ENTITY_DOOR_UPDATE = 1402,
     }
 
     CollectibleType = {
@@ -96,6 +98,7 @@ local function loadNeverbirth(savedStore)
         DAMAGE_INVINCIBLE = 4,
     }
     EntityFlag = { FLAG_CHARM = 1 }
+    EffectVariant = { PLAYER_CREEP_HOLYWATER_TRAIL = 54 }
     TearFlags = { TEAR_HOMING = 1 }
     EntityType = {
         ENTITY_PLAYER = 1,
@@ -187,6 +190,7 @@ local function loadNeverbirth(savedStore)
             forceAngel = forceAngel,
             forceDevil = forceDevil,
         }
+        if self.dealRoomDesc.Data then return end
         self.dealRoomDesc.Data = {
             Type = forceDevil and RoomType.ROOM_DEVIL or RoomType.ROOM_ANGEL,
         }
@@ -219,6 +223,12 @@ local function loadNeverbirth(savedStore)
 
     function room:GetSpawnSeed()
         return 123456
+    end
+
+    function room:TrySpawnDevilRoomDoor(animate, force)
+        self.doorCalls = (self.doorCalls or 0) + 1
+        self.doorArguments = { animate, force }
+        return self.doorSucceeds ~= false
     end
 
     local itemPool = {
@@ -422,6 +432,12 @@ local function loadNeverbirth(savedStore)
         return mod
     end
 
+    -- Separate item modules are outside this fixture's box-mechanic scope.
+    function include(path)
+        if path == "box_deal_rooms" then return dofile("box_deal_rooms.lua") end
+        return function() end
+    end
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallback(callbackId, param)
@@ -448,13 +464,14 @@ local function loadNeverbirth(savedStore)
     local function newPlayer(options)
         options = options or {}
         local player = {
-            InitSeed = options.initSeed or 1234,
+            InitSeed = options.initSeed or (1000 + #players),
             Position = Vector(0, 0),
             TearFlags = 0,
             killCount = 0,
             cacheFlags = {},
             activeItems = options.activeItems or { [ActiveSlot.SLOT_PRIMARY] = itemIds.Angelbox },
             activeCharges = options.activeCharges or { [ActiveSlot.SLOT_PRIMARY] = 4 },
+            nativeChargeType = "special",
             collectibles = options.collectibles or {},
             maxHearts = options.maxHearts or 6,
             effectiveMaxHearts = options.effectiveMaxHearts,
@@ -501,6 +518,20 @@ local function loadNeverbirth(savedStore)
 
         function player:SetActiveCharge(charge, slot)
             self.activeCharges[slot or ActiveSlot.SLOT_PRIMARY] = charge
+        end
+
+        function player:AddActiveCharge(amount, slot, flash, overcharge, force)
+            self.nativeChargeCalls = self.nativeChargeCalls or {}
+            self.nativeChargeCalls[#self.nativeChargeCalls + 1] = {
+                amount = amount, slot = slot, flash = flash, overcharge = overcharge, force = force,
+            }
+            local added = math.max(0, math.min(amount, (self.nativeMaxCharge or 4) - self:GetActiveCharge(slot)))
+            -- Current native AddActiveCharge rejects positive special charge unless forced.
+            -- Verified in isaac-ng.exe at 0x7580BC..0x7580D9; see second-batch report.
+            if self.nativeChargeType == "special" and not force then added = 0 end
+            if self.rejectNativeCharge then added = 0 end
+            self.activeCharges[slot] = self:GetActiveCharge(slot) + added
+            return added
         end
 
         function player:DischargeActiveItem(slot)
@@ -820,10 +851,10 @@ local function test_charged_repeat_use_forces_angel_room_and_spawns_one_quality_
 
     local repeatResult = useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     assertEquals(repeatResult, true, "charged repeat Angelbox use should succeed")
-    assertEquals(#env.level.initializeCalls, 1, "repeat Angelbox use should initialize the deal room")
-    assertEquals(env.level.initializeCalls[1].forceAngel, true, "repeat Angelbox use should force angel room")
-    assertEquals(env.level.initializeCalls[1].forceDevil, false, "repeat Angelbox use should not force devil room")
-    assertEquals(env.level.angelRoomChanceDelta, 1, "repeat Angelbox use should push this floor's deal chance toward guaranteed angel room")
+    assertEquals(#env.level.initializeCalls, 0, "existing angel room should be reused")
+    assertEquals(env.room.doorCalls, 1, "repeat use should create the entrance")
+    assertEquals(env.level.dealRoomDesc.Data.Type, RoomType.ROOM_ANGEL, "entrance must lead to angel room")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "opening must not modify natural probability")
     assertEquals(player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY), 0, "repeat Angelbox use should spend charge")
 
     env.room.roomType = RoomType.ROOM_ANGEL
@@ -933,7 +964,7 @@ local function test_angelbox_deal_chance_is_applied_once_and_removed_when_lost()
     local player = env.newPlayer({ activeItems = { [ActiveSlot.SLOT_PRIMARY] = env.items.Angelbox } })
 
     runPostUpdates(env, 2)
-    assertEquals(env.level.angelRoomChanceDelta, 0.5, "held Angelbox should add one angel room chance modifier")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "held Angelbox must not use additive chance")
 
     player.activeItems[ActiveSlot.SLOT_PRIMARY] = 0
     runPostUpdates(env, 1)
@@ -946,12 +977,12 @@ local function test_first_use_does_not_upgrade_held_chance_to_guaranteed_angel_r
     local useAngelbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Angelbox)
 
     runPostUpdates(env, 1)
-    assertEquals(env.level.angelRoomChanceDelta, 0.5, "held Angelbox should convert half the deal direction to angel")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "held conversion is resolved at the entrance")
 
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     runPostUpdates(env, 1)
 
-    assertEquals(env.level.angelRoomChanceDelta, 0.5, "first Angelbox use should not force 100% angel room")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "first use must not change natural probability")
     assertEquals(#env.level.initializeCalls, 0, "first Angelbox use should not initialize the deal room")
 end
 
@@ -965,7 +996,8 @@ local function test_repeat_use_upgrades_held_chance_to_one_without_stacking()
     player:SetActiveCharge(4, ActiveSlot.SLOT_PRIMARY)
     useAngelbox(env.mod, env.items.Angelbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
 
-    assertEquals(env.level.angelRoomChanceDelta, 1, "repeat use should upgrade total Angelbox chance modifier to one, not stack to 1.5")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "repeat use must not stack additive chance")
+    assertEquals(env.room.doorCalls, 1, "repeat use must create an entrance")
 end
 
 local function test_repeat_use_keeps_guaranteed_angel_room_after_losing_angelbox()
@@ -980,7 +1012,8 @@ local function test_repeat_use_keeps_guaranteed_angel_room_after_losing_angelbox
     player.activeItems[ActiveSlot.SLOT_PRIMARY] = 0
     runPostUpdates(env, 1)
 
-    assertEquals(env.level.angelRoomChanceDelta, 1, "forced Angelbox chance should stay for the floor after losing the item")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "losing item must not modify natural chance")
+    assertEquals(env.level.dealRoomDesc.Data.Type, RoomType.ROOM_ANGEL, "opened angel room persists after item loss")
 end
 
 local function test_devilbox_first_use_grants_one_full_black_heart_per_red_container()
@@ -1065,11 +1098,12 @@ local function test_devilbox_repeat_use_forces_devil_room_and_spawns_quality_thr
     assertEquals(#env.level.initializeCalls, 1, "repeat Devilbox use should initialize the deal room")
     assertEquals(env.level.initializeCalls[1].forceAngel, false, "repeat Devilbox use should not force angel room")
     assertEquals(env.level.initializeCalls[1].forceDevil, true, "repeat Devilbox use should force devil room")
-    assertEquals(env.level.angelRoomChanceDelta, -1, "repeat Devilbox use should push this floor's deal chance toward guaranteed devil room")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "opening must not modify natural probability")
+    assertEquals(env.room.doorCalls, 1, "repeat Devilbox use must create the entrance")
     assertEquals(env.level.dataWasClearedBeforeInitialize, true, "repeat Devilbox use should clear any pre-initialized deal room before forcing devil room")
     assertEquals(env.level.dealRoomDesc.Data.Type, RoomType.ROOM_DEVIL, "repeat Devilbox use should leave the initialized deal room as devil")
-    assertEquals(env.gameStateFlags[GameStateFlag.STATE_DEVILROOM_SPAWNED], false, "repeat Devilbox use should reset spawned state so angel direction is stripped")
-    assertEquals(env.gameStateFlags[GameStateFlag.STATE_DEVILROOM_VISITED], false, "repeat Devilbox use should reset visited state so the floor points back to devil")
+    assertEquals(env.gameStateFlags[GameStateFlag.STATE_DEVILROOM_SPAWNED], true, "preserve native spawned history")
+    assertEquals(env.gameStateFlags[GameStateFlag.STATE_DEVILROOM_VISITED], true, "preserve native visited history")
 
     env.room.roomType = RoomType.ROOM_DEVIL
     runPostNewRoom(env)
@@ -1142,18 +1176,80 @@ local function test_devilbox_held_and_forced_chance_do_not_stack_wrong()
     local useDevilbox = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items.Devilbox)
 
     runPostUpdates(env, 1)
-    assertEquals(env.level.angelRoomChanceDelta, -0.5, "held Devilbox should convert half the deal direction to devil")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "held Devilbox must not use negative additive chance")
 
     useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
     player:SetActiveCharge(4, ActiveSlot.SLOT_PRIMARY)
     useDevilbox(env.mod, env.items.Devilbox, nil, player, 0, ActiveSlot.SLOT_PRIMARY, 0)
-    assertEquals(env.level.angelRoomChanceDelta, -1, "repeat Devilbox use should upgrade total modifier to -1, not stack to -1.5")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "repeat use must not stack additive chance")
+    assertEquals(env.level.dealRoomDesc.Data.Type, RoomType.ROOM_DEVIL, "repeat use chooses actual devil room")
 
     player.activeItems[ActiveSlot.SLOT_PRIMARY] = 0
     runPostUpdates(env, 1)
-    assertEquals(env.level.angelRoomChanceDelta, -1, "forced Devilbox chance should stay for the floor after losing the item")
+    assertEquals(env.level.angelRoomChanceDelta, 0, "losing item must not modify natural chance")
+    assertEquals(env.level.dealRoomDesc.Data.Type, RoomType.ROOM_DEVIL, "opened devil room persists after item loss")
 end
 
+-- Exercise the real pickup handlers; AddActiveCharge is only the engine boundary.
+local function test_box_native_charge_transactions()
+    local passed, failures = 0, {}
+    for _, boxName in ipairs({ "Angelbox", "Devilbox" }) do
+        assertEquals(getItemXmlAttribute(boxName, "chargetype"), "special", "fixture matches actual registration")
+        for _, slot in ipairs({ 0, 1, 2, 3 }) do
+            for _, mode in ipairs({ "accept", "reject", "missing", "capped" }) do
+                local label = boxName .. "/slot=" .. slot .. "/" .. mode
+                local ok, err = pcall(function()
+                    local env = loadNeverbirth()
+                    local player = env.newPlayer({ maxHearts = 22,
+                        activeItems = { [slot] = env.items[boxName] }, activeCharges = { [slot] = 4 } })
+                    local teammate = env.newPlayer({ initSeed = 2000,
+                        activeItems = { [slot] = env.items[boxName] }, activeCharges = { [slot] = 0 } })
+                    local use = env.getCallback(ModCallbacks.MC_USE_ITEM, env.items[boxName])
+                    assertEquals(use(env.mod, env.items[boxName], nil, player, 0, slot, 0), true)
+                    player.soulHearts, player.addedSoulHearts, player.addedBlackHearts = 1, 0, 0
+                    -- Current engine's reserved pocket2 slot reports a zero native cap.
+                    -- Force bypasses special charge type, not this zero-cap outcome.
+                    player.nativeMaxCharge = slot == 3 and 0 or 4
+                    player.rejectNativeCharge = mode == "reject"
+                    if mode == "missing" then player.AddActiveCharge = nil end
+                    if mode == "capped" then
+                        player.soulHearts = 2 -- whole heart overflows; native cap accepts only one charge
+                        if slot ~= 3 then player.nativeMaxCharge = 1 end
+                    end
+                    -- A charge gain must not overwrite the slot via the old setter.
+                    player.SetActiveCharge = function() error("overflow must use native AddActiveCharge") end
+                    local pickup = boxName == "Angelbox" and env.newSoulHeartPickup() or env.newBlackHeartPickup()
+                    local result = runPickupCollision(env, pickup, player)
+                    local accepted = slot ~= 3 and (mode == "accept" or mode == "capped")
+                    assertEquals(result, accepted and true or nil, label .. " collision return")
+                    assertEquals(pickup.removed, accepted, label .. " pickup consumption")
+                    assertEquals(pickup.pickupSounds, accepted and 1 or 0, label .. " feedback")
+                    assertEquals(player:GetActiveCharge(slot), accepted and 1 or 0, label .. " native result")
+                    assertEquals(player.addedSoulHearts + player.addedBlackHearts,
+                        accepted and mode == "accept" and 1 or 0, label .. " health only after charge acceptance")
+                    assertEquals(teammate:GetActiveCharge(slot), 0, label .. " co-op owner isolation")
+                    if mode ~= "missing" then
+                        assertEquals(#player.nativeChargeCalls, 1, label .. " exactly one native call")
+                        local call = player.nativeChargeCalls[1]
+                        assertEquals(call.slot, slot)
+                        assertEquals(call.amount, mode == "capped" and 2 or 1)
+                        assertEquals(call.flash, true)
+                        assertEquals(call.overcharge, false)
+                        assertEquals(call.force, true, "special heart charging requires native Force")
+                    end
+                end)
+                if ok then passed = passed + 1 else failures[#failures + 1] = label .. ": " .. tostring(err) end
+            end
+        end
+    end
+    for _, message in ipairs(failures) do print("FAIL " .. message) end
+    assertEquals(#failures, 0, "box native transactions; passed=" .. passed)
+    print("box native charge transactions: " .. passed .. " passed")
+end
+
+if ... == "--fixture" then return loadNeverbirth end
+
+test_box_native_charge_transactions()
 test_devilbox_is_quality_four_and_angelbox_stays_quality_three()
 test_angelbox_grants_three_luck_while_held()
 test_box_heart_spawn_bonus_rolls_are_independent_and_non_recursive()

@@ -57,6 +57,34 @@ return function(Neverbirth, context)
         end
     end
 
+    local failures = {}
+    local diagnostics = context.Diagnostics == true
+    local function trace(phase)
+        if diagnostics then debugLog(phase) end
+    end
+    local function failOnce(kind, err)
+        if failures[kind] then return end
+        failures[kind] = tostring(err)
+        debugLog(kind .. ": " .. tostring(err))
+    end
+
+    local function entityKey(entity)
+        if not entity then return nil end
+        local ok, hash = pcall(function() return GetPtrHash(entity) end)
+        if not ok or hash == nil or entity.InitSeed == nil then
+            failOnce("identity", ok and "missing GetPtrHash/InitSeed" or hash)
+            return nil
+        end
+        return tostring(hash) .. ":" .. tostring(entity.InitSeed)
+    end
+
+    local function getState(player)
+        local key = entityKey(player)
+        local state = key and runtime.states[key]
+        if state then state.player = player end
+        return state
+    end
+
     local function zeroVector()
         if Vector then
             local ok, value = pcall(function() return Vector.Zero end)
@@ -67,10 +95,12 @@ return function(Neverbirth, context)
     end
 
     local function copyPosition(position)
-        if type(Vector) == "function" and position then
-            return Vector(tonumber(position.X) or 0, tonumber(position.Y) or 0)
+        if position then
+            local ok, value = pcall(function() return Vector(position.X, position.Y) end)
+            if ok then return value end
+            failOnce("Vector", value)
         end
-        return position
+        return nil
     end
 
     local function getData(entity)
@@ -172,26 +202,6 @@ return function(Neverbirth, context)
         return runtime.logicalFrame
     end
 
-    local function getCollectibleConfig(itemId)
-        if type(context.GetCollectibleConfig) == "function" then
-            local ok, config = pcall(context.GetCollectibleConfig, itemId)
-            if ok and config then return config end
-        end
-        if not Isaac or type(Isaac.GetItemConfig) ~= "function" then return nil end
-        local ok, itemConfig = pcall(Isaac.GetItemConfig)
-        if not ok or not itemConfig or type(itemConfig.GetCollectible) ~= "function" then return nil end
-        local configOk, config = pcall(itemConfig.GetCollectible, itemConfig, itemId)
-        return configOk and config or nil
-    end
-
-    local function getCollectibleMaxCharge(itemId)
-        local config = getCollectibleConfig(itemId)
-        if not config then return 0 end
-        return math.max(0, tonumber(
-            config.MaxCharges or config.MaxCharge or config.Charge or config.MaxChargeCount
-        ) or 0)
-    end
-
     local function playerHasCarBattery(player)
         if not player or not CAR_BATTERY_ID or CAR_BATTERY_ID <= 0
             or type(player.HasCollectible) ~= "function"
@@ -203,29 +213,21 @@ return function(Neverbirth, context)
     end
 
     local function chargeActiveSlot(player, slot)
-        if not player or type(player.GetActiveItem) ~= "function"
-            or type(player.GetActiveCharge) ~= "function"
-            or type(player.SetActiveCharge) ~= "function"
-        then
+        if not player or type(player.AddActiveCharge) ~= "function" then
+            failOnce("nativeCharge", "AddActiveCharge unavailable; active charging skipped")
             return false
         end
-        local itemOk, itemId = pcall(player.GetActiveItem, player, slot)
-        itemId = itemOk and tonumber(itemId) or 0
-        if not itemId or itemId <= 0 then return false end
-
-        local maxCharge = getCollectibleMaxCharge(itemId)
-        if maxCharge <= 0 then return false end
-        local chargeOk, currentCharge = pcall(player.GetActiveCharge, player, slot)
-        currentCharge = chargeOk and tonumber(currentCharge) or nil
-        if not currentCharge or currentCharge >= maxCharge then return false end
-
-        local nextCharge = math.min(maxCharge, currentCharge + CAR_BATTERY_CHARGE_PER_HIT)
-        local setOk = pcall(player.SetActiveCharge, player, nextCharge, slot)
-        return setOk
+        -- Fixed per-hit gain must not become a timed full recharge or reject special actives.
+        local ok, added = pcall(player.AddActiveCharge, player, CAR_BATTERY_CHARGE_PER_HIT, slot, true, false, true)
+        if not ok then
+            failOnce("nativeCharge", "AddActiveCharge failed; active charging skipped")
+            return false
+        end
+        return (tonumber(added) or 0) > 0
     end
 
     local function chargeCarBatterySynergy(player)
-        if not runtime.states[player] or not playerHasCarBattery(player) then return 0 end
+        if not getState(player) or not playerHasCarBattery(player) then return 0 end
         local chargedSlots = 0
         for _, slot in ipairs(CAR_BATTERY_ACTIVE_SLOTS) do
             if chargeActiveSlot(player, slot) then chargedSlots = chargedSlots + 1 end
@@ -244,7 +246,7 @@ return function(Neverbirth, context)
         local effect = nil
         if type(context.SpawnEffect) == "function" then
             local ok, value = pcall(context.SpawnEffect, variant, position, spawner)
-            if ok then effect = value end
+            if ok then effect = value else failOnce("spawn", value) end
         elseif Isaac and type(Isaac.Spawn) == "function" then
             local ok, value = pcall(
                 Isaac.Spawn,
@@ -255,10 +257,16 @@ return function(Neverbirth, context)
                 zeroVector(),
                 spawner
             )
-            if ok then effect = value end
+            if ok and value then
+                local converted, result = pcall(function() return value:ToEffect() end)
+                if converted then effect = result else failOnce("ToEffect", result) end
+                if converted and not result then failOnce("ToEffect", "returned nil") end
+                if not effect then removeEffect(value) end
+            elseif not ok then failOnce("spawn", value) end
         end
         if not effect then return nil end
 
+        local configured, configureError = pcall(function()
         effect.Position = position
         effect.Velocity = zeroVector() or effect.Velocity
         effect.DepthOffset = depthOffset or 0
@@ -266,19 +274,18 @@ return function(Neverbirth, context)
         effect.GridCollisionClass = NO_GRID_COLLISION
         effect.Parent = spawner
 
-        local sprite = type(effect.GetSprite) == "function" and effect:GetSprite() or nil
-        if not sprite then
-            removeEffect(effect)
-            return nil
-        end
-        local loaded, loadError = pcall(function()
-            sprite:Load(path, true)
-            sprite:Play(animation, true)
+        local sprite = effect:GetSprite()
+        assert(sprite, "GetSprite returned nil")
+            assert(sprite:Load(path, true) ~= false, "Load returned false")
+            assert(sprite:Play(animation, true) ~= false, "Play returned false")
+            if type(sprite.IsPlaying) == "function" then
+                assert(sprite:IsPlaying(animation), "animation not playing: " .. animation)
+            end
             sprite.Rotation = 0
             sprite.Scale = Vector(1, 1)
         end)
-        if not loaded then
-            debugLog("visual load failed for " .. tostring(path) .. ": " .. tostring(loadError))
+        if not configured then
+            failOnce("visual:" .. tostring(path), configureError)
             removeEffect(effect)
             return nil
         end
@@ -304,7 +311,9 @@ return function(Neverbirth, context)
     local function trackNpc(entity)
         local npc = toNpc(entity)
         if npc and isHostileNpc(npc, false) then
-            runtime.roomNpcs[npc] = true
+            local key = entityKey(npc)
+            if not key then return nil end
+            runtime.roomNpcs[key] = npc
             return npc
         end
         return nil
@@ -330,9 +339,19 @@ return function(Neverbirth, context)
 
     local function damageNpc(npc, amount, player)
         if amount <= 0 or not isHostileNpc(npc, true) or type(npc.TakeDamage) ~= "function" then return false end
-        local source = type(EntityRef) == "function" and EntityRef(player) or nil
+        local sourceOk, source = pcall(function() return EntityRef(player) end)
+        if not sourceOk or not source then
+            failOnce("EntityRef", sourceOk and "constructor returned nil" or source)
+            return false
+        end
         local ok, result = pcall(npc.TakeDamage, npc, amount, 0, source, 0)
+        if not ok then failOnce("TakeDamage", result) end
         local hitSucceeded = ok and result ~= false
+        local state = getState(player)
+        if state and not state.damageObserved then
+            state.damageObserved = true
+            trace("first-damage:" .. tostring(hitSucceeded))
+        end
         if hitSucceeded then chargeCarBatterySynergy(player) end
         return hitSucceeded
     end
@@ -341,9 +360,9 @@ return function(Neverbirth, context)
         local player = state and state.player
         if not player or not player.Position then return end
         local amount = math.max(0, tonumber(player.Damage) or 0) * AURA_DAMAGE_MULTIPLIER
-        for npc in pairs(runtime.roomNpcs) do
+        for key, npc in pairs(runtime.roomNpcs) do
             if not entityExists(npc) or entityIsDead(npc) then
-                runtime.roomNpcs[npc] = nil
+                runtime.roomNpcs[key] = nil
             elseif circlesIntersect(player.Position, AURA_RADIUS, npc) then
                 damageNpc(npc, amount, player)
             end
@@ -357,14 +376,14 @@ return function(Neverbirth, context)
         local player = state.player
         local amount = math.max(0, tonumber(player and player.Damage) or 0) * SHOCKWAVE_DAMAGE_MULTIPLIER
 
-        for npc in pairs(runtime.roomNpcs) do
+        for key, npc in pairs(runtime.roomNpcs) do
             if not entityExists(npc) or entityIsDead(npc) then
-                runtime.roomNpcs[npc] = nil
-            elseif not wave.hit[npc] and isHostileNpc(npc, true) and npc.Position then
+                runtime.roomNpcs[key] = nil
+            elseif not wave.hit[key] and isHostileNpc(npc, true) and npc.Position then
                 local distance = distanceBetween(wave.origin, npc.Position)
                 local size = math.max(0, tonumber(npc.Size) or 0)
                 if distance - size <= currentRadius and distance + size >= previousRadius then
-                    wave.hit[npc] = true
+                    wave.hit[key] = true
                     damageNpc(npc, amount, player)
                 end
             end
@@ -387,14 +406,20 @@ return function(Neverbirth, context)
         state.shockwaves = {}
     end
 
-    local function endState(player, refreshCache)
-        local state = runtime.states[player]
-        if not state then return false end
-        runtime.states[player] = nil
+    -- Internal cleanup must work after the owner's native handle has expired.
+    local function endStateByKey(key, state, refreshCache, reason)
+        if not state or runtime.states[key] ~= state then return false end
+        runtime.states[key] = nil
+        trace("end:" .. (reason or "manual"))
         removeStateVisuals(state)
-        if refreshCache ~= false then refreshTemporaryCaches(player) end
+        if refreshCache ~= false then refreshTemporaryCaches(state.player) end
         if not anyStateActive() then runtime.roomNpcs = {} end
         return true
+    end
+
+    local function endState(player, refreshCache, reason)
+        local key = entityKey(player)
+        return key and endStateByKey(key, runtime.states[key], refreshCache, reason) or false
     end
 
     local function createShockwave(state)
@@ -414,7 +439,8 @@ return function(Neverbirth, context)
     end
 
     local function startState(player)
-        if not player or runtime.states[player] then return false end
+        local key = entityKey(player)
+        if not key or getState(player) then return false end
         local state = {
             player = player,
             remaining = DURATION_FRAMES,
@@ -422,7 +448,7 @@ return function(Neverbirth, context)
             shockwaves = {},
             lastWaveFrame = nil,
         }
-        runtime.states[player] = state
+        runtime.states[key] = state
         seedRoomNpcs()
         state.aura = spawnEffect(
             AURA_VARIANT,
@@ -448,31 +474,43 @@ return function(Neverbirth, context)
     end
 
     local function useItem(_, _, _, player)
-        if not player or runtime.states[player] then return NO_DISCHARGE_RESULT end
+        trace("use")
+        if not player or getState(player) then return NO_DISCHARGE_RESULT end
         if startState(player) then return true end
         return NO_DISCHARGE_RESULT
     end
 
-    local function updateState(player, state)
+    local function updateState(key, player, state)
         if not player or not entityExists(player) or playerIsDead(player) then
-            endState(player, false)
+            endStateByKey(key, state, false, "invalid-owner")
             return
         end
 
         state.elapsed = state.elapsed + 1
+        if state.elapsed == 1 then trace("first-update") end
         state.remaining = state.remaining - 1
 
         if entityExists(state.aura) then
+            local ok, err = pcall(function()
             state.aura.Position = player.Position
             state.aura.Velocity = zeroVector() or state.aura.Velocity
             state.aura.DepthOffset = GROUND_DEPTH_OFFSET
+            end)
+            if not ok then failOnce("visual-update:aura", err); removeEffect(state.aura); state.aura = nil end
         end
 
         if state.activation then
             state.activation.age = state.activation.age + 1
             if entityExists(state.activation.effect) then
+                local ok, err = pcall(function()
                 state.activation.effect.Position = player.Position
                 state.activation.effect.Velocity = zeroVector() or state.activation.effect.Velocity
+                end)
+                if not ok then
+                    failOnce("visual-update:activation", err)
+                    removeEffect(state.activation.effect)
+                    state.activation.effect = nil
+                end
             end
             if state.activation.age >= ACTIVATE_FRAMES then
                 removeEffect(state.activation.effect)
@@ -487,17 +525,18 @@ return function(Neverbirth, context)
         end
 
         if state.elapsed % AURA_INTERVAL_FRAMES == 0 then applyAuraDamage(state) end
-        if state.remaining <= 0 then endState(player, true) end
+        if state.remaining <= 0 then endStateByKey(key, state, true, "expired") end
     end
 
     local function postUpdate()
         runtime.logicalFrame = runtime.logicalFrame + 1
-        for player, state in pairs(runtime.states) do updateState(player, state) end
+        for _, player in ipairs(getPlayers()) do getState(player) end
+        for key, state in pairs(runtime.states) do updateState(key, state.player, state) end
         return nil
     end
 
     local function evaluateCache(_, player, cacheFlag)
-        if not runtime.states[player] then return nil end
+        if not getState(player) then return nil end
         if RANGE_CACHE and cacheFlag == RANGE_CACHE then
             player.TearRange = (tonumber(player.TearRange) or 0) * RANGE_MULTIPLIER
         elseif FIREDELAY_CACHE and cacheFlag == FIREDELAY_CACHE then
@@ -509,7 +548,8 @@ return function(Neverbirth, context)
 
     local function tearOwner(tear)
         if not tear then return nil end
-        return toPlayer(tear.SpawnerEntity) or toPlayer(tear.Parent)
+        if tear.SpawnerEntity then return toPlayer(tear.SpawnerEntity) end
+        return toPlayer(tear.Parent)
     end
 
     local function removeTear(tear)
@@ -523,8 +563,10 @@ return function(Neverbirth, context)
 
     local function postFireTear(_, tear)
         local player = tearOwner(tear)
-        local state = player and runtime.states[player] or nil
+        if player and Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.OwnsAttack(player) then return nil end
+        local state = player and getState(player) or nil
         if not state then return nil end
+        if not state.shotObserved then state.shotObserved = true; trace("first-shot") end
         removeTear(tear)
         local frame = getFrameCount()
         if state.lastWaveFrame ~= frame then
@@ -540,7 +582,7 @@ return function(Neverbirth, context)
     end
 
     local function npcUpdate(_, npc)
-        if anyStateActive() and not runtime.roomNpcs[npc] then trackNpc(npc) end
+        if anyStateActive() then trackNpc(npc) end
         return nil
     end
 
@@ -557,14 +599,15 @@ return function(Neverbirth, context)
     local function resolveEnemyDeath(npc)
         npc = toNpc(npc)
         if not npc or not anyStateActive() or deathAlreadyResolved(npc) then return false end
-        if not runtime.roomNpcs[npc] then return false end
+        local key = entityKey(npc)
+        if not key or not runtime.roomNpcs[key] then return false end
         if hasEntityFlag(npc, FRIENDLY_FLAG) or hasEntityFlag(npc, CHARM_FLAG) then
-            runtime.roomNpcs[npc] = nil
+            runtime.roomNpcs[key] = nil
             markDeathResolved(npc)
             return false
         end
         markDeathResolved(npc)
-        runtime.roomNpcs[npc] = nil
+        runtime.roomNpcs[key] = nil
         for _, state in pairs(runtime.states) do
             state.remaining = state.remaining + KILL_EXTENSION_FRAMES
         end
@@ -581,27 +624,29 @@ return function(Neverbirth, context)
         return nil
     end
 
-    local function clearAll(refreshCache)
-        local players = {}
-        for player in pairs(runtime.states) do players[#players + 1] = player end
-        for _, player in ipairs(players) do endState(player, refreshCache) end
+    local function clearAll(refreshCache, reason)
+        local states = {}
+        for key, state in pairs(runtime.states) do states[#states + 1] = { key = key, state = state } end
+        for _, entry in ipairs(states) do
+            endStateByKey(entry.key, entry.state, refreshCache, reason)
+        end
         runtime.states = {}
         runtime.roomNpcs = {}
     end
 
     local function newRoom()
-        clearAll(true)
+        clearAll(true, "room")
         return nil
     end
 
     local function gameStarted()
-        clearAll(false)
+        clearAll(false, "game-start")
         runtime.logicalFrame = 0
         return nil
     end
 
     local function preGameExit()
-        clearAll(false)
+        clearAll(false, "exit")
         return nil
     end
 
@@ -635,7 +680,10 @@ return function(Neverbirth, context)
         Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, preGameExit)
     end
 
+    trace("init")
     local api = {
+        SetDiagnostics = function(enabled) diagnostics = enabled == true end,
+        Failures = failures,
         ItemId = ITEM_ID,
         Variants = { Aura = AURA_VARIANT, Shockwave = SHOCKWAVE_VARIANT, Activate = ACTIVATE_VARIANT },
         Paths = { Aura = AURA_ANM2, Shockwave = SHOCKWAVE_ANM2, Activate = ACTIVATE_ANM2 },
@@ -650,7 +698,7 @@ return function(Neverbirth, context)
         CarBatteryId = CAR_BATTERY_ID,
         CarBatteryChargePerHit = CAR_BATTERY_CHARGE_PER_HIT,
         Runtime = runtime,
-        GetState = function(player) return runtime.states[player] end,
+        GetState = getState,
         IsHostileNpc = isHostileNpc,
         StartState = startState,
         EndState = endState,

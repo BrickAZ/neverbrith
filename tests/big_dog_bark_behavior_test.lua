@@ -256,13 +256,23 @@ local function test_registration()
         local dogPool = pools:match('<Pool Name="treasure">.-</Pool>')
         assertTruthy(dogPool and dogPool:find('<Item Name="Big Dog Bark" Weight="1" DecreaseBy="1" RemoveOn="1"/>', 1, true),
             path .. " should add Big Dog Bark only to treasure at the locked weight")
-        assertEquals(pools:find('Name="Wind Charge Rod"', 1, true), nil, "Wind Charge Rod pool stays TBD")
-        assertEquals(pools:find('Name="Echo Shard"', 1, true), nil, "Echo Shard pool stays TBD")
+        for _, itemName in ipairs({ "Wind Charge Rod", "Echo Shard" }) do
+            assertTruthy(dogPool:find('<Item Name="' .. itemName .. '" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+                path .. " should include " .. itemName .. " in treasure at weight 1")
+            local _, count = pools:gsub('Name="' .. itemName .. '"', '')
+            assertEquals(count, 1, itemName .. " must be registered only in treasure")
+        end
     end
     local zhPools = readFile("content/itempools.zh_cn.xml")
     local zhTreasure = zhPools:match('<Pool Name="treasure">.-</Pool>')
     assertTruthy(zhTreasure and zhTreasure:find('<Item Name="大狗叫" Weight="1" DecreaseBy="1" RemoveOn="1"/>', 1, true),
         "Chinese treasure pool should use the translated item name")
+    for _, itemName in ipairs({ "蓄风棒", "回响碎片" }) do
+        assertTruthy(zhTreasure:find('<Item Name="' .. itemName .. '" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+            "Chinese treasure should include " .. itemName .. " at weight 1")
+        local _, count = zhPools:gsub('Name="' .. itemName .. '"', '')
+        assertEquals(count, 1, itemName .. " must be registered only in treasure")
+    end
 
     local sounds = readFile("content/sounds.xml")
     assertTruthy(sounds:find('<sounds root="sfx/">', 1, true),
@@ -1133,6 +1143,16 @@ local function test_real_food_pickups_unlock_chew_and_ignore_inventory_reconcili
     api.SettleFoodPickups(1)
     assertEquals(api.GetPlayerRecord(first).foodPickups, 0,
         "initial inventory and sourceless reconciliation do not count")
+
+    if arg and arg[1] == "--pending-p5" then
+        local rejectedPlayer = makePlayer(8005)
+        local rejectedPickup = makePickup(8052, 900)
+        api.Callbacks.PrePickupCollision(nil, rejectedPickup, rejectedPlayer, false)
+        rejectedPlayer.collectibles[900] = 1 -- unrelated code grant after collision cancellation
+        assertEquals(api.SettleFoodPickups(2), 0,
+            "cancelled collision plus same-ID code grant must not forge a food pickup")
+        api.ResetForTest("food")
+    end
 
     local queuedPlayer = makePlayer(8003)
     local queuedPickup = makePickup(8050, 900)

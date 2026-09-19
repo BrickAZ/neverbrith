@@ -1,3 +1,33 @@
+-- Required REPENTOGON bootstrap: no registration or module side effects before this gate.
+do
+    local function supportedRelease(runtime)
+        if type(runtime) ~= "table" or runtime.Real ~= true
+            or type(runtime.Version) ~= "string"
+            or type(_RunEntityTakeDmgCallback) ~= "function"
+        then return false end
+        local major, minor, patch, suffix = runtime.Version:match("^(%d+)%.(%d+)%.(%d+)([a-z]?)$")
+        if not major then return false end
+        for _, component in ipairs({ major, minor, patch }) do
+            if #component > 1 and component:sub(1, 1) == "0" then return false end
+        end
+        major, minor, patch = tonumber(major), tonumber(minor), tonumber(patch)
+        if major ~= 1 then return major > 1 end
+        if minor ~= 0 then return minor > 0 end
+        if patch ~= 12 then return patch > 12 end
+        return suffix ~= "" -- 1.0.12 itself lacks the required letter patch.
+    end
+    if not supportedRelease(REPENTOGON) then
+        if not _G.NeverbirthRepentogonDependencyMessageShown then
+            _G.NeverbirthRepentogonDependencyMessageShown = true
+            local message = "[neverbirth] 需要 REPENTOGON 1.0.12a 或更新的可识别稳定版本；当前前置缺失、过旧或构建未知，已停止初始化。Required: REPENTOGON 1.0.12a or newer recognized stable release; initialization stopped (missing, old or unknown build)."
+            if Isaac and type(Isaac.ConsoleOutput) == "function" then Isaac.ConsoleOutput(message .. "\n")
+            elseif Isaac and type(Isaac.DebugString) == "function" then Isaac.DebugString(message)
+            elseif type(print) == "function" then print(message) end
+        end
+        return
+    end
+end
+
 -- 注册模组
 local Neverbirth = RegisterMod("neverbirth", 1)
 if _G then
@@ -60,6 +90,8 @@ local ITEM_NAME_CANDIDATES = {
     KamikazeSquad = { "Kamikaze Squad", "神风特攻队" },
     MemoryDisorder = { "Memory Disorder", "记忆紊乱" },
     RingOfSevenCurses = { "Ring of the Seven Curses", "七咒之戒" },
+    AvadaKedavra = { "Avada Kedavra", "阿瓦达啃大瓜" },
+    HealthySleep = { "健康睡眠" }, -- English display text remains TBD.
     DS4 = { "ds4" },
 }
 
@@ -130,6 +162,8 @@ local Items = {
     KamikazeSquad = FindItemIdByNames(ITEM_NAME_CANDIDATES.KamikazeSquad),
     MemoryDisorder = FindItemIdByNames(ITEM_NAME_CANDIDATES.MemoryDisorder),
     RingOfSevenCurses = FindItemIdByNames(ITEM_NAME_CANDIDATES.RingOfSevenCurses),
+    AvadaKedavra = FindItemIdByNames(ITEM_NAME_CANDIDATES.AvadaKedavra),
+    HealthySleep = FindItemIdByNames(ITEM_NAME_CANDIDATES.HealthySleep),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
 
@@ -148,11 +182,12 @@ Neverbirth.RuntimeLocalization = Neverbirth.RuntimeLocalization or {
             uncutCordHalfPaid = "HALF PAID",
             uncutCordFullPaid = "FULL PAID",
             blackTaisuiTitle = "Black Taisui",
-            blackTaisuiWard = "WARD",
             blackTaisuiBlock = "TAISUI BLOCK",
             blackTaisuiDeathSaveSubtitle = "Lethal damage blocked",
             condomTitle = "Condom",
-            condomBanned = "{count} baby items banned",
+            condomBanned = "Banned {items}",
+            condomNameSeparator = " and ",
+            condomUnknownItem = "Unknown item",
             condomEmpty = "No baby items left",
         },
         zh_cn = {
@@ -161,11 +196,12 @@ Neverbirth.RuntimeLocalization = Neverbirth.RuntimeLocalization or {
             uncutCordHalfPaid = "一半延迟伤害",
             uncutCordFullPaid = "全部延迟伤害",
             blackTaisuiTitle = "黑太岁",
-            blackTaisuiWard = "护命",
             blackTaisuiBlock = "挡下致命伤害",
             blackTaisuiDeathSaveSubtitle = "挡下致命伤害",
             condomTitle = "避孕套",
-            condomBanned = "已禁用{count}件宝宝道具",
+            condomBanned = "禁用了{items}",
+            condomNameSeparator = "和",
+            condomUnknownItem = "未知道具",
             condomEmpty = "没有剩余宝宝道具",
         },
     },
@@ -255,14 +291,20 @@ local DEBUG_PRINT_ITEM_IDS = true
 local bloodSkullGuBacklashDepth = 0
 
 local EID_DESCRIPTIONS = {
+    [Items.HealthySleep] = {
+        zh_cn = {
+            name = "健康睡眠",
+            eidDescription = "每层初始房间生成一张原版床，每层仅一次#睡眠进度需要现实时间8小时，暂停和退出时停止计时#持续按住游戏操作15帧后加速；不同操作可叠加，遵循平方根递减收益#睡眠中操作仅用于催醒#睡满后先补满红心，再获得3颗魂心",
+        },
+    },
     [Items.RingOfSevenCurses] = {
         en_us = {
             name = "Ring of the Seven Curses",
-            eidDescription = "Permanently binds itself to your primary active slot for this run#Forces Darkness, Lost, Unknown, and Maze; blocks trinkets and flight#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Enemy health and damage taken are doubled#Maximum: 6 hearts, 2 keys, 1 bomb, and 20 coins#Every 2 rooms, charges the retained character-native secondary active by 1#Quality 4 and modded items stay uncollectible; a separate legal item appears beside them#Rerolling the original pedestal checks its new item again; pre-ring active drops are excluded#Trade items add a broken heart",
+            eidDescription = "Permanently binds itself to your primary active slot for this run#Forces Darkness, Lost, Unknown, and Maze; blocks trinkets and flight#Cannot use beds, except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Enemy health and damage taken are doubled#Maximum: 6 hearts, 2 keys, 1 bomb, and 20 coins#Every 2 rooms, charges the retained character-native secondary active by 1#Quality 4 and modded items stay uncollectible; a separate legal item appears beside them#Rerolling the original pedestal checks its new item again; pre-ring active drops are excluded#Trade items add a broken heart",
         },
         zh_cn = {
             name = "七咒之戒",
-            eidDescription = "本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
+            eidDescription = "本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#无法使用床，妈妈的床除外#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
         },
     },
     [Items.MemoryDisorder] = {
@@ -333,14 +375,24 @@ local EID_DESCRIPTIONS = {
         en_us = { name = "Echo Shard", eidDescription = "Big Dog Bark's dash and echo leave polluted creep that slows enemies and deals 1% of your damage every frame#After the dash ends, an echo retraces its path and deals 50% damage" },
         zh_cn = { name = "回响碎片", eidDescription = "大狗本体冲刺与回响都会留下减速水迹，每帧造成攻击力1%伤害#冲刺结束后回响重走原路径，并造成冲刺伤害的50%" },
     },
+    [Items.AvadaKedavra] = {
+        en_us = {
+            name = "Avada Kedavra",
+            eidDescription = "Replaces your weapon with Anti-Gravity Brimstone#While enemies remain, hold fire to charge for 1 second, then release to cast#Multiplies your damage stat by 5; tears do not change the charge time#Keep holding to retain full charge and change aim; releasing early cancels#If a completed cast kills no enemy directly, you die and cannot revive from that death#In co-op, only the caster dies",
+        },
+        zh_cn = {
+            name = "阿瓦达啃大瓜",
+            eidDescription = "攻击替换为原版反重力硫磺火#有敌人时按住射击蓄力1秒，蓄满后松键施法#面板攻击力翻5倍；蓄力不受射速影响#蓄满可持续按住并调整方向；未蓄满松键取消#一次攻击完全结束后若未直接击杀敌人，施法者死亡且本次无法复活#合作模式只杀死施法者",
+        },
+    },
     [Items.YinsCurse] = {
         en_us = {
             name = "Yin's Curse",
-            eidDescription = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If Black Candle was held when this item was picked up, Ipecac instead appears beside it#Lose all explosion immunity; {{Collectible260}} Black Candle temporarily makes you immune to explosions",
+            eidDescription = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If Black Candle was held when this item was picked up, Ipecac instead appears beside it#Existing explosion immunity currently remains active; {{Collectible260}} Black Candle itself does not grant it",
         },
         zh_cn = {
             name = "阴的诅咒",
-            eidDescription = "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#失去所有防爆；{{Collectible260}}黑蜡烛暂时使你免疫爆炸",
+            eidDescription = "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#已有防爆效果目前仍会生效；{{Collectible260}}黑蜡烛本身不提供防爆",
         },
     },
     [Items.ACEAntiCheatSystem] = {
@@ -584,21 +636,21 @@ local EID_DESCRIPTIONS = {
     [Items.BlackTaisui] = {
         en_us = {
             name = "Black Taisui",
-            eidDescription = "Gain parasite value from red-heart healing, red heart containers, and red-heart damage#Each red heart container: +4 parasite; red-heart healing: +1 per half heart; red-heart damage: +2 per half heart#Without red heart containers: soul/black healing +1 per full heart; soul/black damage +1 per half heart#0-7: {{Damage}} -0.5, {{Speed}} -0.2, {{Luck}} -3 per copy (damage cannot fall below 1; speed cannot fall below 0.5)#8-15: {{Damage}} -0.5; reveal question-mark item pedestals and suppress Blind, Lost, Unknown, and Wavy Cap side effects#At 16+, all 8-15 effects remain; each copy grants {{Damage}} +1.5 damage, and Meat Lump is created once#Multiple copies share parasite value; Meat Lump still appears only once",
+            eidDescription = "Gain parasite value from red-heart healing, red heart containers, and red-heart damage#Each red heart container: +4 parasite; red-heart healing: +1 per half heart; red-heart damage: +2 per half heart#Without red heart containers: soul/black healing +1 per full heart; soul/black damage +1 per half heart#0-7: {{Damage}} -0.5, {{Speed}} -0.2, {{Luck}} -3 per copy (damage cannot fall below 1; speed cannot fall below 0.5)#8-15: {{Damage}} -0.5; reveal question-mark item pedestals and suppress Blind, Lost, Unknown, and Wavy Cap side effects#At 16+, all 8-15 effects remain; each copy grants {{Damage}} +1.5 damage, and Meat Lump is created once#At 16+, also blocks one lethal hit per floor, except IV Bag, devil deals, and cursed doors#Multiple copies share parasite value; Meat Lump still appears only once",
         },
         zh_cn = {
             name = "黑太岁",
-            eidDescription = "红心治疗、红心容器和红心伤害会积累寄生值#每个红心容器+4；红心治疗每半心+1；红心伤害每半心+2#无红心容器时：魂心/黑心治疗每整心+1；魂心/黑心伤害每半心+1#0-7：每个黑太岁 {{Damage}} -0.5、{{Speed}} -0.2、{{Luck}} -3（攻击最低1，移速最低0.5）#8-15：{{Damage}} -0.5；揭示问号道具，并压制致盲/迷途/未知和波浪帽副作用#16+：继承二阶段；每个黑太岁 {{Damage}} +1.5；生成1次肉块#多个黑太岁共享寄生值；肉块仍只生成一次",
+            eidDescription = "红心治疗、红心容器和红心伤害会积累寄生值#每个红心容器+4；红心治疗每半心+1；红心伤害每半心+2#无红心容器时：魂心/黑心治疗每整心+1；魂心/黑心伤害每半心+1#0-7：每个黑太岁 {{Damage}} -0.5、{{Speed}} -0.2、{{Luck}} -3（攻击最低1，移速最低0.5）#8-15：{{Damage}} -0.5；揭示问号道具，并压制致盲/迷途/未知和波浪帽副作用#16+：继承二阶段；每个黑太岁 {{Damage}} +1.5；生成1次肉块#三阶段本体每层可挡1次致命伤；不挡献血袋、恶魔交易和诅咒门代价#多个黑太岁共享寄生值；肉块仍只生成一次",
         },
     },
     [Items.MeatLump] = {
         en_us = {
             name = "Meat Lump",
-            eidDescription = "Grants one extra life#On lethal damage, consume it and return with a little health#This item does not appear in any item pool",
+            eidDescription = "Blocks one lethal hit per copy#On trigger, keeps a little health and briefly grants invincibility#HUD +N shows remaining Meat Lump charges#This item does not appear in any item pool",
         },
         zh_cn = {
             name = "肉块",
-            eidDescription = "有条件抵挡一次来自敌人的致死伤害#这个道具不存在于任何道具池里",
+            eidDescription = "每个肉块可抵挡1次致命伤害#触发后保留少量生命，并获得短暂无敌#HUD +N 显示肉块剩余挡死次数#这个道具不存在于任何道具池里",
         },
     },
     [Items.CleansedWavyCap] = {
@@ -634,11 +686,11 @@ local EID_DESCRIPTIONS = {
     [Items.StrongLaxative] = {
         en_us = {
             name = "Strong Laxative",
-            eidDescription = "All creep is treated as friendly#Leave slippery creep while moving#Slippery creep slows enemies and deals 10% of your damage every 10 frames#Each copy gives a 5% chance per second to spawn random poop (max 100%)#Up to 15 poops per room",
+            eidDescription = "All creep is treated as friendly#Leave slippery creep while moving#Slippery creep slows grounded enemies and deals a base 10% of your damage every 10 frames#Aquarius-style synergies: poison, burning, homing and Playdough Cookie effects#Proptosis: 3x creep damage; Ipecac: uses Aquarius damage basis#Coal and acid do not break obstacles or add distance damage; no explosions or Godhead aura#Each copy gives a 5% chance per second to spawn random poop (max 100%)#Up to 15 poops per room",
         },
         zh_cn = {
             name = "强力泻药",
-            eidDescription = "所有水迹视为己方水迹#移动时留下打滑水迹#打滑水迹使敌人减速，并每10帧造成10%角色伤害#每个副本每秒+5%概率生成随机大便（最高100%）#每个房间最多生成15个大便",
+            eidDescription = "所有水迹视为己方水迹#移动时留下打滑水迹#打滑水迹使地面敌人减速，每10帧造成基础10%角色伤害#继承宝瓶座式协同：中毒、燃烧、追踪及黏土饼干随机效果#眼球突出：水迹伤害×3；吐根酊：使用宝瓶座的伤害计算基数#煤块与硫酸不破坏障碍物、不增加距离伤害；无爆炸和神性光环#每个副本每秒+5%概率生成随机大便（最高100%）#每个房间最多生成15个大便",
         },
     },
     [Items.TowerOfBabel] = {
@@ -846,6 +898,13 @@ Neverbirth:RegisterPickupBannerText(Items.Annihilation, "Annihilation", "Feel My
 Neverbirth:RegisterPickupBannerText(Items.KamikazeSquad, "Kamikaze Squad", "For victory! Sacrifice!", "神风特攻队", "为胜利！献身！")
 Neverbirth:RegisterPickupBannerText(Items.MemoryDisorder, "Memory Disorder", "Who am I?", "记忆紊乱", "我是谁？")
 Neverbirth:RegisterPickupBannerText(Items.RingOfSevenCurses, "Ring of the Seven Curses", "This world isn't worth it.", "七咒之戒", "人间不值得")
+Neverbirth:RegisterPickupBannerText(Items.AvadaKedavra, "Avada Kedavra", "", "阿瓦达啃大瓜", "")
+-- Only approved Chinese copy is available; leave English banner/EID unregistered.
+if IsValidItemId(Items.HealthySleep) then
+    Neverbirth.PickupBannerTexts[Items.HealthySleep] = {
+        zh_cn = { name = "健康睡眠", subtitle = "睡够八小时" },
+    }
+end
 
 local eidDescriptionsRegistered = false
 
@@ -3598,8 +3657,9 @@ local function TryTriggerPanicMusicbox(player, amount)
     return true
 end
 
-function Neverbirth:PreventMusicboxDamage(entity, amount)
-    local player = entity and entity.ToPlayer and entity:ToPlayer()
+-- Already-active invulnerability must precede native Holy Mantle/other shields.
+-- Do NOT start panic here: this early hook has not seen ACE/ring damage modifiers.
+function Neverbirth:PreventActiveMusicboxDamage(player)
     if not player then
         return nil
     end
@@ -3611,6 +3671,21 @@ function Neverbirth:PreventMusicboxDamage(entity, amount)
     end
 
     if musicboxEffects[player.InitSeed] then
+        return false
+    end
+
+    return nil
+end
+
+Neverbirth:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, Neverbirth.PreventActiveMusicboxDamage)
+
+function Neverbirth:PreventMusicboxDamage(entity, amount)
+    local player = entity and entity.ToPlayer and entity:ToPlayer()
+    if not player then
+        return nil
+    end
+
+    if self:PreventActiveMusicboxDamage(player) == false then
         return false
     end
 
@@ -4411,7 +4486,6 @@ local BLOOD_SKULL_GU_POOF_EFFECT = (EffectVariant and (EffectVariant.BLOOD_EXPLO
 local BLOOD_SKULL_GU_CREEP_EFFECT = (EffectVariant and EffectVariant.CREEP_RED) or 22
 local BLOOD_SKULL_GU_RANGE_CACHE = (CacheFlag and CacheFlag.CACHE_RANGE) or 64
 local BLOOD_SKULL_GU_RED_HEART_DAMAGE = (DamageFlag and DamageFlag.DAMAGE_RED_HEARTS) or 0
-local BLOOD_SKULL_GU_FAMILIAR_ITEM_SCAN_MAX = 1000
 local BLOOD_SKULL_GU_TEMPORARY_FAMILIARS = {
     [FamiliarVariant and FamiliarVariant.BLUE_FLY or 43] = true,
     [FamiliarVariant and FamiliarVariant.BLUE_SPIDER or 73] = true,
@@ -4419,79 +4493,8 @@ local BLOOD_SKULL_GU_TEMPORARY_FAMILIARS = {
     [FamiliarVariant and FamiliarVariant.ABYSS_LOCUST or 231] = true,
 }
 
-local function BloodSkullGuFamiliarVariant(name, fallback)
-    return FamiliarVariant and FamiliarVariant[name] or fallback
-end
-
-local function BloodSkullGuCollectibleType(name, fallback)
-    return CollectibleType and CollectibleType[name] or fallback
-end
-
-local function BuildBloodSkullGuFamiliarSourceItems()
-    local mappings = {}
-
-    local function add(variantName, variantFallback, collectibleName, collectibleFallback)
-        local variant = BloodSkullGuFamiliarVariant(variantName, variantFallback)
-        local collectible = BloodSkullGuCollectibleType(collectibleName, collectibleFallback)
-        if variant ~= nil and IsValidItemId(collectible) then
-            mappings[variant] = mappings[variant] or {}
-            mappings[variant][#mappings[variant] + 1] = collectible
-        end
-    end
-
-    add("BROTHER_BOBBY", 1, "COLLECTIBLE_BROTHER_BOBBY", 8)
-    add("SISTER_MAGGY", 7, "COLLECTIBLE_SISTER_MAGGY", 67)
-    add("LITTLE_STEVEN", 5, "COLLECTIBLE_LITTLE_STEVEN", 100)
-    add("ROBO_BABY", 6, "COLLECTIBLE_ROBO_BABY", 95)
-    add("GUARDIAN_ANGEL", 32, "COLLECTIBLE_GUARDIAN_ANGEL", 112)
-    add("DEMON_BABY", 2, "COLLECTIBLE_DEMON_BABY", 113)
-    add("GHOST_BABY", 9, "COLLECTIBLE_GHOST_BABY", 163)
-    add("HARLEQUIN_BABY", 10, "COLLECTIBLE_HARLEQUIN_BABY", 167)
-    add("RAINBOW_BABY", 11, "COLLECTIBLE_RAINBOW_BABY", 174)
-    add("ABEL", 8, "COLLECTIBLE_ABEL", 188)
-    add("DRY_BABY", 51, "COLLECTIBLE_DRY_BABY", 265)
-    add("ROBO_BABY_2", 53, "COLLECTIBLE_ROBO_BABY_2", 267)
-    add("ROTTEN_BABY", 54, "COLLECTIBLE_ROTTEN_BABY", 268)
-    add("HEADLESS_BABY", 55, "COLLECTIBLE_HEADLESS_BABY", 269)
-    add("LIL_BRIMSTONE", 61, "COLLECTIBLE_LIL_BRIMSTONE", 275)
-    add("LIL_HAUNT", 63, "COLLECTIBLE_LIL_HAUNT", 277)
-    add("DARK_BUM", 64, "COLLECTIBLE_DARK_BUM", 278)
-    add("MONGO_BABY", 74, "COLLECTIBLE_MONGO_BABY", 322)
-    add("INCUBUS", 80, "COLLECTIBLE_INCUBUS", 360)
-    add("SWORN_PROTECTOR", 83, "COLLECTIBLE_SWORN_PROTECTOR", 363)
-    add("CHARGED_BABY", 86, "COLLECTIBLE_CHARGED_BABY", 372)
-    add("LIL_GURDY", 87, "COLLECTIBLE_LIL_GURDY", 384)
-    add("BUMBO", 88, "COLLECTIBLE_BUMBO", 385)
-    add("CENSER", 89, "COLLECTIBLE_CENSER", 387)
-    add("SERAPHIM", 92, "COLLECTIBLE_SERAPHIM", 390)
-    add("FARTING_BABY", 95, "COLLECTIBLE_FARTING_BABY", 404)
-    add("SUCCUBUS", 96, "COLLECTIBLE_SUCCUBUS", 417)
-    add("LIL_LOKI", 97, "COLLECTIBLE_LIL_LOKI", 435)
-    add("PAPA_FLY", 99, "COLLECTIBLE_PAPA_FLY", 430)
-    add("MULTIDIMENSIONAL_BABY", 101, "COLLECTIBLE_MULTIDIMENSIONAL_BABY", 431)
-    add("SHADE", 106, "COLLECTIBLE_SHADE", 468)
-    add("LIL_MONSTRO", 108, "COLLECTIBLE_LIL_MONSTRO", 471)
-    add("KING_BABY", 109, "COLLECTIBLE_KING_BABY", 472)
-    add("BIG_CHUBBY", 104, "COLLECTIBLE_BIG_CHUBBY", 473)
-    add("ACID_BABY", 112, "COLLECTIBLE_ACID_BABY", 491)
-    add("BUDDY_IN_A_BOX", 119, "COLLECTIBLE_BUDDY_IN_A_BOX", 518)
-    add("BLOOD_PUPPY", 241, "COLLECTIBLE_BLOOD_PUPPY", 565)
-    add("BOILED_BABY", 208, "COLLECTIBLE_BOILED_BABY", 607)
-    add("FREEZER_BABY", 209, "COLLECTIBLE_FREEZER_BABY", 608)
-    add("LIL_DUMPY", 212, "COLLECTIBLE_LIL_DUMPY", 615)
-    add("BOT_FLY", 218, "COLLECTIBLE_BOT_FLY", 629)
-    add("CUBE_BABY", 239, "COLLECTIBLE_CUBE_BABY", 652)
-    add("MINISAAC", 228, "COLLECTIBLE_QUINTS", 661)
-    add("LIL_ABADDON", 230, "COLLECTIBLE_LIL_ABADDON", 679)
-    add("TWISTED_BABY", 235, "COLLECTIBLE_TWISTED_PAIR", 698)
-
-    return mappings
-end
-
-local BLOOD_SKULL_GU_FAMILIAR_SOURCE_ITEMS = BuildBloodSkullGuFamiliarSourceItems()
 
 local bloodSkullGuGrowth = {}
-local bloodSkullGuFamiliarItemCache = {}
 
 local function BuildBloodSkullGuActiveSlots()
     if not ActiveSlot then
@@ -4665,12 +4668,12 @@ local function IsBloodSkullGuEntityRemoved(entity)
     return entity.removed == true
 end
 
-local function IsEligibleBloodSkullFamiliar(entity, player)
+local function GetEligibleBloodSkullFamiliar(entity, player)
     if not entity or entity.Type ~= BLOOD_SKULL_GU_ENTITY_FAMILIAR or IsBloodSkullGuEntityRemoved(entity) then
-        return false
+        return nil
     end
 
-    local familiar = entity
+    local familiar
     if entity.ToFamiliar then
         local ok, converted = pcall(function()
             return entity:ToFamiliar()
@@ -4681,22 +4684,22 @@ local function IsEligibleBloodSkullFamiliar(entity, player)
     end
 
     if not familiar then
-        return false
+        return nil
     end
 
     if BLOOD_SKULL_GU_TEMPORARY_FAMILIARS[familiar.Variant] then
-        return false
+        return nil
     end
 
     if familiar.Player ~= nil then
-        return IsBloodSkullGuSamePlayer(familiar.Player, player)
+        return IsBloodSkullGuSamePlayer(familiar.Player, player) and familiar or nil
     end
 
     if familiar.SpawnerEntity ~= nil then
-        return IsBloodSkullGuSamePlayer(familiar.SpawnerEntity, player)
+        return IsBloodSkullGuSamePlayer(familiar.SpawnerEntity, player) and familiar or nil
     end
 
-    return false
+    return nil
 end
 
 local function CollectBloodSkullGuFamiliars(player)
@@ -4706,8 +4709,11 @@ local function CollectBloodSkullGuFamiliars(player)
     end
 
     for _, entity in ipairs(Isaac.GetRoomEntities()) do
-        if IsEligibleBloodSkullFamiliar(entity, player) then
-            familiars[#familiars + 1] = entity
+        -- Keep the converted view: GetItemConfig belongs to EntityFamiliar,
+        -- not the base Entity handles returned by GetRoomEntities.
+        local familiar = GetEligibleBloodSkullFamiliar(entity, player)
+        if familiar then
+            familiars[#familiars + 1] = familiar
         end
     end
 
@@ -4829,87 +4835,13 @@ local function PlayerHasBloodSkullGuCollectible(player, itemId)
     return player and player.GetCollectibleNum and IsValidItemId(itemId) and player:GetCollectibleNum(itemId) > 0
 end
 
-local function GetBloodSkullGuCollectibleConfig(itemConfig, itemId)
-    if not itemConfig or not itemConfig.GetCollectible or not IsValidItemId(itemId) then
-        return nil
-    end
-
-    local ok, collectible = pcall(function()
-        return itemConfig:GetCollectible(itemId)
-    end)
-    if ok then
-        return collectible
-    end
-
-    return nil
-end
-
-local function GetBloodSkullGuDirectSourceItem(familiar, player)
-    local candidates = {
-        familiar and familiar.CollectibleType,
-        familiar and familiar.Collectible,
-        familiar and familiar.ItemId,
-        familiar and familiar.SourceCollectible,
-        familiar and familiar.SourceItem,
-    }
-
-    for _, itemId in ipairs(candidates) do
-        if PlayerHasBloodSkullGuCollectible(player, itemId) then
-            return itemId
-        end
-    end
-
-    return nil
-end
-
 local function FindBloodSkullGuSourceCollectible(familiar, player)
-    if not familiar or not player then
-        return nil
-    end
-
-    local directItem = GetBloodSkullGuDirectSourceItem(familiar, player)
-    if directItem then
-        return directItem
-    end
-
-    local variant = familiar.Variant
-    if variant == nil or not Isaac.GetItemConfig then
-        return nil
-    end
-
-    local cached = bloodSkullGuFamiliarItemCache[variant]
-    if type(cached) == "table" then
-        for _, itemId in ipairs(cached) do
-            if PlayerHasBloodSkullGuCollectible(player, itemId) then
-                return itemId
-            end
-        end
-    end
-
-    local staticCandidates = BLOOD_SKULL_GU_FAMILIAR_SOURCE_ITEMS[variant]
-    if type(staticCandidates) == "table" then
-        for _, itemId in ipairs(staticCandidates) do
-            if PlayerHasBloodSkullGuCollectible(player, itemId) then
-                bloodSkullGuFamiliarItemCache[variant] = staticCandidates
-                return itemId
-            end
-        end
-    end
-
-    local itemConfig = Isaac.GetItemConfig()
-    local candidates = {}
-    for itemId = 1, BLOOD_SKULL_GU_FAMILIAR_ITEM_SCAN_MAX do
-        local collectible = GetBloodSkullGuCollectibleConfig(itemConfig, itemId)
-        if collectible and collectible.FamiliarVariant == variant then
-            candidates[#candidates + 1] = itemId
-            if PlayerHasBloodSkullGuCollectible(player, itemId) then
-                bloodSkullGuFamiliarItemCache[variant] = candidates
-                return itemId
-            end
-        end
-    end
-
-    bloodSkullGuFamiliarItemCache[variant] = candidates
+    if not familiar or not player then return nil end
+    -- REPENTOGON 1.0.12a records the actual granting ItemConfig on the familiar.
+    -- A nil source is meaningful (e.g. a non-item summon); never guess by variant.
+    local ok, config = pcall(function() return familiar:GetItemConfig() end)
+    local itemId = ok and config and config.ID or nil
+    if PlayerHasBloodSkullGuCollectible(player, itemId) then return itemId end
     return nil
 end
 
@@ -5031,12 +4963,16 @@ local BOSS_ORDER_SPAWN_OFFSET = 120
 local BOSS_ORDER_CHAMPION_CHANCE = 15
 local BOSS_ORDER_CHAMPION_COLOR = -1
 
-local function BossOrderTarget(entityType, variant, subtype, rewardCategory)
+local bossOrderPendingEncounters = {}
+local bossOrderRunToken = {}
+
+local function BossOrderTarget(entityType, variant, subtype, rewardCategory, segments)
     return {
         entityType = entityType,
         variant = variant or 0,
         subtype = subtype or 0,
         rewardCategory = rewardCategory or "normal",
+        segments = segments or 1,
     }
 end
 
@@ -5083,18 +5019,18 @@ local BOSS_ORDER_NORMAL_TARGETS_BY_STAGE_GROUP = {
 
 local BOSS_ORDER_BOSS_RUSH_TARGETS = {
     BossOrderTarget(EntityType and EntityType.ENTITY_MONSTRO or 20, 0, 0, "boss"),
-    BossOrderTarget(EntityType and EntityType.ENTITY_LARRYJR or 19, 0, 0, "boss"),
-    BossOrderTarget(EntityType and EntityType.ENTITY_DUKE or 30, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_LARRYJR or 19, 0, 0, "boss", 5),
+    BossOrderTarget(EntityType and EntityType.ENTITY_DUKE or 67, 0, 0, "boss"),
     BossOrderTarget(EntityType and EntityType.ENTITY_GURDY or 36, 0, 0, "boss"),
-    BossOrderTarget(EntityType and EntityType.ENTITY_CHUB or 28, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_CHUB or 28, 0, 0, "boss", 3),
     BossOrderTarget(EntityType and EntityType.ENTITY_PIN or 62, 0, 0, "boss"),
     BossOrderTarget(EntityType and EntityType.ENTITY_FAMINE or 63, 0, 0, "boss"),
     BossOrderTarget(EntityType and EntityType.ENTITY_PESTILENCE or 64, 0, 0, "boss"),
     BossOrderTarget(EntityType and EntityType.ENTITY_WAR or 65, 0, 0, "boss"),
     BossOrderTarget(EntityType and EntityType.ENTITY_DEATH or 66, 0, 0, "boss"),
-    BossOrderTarget(EntityType and EntityType.ENTITY_LOKI or 81, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_LOKI or 69, 0, 0, "boss"),
     BossOrderTarget(EntityType and EntityType.ENTITY_MONSTRO2 or 43, 0, 0, "boss"),
-    BossOrderTarget(EntityType and EntityType.ENTITY_GURDYJR or 97, 0, 0, "boss"),
+    BossOrderTarget(EntityType and EntityType.ENTITY_GURDY_JR or 99, 0, 0, "boss"),
 }
 
 local function GetBossOrderGame()
@@ -5247,7 +5183,21 @@ local function IsBossOrderSpawnFarEnough(position, player)
     return dx * dx + dy * dy >= BOSS_ORDER_MIN_SPAWN_DISTANCE * BOSS_ORDER_MIN_SPAWN_DISTANCE
 end
 
-local function TryBossOrderSpawnPosition(room, candidate, player)
+local function IsBossOrderSpawnAvailable(position, player, nearby, room)
+    if not IsBossOrderSpawnFarEnough(position, player) then return false end
+    if nearby and room then
+        if room.IsPositionInRoom and not room:IsPositionInRoom(position, 20) then return false end
+        if room.GetGridCollisionAtPos and room:GetGridCollisionAtPos(position) ~= 0 then return false end
+    end
+    for _, npc in ipairs(nearby or {}) do
+        if npc:Exists() and not npc:IsDead() and not IsBossOrderSpawnFarEnough(position, npc) then
+            return false
+        end
+    end
+    return true
+end
+
+local function TryBossOrderSpawnPosition(room, candidate, player, nearby)
     if not candidate then
         return nil
     end
@@ -5256,7 +5206,7 @@ local function TryBossOrderSpawnPosition(room, candidate, player)
         local ok, freePosition = pcall(function()
             return room:FindFreeTilePosition(candidate, BOSS_ORDER_MIN_SPAWN_DISTANCE)
         end)
-        if ok and freePosition and IsBossOrderSpawnFarEnough(freePosition, player) then
+        if ok and freePosition and IsBossOrderSpawnAvailable(freePosition, player, nearby, room) then
             return freePosition
         end
     end
@@ -5265,20 +5215,27 @@ local function TryBossOrderSpawnPosition(room, candidate, player)
         local ok, freePosition = pcall(function()
             return room:FindFreePickupSpawnPosition(candidate, BOSS_ORDER_MIN_SPAWN_DISTANCE, true, false)
         end)
-        if ok and freePosition and IsBossOrderSpawnFarEnough(freePosition, player) then
+        if ok and freePosition and IsBossOrderSpawnAvailable(freePosition, player, nearby, room) then
             return freePosition
         end
     end
 
-    if IsBossOrderSpawnFarEnough(candidate, player) then
+    if IsBossOrderSpawnAvailable(candidate, player, nearby, room) then
         return candidate
     end
 
     return nil
 end
 
-local function GetBossOrderSpawnPosition(player)
+local function GetBossOrderSpawnPosition(player, target)
     local room = GetBossOrderRoom()
+    local nearby
+    if target and target.segments > 1 then
+        -- Separate bodies, including back-to-back uses in the same update.
+        -- Snapshot once per use; never scan every frame or adopt unrelated NPCs.
+        if not Isaac.FindByType then return nil end
+        nearby = Isaac.FindByType(target.entityType, target.variant, target.subtype, false, false)
+    end
     local fallbackPosition = player and player.Position or (Vector and Vector(320, 280)) or { X = 320, Y = 280 }
     local candidates = {}
 
@@ -5306,12 +5263,13 @@ local function GetBossOrderSpawnPosition(player)
     candidates[#candidates + 1] = fallbackPosition
 
     for _, candidate in ipairs(candidates) do
-        local position = TryBossOrderSpawnPosition(room, candidate, player)
+        local position = TryBossOrderSpawnPosition(room, candidate, player, nearby)
         if position then
             return position
         end
     end
 
+    if nearby then return nil end
     return fallbackPosition
 end
 
@@ -5369,7 +5327,7 @@ local function IsBossOrderChampion(npc)
     return false
 end
 
-local function MarkBossOrderTarget(entity, target)
+local function MarkBossOrderTarget(entity, target, encounter)
     local data = GetBossOrderEntityData(entity)
     if not data then
         return false
@@ -5378,6 +5336,12 @@ local function MarkBossOrderTarget(entity, target)
     data.neverbirthBossOrderTarget = true
     data.neverbirthBossOrderRewarded = false
     data.neverbirthBossOrderRewardCategory = target and target.rewardCategory or "normal"
+    if encounter then
+        local member = { entity = entity, dead = false }
+        encounter.members[#encounter.members + 1] = member
+        data.neverbirthBossOrderEncounter = encounter
+        data.neverbirthBossOrderMember = member
+    end
     return true
 end
 
@@ -5409,26 +5373,63 @@ local function SpawnBossOrderTarget(player, target)
         return nil
     end
 
-    local position = GetBossOrderSpawnPosition(player)
+    local position = GetBossOrderSpawnPosition(player, target)
+    if not position then return nil end
     local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
-    local ok, entity = pcall(function()
-        return Isaac.Spawn(target.entityType, target.variant or 0, target.subtype or 0, position, velocity, player)
-    end)
-    if not ok or not entity then
-        return nil
+    local entities = {}
+    local room = GetBossOrderRoom()
+    local encounter = target.segments > 1 and {
+        members = {},
+        status = "spawning",
+        runToken = bossOrderRunToken,
+        entityType = target.entityType,
+        variant = target.variant,
+        subtype = target.subtype,
+        roomSeed = room and room:GetSpawnSeed(),
+    } or nil
+    local function rollback()
+        if encounter then encounter.status = "cancelled" end
+        for _, spawned in ipairs(entities) do
+            if spawned.Exists and spawned:Exists() then
+                local data = GetBossOrderEntityData(spawned)
+                if data then data.neverbirthBossOrderRewarded = true end
+                spawned:Remove()
+            end
+        end
     end
 
-    if not MarkBossOrderTarget(entity, target) then
-        return nil
+    -- Vanilla Larry/Chub assemble adjacent same-position spawns into a body.
+    -- Match the native chunks contract; Pin creates its own segments and is 1.
+    -- Do not force AI state, HP, or link fields before native initialization.
+    for _ = 1, target.segments do
+        local ok, entity = pcall(function()
+            return Isaac.Spawn(target.entityType, target.variant, target.subtype, position, velocity, player)
+        end)
+        if not ok or not entity then rollback(); return nil end
+        entities[#entities + 1] = entity
+        local npc = entity.ToNPC and entity:ToNPC()
+        if not npc or not npc:Exists() or npc:IsDead()
+            or npc.Type ~= target.entityType or npc.Variant ~= target.variant or npc.SubType ~= target.subtype
+            or not MarkBossOrderTarget(npc, target, encounter)
+        then
+            rollback()
+            return nil
+        end
     end
 
-    TryBossOrderMakeChampion(entity, player, target)
-    return entity
+    if encounter then
+        encounter.status = "active"
+        encounter.seed = entities[1].InitSeed
+    end
+    TryBossOrderMakeChampion(entities[1], player, target)
+    return entities[1]
 end
 
 function Neverbirth:UseBossOrder(_, _, player)
     local target = SelectBossOrderTarget(player)
-    return SpawnBossOrderTarget(player, target) ~= nil
+    if SpawnBossOrderTarget(player, target) then return true end
+    -- A boolean only controls the animation; explicitly cancel charge/wisp use.
+    return { Discharge = false, Remove = false, ShowAnim = false }
 end
 
 local function IsBossOrderBoss(npc, data)
@@ -5624,12 +5625,13 @@ local function GetBossOrderRewardCardSubtype(npc, index)
     return candidates[(seed % #candidates) + 1]
 end
 
-local function SpawnBossOrderCards(npc, count)
+local function SpawnBossOrderCards(npc, count, savedPosition, savedSeed)
     if not Isaac or not Isaac.Spawn then
         return
     end
 
-    local origin = npc and npc.Position or (Vector and Vector(320, 280)) or { X = 320, Y = 280 }
+    local origin = savedPosition or (npc and npc.Position) or (Vector and Vector(320, 280)) or { X = 320, Y = 280 }
+    local rewardSource = savedSeed and { InitSeed = savedSeed } or npc
     local room = GetBossOrderRoom()
     local velocity = Vector and Vector(0, 0) or { X = 0, Y = 0 }
 
@@ -5644,7 +5646,7 @@ local function SpawnBossOrderCards(npc, count)
             end
         end
 
-        local cardSubtype = GetBossOrderRewardCardSubtype(npc, index)
+        local cardSubtype = GetBossOrderRewardCardSubtype(rewardSource, index)
         pcall(function()
             Isaac.Spawn(BOSS_ORDER_ENTITY_PICKUP, BOSS_ORDER_CARD_VARIANT, cardSubtype, position, velocity, npc)
         end)
@@ -5657,11 +5659,86 @@ function Neverbirth:RewardBossOrderTarget(npc)
         return
     end
 
+    local encounter = data.neverbirthBossOrderEncounter
+    if encounter then
+        local member = data.neverbirthBossOrderMember
+        if encounter.status ~= "active" or encounter.runToken ~= bossOrderRunToken or not member or member.dead then return end
+        if npc.Type ~= encounter.entityType or npc.Variant ~= encounter.variant or npc.SubType ~= encounter.subtype then
+            encounter.status = "cancelled"
+            return
+        end
+        member.dead = true
+        member.entity = nil -- no userdata access after the death animation removes it
+        data.neverbirthBossOrderRewarded = true
+        encounter.position = Vector(npc.Position.X, npc.Position.Y)
+        bossOrderPendingEncounters[encounter] = true
+        return
+    end
+
     data.neverbirthBossOrderRewarded = true
     SpawnBossOrderCards(npc, GetBossOrderRewardCount(npc, data))
 end
 
+function Neverbirth:UpdateBossOrderEncounters()
+    if next(bossOrderPendingEncounters) == nil then return end
+    local room = GetBossOrderRoom()
+    local roomSeed = room and room:GetSpawnSeed()
+    for encounter in pairs(bossOrderPendingEncounters) do
+        local complete = true
+        if encounter.status == "active" and encounter.runToken == bossOrderRunToken and encounter.roomSeed == roomSeed then
+            for _, member in ipairs(encounter.members) do
+                if not member.dead then
+                    local npc = member.entity
+                    if not npc or not npc:Exists() then
+                        encounter.status = "cancelled" -- Remove is not a kill.
+                        break
+                    elseif npc.Type ~= encounter.entityType or npc.Variant ~= encounter.variant or npc.SubType ~= encounter.subtype then
+                        encounter.status = "cancelled" -- Morph is not a kill.
+                        break
+                    elseif npc:IsDead() then
+                        -- Native linked deaths may become visible before all death callbacks.
+                        member.dead = true
+                        member.entity = nil
+                    else
+                        complete = false
+                    end
+                end
+            end
+            if complete and encounter.status == "active" then
+                encounter.status = "rewarded"
+                -- Only plain position/seed snapshots survive; a removed NPC cannot
+                -- be passed as the native spawner argument to Isaac.Spawn.
+                SpawnBossOrderCards(nil, 3, encounter.position, encounter.seed)
+            end
+        else
+            bossOrderPendingEncounters[encounter] = nil
+        end
+        if encounter.status ~= "active" then
+            bossOrderPendingEncounters[encounter] = nil
+            for _, member in ipairs(encounter.members) do member.entity = nil end
+        end
+    end
+end
+
+function Neverbirth:ResetBossOrderPendingEncounters()
+    -- Queues are visit-local. Existing entity GetData owns the encounter; if
+    -- those entities survive a revisit, a subsequent death queues it again.
+    -- No SaveData/persistence policy is added to this previously entity-owned item.
+    bossOrderPendingEncounters = {}
+end
+
+function Neverbirth:ResetBossOrderRun()
+    bossOrderRunToken = {}
+    bossOrderPendingEncounters = {}
+end
+
 Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseBossOrder, Items.BossOrder)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateBossOrderEncounters)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.ResetBossOrderPendingEncounters)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetBossOrderRun)
+if ModCallbacks.MC_PRE_GAME_EXIT then
+    Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, Neverbirth.ResetBossOrderRun)
+end
 
 if ModCallbacks.MC_POST_NPC_DEATH then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, Neverbirth.RewardBossOrderTarget)
@@ -6182,7 +6259,8 @@ Neverbirth.CoinSwordLostContact = (CollectibleType and CollectibleType.COLLECTIB
 Neverbirth.CoinSwordHomingTurnRate = 0.18
 local coinSwordQiVariant = nil
 local coinSwordHoldStates = {}
-Neverbirth.__coinSwordReleaseTearSuppressions = Neverbirth.__coinSwordReleaseTearSuppressions or {}
+Neverbirth.__coinSwordInputBlocks = {}
+Neverbirth.__coinSwordReadingInput = false
 
 local MASK_REQUIRED_COINS = 5
 local MASK_CONFUSION_DURATION = 90
@@ -6214,8 +6292,9 @@ local StrongLaxativeConfig = {
     CostumePath = "gfx/characters/costume_strong_laxative.anm2",
     EntityEffect = (EntityType and EntityType.ENTITY_EFFECT) or 1000,
     GridPoop = (GridEntityType and GridEntityType.GRID_POOP) or 14,
-    CreepVariant = (EffectVariant and (EffectVariant.PLAYER_CREEP_GREEN or EffectVariant.CREEP_GREEN or EffectVariant.PLAYER_CREEP_BLACK or EffectVariant.CREEP_RED or EffectVariant.POOF01)) or 1,
+    CreepVariant = EffectVariant.PLAYER_CREEP_HOLYWATER_TRAIL,
     CreepVariants = {
+        EffectVariant.PLAYER_CREEP_HOLYWATER_TRAIL,
         (EffectVariant and (EffectVariant.PLAYER_CREEP_GREEN or EffectVariant.CREEP_GREEN or EffectVariant.PLAYER_CREEP_BLACK or EffectVariant.CREEP_RED or EffectVariant.POOF01)) or 1,
         EffectVariant and EffectVariant.PLAYER_CREEP_GREEN,
         EffectVariant and EffectVariant.CREEP_GREEN,
@@ -7240,6 +7319,10 @@ function Neverbirth.Cleaver.SpawnSwingHitbox(state)
     return knife
 end
 function Neverbirth.Cleaver.UpdateSwing(state)
+    if state and Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.OwnsAttack(state.player) then
+        Neverbirth.Cleaver.RemoveSwing(state)
+        return
+    end
     local swing = state and state.swing
     if not swing then return end
     local duration = tonumber(Neverbirth.Cleaver.Config.SwingDurationTicks)
@@ -7276,6 +7359,7 @@ function Neverbirth.Cleaver.UpdateSwing(state)
     if swing.tick >= duration then Neverbirth.Cleaver.RemoveSwing(state) end
 end
 function Neverbirth.Cleaver.TrySwing(player, direction)
+    if Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.OwnsAttack(player) then return false end
     if not Neverbirth.Cleaver.IsEnabled(player) then return false end
     local state = Neverbirth.Cleaver.GetState(player)
     if not Neverbirth.Cleaver.CanSwing(state) or not direction or not direction.Length or direction:Length() <= 0 then return false end
@@ -9141,7 +9225,9 @@ function Neverbirth.GetNearestEnemyDirectionFromPosition(origin)
 end
 
 local function VectorFromInput(value)
-    if type(value) == "table" and value.X and value.Y then
+    -- Engine Vectors are userdata; table-only checks reject real shooting input.
+    local valueType = type(value)
+    if (valueType == "userdata" or valueType == "table") and value.X and value.Y then
         local vector = Vector(tonumber(value.X) or 0, tonumber(value.Y) or 0)
         if vector:Length() > 0 then
             return vector:Normalized()
@@ -9236,27 +9322,18 @@ local function GetCoinSwordBaseDirection(player)
 end
 
 local function GetCoinSwordReleaseDirection(player)
-    if player and player.GetShootingInput then
-        local ok, input = pcall(function()
-            return player:GetShootingInput()
-        end)
-        local vector = ok and VectorFromInput(input) or nil
-        if vector then
-            return vector
-        end
-    end
-
-    if player and player.GetFireDirection then
-        local ok, input = pcall(function()
-            return player:GetFireDirection()
-        end)
-        local vector = ok and DirectionToVector(input) or nil
-        if vector then
-            return vector
-        end
-    end
-
-    return nil
+    if not player or not Input or not Input.GetActionValue or not ButtonAction then return nil end
+    Neverbirth.__coinSwordReadingInput = true
+    local ok, x, y = pcall(function()
+        local controller = player.ControllerIndex
+        return Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, controller)
+                - Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, controller),
+            Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, controller)
+                - Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, controller)
+    end)
+    Neverbirth.__coinSwordReadingInput = false
+    if not ok then return nil end
+    return VectorFromInput(Vector(x, y))
 end
 
 local function RotateVector(vector, degrees)
@@ -10057,15 +10134,24 @@ function Neverbirth.StrongLaxative.RandomInt(player, max)
     return math.max(0, math.floor(seed) % max)
 end
 
+Neverbirth.StrongLaxative.Synergies = include("strong_laxative_synergies")(StrongLaxativeConfig, IsVulnerableEnemy)
+
 function Neverbirth.StrongLaxative.SpawnCreep(player)
     if not player or not player.Position or not Isaac or not Isaac.Spawn then
         return nil
     end
 
-    local creep = Isaac.Spawn(StrongLaxativeConfig.EntityEffect, StrongLaxativeConfig.CreepVariant, 0, player.Position, Vector(0, 0), player)
+    local snapshot = Neverbirth.StrongLaxative.Synergies.Snapshot(player)
+    local spawned = Isaac.Spawn(StrongLaxativeConfig.EntityEffect, StrongLaxativeConfig.CreepVariant, 0, player.Position, Vector(0, 0), player)
+    local creep = spawned and spawned:ToEffect()
     if not creep then
         return nil
     end
+
+    -- Reuse the native Aquarius visual only. Its contact damage/tear flags must
+    -- not run alongside our original radius and ten-update damage cadence.
+    creep.CollisionDamage = 0
+    creep.Timeout = StrongLaxativeConfig.CreepLifetime
 
     local data = creep.GetData and creep:GetData() or nil
     if type(data) == "table" then
@@ -10075,12 +10161,13 @@ function Neverbirth.StrongLaxative.SpawnCreep(player)
         data.Life = StrongLaxativeConfig.CreepLifetime
         data.Age = 0
         data.Radius = StrongLaxativeConfig.CreepRadius
-        data.Damage = (tonumber(player.Damage) or 3.5) * 0.1
+        data.Damage = snapshot.Damage
+        data.Synergy = snapshot
     end
 
     if creep.SetColor and Color then
         pcall(function()
-            creep:SetColor(Color(0.45, 0.6, 0.22, 0.9, 0.1, 0.04, 0), StrongLaxativeConfig.CreepLifetime, 1, true, false)
+            creep:SetColor(snapshot.Color, StrongLaxativeConfig.CreepLifetime, 1, false, false)
         end)
     end
 
@@ -10216,6 +10303,13 @@ function Neverbirth:UpdateStrongLaxativeCreep(effect)
     if type(data) ~= "table" or data.NeverbirthStrongLaxativeCreep ~= true then
         return
     end
+    if data.NeverbirthTowerOfBabelRemoved or (effect.Exists and not effect:Exists()) then return end
+    if not data.Owner or (data.Owner.Exists and not data.Owner:Exists())
+        or (data.Owner.IsDead and data.Owner:IsDead()) then
+        effect:Remove()
+        return
+    end
+    effect.CollisionDamage = 0
 
     data.Age = (tonumber(data.Age) or 0) + 1
     data.Life = (tonumber(data.Life) or 0) - 1
@@ -10230,11 +10324,14 @@ function Neverbirth:UpdateStrongLaxativeCreep(effect)
         return
     end
 
+    local entities = Isaac.GetRoomEntities()
+    local synergies = Neverbirth.StrongLaxative.Synergies
+    if data.Synergy then synergies.Move(effect, data.Synergy, entities) end
     local radius = tonumber(data.Radius) or StrongLaxativeConfig.CreepRadius
     local radiusSquared = radius * radius
     local source = EntityRef(data.Owner or effect)
-    for _, entity in ipairs(Isaac.GetRoomEntities()) do
-        if entity ~= effect and IsVulnerableEnemy(entity) and entity.Position and effect.Position then
+    for _, entity in ipairs(entities) do
+        if entity ~= effect and synergies.IsGroundEnemy(entity) and effect.Position then
             local dx = (entity.Position.X or 0) - (effect.Position.X or 0)
             local dy = (entity.Position.Y or 0) - (effect.Position.Y or 0)
             if dx * dx + dy * dy <= radiusSquared then
@@ -10244,6 +10341,7 @@ function Neverbirth:UpdateStrongLaxativeCreep(effect)
                     end)
                 end
                 if ((tonumber(data.Age) or 0) % StrongLaxativeConfig.CreepDamageInterval) == 0 and entity.TakeDamage then
+                    if data.Synergy then synergies.ApplyStatuses(data.Synergy, entity, source) end
                     pcall(function()
                         entity:TakeDamage(tonumber(data.Damage) or 0, 0, source, 0)
                     end)
@@ -10347,12 +10445,12 @@ local function GetCoinSwordActiveItem(player, slot)
 end
 
 local function FireCoinSewnSword(player, direction, slot)
+    if Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.OwnsAttack(player) then return false end
     if not player then
         return false
     end
 
     local baseDirection = (direction and direction:Length() > 0) and direction:Normalized() or GetCoinSwordBaseDirection(player)
-    Neverbirth.SuppressNextCoinSwordReleaseTear(player)
     local coins = GetPlayerCoins(player)
     if coins <= 0 then
         if player.TakeDamage then
@@ -10386,111 +10484,28 @@ local function GetCoinSwordHoldKey(player)
     return tostring((player and player.InitSeed) or "")
 end
 
-function Neverbirth.GetCoinSwordTearOwnerKey(tear)
-    if not tear then
-        return nil
-    end
-
-    local candidates = { tear.SpawnerEntity, tear.Parent }
-    for _, entity in ipairs(candidates) do
-        if entity then
-            local player = nil
-            if entity.ToPlayer then
-                local ok, value = pcall(function()
-                    return entity:ToPlayer()
-                end)
-                if ok then
-                    player = value
-                end
-            end
-            player = player or (entity.Type == ((EntityType and EntityType.ENTITY_PLAYER) or 1) and entity or nil)
-            if player and player.InitSeed then
-                return GetCoinSwordHoldKey(player)
-            end
-        end
-    end
-
-    return nil
+function Neverbirth.CoinSwordYieldsAttack(player)
+    return Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.OwnsAttack(player)
 end
 
-function Neverbirth.SuppressNextCoinSwordReleaseTear(player)
+function Neverbirth.CoinSwordPlayerAvailable(player, slot)
+    return player and (not player.Exists or player:Exists())
+        and (not player.IsDead or not player:IsDead())
+        and player.ControlsEnabled ~= false and not Neverbirth.CoinSwordYieldsAttack(player)
+        and GetCoinSwordActiveItem(player, slot) == Items.CoinSewnSword
+end
+
+function Neverbirth:CoinSwordInputAction(entity, hook, action)
+    if Neverbirth.__coinSwordReadingInput or not entity or not entity.ToPlayer or not ButtonAction then return nil end
+    if action ~= ButtonAction.ACTION_SHOOTLEFT and action ~= ButtonAction.ACTION_SHOOTRIGHT
+        and action ~= ButtonAction.ACTION_SHOOTUP and action ~= ButtonAction.ACTION_SHOOTDOWN then return nil end
+    local player = entity:ToPlayer()
+    if not player then return nil end
     local key = GetCoinSwordHoldKey(player)
-    if key == "" then
-        return
-    end
-
-    Neverbirth.__coinSwordReleaseTearSuppressions[key] = {
-        shots = 1,
-        frames = 3,
-    }
-end
-
-function Neverbirth.RemoveCoinSwordTear(tear)
-    if tear and tear.Remove then
-        pcall(function()
-            tear:Remove()
-        end)
-    end
-end
-
-function Neverbirth.ShouldSuppressCoinSwordTear(tear)
-    if not tear or tear.Type ~= ((EntityType and EntityType.ENTITY_TEAR) or 2) then
-        return false
-    end
-
-    local key = Neverbirth.GetCoinSwordTearOwnerKey(tear)
-    if not key then
-        return false
-    end
-
-    if coinSwordHoldStates[key] then
-        return true
-    end
-
-    local suppression = Neverbirth.__coinSwordReleaseTearSuppressions[key]
-    if suppression and (suppression.shots or 0) > 0 then
-        suppression.shots = suppression.shots - 1
-        if suppression.shots <= 0 then
-            Neverbirth.__coinSwordReleaseTearSuppressions[key] = nil
-        end
-        return true
-    end
-
-    return false
-end
-
-function Neverbirth:SuppressCoinSewnSwordTear(tear)
-    if Neverbirth.ShouldSuppressCoinSwordTear(tear) then
-        Neverbirth.RemoveCoinSwordTear(tear)
-    end
-end
-
-function Neverbirth.UpdateCoinSwordReleaseTearSuppressions()
-    for key, suppression in pairs(Neverbirth.__coinSwordReleaseTearSuppressions) do
-        suppression.frames = (tonumber(suppression.frames) or 0) - 1
-        if suppression.frames <= 0 or (suppression.shots or 0) <= 0 then
-            Neverbirth.__coinSwordReleaseTearSuppressions[key] = nil
-        end
-    end
-end
-
-function Neverbirth.SuppressCoinSwordTearsInRoomFallback()
-    if not Isaac.GetRoomEntities then
-        return
-    end
-    if not next(coinSwordHoldStates) and not next(Neverbirth.__coinSwordReleaseTearSuppressions) then
-        return
-    end
-
-    for _, entity in ipairs(Isaac.GetRoomEntities()) do
-        if Neverbirth.ShouldSuppressCoinSwordTear(entity) then
-            Neverbirth.RemoveCoinSwordTear(entity)
-        end
-    end
-end
-
-local function CancelCoinSewnSwordHold(player)
-    coinSwordHoldStates[GetCoinSwordHoldKey(player)] = nil
+    local state = coinSwordHoldStates[key] or Neverbirth.__coinSwordInputBlocks[key]
+    if not state or not Neverbirth.CoinSwordPlayerAvailable(player, state.slot) then return nil end
+    if hook == InputHook.GET_ACTION_VALUE then return 0 end
+    if hook == InputHook.IS_ACTION_PRESSED or hook == InputHook.IS_ACTION_TRIGGERED then return false end
 end
 
 local function StartCoinSewnSwordHold(player, slot)
@@ -10501,7 +10516,7 @@ local function StartCoinSewnSwordHold(player, slot)
 end
 
 function Neverbirth:UseCoinSewnSword(_, _, player, _, activeSlot)
-    if not player then
+    if not player or Neverbirth.CoinSwordYieldsAttack(player) then
         return false
     end
 
@@ -10511,9 +10526,11 @@ function Neverbirth:UseCoinSewnSword(_, _, player, _, activeSlot)
         if direction then
             local state = coinSwordHoldStates[key]
             coinSwordHoldStates[key] = nil
+            Neverbirth.__coinSwordInputBlocks[key] = state
             FireCoinSewnSword(player, direction, state.slot or activeSlot)
         else
             coinSwordHoldStates[key] = nil
+            Neverbirth.__coinSwordInputBlocks[key] = nil
         end
         return COIN_SWORD_NO_DISCHARGE_RESULT
     end
@@ -10524,40 +10541,49 @@ end
 
 Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, Neverbirth.UseCoinSewnSword, Items.CoinSewnSword)
 
-function Neverbirth:UpdateCoinSewnSwordHold()
-    for key, state in pairs(coinSwordHoldStates) do
-        local player = state and state.player
-        if not player or GetCoinSwordActiveItem(player, state.slot) ~= Items.CoinSewnSword then
-            coinSwordHoldStates[key] = nil
-        else
-            local direction = GetCoinSwordReleaseDirection(player)
-            if direction then
-                coinSwordHoldStates[key] = nil
-                FireCoinSewnSword(player, direction, state.slot)
-            end
-        end
+function Neverbirth:UpdateCoinSewnSwordHold(player)
+    local key = GetCoinSwordHoldKey(player)
+    -- Keep the release input blocked throughout the complete native weapon pass.
+    -- Release this one-update lease only when the owner's next update starts.
+    Neverbirth.__coinSwordInputBlocks[key] = nil
+    local state = coinSwordHoldStates[key]
+    if not state then return end
+    if not Neverbirth.CoinSwordPlayerAvailable(player, state.slot) then
+        coinSwordHoldStates[key] = nil
+        return
     end
-    Neverbirth.SuppressCoinSwordTearsInRoomFallback()
-    Neverbirth.UpdateCoinSwordReleaseTearSuppressions()
+    local direction = GetCoinSwordReleaseDirection(player)
+    if direction then
+        coinSwordHoldStates[key] = nil
+        Neverbirth.__coinSwordInputBlocks[key] = state
+        FireCoinSewnSword(player, direction, state.slot)
+    end
 end
 
-Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateCoinSewnSwordHold)
-
-if ModCallbacks.MC_POST_FIRE_TEAR then
-    Neverbirth:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Neverbirth.SuppressCoinSewnSwordTear)
+if ModCallbacks.MC_PRE_PLAYER_UPDATE then
+    Neverbirth:AddCallback(ModCallbacks.MC_PRE_PLAYER_UPDATE, Neverbirth.UpdateCoinSewnSwordHold)
+end
+if ModCallbacks.MC_INPUT_ACTION then
+    Neverbirth:AddCallback(ModCallbacks.MC_INPUT_ACTION, Neverbirth.CoinSwordInputAction)
 end
 
 function Neverbirth:CancelCoinSewnSwordHolds()
     coinSwordHoldStates = {}
-    Neverbirth.__coinSwordReleaseTearSuppressions = {}
+    Neverbirth.__coinSwordInputBlocks = {}
+    Neverbirth.__coinSwordReadingInput = false
 end
 
-if ModCallbacks.MC_POST_NEW_ROOM then
-    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.CancelCoinSewnSwordHolds)
+for _, callbackId in ipairs({
+    ModCallbacks.MC_POST_NEW_ROOM, ModCallbacks.MC_POST_NEW_LEVEL,
+    ModCallbacks.MC_POST_GAME_STARTED, ModCallbacks.MC_PRE_GAME_EXIT,
+}) do
+    Neverbirth:AddCallback(callbackId, Neverbirth.CancelCoinSewnSwordHolds)
 end
-
-if ModCallbacks.MC_POST_NEW_LEVEL then
-    Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.CancelCoinSewnSwordHolds)
+if ModCallbacks.MC_POST_ENTITY_REMOVE then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, function(_, entity)
+        local key = GetCoinSwordHoldKey(entity)
+        coinSwordHoldStates[key], Neverbirth.__coinSwordInputBlocks[key] = nil, nil
+    end, EntityType.ENTITY_PLAYER)
 end
 
 local function GetMaskState(player)
@@ -10855,10 +10881,10 @@ Neverbirth.BlackTaisuiFearRadius = 180
 Neverbirth.BlackTaisuiWavyCap = (CollectibleType and CollectibleType.COLLECTIBLE_WAVY_CAP) or 582
 Neverbirth.BlackTaisuiWavyCapTearsBonus = 0.75
 Neverbirth.BlackTaisuiWavyCapRangeBonus = 20
-Neverbirth.BlackTaisuiOfficialLifeItem = (CollectibleType and CollectibleType.COLLECTIBLE_1UP) or 11
-Neverbirth.BlackTaisuiLifeHudTextKey = "blackTaisuiWard"
-Neverbirth.BlackTaisuiLifeHudX = 132
-Neverbirth.BlackTaisuiLifeHudY = 28
+-- Match the existing Revive My Love survival window; the engine owns expiry.
+Neverbirth.BlackTaisuiDeathSaveInvincibility = 60
+Neverbirth.MeatLumpLifeHudX = 132
+Neverbirth.MeatLumpLifeHudY = 28
 Neverbirth.CleansedWavyCapSpeedPenalty = 0.03
 Neverbirth.CleansedWavyCapTearsBonus = 0.75
 Neverbirth.CleansedWavyCapSettledSpeedPenalty = 0.06
@@ -11137,31 +11163,6 @@ function Neverbirth:GetBlackTaisuiTemporaryEffects(player)
     return nil
 end
 
-function Neverbirth:GetBlackTaisuiOfficialLifeCount(player)
-    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
-    if not effects then
-        return nil
-    end
-    local itemId = Neverbirth.BlackTaisuiOfficialLifeItem
-    if effects.GetCollectibleEffectNum then
-        local ok, count = pcall(function()
-            return effects:GetCollectibleEffectNum(itemId)
-        end)
-        if ok then
-            return tonumber(count) or 0
-        end
-    end
-    if effects.HasCollectibleEffect then
-        local ok, has = pcall(function()
-            return effects:HasCollectibleEffect(itemId)
-        end)
-        if ok then
-            return has and 1 or 0
-        end
-    end
-    return nil
-end
-
 function Neverbirth:GetBlackTaisuiWavyCapEffectCount(player)
     local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
     if not effects then
@@ -11215,57 +11216,6 @@ function Neverbirth:RemoveBlackTaisuiWavyCapEffects(player, count)
     return removed
 end
 
-function Neverbirth:AddBlackTaisuiOfficialLifeEffect(player)
-    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
-    if state.officialLifeEffectActive then
-        return true
-    end
-    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
-    if not effects or not effects.AddCollectibleEffect then
-        return false
-    end
-    local ok = pcall(function()
-        effects:AddCollectibleEffect(Neverbirth.BlackTaisuiOfficialLifeItem, false, 1)
-    end)
-    if ok then
-        state.officialLifeEffectActive = true
-        local count = Neverbirth:GetBlackTaisuiOfficialLifeCount(player)
-        state.officialLifeEffectConfirmed = count ~= nil and count > 0
-        return true
-    end
-    return false
-end
-
-function Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
-    local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
-    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
-    local hasEffect = state.officialLifeEffectActive == true
-    if not hasEffect and effects and effects.GetCollectibleEffectNum then
-        local ok, count = pcall(function()
-            return effects:GetCollectibleEffectNum(Neverbirth.BlackTaisuiOfficialLifeItem)
-        end)
-        hasEffect = ok and (tonumber(count) or 0) > 0
-    end
-    if not hasEffect then
-        state.officialLifeEffectActive = nil
-        state.officialLifeEffectConfirmed = nil
-        return
-    end
-    if effects and effects.RemoveCollectibleEffect then
-        pcall(function()
-            effects:RemoveCollectibleEffect(Neverbirth.BlackTaisuiOfficialLifeItem, 1)
-        end)
-    end
-    state.officialLifeEffectActive = nil
-    state.officialLifeEffectConfirmed = nil
-end
-
-function Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
-    -- Do not fake the official 1UP HUD/costume for Black Taisui. The protection
-    -- is a damage ward, not an extra-life item, so always clean old temp effects.
-    Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
-end
-
 function Neverbirth:RestoreBlackTaisuiDeathSaveHealth(player)
     if player.GetMaxHearts and player:GetMaxHearts() > 0 then
         if player.GetHearts and player.AddHearts then
@@ -11278,17 +11228,19 @@ function Neverbirth:RestoreBlackTaisuiDeathSaveHealth(player)
 end
 
 function Neverbirth:ApplyBlackTaisuiDeathSave(player, reviveDeadPlayer)
+    if Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.IsFailureDeath(player) then return false end
+    if not player or not Neverbirth:BlackTaisuiDeathSaveAvailable(player) then return false end
+    if reviveDeadPlayer then
+        if not player.Revive or not player.IsDead then return false end
+        local ok = pcall(function() player:Revive() end)
+        if not ok or player:IsDead() then return false end
+    end
     local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
-    Neverbirth:RemoveBlackTaisuiOfficialLifeEffect(player)
     state.deathSavedFloorKey = GetFolkFloorKey()
     state.deathSaveFeedbackFrames = 90
     state.deathSaveFeedbackKey = "blackTaisuiBlock"
-    if reviveDeadPlayer and player.Revive then
-        pcall(function()
-            player:Revive()
-        end)
-    end
     Neverbirth:RestoreBlackTaisuiDeathSaveHealth(player)
+    player:SetMinDamageCooldown(Neverbirth.BlackTaisuiDeathSaveInvincibility)
     if player and player.SetColor and Color then
         pcall(function()
             player:SetColor(Color(0.35, 0.08, 0.45, 1, 0.12, 0, 0.2), 45, 1, true, false)
@@ -11306,6 +11258,10 @@ function Neverbirth:ApplyBlackTaisuiDeathSave(player, reviveDeadPlayer)
         end)
     end
     Neverbirth:TriggerBlackTaisuiSpores(player, "death-save:" .. tostring(GetFolkFloorKey()), true)
+    if Isaac and Isaac.DebugString then
+        Isaac.DebugString("[neverbirth] Black Taisui blocked lethal damage; survival cooldown granted")
+    end
+    return true
 end
 
 function Neverbirth:HandleBlackTaisuiDamage(entity, amount, flags)
@@ -11318,8 +11274,8 @@ function Neverbirth:HandleBlackTaisuiDamage(entity, amount, flags)
     end
 
     if Neverbirth:BlackTaisuiDeathSaveAvailable(player) and Neverbirth:BlackTaisuiDamageIsLethal(player, amount) then
-        Neverbirth:ApplyBlackTaisuiDeathSave(player, false)
-        return false
+        if Neverbirth:ApplyBlackTaisuiDeathSave(player, false) then return false end
+        return nil
     end
 
     local maxHearts = player.GetMaxHearts and player:GetMaxHearts() or tonumber(player.maxHearts) or 0
@@ -11885,7 +11841,6 @@ function Neverbirth:UpdateBlackTaisui()
                 Neverbirth:SpawnFolkVisualEffect("BlackTaisuiMatureCore", player.Position or Vector(320, 280), player)
             end
         end
-        Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
         if Neverbirth:BlackTaisuiDeathSaveAvailable(player) and player.IsDead then
             local deadOk, isDead = pcall(function()
                 return player:IsDead()
@@ -11903,15 +11858,19 @@ function Neverbirth:RenderBlackTaisuiLifeHud()
     if not Isaac then
         return
     end
-    local slot = 0
-    for _, player in ipairs(GetPlayers()) do
+    local game = GetFolkGame()
+    local hud = game and game.GetHUD and game:GetHUD()
+    if hud and hud.IsVisible and not hud:IsVisible() then return end
+    local players = GetPlayers()
+    for index, player in ipairs(players) do
         local state = Neverbirth:GetBlackTaisuiRuntimeState(player)
-        if Neverbirth:BlackTaisuiDeathSaveAvailable(player) then
-            local x = Neverbirth.BlackTaisuiLifeHudX + slot * 24
-            local y = Neverbirth.BlackTaisuiLifeHudY
-            Neverbirth:RenderRuntimeText(Neverbirth.BlackTaisuiLifeHudTextKey, "", x + 1, y + 1, 0, 0, 0, 0.75)
-            Neverbirth:RenderRuntimeText(Neverbirth.BlackTaisuiLifeHudTextKey, "", x, y, 0.58, 0.28, 0.76, 1)
-            slot = slot + 1
+        local lives = Neverbirth:GetMeatLumpLifeCount(player)
+        if lives > 0 then
+            local label = (#players > 1 and ("P" .. index .. " ") or "") .. "+" .. tostring(lives)
+            local x = Neverbirth.MeatLumpLifeHudX + (index - 1) * 60
+            local y = Neverbirth.MeatLumpLifeHudY
+            Neverbirth:RenderRuntimeText("", label, x + 1, y + 1, 0, 0, 0, 0.75)
+            Neverbirth:RenderRuntimeText("", label, x, y, 1, 0.8, 0.85, 1)
         end
         if (tonumber(state.deathSaveFeedbackFrames) or 0) > 0 and player and player.Position and Isaac.WorldToScreen then
             local screen = Isaac.WorldToScreen(player.Position + Vector(0, -52))
@@ -11932,7 +11891,6 @@ function Neverbirth:ResetBlackTaisuiOnNewLevel()
         state.sporeKeys = {}
         state.revealRoomKey = nil
         state.snapshotReady = false
-        state.officialLifeEffectActive = nil
         state.wavySuppressedStacks = 0
         state.cleansedWavyRoomKey = GetFolkRoomKey()
         state.cleansedWavyCurrentSpeed = 0
@@ -11941,7 +11899,6 @@ function Neverbirth:ResetBlackTaisuiOnNewLevel()
         state.cleansedWavyLingeringTears = 0
         state.cleansedWavyClearRoomKey = nil
         Neverbirth:RefreshBlackTaisuiCache(player)
-        Neverbirth:SyncBlackTaisuiOfficialLifeEffect(player)
     end
 end
 
@@ -13504,8 +13461,13 @@ local function SetAngelboxCharge(player, slot, charge)
 end
 
 local function AddAngelboxCharge(player, slot, amount)
-    local currentCharge = GetAngelboxCharge(player, slot)
-    SetAngelboxCharge(player, slot, currentCharge + (amount or 0))
+    if not player or not player.GetActiveItem or player:GetActiveItem(slot) ~= Items.Angelbox
+        or type(player.AddActiveCharge) ~= "function" then
+        return 0
+    end
+    -- Both boxes use chargetype=special: Force bypasses that charge-type gate,
+    -- not the native maximum. Only this owned slot's overflow-heart gain is forced.
+    return tonumber(player:AddActiveCharge(amount, slot, true, false, true)) or 0
 end
 
 local function GetAngelboxSoulHeartRoom(player)
@@ -13658,21 +13620,6 @@ local function SetAngelboxChanceTarget(target)
     return true
 end
 
-local function GetAngelboxChanceTarget()
-    local data = GetAngelboxData()
-    local floorKey = GetAngelboxFloorKey()
-
-    if data.forcedAngelFloors[floorKey] then
-        return 1
-    end
-
-    if AnyPlayerHasAngelbox() then
-        return ANGELBOX_ANGEL_CHANCE
-    end
-
-    return 0
-end
-
 local function IsCollectibleQuality(itemId, quality)
     if not itemId or itemId <= 0 or not Isaac.GetItemConfig then
         return false
@@ -13780,7 +13727,8 @@ local function TrySpawnAngelboxReward()
 
         local itemId = SelectAngelboxReward(index, selectedItems)
         selectedItems[itemId] = true
-        game:Spawn(ANGELBOX_ENTITY_PICKUP, ANGELBOX_COLLECTIBLE_VARIANT, position, velocity, nil, itemId, seed + index)
+        local reward = game:Spawn(ANGELBOX_ENTITY_PICKUP, ANGELBOX_COLLECTIBLE_VARIANT, position, velocity, nil, itemId, seed + index)
+        DebugLog("[neverbirth][Boxes] reward box=Angelbox item=" .. itemId .. " spawned=" .. tostring(reward ~= nil))
     end
 
     ClearAngelboxPendingRewards()
@@ -13789,21 +13737,7 @@ local function TrySpawnAngelboxReward()
 end
 
 local function ForceAngelboxAngelRoom()
-    local level = GetAngelboxLevel()
-    if not level then
-        return
-    end
-
-    local data = GetAngelboxData()
-    local floorKey = GetAngelboxFloorKey()
-    if not data.forcedAngelFloors[floorKey] then
-        data.forcedAngelFloors[floorKey] = true
-    end
-    SetAngelboxChanceTarget(1)
-
-    if level.InitializeDevilAngelRoom then
-        level:InitializeDevilAngelRoom(true, false)
-    end
+    return Neverbirth.BoxDealRooms.Open(ANGELBOX_ROOM_ANGEL)
 end
 
 function Neverbirth:UseAngelbox(_, _, player, _, activeSlot)
@@ -13833,8 +13767,10 @@ function Neverbirth:UseAngelbox(_, _, player, _, activeSlot)
         return true
     end
 
+    if not ForceAngelboxAngelRoom() then
+        return { Discharge = false, Remove = false, ShowAnim = false }
+    end
     MarkAngelboxRewardPending(player)
-    ForceAngelboxAngelRoom()
     SetAngelboxCharge(player, slot, 0)
     SaveMusicboxData()
     TrySpawnAngelboxReward()
@@ -13880,11 +13816,16 @@ function Neverbirth:HandleAngelboxSoulHeartPickup(pickup, collider)
         return nil
     end
 
+    -- Do not heal or consume the pickup if the native charge transaction declined.
+    local accepted = AddAngelboxCharge(player, slot, chargeAmount)
+    if accepted <= 0 then
+        return nil
+    end
+    DebugLog(string.format("[neverbirth][Boxes] charge box=Angelbox slot=%d requested=%d accepted=%d health=%d", slot, chargeAmount, accepted, healthAmount))
+
     if healthAmount > 0 and player.AddSoulHearts then
         player:AddSoulHearts(healthAmount)
     end
-
-    AddAngelboxCharge(player, slot, chargeAmount)
 
     if pickup.PlayPickupSound then
         pickup:PlayPickupSound()
@@ -13916,18 +13857,8 @@ if ModCallbacks.MC_POST_NEW_ROOM then
 end
 
 function Neverbirth:UpdateAngelboxDealChance()
-    local data = GetAngelboxData()
-    local floorKey = GetAngelboxFloorKey()
-    local target = GetAngelboxChanceTarget()
-    local applied = GetAngelboxAppliedChance(data, floorKey)
-
-    if target <= 0 and applied <= 0 then
-        return
-    end
-
-    if SetAngelboxChanceTarget(target) then
-        SaveMusicboxData()
-    end
+    -- Undo only the legacy contribution recorded by this mod.
+    if SetAngelboxChanceTarget(0) then SaveMusicboxData() end
 end
 
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateAngelboxDealChance)
@@ -13946,9 +13877,6 @@ local DEVILBOX_REWARD_QUALITY = 3
 local DEVILBOX_DEVIL_POOL = (ItemPoolType and ItemPoolType.POOL_DEVIL) or 3
 local DEVILBOX_ROOM_DEVIL = (RoomType and RoomType.ROOM_DEVIL) or 14
 local DEVILBOX_BLACK_HEART_SUBTYPE = (HeartSubType and HeartSubType.HEART_BLACK) or 6
-local DEVILBOX_GRID_ROOM_INDEX = (GridRooms and GridRooms.ROOM_DEVIL_IDX) or -1
-local DEVILBOX_STATE_DEVILROOM_SPAWNED = (GameStateFlag and GameStateFlag.STATE_DEVILROOM_SPAWNED) or 5
-local DEVILBOX_STATE_DEVILROOM_VISITED = (GameStateFlag and GameStateFlag.STATE_DEVILROOM_VISITED) or 6
 local DEVILBOX_FALLBACK_REWARDS = {
     278, -- Dark Bum
     292, -- Satanic Bible
@@ -14043,7 +13971,8 @@ end
 
 local function RollBoxHeartBonus(pickup, chancePercent, salt)
     local seed = tonumber(pickup and (pickup.InitSeed or pickup.Seed)) or 0
-    return ((seed + (salt or 0)) % 100) < chancePercent
+    local roll = (seed + (salt or 0)) % 100
+    return roll < chancePercent, roll
 end
 
 local function SpawnBoxBonusHeart(sourcePickup, subtype)
@@ -14065,8 +13994,14 @@ local function SpawnBoxBonusHeart(sourcePickup, subtype)
 
     local seed = (tonumber(sourcePickup and (sourcePickup.InitSeed or sourcePickup.Seed)) or 0) + subtype * 1000
     boxBonusHeartSpawnDepth = boxBonusHeartSpawnDepth + 1
-    local pickup = game:Spawn(ANGELBOX_ENTITY_PICKUP, ANGELBOX_HEART_VARIANT, position, Vector(0, 0), sourcePickup, subtype, seed)
+    local ok, pickup = pcall(function()
+        return game:Spawn(ANGELBOX_ENTITY_PICKUP, ANGELBOX_HEART_VARIANT, position, Vector(0, 0), sourcePickup, subtype, seed)
+    end)
     boxBonusHeartSpawnDepth = boxBonusHeartSpawnDepth - 1
+    if not ok then
+        DebugLog("[neverbirth][Boxes] bonus heart spawn failed: " .. tostring(pickup))
+        return nil
+    end
 
     local key = GetBoxHeartPickupKey(pickup)
     if key then
@@ -14103,12 +14038,16 @@ function Neverbirth:HandleBoxHeartPickupInit(pickup)
         boxProcessedHeartKeys[key] = true
     end
 
-    if AnyPlayerHasAngelbox() and RollBoxHeartBonus(pickup, ANGELBOX_EXTRA_SOUL_HEART_CHANCE, 0) then
-        SpawnBoxBonusHeart(pickup, ANGELBOX_SOUL_HEART_SUBTYPE)
+    if AnyPlayerHasAngelbox() then
+        local hit, roll = RollBoxHeartBonus(pickup, ANGELBOX_EXTRA_SOUL_HEART_CHANCE, 0)
+        local spawned = hit and SpawnBoxBonusHeart(pickup, ANGELBOX_SOUL_HEART_SUBTYPE) or nil
+        DebugLog(string.format("[neverbirth][Boxes] heart box=Angelbox source=%s roll=%d threshold=60 hit=%s spawned=%s", tostring(key), roll, tostring(hit), tostring(spawned ~= nil)))
     end
 
-    if AnyPlayerHasDevilbox() and RollBoxHeartBonus(pickup, DEVILBOX_EXTRA_BLACK_HEART_CHANCE, 7) then
-        SpawnBoxBonusHeart(pickup, DEVILBOX_BLACK_HEART_SUBTYPE)
+    if AnyPlayerHasDevilbox() then
+        local hit, roll = RollBoxHeartBonus(pickup, DEVILBOX_EXTRA_BLACK_HEART_CHANCE, 7)
+        local spawned = hit and SpawnBoxBonusHeart(pickup, DEVILBOX_BLACK_HEART_SUBTYPE) or nil
+        DebugLog(string.format("[neverbirth][Boxes] heart box=Devilbox source=%s roll=%d threshold=80 hit=%s spawned=%s", tostring(key), roll, tostring(hit), tostring(spawned ~= nil)))
     end
 end
 
@@ -14140,8 +14079,12 @@ local function SetDevilboxCharge(player, slot, charge)
 end
 
 local function AddDevilboxCharge(player, slot, amount)
-    local currentCharge = GetDevilboxCharge(player, slot)
-    SetDevilboxCharge(player, slot, currentCharge + (amount or 0))
+    if not player or not player.GetActiveItem or player:GetActiveItem(slot) ~= Items.Devilbox
+        or type(player.AddActiveCharge) ~= "function" then
+        return 0
+    end
+    -- Same special-charge contract as Angelbox; no overcharge or all-slot grant.
+    return tonumber(player:AddActiveCharge(amount, slot, true, false, true)) or 0
 end
 
 local function GetDevilboxPlayerKey(player)
@@ -14252,21 +14195,6 @@ local function SetDevilboxChanceTarget(target)
     return true
 end
 
-local function GetDevilboxChanceTarget()
-    local data = GetDevilboxData()
-    local floorKey = GetAngelboxFloorKey()
-
-    if data.forcedDevilFloors[floorKey] then
-        return -1
-    end
-
-    if AnyPlayerHasDevilbox() then
-        return DEVILBOX_DEVIL_CHANCE
-    end
-
-    return 0
-end
-
 local function GetDevilboxBlackHeartValue(pickup)
     if pickup and pickup.SubType == DEVILBOX_BLACK_HEART_SUBTYPE then
         return 2
@@ -14353,7 +14281,8 @@ local function TrySpawnDevilboxReward()
 
         local itemId = SelectDevilboxReward(index, selectedItems)
         selectedItems[itemId] = true
-        game:Spawn(ANGELBOX_ENTITY_PICKUP, ANGELBOX_COLLECTIBLE_VARIANT, position, velocity, nil, itemId, seed + index)
+        local reward = game:Spawn(ANGELBOX_ENTITY_PICKUP, ANGELBOX_COLLECTIBLE_VARIANT, position, velocity, nil, itemId, seed + index)
+        DebugLog("[neverbirth][Boxes] reward box=Devilbox item=" .. itemId .. " spawned=" .. tostring(reward ~= nil))
     end
 
     ClearDevilboxPendingRewards()
@@ -14361,53 +14290,8 @@ local function TrySpawnDevilboxReward()
     return true
 end
 
-local function ClearDevilboxInitializedDealRoom(level)
-    if not level or not level.GetRoomByIdx then
-        return false
-    end
-
-    local ok, cleared = pcall(function()
-        local roomDesc = level:GetRoomByIdx(DEVILBOX_GRID_ROOM_INDEX)
-        if not roomDesc then
-            return false
-        end
-
-        roomDesc.Data = nil
-        return true
-    end)
-
-    return ok and cleared == true
-end
-
-local function ResetDevilboxDealStateForDevilRoom()
-    local game = GetAngelboxGame()
-    if not game or not game.SetStateFlag then
-        return false
-    end
-
-    game:SetStateFlag(DEVILBOX_STATE_DEVILROOM_SPAWNED, false)
-    game:SetStateFlag(DEVILBOX_STATE_DEVILROOM_VISITED, false)
-    return true
-end
-
 local function ForceDevilboxDevilRoom()
-    local level = GetAngelboxLevel()
-    if not level then
-        return
-    end
-
-    local data = GetDevilboxData()
-    local floorKey = GetAngelboxFloorKey()
-    if not data.forcedDevilFloors[floorKey] then
-        data.forcedDevilFloors[floorKey] = true
-    end
-    SetDevilboxChanceTarget(-1)
-    ResetDevilboxDealStateForDevilRoom()
-    ClearDevilboxInitializedDealRoom(level)
-
-    if level.InitializeDevilAngelRoom then
-        level:InitializeDevilAngelRoom(false, true)
-    end
+    return Neverbirth.BoxDealRooms.Open(DEVILBOX_ROOM_DEVIL)
 end
 
 function Neverbirth:UseDevilbox(_, _, player, _, activeSlot)
@@ -14437,8 +14321,10 @@ function Neverbirth:UseDevilbox(_, _, player, _, activeSlot)
         return true
     end
 
+    if not ForceDevilboxDevilRoom() then
+        return { Discharge = false, Remove = false, ShowAnim = false }
+    end
     MarkDevilboxRewardPending(player)
-    ForceDevilboxDevilRoom()
     SetDevilboxCharge(player, slot, 0)
     SaveMusicboxData()
     TrySpawnDevilboxReward()
@@ -14484,11 +14370,15 @@ function Neverbirth:HandleDevilboxBlackHeartPickup(pickup, collider)
         return nil
     end
 
+    local accepted = AddDevilboxCharge(player, slot, chargeAmount)
+    if accepted <= 0 then
+        return nil
+    end
+    DebugLog(string.format("[neverbirth][Boxes] charge box=Devilbox slot=%d requested=%d accepted=%d health=%d", slot, chargeAmount, accepted, healthAmount))
+
     if healthAmount > 0 and player.AddBlackHearts then
         player:AddBlackHearts(healthAmount)
     end
-
-    AddDevilboxCharge(player, slot, chargeAmount)
 
     if pickup.PlayPickupSound then
         pickup:PlayPickupSound()
@@ -14520,18 +14410,7 @@ if ModCallbacks.MC_POST_NEW_ROOM then
 end
 
 function Neverbirth:UpdateDevilboxDealChance()
-    local data = GetDevilboxData()
-    local floorKey = GetAngelboxFloorKey()
-    local target = GetDevilboxChanceTarget()
-    local applied = GetDevilboxAppliedChance(data, floorKey)
-
-    if target >= 0 and applied >= 0 then
-        return
-    end
-
-    if SetDevilboxChanceTarget(target) then
-        SaveMusicboxData()
-    end
+    if SetDevilboxChanceTarget(0) then SaveMusicboxData() end
 end
 
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateDevilboxDealChance)
@@ -14539,6 +14418,22 @@ Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateDevilboxDea
 if ModCallbacks.MC_POST_NEW_LEVEL then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Neverbirth.UpdateDevilboxDealChance)
 end
+
+include("box_deal_rooms")(Neverbirth, {
+    AngelItem = Items.Angelbox,
+    DevilItem = Items.Devilbox,
+    GetPlayers = GetPlayers,
+    GetData = GetAngelboxData,
+    GetFloorKey = GetAngelboxFloorKey,
+    Save = SaveMusicboxData,
+    HasItem = function(player, itemId)
+        return itemId == Items.Angelbox and PlayerHasAngelbox(player)
+            or itemId == Items.Devilbox and PlayerHasDevilbox(player)
+    end,
+    WasEntered = function()
+        return IsAngelboxRoomEnteredThisFloor() or IsDevilboxRoomEnteredThisFloor()
+    end,
+})
 
 --------------------------------------------------
 -- 避孕套 / 美工刀
@@ -14694,66 +14589,23 @@ function Neverbirth:IsBabyTaggedCollectible(itemId)
     return false
 end
 
-function Neverbirth:AddFallbackBabyItem(targets, collectibleName)
-    if CollectibleType and CollectibleType[collectibleName] then
-        targets[CollectibleType[collectibleName]] = true
-    end
-end
-
 function Neverbirth:CollectBabyTaggedItems()
     local ids = {}
-    local seen = {}
     local config = self:GetItemConfigObject()
+    if not config or not config.GetCollectibles then
+        return ids
+    end
 
-    if config and config.GetCollectibles then
-        local ok, collectibles = pcall(function()
-            return config:GetCollectibles()
-        end)
-        if ok and type(collectibles) == "table" then
-            for _, collectible in pairs(collectibles) do
-                if type(collectible) == "table" or type(collectible) == "userdata" then
-                    local itemId = collectible and (collectible.ID or collectible.Id)
-                    if type(itemId) == "number" and itemId > 0 and self:IsBabyTaggedCollectible(itemId) and not seen[itemId] then
-                        ids[#ids + 1] = itemId
-                        seen[itemId] = true
-                    end
-                end
-            end
+    -- GetCollectibles returns native userdata, not an iterable Lua table.
+    -- Use Size + GetCollectible; GetTaggedItems can crash in REPENTOGON 1.0.12a.
+    local collectibles = config:GetCollectibles()
+    local size = collectibles and tonumber(collectibles.Size) or 0
+    for itemId = 1, (size or 0) - 1 do
+        if self:IsBabyTaggedCollectible(itemId) then
+            ids[#ids + 1] = itemId
         end
     end
 
-    if #ids == 0 then
-        local fallback = {}
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_BROTHER_BOBBY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_SISTER_MAGGY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LITTLE_CHUBBY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_ROBO_BABY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LITTLE_GISH")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LITTLE_STEVEN")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_DEMON_BABY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_GHOST_BABY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_HARLEQUIN_BABY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_RAINBOW_BABY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_ROBO_BABY_2")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_ROTTEN_BABY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_HEADLESS_BABY")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LEECH")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LIL_BRIMSTONE")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_INCUBUS")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_LIL_LOKI")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_BBF")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_SERAPHIM")
-        self:AddFallbackBabyItem(fallback, "COLLECTIBLE_SWORN_PROTECTOR")
-
-        for itemId in pairs(fallback) do
-            if not seen[itemId] then
-                ids[#ids + 1] = itemId
-                seen[itemId] = true
-            end
-        end
-    end
-
-    table.sort(ids)
     return ids
 end
 
@@ -14770,9 +14622,12 @@ end
 function Neverbirth:GetCondomEligibleItems()
     local data = self:GetCondomData()
     local eligible = {}
+    local game = Game()
+    local itemPool = game and game:GetItemPool()
 
     for _, itemId in ipairs(self:CollectBabyTaggedItems()) do
-        if not data.banned[tostring(itemId)] and not self:AnyPlayerOwnsCollectible(itemId) then
+        if not data.banned[tostring(itemId)] and not self:AnyPlayerOwnsCollectible(itemId)
+            and (not itemPool or not itemPool.CanSpawnCollectible or itemPool:CanSpawnCollectible(itemId, false)) then
             eligible[#eligible + 1] = itemId
         end
     end
@@ -14780,7 +14635,31 @@ function Neverbirth:GetCondomEligibleItems()
     return eligible
 end
 
-function Neverbirth:ShowCondomFeedback(bannedCount)
+function Neverbirth:GetCondomCollectibleName(itemId)
+    local translations = self.PickupBannerTexts[itemId]
+    local translated = translations and (translations[self:GetRuntimeLocale()] or translations.en_us)
+    if translated and translated.name then
+        return translated.name
+    end
+
+    local config = self:GetCollectibleConfig(itemId)
+    local name = config and config.Name
+    if type(name) == "string" and name ~= "" then
+        if name:sub(1, 1) ~= "#" then
+            return name
+        end
+        if Isaac.GetString then
+            local localized = Isaac.GetString("Items", name:sub(2))
+            if type(localized) == "string" and localized ~= "" and localized ~= name
+                and localized ~= name:sub(2) then
+                return localized
+            end
+        end
+    end
+    return self:GetRuntimeText("condomUnknownItem")
+end
+
+function Neverbirth:ShowCondomFeedback(bannedItems)
     local game = Game()
     local hud = game and game.GetHUD and game:GetHUD()
     if not hud or not hud.ShowItemText then
@@ -14788,8 +14667,14 @@ function Neverbirth:ShowCondomFeedback(bannedCount)
     end
 
     local title = self:GetRuntimeText("condomTitle")
-    if bannedCount > 0 then
-        hud:ShowItemText(title, self:FormatRuntimeText("condomBanned", { count = bannedCount }))
+    if #bannedItems > 0 then
+        local names = {}
+        for _, itemId in ipairs(bannedItems) do
+            names[#names + 1] = self:GetCondomCollectibleName(itemId)
+        end
+        hud:ShowItemText(title, self:FormatRuntimeText("condomBanned", {
+            items = table.concat(names, self:GetRuntimeText("condomNameSeparator")),
+        }))
     else
         hud:ShowItemText(title, self:GetRuntimeText("condomEmpty"))
     end
@@ -14818,7 +14703,7 @@ function Neverbirth:UseCondom(itemId, rng, player)
         playerRng = player:GetCollectibleRNG(Items.Condom)
     end
 
-    local bannedCount = 0
+    local bannedItems = {}
     for _ = 1, self.CondomBanCount do
         local target = self:PickCondomTarget(eligible, playerRng)
         if not target then
@@ -14826,11 +14711,11 @@ function Neverbirth:UseCondom(itemId, rng, player)
         end
 
         data.banned[tostring(target)] = true
-        bannedCount = bannedCount + 1
+        bannedItems[#bannedItems + 1] = target
     end
 
-    self:ShowCondomFeedback(bannedCount)
-    if bannedCount > 0 then
+    self:ShowCondomFeedback(bannedItems)
+    if #bannedItems > 0 then
         SaveMusicboxData()
     end
 
@@ -14867,7 +14752,7 @@ function Neverbirth:RollCondomReplacement(originalItemId)
 end
 
 function Neverbirth:ReplaceCondomBannedPickup(pickup)
-    if not pickup or pickup.Variant ~= self.CondomCollectibleVariant then
+    if not pickup or pickup.Type ~= self.CondomEntityPickup or pickup.Variant ~= self.CondomCollectibleVariant then
         return
     end
 
@@ -15188,6 +15073,52 @@ end
 Neverbirth.FortuneRivallingHeavenGu = Neverbirth.FortuneRivallingHeavenGu or {}
 Neverbirth.FortuneRivallingHeavenGu.luckCaps = { collectible = {}, trinket = {} }
 Neverbirth.FortuneRivallingHeavenGu.auditRows = {}
+Neverbirth.FortuneRivallingHeavenGu.dependencies = { collectible = {}, trinket = {} }
+Neverbirth.FortuneRivallingHeavenGu.players = {}
+Neverbirth.FortuneRivallingHeavenGu.cacheTag = "neverbrith_fortune_required_luck"
+
+-- Runtime-only derived state. External resolvers invalidate non-inventory changes.
+function Neverbirth:InvalidateFortuneLuck(player)
+    local state = self.FortuneRivallingHeavenGu
+    if not player then
+        for _, owner in ipairs(GetPlayers()) do self:InvalidateFortuneLuck(owner) end
+        return
+    end
+    if not player.GetData or (player.Exists and not player:Exists()) then return end
+    local key = player:GetData()
+    if not state.players[key] then
+        state.players[key] = { owner = player, collectible = {}, trinket = {} }
+    end
+    state.players[key].dirty = true
+end
+
+function Neverbirth:ResetFortuneLuckRuntime()
+    self.FortuneRivallingHeavenGu.players = {}
+    self:InvalidateFortuneLuck()
+end
+
+function Neverbirth:OnFortunePlayerInit(player)
+    self:InvalidateFortuneLuck(player)
+end
+
+function Neverbirth:OnFortuneCollectibleAdded(itemId, charge, firstTime, slot, varData, player)
+    self:OnFortuneCollectibleRemoved(player, itemId)
+end
+
+function Neverbirth:OnFortuneCollectibleRemoved(player, itemId)
+    if player and (self.FortuneRivallingHeavenGu.dependencies.collectible[itemId]
+        or self:PlayerHasFortuneRivallingHeavenGu(player)) then
+        self:InvalidateFortuneLuck(player)
+    end
+end
+
+function Neverbirth:OnFortuneTrinketChanged(player)
+    self:InvalidateFortuneLuck(player)
+end
+
+function Neverbirth:EvaluateFortuneCustomCache(player, tag, value)
+    return math.max(tonumber(value) or 0, self:GetFortuneRivallingHeavenGuRequiredLuck(player))
+end
 
 function Neverbirth:RegisterFortuneLuckEntry(ownerKind, itemId, fixedCap, resolverFn, auditRow)
     itemId = tonumber(itemId) or 0
@@ -15206,6 +15137,8 @@ function Neverbirth:RegisterFortuneLuckEntry(ownerKind, itemId, fixedCap, resolv
         resolverFn = resolverFn,
         auditRow = auditRow,
     }
+    self.FortuneRivallingHeavenGu.dependencies[ownerKind][itemId] = true
+    self:InvalidateFortuneLuck()
     return true
 end
 
@@ -15288,7 +15221,8 @@ function Neverbirth:EvaluateFortuneRivallingHeavenGu(player, cacheFlag)
         return
     end
     -- CACHE_LUCK 开始时的 Luck 是原缓存链结果：只补差额，不保存层数，也不累计。
-    player.Luck = math.max(tonumber(player.Luck) or 0, self:GetFortuneRivallingHeavenGuRequiredLuck(player))
+    player.Luck = math.max(tonumber(player.Luck) or 0,
+        player:GetCustomCacheValue(self.FortuneRivallingHeavenGu.cacheTag))
 end
 
 function Neverbirth:GetFortuneLuckAuditSignature(player)
@@ -15308,20 +15242,50 @@ function Neverbirth:GetFortuneLuckAuditSignature(player)
     return table.concat(parts, "|")
 end
 
--- 只检查已审查的有限 ID，签名变化才请求一次 CACHE_LUCK 重算；不枚举全局道具或房间实体。
+-- Finite numeric dependency snapshots, without sort/string/full-inventory scans.
 function Neverbirth:TrackFortuneRivallingHeavenGuLuckSources()
     local state = self.FortuneRivallingHeavenGu
-    state.playerLuckSignatures = state.playerLuckSignatures or {}
+    for _, runtime in pairs(state.players) do runtime.seen = false end
     for _, player in ipairs(GetPlayers()) do
-        local key = tostring(player.InitSeed or "")
-        local signature = self:GetFortuneLuckAuditSignature(player)
-        if state.playerLuckSignatures[key] ~= signature then
-            state.playerLuckSignatures[key] = signature
-            if player.AddCacheFlags and player.EvaluateItems and CacheFlag and CacheFlag.CACHE_LUCK then
-                player:AddCacheFlags(CacheFlag.CACHE_LUCK)
-                player:EvaluateItems()
+        if player.GetData and (not player.Exists or player:Exists()) then
+            local key = player:GetData()
+            if not state.players[key] then self:InvalidateFortuneLuck(player) end
+            local runtime = state.players[key]
+            runtime.seen = true
+            for kind, ids in pairs(state.dependencies) do
+                for id in pairs(ids) do
+                    local count = kind == "collectible"
+                        and math.max(0, tonumber(player:GetCollectibleNum(id)) or 0)
+                        or self:GetFortuneTrinketMultiplier(player, id)
+                    if runtime[kind][id] ~= count then
+                        runtime[kind][id] = count
+                        runtime.dirty = true
+                    end
+                end
+            end
+            if runtime.dirty and not runtime.flushing then
+                runtime.dirty = false
+                runtime.flushing = true
+                -- 1.0.12a normal caches precede custom caches: two-phase flush.
+                local ok = pcall(function()
+                    player:AddCustomCacheTag(state.cacheTag, true)
+                    player:AddCacheFlags(CacheFlag.CACHE_LUCK)
+                    player:EvaluateItems()
+                end)
+                runtime.flushing = false
+                if not ok then
+                    runtime.dirty = true
+                    -- Bound repeated native failures to one log per runtime owner.
+                    if not runtime.flushErrorReported then
+                        runtime.flushErrorReported = true
+                        DebugLog("[Neverbirth] 鸿运缓存刷新失败；将在后续更新重试。")
+                    end
+                end
             end
         end
+    end
+    for key, runtime in pairs(state.players) do
+        if not runtime.seen then state.players[key] = nil end
     end
 end
 function Neverbirth:BuildFortuneLuckAuditRows()
@@ -15443,12 +15407,20 @@ end
 function Neverbirth:RegisterVerifiedFortuneLuckCaps()
     local state = self.FortuneRivallingHeavenGu
     state.luckCaps = { collectible = {}, trinket = {} }
+    state.dependencies = { collectible = {}, trinket = {} }
+    if IsValidItemId(Items.FortuneRivallingHeavenGu) then
+        state.dependencies.collectible[Items.FortuneRivallingHeavenGu] = true
+    end
     state.auditRows = self:BuildFortuneLuckAuditRows()
     for _, auditRow in ipairs(state.auditRows) do
         if auditRow.includeFortune then
             local enumTable = auditRow.kind == "trinket" and TrinketType or CollectibleType
             local itemId = tonumber(auditRow.runtimeItemId) or (enumTable and enumTable[auditRow.enum])
             if itemId then
+                local conditionId = CollectibleType and CollectibleType[auditRow.condition]
+                if conditionId and conditionId > 0 then
+                    state.dependencies.collectible[conditionId] = true
+                end
                 local function resolver(player)
                     if self:FortuneAuditConditionMet(player, auditRow.condition) then
                         return auditRow.cap
@@ -15471,28 +15443,23 @@ function Neverbirth:RegisterVerifiedFortuneLuckCaps()
     end
 end
 Neverbirth:RegisterVerifiedFortuneLuckCaps()
-function Neverbirth:GrantMeatLumpOneUp(...)
-    local player = self:FindUtilityKnifePickupPlayer(...)
-    if not player then
-        return
-    end
-
-    local granted = self:GrantOfficialOneUpFromMeatLump(player)
-    if granted and player.GetCollectibleNum and IsValidItemId(Items.MeatLump) then
-        local data = Neverbirth.GetBlackTaisuiData()
-        local key = tostring((player and player.InitSeed) or "0")
-        data.meatLumpCounts[key] = math.max(tonumber(data.meatLumpCounts[key]) or 0, tonumber(player:GetCollectibleNum(Items.MeatLump)) or 0)
-        SaveMusicboxData()
-    end
+function Neverbirth:GrantMeatLumpOneUp(itemId, charge, firstTime, slot, varData, player)
+    Neverbirth:TrackMeatLumpPlayerCopies(player)
 end
 
-function Neverbirth:GrantOfficialOneUpFromMeatLump(player)
-    if not player then
-        return false
+function Neverbirth:TrackMeatLumpPlayerCopies(player)
+    if not player or not player.GetCollectibleNum or not IsValidItemId(Items.MeatLump) then return end
+    local data = Neverbirth.GetBlackTaisuiData()
+    local key = tostring(player.InitSeed or "0")
+    local current = math.max(0, tonumber(player:GetCollectibleNum(Items.MeatLump)) or 0)
+    local previous = tonumber(data.meatLumpCounts[key]) or 0
+    if current == previous then return end
+    -- POST_ADD and the polling fallback share one inventory snapshot authority.
+    data.meatLumpCounts[key] = current
+    if current > previous then
+        data.meatLumpLives[key] = math.max(0, tonumber(data.meatLumpLives[key]) or 0) + current - previous
     end
-    Neverbirth:AddHiddenMeatLumpOneUpEffect(player, Neverbirth.BlackTaisuiOfficialLifeItem)
-    Neverbirth:AddMeatLumpLife(player, 1)
-    return true
+    SaveMusicboxData()
 end
 
 function Neverbirth:GetMeatLumpLifeCount(player)
@@ -15536,29 +15503,36 @@ function Neverbirth:RestoreMeatLumpLifeHealth(player)
 end
 
 function Neverbirth:ApplyMeatLumpLife(player, reviveDeadPlayer)
+    if Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.IsFailureDeath(player) then return false end
+    if not player or Neverbirth:GetMeatLumpLifeCount(player) <= 0 then return false end
+    if reviveDeadPlayer then
+        if not player.Revive or not player.IsDead then return false end
+        local ok = pcall(function() player:Revive() end)
+        if not ok or player:IsDead() then return false end
+    end
     if not Neverbirth:ConsumeMeatLumpLife(player) then
         return false
     end
-    Neverbirth:ConsumeHiddenMeatLumpOneUpEffect(player, Neverbirth.BlackTaisuiOfficialLifeItem)
-    if reviveDeadPlayer and player and player.Revive then
-        pcall(function()
-            player:Revive()
-        end)
-    end
     Neverbirth:RestoreMeatLumpLifeHealth(player)
+    player:SetMinDamageCooldown(Neverbirth.BlackTaisuiDeathSaveInvincibility)
     if player and player.SetColor and Color then
         pcall(function()
             player:SetColor(Color(0.25, 0.15, 0.18, 1, 0.08, 0, 0.08), 45, 1, true, false)
         end)
     end
+    if Isaac and Isaac.DebugString then
+        Isaac.DebugString("[neverbirth] Meat Lump blocked lethal damage; lives=" .. Neverbirth:GetMeatLumpLifeCount(player) .. "; survival cooldown granted")
+    end
     return true
 end
 
-function Neverbirth:HandleMeatLumpDamage(entity, amount)
+function Neverbirth:HandleMeatLumpDamage(entity, amount, flags)
     local player = entity and entity.ToPlayer and entity:ToPlayer()
     if not player or (tonumber(amount) or 0) <= 0 or Neverbirth:GetMeatLumpLifeCount(player) <= 0 then
         return nil
     end
+    local nonLethalFlags = (DamageFlag.DAMAGE_FAKE or 0) | (DamageFlag.DAMAGE_NOKILL or 0)
+    if ((tonumber(flags) or 0) & nonLethalFlags) ~= 0 then return nil end
     if IsIncomingDamageLethal(player, tonumber(amount) or 0) and Neverbirth:ApplyMeatLumpLife(player, false) then
         return false
     end
@@ -15603,84 +15577,12 @@ function Neverbirth:TryRemoveCollectibleCostume(player, itemId)
     end
 end
 
-function Neverbirth:AddHiddenMeatLumpOneUpEffect(player, itemId)
-    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
-    if not effects or not effects.AddCollectibleEffect then
-        return false
-    end
-    local attempts = {
-        function() effects:AddCollectibleEffect(itemId, false, 1) end,
-        function() effects:AddCollectibleEffect(itemId, false) end,
-        function() effects:AddCollectibleEffect(itemId) end,
-    }
-    for _, attempt in ipairs(attempts) do
-        if pcall(attempt) then
-            return true
-        end
-    end
-    return false
-end
-
-function Neverbirth:ConsumeHiddenMeatLumpOneUpEffect(player, itemId)
-    local effects = Neverbirth:GetBlackTaisuiTemporaryEffects(player)
-    if not effects or not effects.RemoveCollectibleEffect then
-        return false
-    end
-    return pcall(function()
-        effects:RemoveCollectibleEffect(itemId, 1)
-    end)
-end
-
-function Neverbirth:HideMeatLumpOneUpCollectible(player, itemId)
-    Neverbirth:TryRemoveCollectibleCostume(player, itemId)
-
-    if player and player.RemoveCollectible then
-        local attempts = {
-            function() player:RemoveCollectible(itemId, false, 0, true) end,
-            function() player:RemoveCollectible(itemId, false, 0) end,
-            function() player:RemoveCollectible(itemId, false) end,
-            function() player:RemoveCollectible(itemId) end,
-        }
-        for _, attempt in ipairs(attempts) do
-            if pcall(attempt) then
-                break
-            end
-        end
-    end
-
-    -- The official 1UP is engine-side. After hiding its collectible/costume,
-    -- keep a no-costume collectible effect as the closest hidden official-life
-    -- backup available from Lua. If the engine ignores this for revives, the
-    -- visible collectible route is the only fully official path.
-    Neverbirth:AddHiddenMeatLumpOneUpEffect(player, itemId)
-end
-
 function Neverbirth:TrackMeatLumpOneUpCopies()
     if not IsValidItemId(Items.MeatLump) then
         return
     end
-    local data = Neverbirth.GetBlackTaisuiData()
     for _, player in ipairs(GetPlayers()) do
-        if player and player.GetCollectibleNum then
-            local key = tostring((player and player.InitSeed) or "0")
-            local currentCount = tonumber(player:GetCollectibleNum(Items.MeatLump)) or 0
-            local previousCount = tonumber(data.meatLumpCounts[key]) or 0
-            if currentCount > previousCount then
-                local granted = 0
-                for _ = 1, currentCount - previousCount do
-                    if Neverbirth:GrantOfficialOneUpFromMeatLump(player) then
-                        granted = granted + 1
-                    end
-                end
-                if granted > 0 then
-                    data.meatLumpCounts[key] = currentCount
-                    SaveMusicboxData()
-                end
-            elseif currentCount < previousCount then
-                data.meatLumpCounts[key] = currentCount
-                SaveMusicboxData()
-            end
-        end
+        Neverbirth:TrackMeatLumpPlayerCopies(player)
     end
 end
 
@@ -15831,6 +15733,15 @@ Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Neverbirth.EvaluateFortun
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackUtilityKnifeCopies)
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackCrazyCoconutCopies)
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackFortuneRivallingHeavenGuLuckSources)
+Neverbirth:AddCallback(ModCallbacks.MC_EVALUATE_CUSTOM_CACHE, Neverbirth.EvaluateFortuneCustomCache,
+    Neverbirth.FortuneRivallingHeavenGu.cacheTag)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, Neverbirth.ResetFortuneLuckRuntime)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Neverbirth.InvalidateFortuneLuck)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Neverbirth.OnFortunePlayerInit)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.OnFortuneCollectibleAdded)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, Neverbirth.OnFortuneCollectibleRemoved)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, Neverbirth.OnFortuneTrinketChanged)
+Neverbirth:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_REMOVED, Neverbirth.OnFortuneTrinketChanged)
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.TrackMeatLumpOneUpCopies)
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateDebugControllerMenus)
 Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, Neverbirth.UpdateLocalizedPickupBanners)
@@ -15856,6 +15767,10 @@ if ModCallbacks.MC_POST_PICKUP_INIT then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, Neverbirth.ReplaceCondomBannedPickup, Neverbirth.CondomCollectibleVariant)
 end
 
+if ModCallbacks.MC_POST_PICKUP_MORPH then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_MORPH, Neverbirth.ReplaceCondomBannedPickup)
+end
+
 if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.GrantUtilityKnifeBrokenHeart, Items.UtilityKnife)
 end
@@ -15868,6 +15783,9 @@ end
 
 if ModCallbacks.MC_POST_ADD_COLLECTIBLE and IsValidItemId(Items.MeatLump) then
     Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, Neverbirth.GrantMeatLumpOneUp, Items.MeatLump)
+end
+if ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED and IsValidItemId(Items.MeatLump) then
+    Neverbirth:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, Neverbirth.TrackMeatLumpPlayerCopies, Items.MeatLump)
 end
 end
 
@@ -15914,6 +15832,9 @@ end
     local state = Neverbirth.LittleLeatherShoesState
     state.trafficInventorySeen = state.trafficInventorySeen or {}
     state.hudFonts = state.hudFonts or {}
+    local function log(message)
+        DebugLog("[neverbirth][Shoes] " .. message)
+    end
 
     local function call(object, methodName, ...)
         local method = object and object[methodName]
@@ -16017,6 +15938,7 @@ end
         state.spawningReturn = nil
         state.hudSprite = nil
         state.hudTier = nil
+        log("floor reset enabled=" .. tostring(state.floorEnabled))
     end
 
     local function anyShoes()
@@ -16109,12 +16031,17 @@ end
         if markSplitChild(npc, key) or not eligible(npc) then return nil end
         local data = dataOf(npc)
         if not data then return nil end
-        if data.NeverbirthLittleLeatherShoesChainId then return data.NeverbirthLittleLeatherShoesChainId end
+        local existing = getRoom(key, false)
+        if data.NeverbirthLittleLeatherShoesRoomKey == key and existing
+            and existing.chains[data.NeverbirthLittleLeatherShoesChainId] then
+            return data.NeverbirthLittleLeatherShoesChainId
+        end
         local id = state.nextChainId; state.nextChainId = id + 1
         getRoom(key, true).chains[id] = { id = id, deaths = 0, excluded = false }
         data.NeverbirthLittleLeatherShoesChainId = id
         data.NeverbirthLittleLeatherShoesRoomKey = key
         data.NeverbirthLittleLeatherShoesDeathHandled = false
+        log("registered room=" .. key .. " chain=" .. id .. " npc=" .. entityKey(npc))
         return id
     end
 
@@ -16160,9 +16087,9 @@ end
         state.spawningReturn = value
         local spawnOk, spawned = pcall(Isaac.Spawn, snap.type, snap.variant, snap.subtype, snap.position, Vector(0, 0), nil)
         state.spawningReturn = nil
-        if not spawnOk then return nil end
+        if not spawnOk then log("return spawn failed chain=" .. snap.chainId); return nil end
         local npc = spawned and spawned.ToNPC and spawned:ToNPC() or spawned
-        if not npc then return nil end
+        if not npc then log("return spawn missing chain=" .. snap.chainId); return nil end
         if snap.champion and npc.MakeChampion then pcall(function() npc:MakeChampion(snap.initSeed + value.deathCount, snap.championColor, true) end) end
         npc.MaxHitPoints = snap.maxHp; npc.HitPoints = snap.maxHp
         local data = dataOf(npc)
@@ -16172,6 +16099,7 @@ end
             data.NeverbirthLittleLeatherShoesDeathHandled = false
             data.NeverbirthLittleLeatherShoesReturnBody = true
         end
+        log("return spawned chain=" .. snap.chainId .. " afterDeath=" .. value.deathCount)
         return npc
     end
 
@@ -16185,10 +16113,12 @@ end
         if value.settled then return value.traffic or 0 end
         value.settled = true; value.traffic = roomTraffic(value.chains)
         state.floorTraffic = state.floorTraffic + value.traffic
+        log("settled room=" .. key .. " gained=" .. value.traffic .. " total=" .. state.floorTraffic)
         local room = Game():GetRoom()
         if room and room.GetType and room:GetType() == BOSS_ROOM and not state.floorBossSettled then
             state.floorBossSettled = true
             local tier = trafficTier(state.floorTraffic)
+            log("boss settled traffic=" .. state.floorTraffic .. " tier=" .. tier)
             if tier > 0 then queueBossReward(tier, key) end
             state.floorTraffic = 0
         end
@@ -16197,7 +16127,9 @@ end
 
     local function spawnPedestal(itemId, position)
         if not IsValidItemId(itemId) then return nil end
-        return Isaac.Spawn(PICKUP_ENTITY, COLLECTIBLE_PICKUP, itemId, position, Vector(0, 0), nil)
+        local pickup = Isaac.Spawn(PICKUP_ENTITY, COLLECTIBLE_PICKUP, itemId, position, Vector(0, 0), nil)
+        log("reward item=" .. itemId .. " spawned=" .. tostring(pickup ~= nil))
+        return pickup
     end
 
     local function removeEntity(entity)
@@ -16209,7 +16141,7 @@ end
         state.choiceGroups[id] = { pickups = { a, b }, resolved = false }
         for _, pickup in ipairs({ a, b }) do local data = dataOf(pickup); if data then data.NeverbirthTrafficChoiceGroup = id end end
         local sprite
-        if type(Sprite) == "function" then local ok, value = pcall(Sprite); if ok then sprite = value; pcall(function() sprite:Load("gfx/Effects/traffic_choice_link.anm2", true); sprite:Play("Idle", true) end) end end
+        if Sprite then local ok, value = pcall(Sprite); if ok then sprite = value; pcall(function() sprite:Load("gfx/Effects/traffic_choice_link.anm2", true); sprite:Play("Idle", true) end) end end
         state.choiceLinks[id] = { sprite = sprite, position = Vector((left.X + right.X) / 2, (left.Y + right.Y) / 2) }
     end
 
@@ -16251,7 +16183,7 @@ end
 
     local function visual(itemId, position, chest)
         local path = trafficAnm2[itemId]
-        if not path or type(Sprite) ~= "function" then if chest then Isaac.Spawn(PICKUP_ENTITY, CHEST_PICKUP, CLOSED_CHEST, position, Vector(0, 0), nil) end; return end
+        if not path or not Sprite then if chest then Isaac.Spawn(PICKUP_ENTITY, CHEST_PICKUP, CLOSED_CHEST, position, Vector(0, 0), nil) end; return end
         local ok, sprite = pcall(Sprite); if not ok or not sprite then return end
         if not pcall(function() sprite:Load(path, true); sprite:Play("Pickup", true) end) then return end
         state.visuals[#state.visuals + 1] = { sprite = sprite, position = copyPosition(position), frames = 0, chest = chest == true }
@@ -16298,6 +16230,7 @@ end
     local function addHeat(player)
         local save = persistent(); local key = playerKey(player)
         save.heatByPlayer[key] = math.max(0, math.floor(tonumber(save.heatByPlayer[key]) or 0)) + 1
+        log("heat player=" .. key .. " stacks=" .. save.heatByPlayer[key])
         SaveMusicboxData()
         queueHeatRefresh(player)
     end
@@ -16364,6 +16297,7 @@ end
     end
 
     local function applyTrafficInventoryReward(player, itemId, source)
+        log("reward collected item=" .. itemId .. " player=" .. playerKey(player))
         local position = source and source.position or copyPosition(player and player.Position)
         resolveTrackedChoice(source, itemId)
         removeCollectible(player, itemId)
@@ -16408,7 +16342,10 @@ end
         for index = #state.splitWatch, 1, -1 do
             local value = state.splitWatch[index]
             if state.frame >= value.expires then
-                if not value.split and state.returnsEnabled and shouldReturn(deterministicRoll(value.snapshot, value.deaths), value.deaths) then
+                local roll = deterministicRoll(value.snapshot, value.deaths)
+                local queued = not value.split and state.returnsEnabled and shouldReturn(roll, value.deaths)
+                log(string.format("return roll chain=%d deaths=%d roll=%d threshold=%d split=%s enabled=%s queued=%s", value.chainId, value.deaths, roll, returnChance(value.deaths), tostring(value.split), tostring(state.returnsEnabled), tostring(queued)))
+                if queued then
                     state.pendingReturns[#state.pendingReturns + 1] = { snapshot = value.snapshot, roomKey = value.roomKey, deathCount = value.deaths, due = state.frame + 1 }
                 end
                 table.remove(state.splitWatch, index)
@@ -16419,7 +16356,16 @@ end
     local function roomReady()
         local room = Game():GetRoom(); if not room or pendingFor(roomKey()) then return false end
         local clear, clearOk = call(room, "IsClear"); if clearOk and clear ~= true then return false end
-        local done, doneOk = call(room, "IsAmbushDone"); if doneOk and done ~= true then return false end
+        local alive, aliveOk = call(room, "GetAliveEnemiesCount")
+        if aliveOk and tonumber(alive) and alive > 0 then return false end
+        local roomType = room:GetType()
+        local active = call(room, "IsAmbushActive")
+        local waveRoom = roomType == ((RoomType and RoomType.ROOM_CHALLENGE) or 11)
+            or roomType == ((RoomType and RoomType.ROOM_BOSSRUSH) or 17)
+        if waveRoom or active == true then
+            local done, doneOk = call(room, "IsAmbushDone")
+            if not doneOk or done ~= true then return false end
+        end
         return true
     end
 
@@ -16436,6 +16382,7 @@ end
         if state.floorEnabled and state.returnsEnabled and not hasShoes then
             state.returnsEnabled = false
             state.pendingReturns = {}
+            log("returns disabled: item lost")
         end
     end
 
@@ -16479,10 +16426,22 @@ end
         return nil
     end
 
+    local function npcUpdate(_, npc)
+        if not state.floorEnabled then return nil end
+        local data = dataOf(npc)
+        if not data or data.NeverbirthLittleLeatherShoesExcluded then return nil end
+        local key = roomKey()
+        local room = getRoom(key, false)
+        if data.NeverbirthLittleLeatherShoesRoomKey == key and room
+            and room.chains[data.NeverbirthLittleLeatherShoesChainId] then return nil end
+        registerNpc(npc)
+        return nil
+    end
+
     local function preClearAward()
         if not state.floorEnabled or state.releasingAward then return nil end
         local room = getRoom(roomKey(), true)
-        if pendingFor(room.key) then room.pendingAward = true; return true end
+        if pendingFor(room.key) or not roomReady() then room.pendingAward = true; return true end
         settleRoom(); return nil
     end
 
@@ -16510,7 +16469,7 @@ end
         local cached = state.hudFonts[locale]
         if cached ~= nil then return cached or nil end
         state.hudFonts[locale] = false
-        if type(Font) ~= "function" then return nil end
+        if not Font then return nil end
         local okFont, font = pcall(Font)
         if not okFont or not font or type(font.Load) ~= "function" then return nil end
         local okLoad, loaded = pcall(function() return font:Load(trafficHudFontPaths[locale]) end)
@@ -16527,7 +16486,7 @@ end
             or (locale == "zh" and ("流量 " .. traffic .. " 还差 " .. remaining) or ("Traffic " .. traffic .. " Next +" .. remaining))
         local fallback = maximum and ("Traffic " .. traffic .. " MAX") or ("Traffic " .. traffic .. " Next +" .. remaining)
         local font = trafficHudFont(locale)
-        if font and type(KColor) == "function" then
+        if font and KColor then
             local okColor, color = pcall(KColor, 1, 1, 1, 1)
             local method = locale == "zh" and font.DrawStringUTF8 or font.DrawString
             if okColor and color and type(method) == "function" then
@@ -16542,7 +16501,7 @@ end
     local function render()
         if not state.floorEnabled then return end
         local traffic = math.max(0, math.floor(tonumber(state.floorTraffic) or 0)); local tier = trafficTier(traffic)
-        if tier > 0 and type(Sprite) == "function" then
+        if tier > 0 and Sprite then
             if not state.hudSprite then local ok, sprite = pcall(Sprite); if ok then state.hudSprite = sprite; pcall(function() sprite:Load("gfx/UI/traffic_meter.anm2", true) end) end end
             if state.hudSprite and state.hudTier ~= tier then state.hudTier = tier; pcall(function() state.hudSprite:Play("Level" .. tier, true) end) end
             if state.hudSprite then pcall(function() state.hudSprite:Render(Vector(42, 42)) end) end
@@ -16564,10 +16523,11 @@ end
         SpawnTrafficBossReward = spawnBossReward, ResolveChoiceAtCollision = resolveChoice,
         AddHeat = addHeat, ProcessHeatRefreshes = processHeatRefreshes, GetPersistentData = persistent, HandleFloorOwnership = handleFloorOwnership, ResolveExposure = exposure,
         ProcessTrafficInventory = processTrafficInventory, ProcessTrafficPlayer = processTrafficPlayer, TrackTrafficPickup = trackTrafficPickup, QueuePickupVisual = visual, ProcessPickupVisuals = processVisuals, SpawnReturn = spawnReturn, Update = update, Render = render,
-        Callbacks = { NpcInit = npcInit, EntityKill = entityKill, PreClearAward = preClearAward, TrackTrafficPickup = trackTrafficPickup, EvaluateHeat = evaluateHeat },
+        Callbacks = { NpcInit = npcInit, NpcUpdate = npcUpdate, EntityKill = entityKill, PreClearAward = preClearAward, TrackTrafficPickup = trackTrafficPickup, EvaluateHeat = evaluateHeat },
     }
 
     if ModCallbacks.MC_POST_NPC_INIT then Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_INIT, npcInit) end
+    if ModCallbacks.MC_NPC_UPDATE then Neverbirth:AddCallback(ModCallbacks.MC_NPC_UPDATE, npcUpdate) end
     if ModCallbacks.MC_POST_ENTITY_KILL then Neverbirth:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, entityKill) end
     Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, update)
     if ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD then Neverbirth:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, preClearAward) end
@@ -17678,7 +17638,8 @@ end)()
             or tonumber(pickup.Variant) ~= COLLECTIBLE_PICKUP
             or (tonumber(pickup.SubType) or 0) <= 0 then return false end
         local entityData = pickup.GetData and pickup:GetData() or nil
-        if entityData and entityData.NeverbirthHouseSessionToken then return false end
+        if entityData and (entityData.NeverbirthHouseSessionToken
+            or entityData.NeverbirthCertificateSessionToken) then return false end
         runData.encounters = type(runData.encounters) == "table" and runData.encounters or {}
         runData.seenKeys = type(runData.seenKeys) == "table" and runData.seenKeys or {}
         local key = encounterKey(roomContext, pickup)
@@ -17796,6 +17757,25 @@ end)()
         end
         if added > 0 then save() end
         return added
+    end
+
+    local function pickupUpdate(_, pickup)
+        if not pickup or tonumber(pickup.Type) ~= PICKUP_ENTITY
+            or tonumber(pickup.Variant) ~= COLLECTIBLE_PICKUP
+            or (tonumber(pickup.SubType) or 0) <= 0 then return nil end
+        local context = state.encounterContext
+        if not context or context.roomIndex == SPECIAL_ROOM_INDEX then return nil end
+        local data = pickup.GetData and pickup:GetData() or nil
+        if not data or data.NeverbirthHouseSessionToken or data.NeverbirthCertificateSessionToken
+            or data.NeverbirthHouseEncounterContext == context then return nil end
+        local runData = getPersistentData()
+        if runData.session then return nil end
+        -- POST_PICKUP_UPDATE also sees rewards/chest contents born after entry.
+        -- Cache observation per room visit; persistent instance keys still own
+        -- de-duplication across visits and continue. No per-frame room scan.
+        if recordEncounter(runData, context, pickup) then save() end
+        data.NeverbirthHouseEncounterContext = context
+        return nil
     end
 
     local function capturePlayerPositions()
@@ -18200,7 +18180,7 @@ end)()
         if state.transition then processControlTransition(runData, session); return end
         if not session or session.phase ~= "active" then return end
         local touching = updateControlTouchLatches(session)
-        if session.interactionLocked == true
+        if next(state.pending) ~= nil or session.interactionLocked == true
             or state.frame < (tonumber(session.controlArmedFrame) or 0)
             or state.frame < (tonumber(session.controlCooldownUntil) or 0) then return end
         for _, role in ipairs(CONTROL_TRIGGER_ORDER) do
@@ -18250,6 +18230,8 @@ end)()
             DebugLog("[neverbirth][HouseVsElephant] use refused: gallery control entity unresolved")
             return noConsume(false)
         end
+        -- Include pedestals spawned this update, before their first update hook.
+        scanCurrentRoom()
         local candidates = buildCandidates(runData.encounters, GetPlayers())
         local parentToken = nil
         if context.roomIndex == SPECIAL_ROOM_INDEX then
@@ -18273,6 +18255,12 @@ end)()
         return noConsume(false)
     end
 
+    local function queuedCollectibleId(player)
+        local queued = player and player.QueuedItem
+        local item = queued and queued.Item
+        return tonumber(item and item.ID) or 0
+    end
+
     local function pickupCollision(_, pickup, collider)
         if not pickup or tonumber(pickup.Type) ~= PICKUP_ENTITY
             or tonumber(pickup.Variant) ~= COLLECTIBLE_PICKUP then return nil end
@@ -18280,19 +18268,39 @@ end)()
         if not data or not data.NeverbirthHouseSessionToken then return nil end
         local runData = getPersistentData()
         local session = runData.session
-        if not session or session.phase ~= "active" or data.NeverbirthHouseSessionToken ~= session.token then return nil end
+        if not session or data.NeverbirthHouseSessionToken ~= session.token then return nil end
         local player = collider and collider.ToPlayer and collider:ToPlayer() or nil
         if not player then return nil end
+        -- Reserve team quota before the engine can accept another collision in
+        -- this update. Controls and returning sessions cannot admit new picks.
+        if session.phase ~= "active" or session.interactionLocked == true or state.transition
+            or session.selectedCount >= 3 then return true end
         local candidateIndex = math.floor(tonumber(data.NeverbirthHouseCandidateIndex) or 0)
+        if candidateIndex <= 0 then return nil end
+        if session.selected[tostring(candidateIndex)] then return true end
+        local itemId = tonumber(pickup.SubType) or 0
+        if itemId <= 0 then return true end
+        local ownerKey = playerKey(player)
         local key = tostring(session.token) .. ":" .. tostring(candidateIndex)
-        if candidateIndex > 0 and not session.selected[tostring(candidateIndex)] and not state.pending[key] then
-            local before = player.GetCollectibleNum and tonumber(player:GetCollectibleNum(pickup.SubType)) or 0
-            state.pending[key] = {
-                pickup = pickup, player = player, itemId = tonumber(pickup.SubType),
-                candidateIndex = candidateIndex, beforeCount = before or 0,
-                expires = state.frame + CONFIRM_FRAMES,
-            }
+        local pending = state.pending[key]
+        if pending then
+            if pending.playerKey ~= ownerKey or queuedCollectibleId(player) > 0 then return true end
+            return nil
         end
+        if queuedCollectibleId(player) > 0 then return true end
+        local reserved = 0
+        for _, entry in pairs(state.pending) do
+            reserved = reserved + 1
+            -- One player's single item queue cannot own two pending pedestals.
+            if entry.playerKey == ownerKey then return true end
+        end
+        if session.selectedCount + reserved >= 3 then return true end
+        local before = player.GetCollectibleNum and tonumber(player:GetCollectibleNum(itemId)) or 0
+        state.pending[key] = {
+            pickup = pickup, player = player, playerKey = ownerKey, itemId = itemId,
+            candidateIndex = candidateIndex, beforeCount = before or 0,
+            expires = state.frame + CONFIRM_FRAMES,
+        }
         return nil
     end
 
@@ -18308,7 +18316,13 @@ end)()
             end
             local count = pending.player and pending.player.GetCollectibleNum
                 and tonumber(pending.player:GetCollectibleNum(pending.itemId)) or pending.beforeCount
-            if not exists or count > pending.beforeCount then
+            local queued = queuedCollectibleId(pending.player) == pending.itemId
+            if queued then pending.queued = true end
+            local consumed = not exists or tonumber(pending.pickup and pending.pickup.SubType) == 0
+            -- An empty pedestal may remain throughout the pickup animation.
+            -- Keep the reservation while queued; settle only an actual grant
+            -- tied to this pickup, never room cleanup or an unrelated grant.
+            if count > pending.beforeCount and (pending.queued or consumed) then
                 state.pending[key] = nil
                 adoptSessionSpawnedPedestals(session)
                 if markSelected(session, pending.candidateIndex) then
@@ -18316,7 +18330,9 @@ end)()
                     return
                 end
                 save()
-            elseif state.frame >= pending.expires then
+            elseif not queued and (pending.queued or consumed
+                or tonumber(pending.pickup and pending.pickup.SubType) ~= pending.itemId
+                or state.frame >= pending.expires) then
                 state.pending[key] = nil
             end
         end
@@ -18342,6 +18358,7 @@ end)()
         local runData = getPersistentData()
         local session = runData.session
         local context = roomContext()
+        state.encounterContext = context
         if state.returningAfterContinue then
             local stale = state.returningAfterContinue
             state.returningAfterContinue = nil
@@ -18418,13 +18435,16 @@ end)()
         end,
         MakePositions = makePositions, GetPersistentData = getPersistentData,
         Callbacks = {
-            UseItem = useItem, NewRoom = newRoom, PickupCollision = pickupCollision,
+            UseItem = useItem, NewRoom = newRoom, PickupCollision = pickupCollision, PickupUpdate = pickupUpdate,
             Update = update, GameStarted = gameStarted, PreGameExit = preGameExit,
         },
     }
 
     Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, useItem, HOUSE)
     if ModCallbacks.MC_POST_NEW_ROOM then Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, newRoom) end
+    if ModCallbacks.MC_POST_PICKUP_UPDATE then
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, pickupUpdate, COLLECTIBLE_PICKUP)
+    end
     if ModCallbacks.MC_PRE_PICKUP_COLLISION then
         Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, pickupCollision, COLLECTIBLE_PICKUP)
     end
@@ -19936,8 +19956,8 @@ end)()
     -- The time budget and iteration guard prevent an infinite loop. The fatal
     -- fallback is a real team wipe, not a Lua error that disables the mod.
     local capabilities = {
-        sameHitDamageRewrite = false,
-        guardedDamageReplacement = true,
+        sameHitDamageRewrite = true,
+        guardedDamageReplacement = false,
         targetFps = false,
         safeRoomSlowdown = true,
         boundedFrameThrottle = true,
@@ -19954,7 +19974,6 @@ end)()
         lockUntilMs = 0,
         fatalTriggered = false,
         lastFatalMessage = nil,
-        playerDamageReplacementDepth = {},
         slowRoom = nil,
         previousBrokenWatchState = nil,
         lastKilledPlayers = 0,
@@ -20359,7 +20378,6 @@ end)()
         runtime.workloadCalls = 0
         runtime.workloadIterations = 0
         runtime.workloadSink = 0
-        runtime.playerDamageReplacementDepth = {}
         runtime.warnings = {}
     end
 
@@ -20369,7 +20387,7 @@ end)()
         runtime.fatalTriggered = false
         runtime.lastFatalMessage = nil
         monitorCurrentRoom(true)
-        logOnce("damage", "[neverbirth][ACE] Using guarded cancel-and-replace damage doubling because ordinary Repentance cannot rewrite the same hit amount")
+        logOnce("damage", "[neverbirth][ACE] REPENTOGON rewrites incoming damage in the same hit; no replacement damage event")
     end
 
     local function deactivate()
@@ -20381,32 +20399,14 @@ end)()
         local damageAmount = tonumber(amount) or 0
         if not player or itemCount(player) <= 0 or damageAmount <= 0 then return nil end
 
-        local key = playerKey(player)
-        local depth = tonumber(runtime.playerDamageReplacementDepth[key]) or 0
-        if depth > 0 then return nil end
-
-        runtime.playerDamageReplacementDepth[key] = depth + 1
-        local ok, err = pcall(function()
-            player:TakeDamage(
-                damageAmount * 2,
-                tonumber(flags) or 0,
-                source,
-                tonumber(countdown) or 0
-            )
-        end)
-        runtime.playerDamageReplacementDepth[key] = nil
-
-        if not ok then
-            DebugLog("[neverbirth][ACE] Doubled replacement damage failed; preserving original hit: " .. tostring(err))
-            return nil
-        end
-
-        -- MC_ENTITY_TAKE_DMG: false cancels the original hit. The guarded
-        -- replacement above re-enters this callback once and is allowed through.
-        return false
+        return { Damage = damageAmount * 2 }
     end
 
     local function npcDamage(_, entity, amount)
+        -- REPENTOGON 1.0.12a NPC POST runs after queue insertion, not HP commit.
+        -- Only final positive, uncancelled requests may become candidates here.
+        -- Settlement below is still a legacy HP observation, not per-entry proof
+        -- when several accepted requests share one native damage queue.
         if not runtime.active or runtime.fatalTriggered or (tonumber(amount) or 0) <= 0 then return nil end
         local npc = toNpc(entity)
         if not npc then return nil end
@@ -20509,8 +20509,8 @@ end)()
         },
     }
 
-    Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, playerDamage, EntityType and EntityType.ENTITY_PLAYER or 1)
-    Neverbirth:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, npcDamage)
+    Neverbirth:AddPriorityCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, CallbackPriority.EARLY, playerDamage, EntityType and EntityType.ENTITY_PLAYER or 1)
+    Neverbirth:AddPriorityCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, CallbackPriority.IMPORTANT, npcDamage)
     Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, postUpdate)
     if ModCallbacks.MC_POST_NPC_INIT then Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_INIT, npcInit) end
     if ModCallbacks.MC_POST_NPC_DEATH then Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, npcDeath) end
@@ -20576,7 +20576,6 @@ initializeReviveMyLove(Neverbirth, {
     end,
     Save = SaveMusicboxData,
     GetCurrentRunSeed = GetCurrentRunSeed,
-    IsIncomingDamageLethal = IsIncomingDamageLethal,
     DebugLog = DebugLog,
 })
 -- REVIVE_MY_LOVE_END
@@ -20600,6 +20599,15 @@ initializeNightOfTheCowards(Neverbirth, {
 -- NIGHT_OF_THE_COWARDS_END
 
 -- ANNIHILATION_BEGIN
+-- AVADA_KEDAVRA_BEGIN: shared per-owner guards are available to other modules.
+include("avada_kedavra")(Neverbirth, {
+    ItemId = Items.AvadaKedavra,
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- AVADA_KEDAVRA_END
+
+-- Annihilation keeps its aura; only its shooting replacement yields to Avada.
 local initializeAnnihilation = include("annihilation")
 initializeAnnihilation(Neverbirth, {
     ItemId = Items.Annihilation,
@@ -20662,10 +20670,21 @@ include("ring_of_the_seven_curses")(Neverbirth, {
 })
 -- RING_OF_THE_SEVEN_CURSES_END
 
--- DANTE_CHARACTER_BEGIN
-local initializeDanteCharacter = include("dante_character")
-initializeDanteCharacter(Neverbirth, {
+-- HEALTHY_SLEEP_BEGIN
+include("healthy_sleep")(Neverbirth, {
+    ItemId = Items.HealthySleep,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
     GetPlayers = GetPlayers,
     DebugLog = DebugLog,
 })
+-- HEALTHY_SLEEP_END
+
+-- DANTE_CHARACTER_BEGIN
+-- Custom characters are temporarily disabled; do not load their gameplay or visual callbacks.
+-- dante_character.lua and its assets are retained for possible future use.
 -- DANTE_CHARACTER_END

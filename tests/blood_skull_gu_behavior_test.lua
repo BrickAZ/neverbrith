@@ -345,6 +345,9 @@ local function loadNeverbirth(options)
         return mod
     end
 
+    -- This fixture exercises main.lua, not separately tested feature modules.
+    function include() return function() end end
+    dofile("tests/repentogon_test_fixture.lua")()
     dofile("main.lua")
 
     local function getCallbacks(callbackId, param)
@@ -476,6 +479,14 @@ local function loadNeverbirth(options)
         function familiar:ToFamiliar()
             return self
         end
+        function familiar:GetItemConfig()
+            assertEquals(self, familiar, "GetItemConfig requires the converted EntityFamiliar")
+            if optionsForFamiliar.nativeError then error("native lookup failed") end
+            if optionsForFamiliar.noNativeSource then return nil end
+            local sourceIds = { [1] = 8, [7] = 67, [80] = 360, [235] = 698 }
+            local id = optionsForFamiliar.sourceItemId or sourceIds[self.Variant]
+            return id and { ID = id } or nil
+        end
         function familiar:ToPlayer()
             return nil
         end
@@ -489,7 +500,29 @@ local function loadNeverbirth(options)
             return optionsForFamiliar.friendlyFlag == true and flag == EntityFlag.FLAG_FRIENDLY
         end
 
-        roomEntities[#roomEntities + 1] = familiar
+        -- GetRoomEntities returns Entity handles, not the EntityFamiliar view.
+        -- Keep subtype-only Player/GetItemConfig unavailable until ToFamiliar.
+        local roomEntity = {
+            Type = familiar.Type,
+            Variant = familiar.Variant,
+            SubType = familiar.SubType,
+            InitSeed = familiar.InitSeed,
+            Position = familiar.Position,
+            SpawnerEntity = familiar.SpawnerEntity,
+        }
+        function roomEntity:ToFamiliar()
+            return familiar
+        end
+        function roomEntity:IsDead()
+            return familiar.dead
+        end
+        function roomEntity:Exists()
+            return not familiar.removed
+        end
+        function roomEntity:Remove()
+            familiar:Remove()
+        end
+        roomEntities[#roomEntities + 1] = roomEntity
         return familiar
     end
 
@@ -590,7 +623,7 @@ local function test_sacrifice_removes_source_collectible_so_cache_cannot_restore
     assertEquals(familiar.removed, true, "selected familiar should still be removed immediately for visible feedback")
 end
 
-local function test_static_baby_mapping_removes_source_collectible_without_item_config_variant()
+local function test_native_source_works_without_item_config_variant()
     local env = loadNeverbirth({
         rngValues = { 0, 0 },
         disableItemConfigFamiliarVariant = true,
@@ -607,13 +640,13 @@ local function test_static_baby_mapping_removes_source_collectible_without_item_
 
     runUseBloodSkullGu(env, player)
 
-    assertEquals(#player.removeCalls, 1, "static baby mapping should remove the source collectible even when ItemConfig lacks FamiliarVariant")
+    assertEquals(#player.removeCalls, 1, "native source must work even when the global ItemConfig lacks FamiliarVariant")
     assertEquals(player.removeCalls[1].itemId, CollectibleType.COLLECTIBLE_SISTER_MAGGY, "Sister Maggy familiar should remove Sister Maggy item")
     assertEquals(player:GetCollectibleNum(CollectibleType.COLLECTIBLE_SISTER_MAGGY), 0, "Sister Maggy item should be gone")
     assertEquals(familiar.removed, true, "selected familiar should still be removed immediately")
 end
 
-local function test_static_mapping_covers_repentance_baby_items()
+local function test_native_source_covers_repentance_baby_items()
     local env = loadNeverbirth({
         rngValues = { 1, 0 },
         disableItemConfigFamiliarVariant = true,
@@ -795,11 +828,53 @@ local function test_temporary_consumables_are_not_eligible()
     assertEquals(#player.damageCalls, 1, "only temporary familiars should cause backlash")
 end
 
+local function test_room_entity_conversion_preserves_sacrifice_instead_of_backlash()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ collectibles = { [8] = 1 } })
+    local familiar = env.newFamiliar(player, { variant = FamiliarVariant.BROTHER_BOBBY })
+
+    runUseBloodSkullGu(env, player)
+
+    assertEquals(#player.damageCalls, 0, "an owned Brother Bobby must be sacrificed instead of causing backlash")
+    assertEquals(player:GetCollectibleNum(8), 0, "the sacrificed source collectible must be removed")
+    assertEquals(familiar.removed, true, "the selected familiar must disappear")
+    assertEquals(player.Damage, 5.0, "sacrifice must grant the damage reward")
+    assertEquals(player.TearRange, 300, "sacrifice must grant the range reward")
+    assertEquals(countBlackHeartSpawns(env), 1, "sacrifice must drop the rolled black heart reward")
+    assertEquals(player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY), 0, "sacrifice must consume charge")
+end
+
+local function test_native_source_wins_over_shared_variant_and_guessed_fields()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ collectibles = { [8] = 1, [1201] = 1 } })
+    local familiar = env.newFamiliar(player, { variant = 1, sourceItemId = 1201 })
+    familiar.CollectibleType = 8
+    runUseBloodSkullGu(env, player)
+    assertEquals(player.removeCalls[1].itemId, 1201, "native source must beat a shared vanilla variant and guessed fields")
+    assertEquals(player.collectibles[8], 1, "unrelated same-variant source must survive")
+end
+
+local function test_missing_native_source_never_guesses_a_held_collectible()
+    for _, flags in ipairs({ { noNativeSource = true }, { nativeError = true }, { sourceItemId = 1201 } }) do
+        local env = loadNeverbirth()
+        local player = env.newPlayer({ collectibles = { [8] = 1 } })
+        flags.variant = 1
+        local familiar = env.newFamiliar(player, flags)
+        familiar.CollectibleType = 8
+        runUseBloodSkullGu(env, player)
+        assertEquals(#player.removeCalls, 0, "nil/error/unowned native source must not fall back to guessing")
+        assertEquals(familiar.removed, false, "unproven familiar must survive")
+    end
+end
+
+test_room_entity_conversion_preserves_sacrifice_instead_of_backlash()
+test_native_source_wins_over_shared_variant_and_guessed_fields()
+test_missing_native_source_never_guesses_a_held_collectible()
 test_xml_registers_active_three_charge_item_and_pools()
 test_successful_use_removes_random_eligible_familiar()
 test_sacrifice_removes_source_collectible_so_cache_cannot_restore_familiar()
-test_static_baby_mapping_removes_source_collectible_without_item_config_variant()
-test_static_mapping_covers_repentance_baby_items()
+test_native_source_works_without_item_config_variant()
+test_native_source_covers_repentance_baby_items()
 test_unmapped_familiar_without_source_collectible_is_not_sacrificed()
 test_successful_use_grants_damage_and_range()
 test_successful_use_drops_one_or_two_black_hearts()

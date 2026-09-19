@@ -51,9 +51,20 @@ EntityType = { ENTITY_PLAYER = 1, ENTITY_NPC = 10, ENTITY_MULLIGAN = 16 }
 EntityFlag = { FLAG_FRIENDLY = 1, FLAG_CHARM = 2 }
 TearFlags = { TEAR_NORMAL = 0 }
 DamageFlag = { DAMAGE_EXPLOSION = 1 }
-Color = { Default = {} }
+local ColorMt = {}
+Color = setmetatable({}, { __call = function() return setmetatable({}, ColorMt) end })
+Color.Default = Color()
 
 function EntityRef(entity) return { Entity = entity } end
+local nextIdentity = 0
+function GetPtrHash(entity)
+    if not entity.identity then nextIdentity = nextIdentity + 1; entity.identity = nextIdentity end
+    return entity.identity
+end
+local function fresh(entity)
+    GetPtrHash(entity)
+    return setmetatable({}, { __index = entity, __newindex = entity })
+end
 local currentGame = nil
 function Game() return currentGame end
 
@@ -131,12 +142,19 @@ local function makeEnvironment(options)
     local spawned = {}
     local explosions = {}
     local nativeExplosions = {}
+    local explosionAttempts = 0
     local frame = 0
+    local logs = {}
     local mod = {}
 
     currentGame = {
         BombExplosionEffects = function(_, position, damage, tearFlags, color, source,
                 radiusMultiplier, lineCheck, damageSource, damageFlags)
+            explosionAttempts = explosionAttempts + 1
+            assertEquals(getmetatable(position), VectorMt, "dispatch requires constructor Vector")
+            assertEquals(getmetatable(color), ColorMt, "dispatch requires constructor Color")
+            assertTruthy(source and source.ToPlayer and source:ToPlayer(), "dispatch requires player source")
+            if options.throwExplosion then error("injected explosion failure") end
             nativeExplosions[#nativeExplosions + 1] = {
                 position = position,
                 damage = damage,
@@ -158,7 +176,14 @@ local function makeEnvironment(options)
     local initialize = assert(dofile("kamikaze_squad.lua"))
     local moduleContext = {
         ItemId = 9054,
-        GetPlayers = function() return players end,
+        DiagnosticsEnabled = options.diagnostics,
+        DebugLog = function(message) logs[#logs + 1] = message end,
+        GetPlayers = function()
+            if not options.freshWrappers then return players end
+            local result = {}
+            for i, player in ipairs(players) do result[i] = fresh(player) end
+            return result
+        end,
         GetRoomEntities = function() return roomEntities end,
         GetFrameCount = function() return frame end,
         GetFreeNearPosition = function(position) return position + Vector(16, 0) end,
@@ -174,6 +199,20 @@ local function makeEnvironment(options)
             return unit
         end,
     }
+    if options.missingExplosion then currentGame.BombExplosionEffects = nil end
+    if options.nativeSpawn then
+        local spawn = moduleContext.SpawnMulliboom
+        Isaac = { Spawn = function(kind, variant, subtype, position, velocity, owner)
+            assertEquals(kind, 16, "native spawn type")
+            assertEquals(variant, 2, "native spawn variant")
+            assertEquals(subtype, 0, "native spawn subtype")
+            assertEquals(getmetatable(position), VectorMt, "native spawn position")
+            assertEquals(velocity, Vector.Zero, "native spawn velocity")
+            local npc = spawn(position, owner)
+            return { ToNPC = function() return fresh(npc) end }
+        end }
+        moduleContext.SpawnMulliboom = nil
+    end
     if not options.useNativeExplosion then
         moduleContext.TriggerExplosion = function(position, damage, radiusMultiplier, owner)
             explosions[#explosions + 1] = {
@@ -220,6 +259,8 @@ local function makeEnvironment(options)
         spawned = spawned,
         explosions = explosions,
         nativeExplosions = nativeExplosions,
+        getExplosionAttempts = function() return explosionAttempts end,
+        logs = logs,
         update = update,
         npcInit = function(npc) return invoke(ModCallbacks.MC_POST_NPC_INIT, npc) end,
         npcDeath = function(npc)
@@ -364,7 +405,7 @@ local function test_contact_and_clean_room_use_one_normal_damage_double_radius_e
     assertEquals(env.explosions[2].radiusMultiplier, 2, "clean-room radius")
 end
 
-local function test_real_bomb_explosion_path_preserves_all_native_semantic_arguments()
+local function test_bomb_explosion_dispatch_preserves_arguments_without_native_equivalence_claim()
     local env = makeEnvironment({ useNativeExplosion = true })
     env.players[2].collectibles[9054] = 0
     addEnemy(env, 1451, Vector(150, 100))
@@ -377,7 +418,7 @@ local function test_real_bomb_explosion_path_preserves_all_native_semantic_argum
     local call = env.nativeExplosions[1]
     assertEquals(call.damage, 40, "real engine path damage")
     assertEquals(call.tearFlags, TearFlags.TEAR_NORMAL, "real engine path tear flags")
-    assertEquals(call.color, Color.Default, "real engine path color")
+    assertEquals(getmetatable(call.color), ColorMt, "dispatch color uses native constructor")
     assertEquals(call.source, env.players[1], "real engine path source")
     assertEquals(call.radiusMultiplier, 2, "real engine path radius multiplier")
     assertEquals(call.lineCheck, true, "real engine path line check")
@@ -500,12 +541,108 @@ local function test_registration_text_pool_icon_and_no_custom_entity_contract()
 end
 
 local tests = {
+    function()
+        local env = makeEnvironment({ useNativeExplosion = true, diagnostics = true })
+        env.players[2].collectibles[9054] = 0
+        addEnemy(env, 1961, Vector(500, 100))
+        env.update(90)
+        local originalColor = Color
+        Color = nil
+        env.cleanAward()
+        Color = originalColor
+        assertEquals(env.spawned[1].removed, false, "constructor failure must retain unit")
+        assertEquals(#env.nativeExplosions, 0, "constructor failure must not dispatch")
+        env.cleanAward()
+        assertEquals(#env.nativeExplosions, 0, "restored API must not retry failed unit")
+        env.newRoom()
+        assertTruthy(env.spawned[1].removed, "room exit must clean failed unit")
+    end,
+    function()
+        local env = makeEnvironment({ freshWrappers = true })
+        env.players[2].collectibles[9054] = 0
+        local enemy = addEnemy(env, 1962, Vector(500, 100))
+        env.update(90)
+        assertEquals(env.api.TrackEnemy(fresh(enemy)), false, "fresh hostile wrapper must not duplicate tracking")
+        env.npcDeath(fresh(env.spawned[1]))
+        env.npcDeath(fresh(env.spawned[1]))
+        env.npcRemove(fresh(env.spawned[1]))
+        assertEquals(env.api.GetLiveCount(fresh(env.players[1])), 0, "external death removes count once")
+        assertEquals(#env.explosions, 0, "external death does not append unverified manual second explosion")
+        assertEquals(#env.logs, 0, "diagnostics default off")
+    end,
+    function()
+        local env = makeEnvironment({ useNativeExplosion = true, missingExplosion = true, diagnostics = true })
+        env.players[2].collectibles[9054] = 0
+        addEnemy(env, 1971, Vector(500, 100))
+        env.update(90)
+        local unit = env.spawned[1]
+        env.cleanAward()
+        assertEquals(unit.removed, false, "missing explosion API must not silently remove unit")
+        local count = #env.logs
+        env.update(100)
+        assertEquals(#env.logs, count, "failed explosion must not log or retry each frame")
+    end,
+    function()
+        local env = makeEnvironment({ useNativeExplosion = true, throwExplosion = true, diagnostics = true })
+        env.players[2].collectibles[9054] = 0
+        local enemy = addEnemy(env, 1972, Vector(500, 100))
+        env.update(90)
+        enemy.dead = true
+        local ok = pcall(env.cleanAward)
+        assertTruthy(ok, "explosion exceptions must be contained and diagnosed")
+        assertEquals(env.getExplosionAttempts(), 1, "throwing native explosion is attempted once")
+        local count = #env.logs
+        env.cleanAward()
+        env.update(100)
+        env.cleanAward()
+        assertEquals(env.getExplosionAttempts(), 1, "repeated clear and update must not retry a failed explosion")
+        assertEquals(#env.logs, count, "throwing explosion must not retry")
+    end,
+    function()
+        local env = makeEnvironment({ nativeSpawn = true, freshWrappers = true })
+        env.players[2].collectibles[9054] = 0
+        addEnemy(env, 1973, Vector(500, 100))
+        env.update(90)
+        assertEquals(#env.spawned, 1, "Isaac.Spawn ToNPC path")
+        assertTruthy(env.spawned[1]:HasEntityFlags(EntityFlag.FLAG_FRIENDLY), "native path friendliness")
+        assertEquals(GetPtrHash(env.spawned[1].charmSource.Entity), GetPtrHash(env.players[1]), "native owner attribution")
+    end,
+    function()
+        local env = makeEnvironment()
+        env.players[2].collectibles[9054] = 0
+        local first = addEnemy(env, 1981, Vector(500, 100))
+        env.update(90)
+        local unit = env.spawned[1]
+        local closer = addEnemy(env, 1982, Vector(250, 100))
+        env.npcUpdate(fresh(unit))
+        assertEquals(unit.Target, first, "valid target must remain locked")
+        first:AddEntityFlags(EntityFlag.FLAG_FRIENDLY)
+        env.npcUpdate(fresh(unit))
+        assertEquals(unit.Target, closer, "friendly target must be replaced")
+        local third = addEnemy(env, 1983, Vector(450, 100))
+        env.npcRemove(fresh(closer))
+        env.npcUpdate(fresh(unit))
+        assertEquals(unit.Target, third, "removed target must be replaced")
+    end,
+    function()
+        local env = makeEnvironment({ freshWrappers = true })
+        addEnemy(env, 1991, Vector(600, 100))
+        env.update(89)
+        assertEquals(#env.spawned, 0, "fresh wrappers frame 89")
+        env.update(1)
+        assertEquals(#env.spawned, 2, "fresh wrappers frame 90 coop")
+        env.update(90)
+        assertEquals(#env.spawned, 4, "fresh wrappers frame 180 coop")
+        assertEquals(env.api.GetLiveCount(fresh(env.players[1])), 2, "fresh query owner")
+        env.npcRemove(fresh(env.spawned[1]))
+        assertEquals(env.api.GetLiveCount(fresh(env.players[1])) + env.api.GetLiveCount(fresh(env.players[2])), 3, "fresh NPC removal")
+    end,
     test_spawns_every_90_frames_only_with_enemies_and_caps_each_owner_at_two,
     test_multiplayer_owners_have_independent_timers_caps_and_markers,
     test_no_enemy_never_spawns_and_natural_mulliboom_is_untouched,
     test_spawn_is_vanilla_friendly_and_retargets_nearest_valid_enemy,
     test_contact_and_clean_room_use_one_normal_damage_double_radius_explosion,
-    test_real_bomb_explosion_path_preserves_all_native_semantic_arguments,
+    test_bomb_explosion_dispatch_preserves_arguments_without_native_equivalence_claim,
     test_last_enemy_death_triggers_fallback_explosion_without_clean_award,
     test_player_death_and_item_loss_silently_clear_and_restart_full_timer,
     test_room_and_run_lifecycle_clear_units_counts_and_timers_without_exploding,

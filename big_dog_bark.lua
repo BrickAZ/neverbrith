@@ -678,6 +678,61 @@ return function(Neverbirth, context)
         return false
     end
 
+
+    local rerollingUpgrade = false
+
+    local function isDogUpgrade(itemId)
+        return (WIND_CHARGE_ROD_ID > 0 and itemId == WIND_CHARGE_ROD_ID)
+            or (ECHO_SHARD_ID > 0 and itemId == ECHO_SHARD_ID)
+    end
+
+    local function postGetCollectible(_, selected, poolType, decrease, seed)
+        if rerollingUpgrade or not isDogUpgrade(selected) then
+            return nil
+        end
+        -- Shared pool: read current active slots, with no permanent unlock flag.
+        for _, player in ipairs(getPlayers()) do
+            if hasBigDogActive(player) then return nil end
+        end
+
+        local fallback = (CollectibleType and CollectibleType.COLLECTIBLE_BREAKFAST) or 25
+        local rejected = {}
+        if decrease then rejected[selected] = true end
+        local itemPool
+        rerollingUpgrade = true
+        local ok, replacement = pcall(function()
+            itemPool = Game():GetItemPool()
+            -- Preserve the requested pool (including native Chaos handling)
+            -- and depletion. Retry seeds never consume the global RNG stream.
+            local retrySeed = math.floor(tonumber(seed) or 0) % 2147483647
+            for attempt = 1, 32 do
+                retrySeed = retrySeed % 2147483646 + 1
+                local candidate = itemPool:GetCollectible(poolType, decrease, retrySeed)
+                if not isDogUpgrade(candidate) then return candidate end
+                if decrease then rejected[candidate] = true end
+            end
+            return fallback
+        end)
+        rerollingUpgrade = false
+
+        -- These upgrades have one-draw depletion (weight/decreaseBy = 1).
+        -- Restore rejected decreasing draws only, after finding the reward;
+        -- otherwise they could run out before anyone obtains the dog.
+        -- Allowed draws and nondecreasing previews must never be reset.
+        -- ResetCollectible is supported by the required REPENTOGON 1.0.12a.
+        if itemPool then
+            for itemId in pairs(rejected) do
+                local restored, err = pcall(itemPool.ResetCollectible, itemPool, itemId)
+                if not restored then debugLog("upgrade pool restore failed: " .. tostring(err)) end
+            end
+        end
+        if not ok then
+            debugLog("upgrade pool draw failed: " .. tostring(replacement))
+            return fallback
+        end
+        return tonumber(replacement) or fallback
+    end
+
     local function removeEntity(entity)
         if entityExists(entity) and type(entity.Remove) == "function" then
             pcall(entity.Remove, entity)
@@ -842,6 +897,7 @@ return function(Neverbirth, context)
     end
 
     local function launch(player, direction, options)
+        if Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.OwnsAttack(player) then return nil end
         options = options or {}
         local state = getPlayerRuntime(player, true)
         local record = getPlayerRecord(player)
@@ -2376,6 +2432,7 @@ return function(Neverbirth, context)
     end
     local function useItem(_, itemId, rng, player, useFlags, activeSlot, customVarData)
         local result = { Discharge = false, Remove = false, ShowAnim = false }
+        if player and Neverbirth.AvadaKedavra and Neverbirth.AvadaKedavra.OwnsAttack(player) then return result end
         if tonumber(itemId) ~= BIG_DOG_BARK_ID or not player then
             return result
         end
@@ -2700,6 +2757,7 @@ return function(Neverbirth, context)
     end
 
     local Callbacks = {
+        PostGetCollectible = postGetCollectible,
         UseItem = useItem,
         PlayerUpdate = postPlayerUpdate,
         PostPlayerUpdate = postPlayerUpdate,
@@ -2768,6 +2826,9 @@ return function(Neverbirth, context)
     end
 
     if ModCallbacks then
+        if ModCallbacks.MC_POST_GET_COLLECTIBLE then
+            Neverbirth:AddCallback(ModCallbacks.MC_POST_GET_COLLECTIBLE, postGetCollectible)
+        end
         if ModCallbacks.MC_USE_ITEM and BIG_DOG_BARK_ID > 0 then
             Neverbirth:AddCallback(ModCallbacks.MC_USE_ITEM, useItem, BIG_DOG_BARK_ID)
         end

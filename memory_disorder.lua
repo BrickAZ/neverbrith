@@ -184,6 +184,16 @@ return function(Neverbirth, context)
         return tostring(initSeed) .. ":" .. tostring(controller)
     end
 
+    local function runtimePlayerKey(player)
+        if not player then return nil end
+        -- Engine calls can wrap the same native player in different Lua userdata.
+        -- Keep pointer identity only in runtime state, never in the save data.
+        if type(GetPtrHash) == "function" then
+            return tostring(GetPtrHash(player)) .. ":" .. tostring(player.InitSeed or 0)
+        end
+        return playerKey(player)
+    end
+
     local function getPlayers()
         if context.GetPlayers then return context.GetPlayers() or {} end
         local result = {}
@@ -703,7 +713,7 @@ return function(Neverbirth, context)
     local function chooseIcon(player)
         local candidates = runtime.iconCandidates or buildIconCandidates()
         if #candidates == 0 then return FALLBACK_ICON_ID end
-        local state = runtime.states[player]
+        local state = runtime.states[runtimePlayerKey(player)]
         local salt = "icon:" .. runtime.roomSerial .. ":" .. (state and state.switchSerial or 0)
         local selected = candidates[randomIndex(#candidates, player, salt)] or FALLBACK_ICON_ID
         if state then state.currentIconId = selected end
@@ -711,7 +721,7 @@ return function(Neverbirth, context)
     end
 
     local function resolveIdentitySwitch(player, profile)
-        local state = runtime.states[player]
+        local state = runtime.states[runtimePlayerKey(player)]
         if not state or not profile then return false end
 
         captureHealthLedger(player, state)
@@ -767,20 +777,22 @@ return function(Neverbirth, context)
         applyHealth(player, state.healthLedger, profileForType(state.originalType))
         local saved = ensureSavedState()
         saved.players[state.key] = nil
-        runtime.states[player] = nil
+        runtime.states[runtimePlayerKey(player)] = nil
         save()
         return true
     end
 
     local function onOwnershipUpdate(player)
         if not player then return false end
-        local state = runtime.states[player]
+        local key = runtimePlayerKey(player)
+        local state = runtime.states[key]
+        if state then state.player = player end
         local held = hasItem(player)
         if held and not state then
             local saved = ensureSavedState()
             local savedPlayer = saved.players[playerKey(player)]
             state = makeState(player, savedPlayer and savedPlayer.active and savedPlayer or nil)
-            runtime.states[player] = state
+            runtime.states[key] = state
             saved.memoryDisorderVoidUnlockedThisRun = true
             persistState(state)
             save()
@@ -811,7 +823,8 @@ return function(Neverbirth, context)
 
     local function beginRoomTransitions(roomKey)
         runtime.roomSerial = runtime.roomSerial + 1
-        for player, state in pairs(runtime.states) do
+        for _, state in pairs(runtime.states) do
+            local player = state.player
             if hasItem(player) then
                 state.transition = {
                     frame = 0,
@@ -827,7 +840,8 @@ return function(Neverbirth, context)
 
     local function advanceFrame()
         local maximumDarkness = 0
-        for player, state in pairs(runtime.states) do
+        for _, state in pairs(runtime.states) do
+            local player = state.player
             if state.transition then
                 state.transition.frame = state.transition.frame + 1
                 local frame = state.transition.frame
@@ -948,19 +962,20 @@ return function(Neverbirth, context)
         local livePlayers = {}
         local stateChanged = false
         for _, player in ipairs(getPlayers()) do
-            livePlayers[player] = true
+            local key = runtimePlayerKey(player)
+            livePlayers[key] = true
             onOwnershipUpdate(player)
-            local state = runtime.states[player]
+            local state = runtime.states[key]
             if state and playerIsDead(player) and state.transition then
                 state.transition = nil
                 persistState(state)
                 stateChanged = true
             end
         end
-        for player, state in pairs(runtime.states) do
-            if not livePlayers[player] or not playerExists(player) then
+        for key, state in pairs(runtime.states) do
+            if not livePlayers[key] or not playerExists(state.player) then
                 persistState(state)
-                runtime.states[player] = nil
+                runtime.states[key] = nil
                 stateChanged = true
             end
         end
@@ -999,7 +1014,8 @@ return function(Neverbirth, context)
     end
 
     local function onPreGameExit()
-        for player, state in pairs(runtime.states) do
+        for _, state in pairs(runtime.states) do
+            local player = state.player
             captureHealthLedger(player, state)
             reconcileTemporaryCopies(player, state)
             updatePermanentSlots(player, state)
@@ -1029,7 +1045,7 @@ return function(Neverbirth, context)
         ChooseIcon = chooseIcon,
         InvalidateIconCache = function() runtime.iconCandidates = nil end,
         TrySpawnVoidPortal = trySpawnVoidPortal,
-        GetRuntimeState = function(player) return runtime.states[player] end,
+        GetRuntimeState = function(player) return runtime.states[runtimePlayerKey(player)] end,
         GetSavedState = ensureSavedState,
         OnGameStarted = onGameStarted,
         OnPreGameExit = onPreGameExit,
@@ -1042,12 +1058,14 @@ return function(Neverbirth, context)
     if ModCallbacks then
         Neverbirth:AddCallback(ModCallbacks.MC_POST_UPDATE, onPostUpdate)
         Neverbirth:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, onNewRoom)
-        Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, onGameStarted)
+        Neverbirth:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function(_, continued) onGameStarted(continued) end)
         Neverbirth:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, onPreGameExit)
         if ModCallbacks.MC_POST_PLAYER_INIT then
             Neverbirth:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player) onOwnershipUpdate(player) end)
         end
-        if ModCallbacks.MC_POST_NPC_DEATH then Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, onNpcDeath) end
+        if ModCallbacks.MC_POST_NPC_DEATH then
+            Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, function(_, npc) onNpcDeath(npc) end)
+        end
     end
 
     return api

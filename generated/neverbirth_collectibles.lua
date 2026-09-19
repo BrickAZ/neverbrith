@@ -57,4 +57,6 @@ return {
     { localId = 54, englishName = "Kamikaze Squad", names = { "Kamikaze Squad", "神风特攻队" } },
     { localId = 55, englishName = "Memory Disorder", names = { "Memory Disorder", "记忆紊乱" } },
     { localId = 56, englishName = "Ring of the Seven Curses", names = { "Ring of the Seven Curses", "七咒之戒" } },
+    { localId = 57, englishName = "Avada Kedavra", names = { "Avada Kedavra", "阿瓦达啃大瓜" } },
+    { localId = 58, englishName = "健康睡眠", names = { "健康睡眠" } },
 }
