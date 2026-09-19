@@ -312,7 +312,14 @@ CheckRelativeLinks $chinesePath $chinese
 $readmePath = Join-Path $Root 'README.md'
 $readme = Get-Content -Raw -LiteralPath $readmePath
 RequireContains $readme '[English compatibility guide](COMPATIBILITY.md)' 'README.md'
-RequireContains $readme '[简体中文兼容指南](COMPATIBILITY.zh-CN.md)' 'README.md'
+$readmeChinesePath = Join-Path $Root 'README.zh-CN.md'
+Require (Test-Path -LiteralPath $readmeChinesePath) 'README.zh-CN.md does not exist'
+$readmeChinese = Get-Content -Raw -LiteralPath $readmeChinesePath
+RequireContains $readmeChinese '[简体中文兼容指南](COMPATIBILITY.zh-CN.md)' 'README.zh-CN.md'
+RequireContains $readme 'English | [简体中文](README.zh-CN.md)' 'README.md'
+RequireContains $readmeChinese '[English](README.md) | 简体中文' 'README.zh-CN.md'
+CheckRelativeLinks $readmePath $readme
+CheckRelativeLinks $readmeChinesePath $readmeChinese
 RequireContains $readme 'The public compatibility scope covers only Fortune Rivalling Heaven Gu Luck thresholds and Dice Set custom dice active items. Memory Disorder has no public compatibility API.' 'README.md'
 
 Write-Host 'compatibility docs tests passed'
