@@ -406,13 +406,13 @@ local function test_xml_registers_requested_items_and_pools()
     local pools = readFile("content/itempools.xml")
     local main = readFile("main.lua")
 
-    assertTruthy(items:find('<active%s+name="Condom".-maxcharges="3".-description="It does not count".-gfx="Condom.png".-quality="0"', 1), "Condom XML should be a 3-charge quality 0 active")
+    assertTruthy(items:find('<active%s+name="Condom".-maxcharges="3".-description="She said it doesn\'t count with one on".-gfx="Condom.png".-quality="0"', 1), "Condom XML should be a 3-charge quality 0 active")
     assertTruthy(items:find('<passive%s+name="Utility Knife".-cache="damage".-description="Painful scars".-gfx="UtilityKnife.png".-quality="2".-tags="offensive summonable"', 1), "Utility Knife XML should be a damage passive with requested tags")
     assertTruthy(pools:find('<Pool Name="oldChest".-<Item Name="Condom" Weight="1"', 1), "Condom should be in oldChest pool")
     assertTruthy(pools:find('<Pool Name="boss".-<Item Name="Utility Knife" Weight="1"', 1), "Utility Knife should be in boss pool")
-    assertTruthy(items:find('<passive%s+name="Crazy Coconut".-cache="damage".-description="King of hollow earth".-gfx="CrazyCoconut.png".-quality="4".-tags="offensive"', 1), "Crazy Coconut XML should be a quality 4 damage-cache passive")
+    assertTruthy(items:find('<passive%s+name="Crazy Coconut".-cache="damage".-description="King of the Hollow Earth".-gfx="CrazyCoconut.png".-quality="4".-tags="offensive"', 1), "Crazy Coconut XML should be a quality 4 damage-cache passive")
     assertTruthy(pools:find('<Pool Name="treasure".-<Item Name="Crazy Coconut" Weight="1"', 1), "Crazy Coconut should be in treasure pool")
-    assertTruthy(main:find('eidDescription = "{{Damage}} Each copy: +3 permanent damage#Afterwards, every pedestal item that does not increase actual damage grants +3 permanent damage per copy"', 1, true),
+    assertTruthy(main:find('eidDescription = "{{Damage}} Each copy grants +3 permanent damage#After that, picking up an item from a pedestal grants another +3 permanent damage per copy if that item does not increase your actual damage"', 1, true),
         "Crazy Coconut English EID should describe per-copy rewards and actual damage comparison")
     assertTruthy(main:find('eidDescription = "{{Damage}} 每个副本永久+3攻击力#之后，从道具底座拿到的每个实际不增加攻击力的道具：每个副本永久+3攻击力"', 1, true),
         "Crazy Coconut Chinese EID should describe per-copy rewards and pedestal scope")

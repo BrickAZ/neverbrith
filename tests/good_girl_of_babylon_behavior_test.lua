@@ -433,7 +433,7 @@ local function test_xml_registers_good_girl_and_pools()
     local pools = readFile("content/itempools.xml")
     local costumes = readFile("content/costumes2.xml")
 
-    assertTruthy(items:find('<passive%s+name="Good Girl of Babylon".-description="Don\'t stain the dress%."', 1), "Good Girl of Babylon should be registered as passive")
+    assertTruthy(items:find('<passive%s+name="Good Girl of Babylon".-description="Don\'t stain the dress"', 1), "Good Girl of Babylon should be registered as passive")
     assertTruthy(pools:find('<Pool Name="angel".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in angel pool")
     assertTruthy(pools:find('<Pool Name="library".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in library pool")
     assertTruthy(pools:find('<Pool Name="curse".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in curse pool")

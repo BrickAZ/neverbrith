@@ -361,7 +361,7 @@ local function test_xml_and_pool_registration()
     local names = {
         { "Protein Strip", "高蛋白肉条", "protein_strip.png", "damage", "39" },
         { "Energy Kibble", "活力狗饼干", "energy_kibble.png", "firedelay", "40" },
-        { "Lean Can", "轻盈低脂罐头", "lean_can.png", "speed", "41" },
+        { "Lean Can", "轻盈低脂罐头", "lean_can.png", "speed", "41", "Low-Fat Chow" },
         { "DHA Fish Oil", "DHA 鱼油", "dha_fish_oil.png", "range", "42" },
         { "Dental Chew", "护齿磨牙骨", "dental_chew.png", nil, "43" },
         { "Lucky Liver Bites", "幸运肝粒", "lucky_liver_bites.png", "luck", "44" },
@@ -370,7 +370,8 @@ local function test_xml_and_pool_registration()
     for _, file in ipairs({ "content/items.xml", "content/items.en_us.xml", "content/items.zh_cn.xml" }) do
         local text = readFile(file)
         for _, spec in ipairs(names) do
-            local name = file:find("zh_cn", 1, true) and spec[2] or spec[1]
+            local name = file:find("zh_cn", 1, true) and spec[2]
+                or (file:find("en_us", 1, true) and spec[6] or spec[1])
             local escaped = name:gsub("([^%w])", "%%%1")
             local block = text:match('<passive%s+name="' .. escaped .. '".-/>')
             assertTruthy(block, file .. " missing " .. name)
@@ -385,7 +386,8 @@ local function test_xml_and_pool_registration()
     for _, file in ipairs({ "content/itempools.xml", "content/itempools.en_us.xml", "content/itempools.zh_cn.xml" }) do
         local text = readFile(file)
         for _, spec in ipairs(names) do
-            local name = file:find("zh_cn", 1, true) and spec[2] or spec[1]
+            local name = file:find("zh_cn", 1, true) and spec[2]
+                or (file:find("en_us", 1, true) and spec[6] or spec[1])
             local escaped = name:gsub("([^%w])", "%%%1")
             local count = 0
             for _ in text:gmatch('<Item Name="' .. escaped .. '" Weight="0%.1" DecreaseBy="1" RemoveOn="0%.1"/>') do count = count + 1 end

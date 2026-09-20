@@ -47,7 +47,7 @@ local ITEM_NAME_CANDIDATES = {
     EmptyCradle = { "Empty Cradle", "空摇篮" },
     BloodSkullGu = { "Blood Skull Gu", "血颅蛊" },
     BossOrder = { "Boss's Order", "老大的指令" },
-    BetweenDeathAndLife = { "Between Death and Life", "生死一念间" },
+    BetweenDeathAndLife = { "Between Death and Life", "Between Life and Death", "生死一念间" },
     CoinSewnSword = { "Coin-Sewn Sword", "铜钱剑" },
     CoinFacedMask = { "Coin-Faced Mask", "铜钱面具" },
     BlackTaisui = { "Black Taisui", "黑太岁" },
@@ -58,7 +58,7 @@ local ITEM_NAME_CANDIDATES = {
     StrongLaxative = { "Strong Laxative", "强力泻药" },
     TowerOfBabel = { "Tower of Babel", "通天塔" },
     TheMoonIsBeautiful = { "The Moon Is Beautiful", "月色真美" },
-    Needletick = { "Needletick", "虚空针尖" },
+    Needletick = { "Needletick", "Void Needle", "虚空针尖" },
     CrazyCoconut = { "Crazy Coconut", "疯狂的椰子" },
     FortuneRivallingHeavenGu = { "Fortune Rivalling Heaven Gu", "鸿运齐天蛊" },
     BurnAwayResentment = { "Burn Away the Resentment", "焚尽郁结" },
@@ -74,7 +74,7 @@ local ITEM_NAME_CANDIDATES = {
     Everchanging = { "Everchanging", "千变万化" },
     ProteinStrip = { "Protein Strip", "高蛋白肉条" },
     EnergyKibble = { "Energy Kibble", "活力狗饼干" },
-    LeanCan = { "Lean Can", "轻盈低脂罐头" },
+    LeanCan = { "Lean Can", "Low-Fat Chow", "轻盈低脂罐头" },
     DHAFishOil = { "DHA Fish Oil", "DHA 鱼油" },
     DentalChew = { "Dental Chew", "护齿磨牙骨" },
     LuckyLiverBites = { "Lucky Liver Bites", "幸运肝粒" },
@@ -84,14 +84,14 @@ local ITEM_NAME_CANDIDATES = {
     BigDogBark = { "Big Dog Bark", "大狗叫" },
     WindChargeRod = { "Wind Charge Rod", "蓄风棒" },
     EchoShard = { "Echo Shard", "回响碎片" },
-    ReviveMyLove = { "Revive My Love", "复活吧，我的爱人！" },
+    ReviveMyLove = { "Revive My Love", "Arise, My Love!", "复活吧，我的爱人！" },
     NightOfTheCowards = { "Night of the Cowards", "胆小鬼之夜" },
     Annihilation = { "Annihilation", "诛" },
     KamikazeSquad = { "Kamikaze Squad", "神风特攻队" },
     MemoryDisorder = { "Memory Disorder", "记忆紊乱" },
     RingOfSevenCurses = { "Ring of the Seven Curses", "七咒之戒" },
     AvadaKedavra = { "Avada Kedavra", "阿瓦达啃大瓜" },
-    HealthySleep = { "健康睡眠" }, -- English display text remains TBD.
+    HealthySleep = { "Healthy Sleep", "健康睡眠" },
     DS4 = { "ds4" },
 }
 
@@ -292,6 +292,10 @@ local bloodSkullGuBacklashDepth = 0
 
 local EID_DESCRIPTIONS = {
     [Items.HealthySleep] = {
+        en_us = {
+            name = "Healthy Sleep",
+            eidDescription = "Spawns a bed in the starting room once per floor#A full night's sleep takes 8 hours of real time; progress stops while paused or out of the game#Hold a gameplay input for 15 frames to speed up sleep#Hold different inputs together for a greater speedup, with diminishing returns#While asleep, inputs only help you wake up sooner#Finishing sleep fully restores red hearts, then grants 3 soul hearts",
+        },
         zh_cn = {
             name = "健康睡眠",
             eidDescription = "每层初始房间生成一张原版床，每层仅一次#睡眠进度需要现实时间8小时，暂停和退出时停止计时#持续按住游戏操作15帧后加速；不同操作可叠加，遵循平方根递减收益#睡眠中操作仅用于催醒#睡满后先补满红心，再获得3颗魂心",
@@ -300,7 +304,7 @@ local EID_DESCRIPTIONS = {
     [Items.RingOfSevenCurses] = {
         en_us = {
             name = "Ring of the Seven Curses",
-            eidDescription = "Permanently binds itself to your primary active slot for this run#Forces Darkness, Lost, Unknown, and Maze; blocks trinkets and flight#Cannot use beds, except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Enemy health and damage taken are doubled#Maximum: 6 hearts, 2 keys, 1 bomb, and 20 coins#Every 2 rooms, charges the retained character-native secondary active by 1#Quality 4 and modded items stay uncollectible; a separate legal item appears beside them#Rerolling the original pedestal checks its new item again; pre-ring active drops are excluded#Trade items add a broken heart",
+            eidDescription = "Permanently occupies your primary active slot for the rest of the run#Forces the Curses of Darkness, the Lost, the Unknown, and the Maze#Disables trinkets and flight; prevents sleeping in beds except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Doubles enemy health and the damage you take#Caps health at 6 hearts, keys at 2, bombs at 1, and coins at 20#Every 2 rooms, adds 1 charge to your character's built-in secondary active, if retained#Quality 4 and modded items cannot be picked up; an item you can pick up spawns beside each one#Rerolling a blocked item checks it again; active items dropped when equipping the ring do not grant replacements#Taking an item that costs hearts also adds 1 broken heart",
         },
         zh_cn = {
             name = "七咒之戒",
@@ -310,7 +314,7 @@ local EID_DESCRIPTIONS = {
     [Items.MemoryDisorder] = {
         en_us = {
             name = "Memory Disorder",
-            eidDescription = "Starting next room, every room changes you into a random unlocked identity#Temporary starting components follow that identity; your normal build is preserved#Losing the item restores your original identity#Once picked up this run, valid finale nodes always offer a Void portal",
+            eidDescription = "Starting with the next room, entering a room turns you into a random unlocked character#Temporarily grants that character's starting items and abilities while preserving your existing build#Losing this item restores your original character#Once picked up, guarantees a Void portal after eligible endgame encounters for the rest of the run: Boss Rush, Hush, Mega Satan, and the final Greed Mode boss room",
         },
         zh_cn = {
             name = "记忆紊乱",
@@ -320,7 +324,7 @@ local EID_DESCRIPTIONS = {
     [Items.KamikazeSquad] = {
         en_us = {
             name = "Kamikaze Squad",
-            eidDescription = "While enemies are present, spawns a friendly Mulliboom near you every 3 seconds#Up to 2 per player#They chase the nearest enemy and explode on contact#The explosion deals normal Mulliboom damage with double radius#When the room is cleared, remaining squad members immediately explode",
+            eidDescription = "While enemies remain, spawns a friendly Mulliboom near you every 3 seconds#Up to 2 per player at a time#They chase the nearest enemy and explode on contact#Explosions deal normal Mulliboom damage with twice the radius#Clearing the room makes all remaining squad members explode",
         },
         zh_cn = {
             name = "神风特攻队",
@@ -330,7 +334,7 @@ local EID_DESCRIPTIONS = {
     [Items.Annihilation] = {
         en_us = {
             name = "Annihilation",
-            eidDescription = "For 5 seconds, emit an aura that deals 40% of your current damage every 4 frames#Your tears are replaced by radial shockwaves that deal 100% of your current damage#{{Range}} Range x0.45#{{Tears}} Fire rate x0.60#Enemy deaths extend the effect by 0.3 seconds#{{Collectible356}} Car Battery: while active, each hit charges your primary and secondary active items by 1",
+            eidDescription = "For 5 seconds, emit a damaging aura and replace your tears with radial shockwaves#The aura deals 40% of your current damage every 4 frames#Each shockwave deals 100% of your current damage#{{Range}} Range x0.45#{{Tears}} Fire rate x0.60#Each enemy death extends the effect by 0.3 seconds#{{Collectible356}} Car Battery: each hit during the effect adds 1 charge to both your primary and secondary active items",
         },
         zh_cn = {
             name = "诛",
@@ -340,7 +344,7 @@ local EID_DESCRIPTIONS = {
     [Items.NightOfTheCowards] = {
         en_us = {
             name = "Night of the Cowards",
-            eidDescription = "Grants {{Collectible20}} Transcendence#Normal enemies become Hosts, Red Hosts, or Hard Hosts#All enemies emit a short fear aura#Entering an aura shows {{Fear}} Fear and prevents shooting",
+            eidDescription = "Grants {{Collectible20}} Transcendence#Turns normal enemies into Hosts, Red Hosts, or Hard Hosts#All enemies emit a small fear aura#You cannot shoot while inside an aura; {{Fear}} Fear appears above you",
         },
         zh_cn = {
             name = "胆小鬼之夜",
@@ -349,8 +353,8 @@ local EID_DESCRIPTIONS = {
     },
     [Items.ReviveMyLove] = {
         en_us = {
-            name = "Revive My Love",
-            eidDescription = "When no other revival is pending, your first true death this run plays out fully#After the death and revival animations, revive in the current room with {{Heart}} 1 full red heart and brief invincibility#Consumes 1 copy; other revival sources are preserved",
+            name = "Arise, My Love!",
+            eidDescription = "If no other revival is waiting to trigger, your first death this run plays its full animation#After the death and revival animations, revives you in the same room with {{Heart}} 1 full red heart and brief invincibility#Consumes 1 copy without removing your other revival items",
         },
         zh_cn = {
             name = "复活吧，我的爱人！",
@@ -360,7 +364,7 @@ local EID_DESCRIPTIONS = {
     [Items.BigDogBark] = {
         en_us = {
             name = "Big Dog Bark",
-            eidDescription = "Hold the active button until fully charged, then release to send the dog dashing#Releasing early cancels the attack#Charge time scales with fire rate#Dash damage: 5 + 5% of the enemy's max HP + 20% of your damage#After picking up 4 food items this run, the dog autonomously chews enemies for 10% max HP",
+            eidDescription = "Hold the active item button until fully charged, then release to send the dog dashing in your movement direction#While standing still, uses your last movement direction#Releasing before full charge cancels the attack#Higher fire rate shortens the charge time#Dash damage: 5 + 5% of the enemy's max HP + 20% of your damage#After you pick up 4 food items this run, the dog also chews enemies automatically for 10% of their max HP",
         },
         zh_cn = {
             name = "大狗叫",
@@ -368,17 +372,17 @@ local EID_DESCRIPTIONS = {
         },
     },
     [Items.WindChargeRod] = {
-        en_us = { name = "Wind Charge Rod", eidDescription = "Big Dog Bark fires instantly in the opposite movement direction#Removes its charge time" },
+        en_us = { name = "Wind Charge Rod", eidDescription = "Big Dog Bark no longer needs to charge#Press the active item button to send the dog dashing opposite your movement direction#While standing still, uses the opposite of your last movement direction" },
         zh_cn = { name = "蓄风棒", eidDescription = "大狗叫无需蓄力，按下即沿移动方向反向发射" },
     },
     [Items.EchoShard] = {
-        en_us = { name = "Echo Shard", eidDescription = "Big Dog Bark's dash and echo leave polluted creep that slows enemies and deals 1% of your damage every frame#After the dash ends, an echo retraces its path and deals 50% damage" },
+        en_us = { name = "Echo Shard", eidDescription = "Big Dog Bark's dash and echo leave creep that slows enemies and deals 1% of your damage every frame#After the dash, an echo retraces its path and deals 50% of the original dash's damage" },
         zh_cn = { name = "回响碎片", eidDescription = "大狗本体冲刺与回响都会留下减速水迹，每帧造成攻击力1%伤害#冲刺结束后回响重走原路径，并造成冲刺伤害的50%" },
     },
     [Items.AvadaKedavra] = {
         en_us = {
             name = "Avada Kedavra",
-            eidDescription = "Replaces your weapon with Anti-Gravity Brimstone#While enemies remain, hold fire to charge for 1 second, then release to cast#Multiplies your damage stat by 5; tears do not change the charge time#Keep holding to retain full charge and change aim; releasing early cancels#If a completed cast kills no enemy directly, you die and cannot revive from that death#In co-op, only the caster dies",
+            eidDescription = "Replaces your weapon with Anti-Gravity Brimstone#While enemies remain, hold fire for 1 second, then release to cast#{{Damage}} Damage x5#Fire rate does not affect charge time#At full charge, keep holding to wait or adjust your aim; releasing early cancels the cast#{{Warning}} If a completed cast directly kills no enemies, you die and cannot revive from that death#In co-op, only the caster dies",
         },
         zh_cn = {
             name = "阿瓦达啃大瓜",
@@ -388,7 +392,7 @@ local EID_DESCRIPTIONS = {
     [Items.YinsCurse] = {
         en_us = {
             name = "Yin's Curse",
-            eidDescription = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If Black Candle was held when this item was picked up, Ipecac instead appears beside it#Existing explosion immunity currently remains active; {{Collectible260}} Black Candle itself does not grant it",
+            eidDescription = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If you held {{Collectible260}} Black Candle when you picked up Yin's Curse, Ipecac spawns beside that item instead#Existing explosion immunity still works; Black Candle does not grant explosion immunity",
         },
         zh_cn = {
             name = "阴的诅咒",
@@ -398,7 +402,7 @@ local EID_DESCRIPTIONS = {
     [Items.ACEAntiCheatSystem] = {
         en_us = {
             name = "ACE Anti-Cheat System",
-            eidDescription = "Damage taken is doubled#Killing a normal enemy in one hit causes severe room slowdown and 3 FPS-style stuttering for 5 seconds#Killing 3 normal enemies in one hit each in the same room kills the whole team",
+            eidDescription = "Doubles the damage you take#Killing a normal enemy in one hit causes severe room slowdown and 3 FPS-style stuttering for 5 seconds#{{Warning}} Killing 3 normal enemies in one hit each in the same room kills the entire team",
         },
         zh_cn = {
             name = "ACE 反作弊系统",
@@ -406,37 +410,37 @@ local EID_DESCRIPTIONS = {
         },
     },
     [Items.ProteinStrip] = {
-        en_us = { name = "Protein Strip", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Damage}} +0.15 damage" },
+        en_us = { name = "Protein Strip", eidDescription = "{{Heart}} +1 heart container#Fully restores red hearts#{{Damage}} +0.15 damage" },
         zh_cn = { name = "高蛋白肉条", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Damage}} +0.15攻击" },
     },
     [Items.EnergyKibble] = {
-        en_us = { name = "Energy Kibble", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Tears}} +0.15 fire rate" },
+        en_us = { name = "Energy Kibble", eidDescription = "{{Heart}} +1 heart container#Fully restores red hearts#{{Tears}} +0.15 fire rate" },
         zh_cn = { name = "活力狗饼干", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Tears}} +0.15射速" },
     },
     [Items.LeanCan] = {
-        en_us = { name = "Lean Can", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Speed}} +0.10 speed" },
+        en_us = { name = "Low-Fat Chow", eidDescription = "{{Heart}} +1 heart container#Fully restores red hearts#{{Speed}} +0.10 speed" },
         zh_cn = { name = "轻盈低脂罐头", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Speed}} +0.10移速" },
     },
     [Items.DHAFishOil] = {
-        en_us = { name = "DHA Fish Oil", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Range}} +0.40 range" },
+        en_us = { name = "DHA Fish Oil", eidDescription = "{{Heart}} +1 heart container#Fully restores red hearts#{{Range}} +0.40 range" },
         zh_cn = { name = "DHA 鱼油", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Range}} +0.40射程" },
     },
     [Items.DentalChew] = {
-        en_us = { name = "Dental Chew", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#Your tears push normal movable enemies in their direction of travel#Push strength: 1.25 per copy; maximum enemy speed: 4.5; 8-frame cooldown per enemy and player" },
+        en_us = { name = "Dental Chew", eidDescription = "{{Heart}} +1 heart container#Fully restores red hearts#Your tears push normal, movable enemies in the tear's direction#Each copy adds 1.25 push strength, up to an enemy speed of 4.5#Each player can push the same enemy once every 8 frames" },
         zh_cn = { name = "护齿磨牙骨", eidDescription = "{{Heart}} +1红心上限并补满所有红心#自身泪弹会沿飞行方向轻推普通可移动敌人#每份推力1.25；速度上限4.5；同一敌人与玩家冷却8帧" },
     },
     [Items.LuckyLiverBites] = {
-        en_us = { name = "Lucky Liver Bites", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{Luck}} +0.25 luck" },
+        en_us = { name = "Lucky Liver Bites", eidDescription = "{{Heart}} +1 heart container#Fully restores red hearts#{{Luck}} +0.25 luck" },
         zh_cn = { name = "幸运肝粒", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{Luck}} +0.25幸运" },
     },
     [Items.GoatMilkPudding] = {
-        en_us = { name = "Goat Milk Pudding", eidDescription = "{{Heart}} +1 heart container#Fully restores red health#{{SoulHeart}} +0.5 soul heart" },
+        en_us = { name = "Goat Milk Pudding", eidDescription = "{{Heart}} +1 heart container#Fully restores red hearts#{{SoulHeart}} +0.5 soul heart" },
         zh_cn = { name = "羊奶布丁", eidDescription = "{{Heart}} +1红心上限并补满所有红心#{{SoulHeart}} +0.5魂心" },
     },
     [Items.Everchanging] = {
         en_us = {
             name = "Everchanging",
-            eidDescription = "Gain a random appearance for the run that stays visible over ordinary costumes#Additional copies reroll the appearance when possible#Unsupported characters keep their normal appearance",
+            eidDescription = "Gives you a random appearance for the run that takes priority over ordinary costumes#Additional copies choose a different appearance when possible#Unsupported characters keep their normal appearance",
         },
         zh_cn = {
             name = "千变万化",
@@ -446,7 +450,7 @@ local EID_DESCRIPTIONS = {
     [Items.HouseVsElephant] = {
         en_us = {
             name = "House VS Elephant",
-            eidDescription = "One-use, zero-charge active item#Enter a paged room containing every passive or familiar item seen on a pedestal this run that no player currently holds#If the same item was seen on multiple pedestals, each one appears separately#The whole team may take 3 items total; the third item returns the team automatically#Use the previous, return, and next controls to browse or leave early#Fewer than 3 candidates are filled with {{Collectible25}} Milk",
+            eidDescription = "Single-use active item; no charge required#Enter a gallery of passive and familiar items seen on pedestals this run that nobody on the team currently holds#Separate pedestals of the same item appear as separate choices#The team may take 3 items in total; taking the third returns everyone automatically#Use the previous page, next page, and return controls to browse or leave early#If fewer than 3 choices are available, fills the remaining slots with {{Collectible25}} Breakfast",
         },
         zh_cn = {
             name = "再契象",
@@ -456,7 +460,7 @@ local EID_DESCRIPTIONS = {
     [Items.CertificateOfNeverbirth] = {
         en_us = {
             name = "Certificate of Neverbirth",
-            eidDescription = "Reusable debug active item with no charge#Enter a paged gallery containing every collectible registered by neverbrith#Take any number of items; changing pages rebuilds that page completely#Only the return control leaves the gallery",
+            eidDescription = "Reusable debug active item; no charge required#Enter a gallery of all collectibles registered by neverbrith#Take as many items as you like; switching pages resets the items on that page#Use the return control to leave",
         },
         zh_cn = {
             name = "未生证明",
@@ -466,7 +470,7 @@ local EID_DESCRIPTIONS = {
     [Items.LittleLeatherShoes] = {
         en_us = {
             name = "Little Leather Shoes",
-            eidDescription = "Normal enemies may return after death: 33%, then 22%, then 11%#Clearing a room grants Traffic equal to the highest death count of any returning enemy#Boss rewards at 6, 8, and 12 Traffic#At 12 Traffic, choose between Exposure and Heat#Traffic is checked and reset each floor",
+            eidDescription = "Normal enemies can return after death: a 33% chance the first time, then 22%, then 11%#Earn Traffic, representing audience attention, when you clear a room#Traffic gained equals the highest death count in a chain of returning enemies in that room#Reach 6, 8, or 12 Traffic to unlock rewards when you clear the floor's boss room#At 12 Traffic, choose between Exposure and Heat#Traffic is settled and reset each floor",
         },
         zh_cn = {
             name = "小皮鞋",
@@ -476,7 +480,7 @@ local EID_DESCRIPTIONS = {
     [Items.TrafficUnboxing] = {
         en_us = {
             name = "Traffic: Unboxing",
-            eidDescription = "On pickup, spawns 1 normal chest after the pickup animation#Not found in item pools",
+            eidDescription = "Spawns 1 normal chest after the pickup animation#Does not appear in item pools",
         },
         zh_cn = {
             name = "流量：开箱",
@@ -486,7 +490,7 @@ local EID_DESCRIPTIONS = {
     [Items.TrafficExposure] = {
         en_us = {
             name = "Traffic: Exposure",
-            eidDescription = "On pickup, spawns 1 collectible from the current room's item pool",
+            eidDescription = "Spawns 1 collectible from the current room's item pool",
         },
         zh_cn = {
             name = "流量：曝光",
@@ -496,7 +500,7 @@ local EID_DESCRIPTIONS = {
     [Items.TrafficHeat] = {
         en_us = {
             name = "Traffic: Heat",
-            eidDescription = "{{Tears}} +0.5 fire rate",
+            eidDescription = "{{Tears}} +0.5 tears per second",
         },
         zh_cn = {
             name = "流量：热度",
@@ -516,7 +520,7 @@ local EID_DESCRIPTIONS = {
     [Items.Wuhu] = {
         en_us = {
             name = "Wuhu!",
-            eidDescription = "{{Speed}} +1 speed#{{Tears}} Max fire rate#{{Damage}} +40 damage#{{Shotspeed}} -1 shot speed",
+            eidDescription = "{{Speed}} +1 speed#{{Tears}} Sets fire rate to 30 tears per second#{{Damage}} +40 damage#{{Shotspeed}} -1 shot speed",
         },
         zh_cn = {
             name = "芜湖！~",
@@ -526,17 +530,17 @@ local EID_DESCRIPTIONS = {
     [Items.Chunyao] = {
         en_us = {
             name = "Aphrodisiac",
-            eidDescription = "1-charge active item#Spend 1 full heart#{{Warning}} Red hearts are spent first#{{Warning}} Cannot kill you#{{Damage}} +0.5 damage#{{Tears}} +0.5 fire rate#Charm effect and homing tears for 3 seconds",
+            eidDescription = "1-charge active item#Take damage with a base cost of half a heart; red hearts are used first#{{Warning}} This damage cannot kill you#For 3 seconds:#{{Damage}} +0.5 damage#{{Tears}} -0.5 tear delay (faster firing)#Charm effect and homing tears",
         },
         zh_cn = {
             name = "春药",
-            eidDescription = "1充能主动道具#使用后扣除1滴完整的血#{{Warning}} 优先扣红心#{{Warning}} 不致死#{{Damage}} +0.5攻击力#{{Tears}} +0.5射速#角色进入魅惑状态#眼泪获得追踪效果#持续3秒",
+            eidDescription = "1充能主动道具#使用后受到基础半颗心伤害#{{Warning}} 优先扣红心#{{Warning}} 不致死#{{Damage}} +0.5攻击力#{{Tears}} 射击间隔-0.5#角色进入魅惑状态#眼泪获得追踪效果#持续3秒",
         },
     },
     [Items.Musicbox] = {
         en_us = {
             name = "Music Box",
-            eidDescription = "12-charge active item#On use: 20 seconds of invincibility, red tears, and Music Box music#{{Warning}} Die when the timer ends#Reuse does not extend the timer#At 0 charge, a lethal enemy hit removes Music Box and triggers it once#While Music Box is active, Plan C does not kill you, but still damages enemies#Only extra lives can continue the run",
+            eidDescription = "12-charge active item#Grants 20 seconds of invincibility, turns your tears red, and plays music#{{Warning}} You die when the timer ends#Using it again does not extend the timer#At 0 charge, a lethal enemy hit consumes Music Box and activates it once#While active, Plan C still damages enemies but does not kill you#You need an extra life to survive the final death",
         },
         zh_cn = {
             name = "八音盒",
@@ -546,7 +550,7 @@ local EID_DESCRIPTIONS = {
     [Items.Angelbox] = {
         en_us = {
             name = "Angel Box",
-            eidDescription = "{{Luck}} +3 luck while held#4-charge active item#Each player's first use: each red heart container gives 1 full soul heart#After the first use, excess Soul Hearts are converted into charge; 4 charges to use again#Later uses at full charge attempt to open an Angel Room on the current floor#If no Angel Room was entered this floor, the first one also contains 1 quality-4 Angel item#Heart pickups have a 60% chance to spawn 1 extra full soul heart#While held, converts 50% Devil Deal chance to Angel Room chance",
+            eidDescription = "{{Luck}} +3 luck while held#4-charge active item#Each player's first use spawns 1 full soul heart per red heart container#After that, absorbs only soul hearts you cannot hold; 4 charges are needed per use#Later uses at full charge attempt to open an Angel Room on the current floor#If you have not entered an Angel Room this floor, the first one also contains 1 quality-4 Angel Room item#Heart pickups have a 60% chance to spawn 1 extra full soul heart#While held, converts half of your Devil Deal chance into Angel Room chance",
         },
         zh_cn = {
             name = "天使盒",
@@ -556,7 +560,7 @@ local EID_DESCRIPTIONS = {
     [Items.Devilbox] = {
         en_us = {
             name = "Devil Box",
-            eidDescription = "4-charge active item#Each player's first use: each red heart container gives 1 full black heart#After the first use, excess Black Hearts are converted into charge; 4 charges to use again#Later uses at full charge attempt to open a Devil Room on the current floor#If no Devil Room was entered this floor, the first one also contains 1 quality-3 Devil item#Heart pickups have an 80% chance to spawn 1 extra black heart#While held, converts 50% Angel Room chance to Devil Deal chance",
+            eidDescription = "4-charge active item#Each player's first use spawns 1 full black heart per red heart container#After that, absorbs only black hearts you cannot hold; 4 charges are needed per use#Later uses at full charge attempt to open a Devil Room on the current floor#If you have not entered a Devil Room this floor, the first one also contains 1 quality-3 Devil Room item#Heart pickups have an 80% chance to spawn 1 extra black heart#While held, converts half of your Angel Room chance into Devil Deal chance",
         },
         zh_cn = {
             name = "恶魔盒",
@@ -566,7 +570,7 @@ local EID_DESCRIPTIONS = {
     [Items.UncutCord] = {
         en_us = {
             name = "Uncut Cord",
-            eidDescription = "50% chance to delay incoming damage instead of taking it immediately#Clear 2 rooms without getting hit to take only half of the delayed damage#Getting hit again triggers the full delayed damage immediately",
+            eidDescription = "50% chance to delay incoming damage#Clear 2 enemy rooms without taking another hit to pay only half of the delayed damage, with a minimum of half a heart#Taking another hit makes you pay the full delayed damage immediately",
         },
         zh_cn = {
             name = "未剪断的脐带",
@@ -576,7 +580,7 @@ local EID_DESCRIPTIONS = {
     [Items.ShreddedTarot] = {
         en_us = {
             name = "Shredded Tarot",
-            eidDescription = "{{Luck}} +3 Luck while held#Single-use active item#Removes card pickups in the current room#Every 3 removed cards spawn 1 Treasure Room item#Not consumed if fewer than 3 cards are present#Empty use does not count; disappears after this floor if unused",
+            eidDescription = "{{Luck}} +3 luck while held#Single-use active item#Removes card pickups from the current room#Every 3 cards removed spawn 1 Treasure Room item#Fewer than 3 cards: no effect and no item consumed#Disappears at the end of the floor if unused",
         },
         zh_cn = {
             name = "剪碎的塔罗",
@@ -586,7 +590,7 @@ local EID_DESCRIPTIONS = {
     [Items.BloodSkullGu] = {
         en_us = {
             name = "Blood Skull Gu",
-            eidDescription = "3-charge active item#Sacrifice one familiar item you own#{{Damage}} +1.5 permanent damage#{{Range}} +1 permanent range#Drops 1-2 black hearts#If no familiar item can be sacrificed, take half a red heart of backlash damage instead",
+            eidDescription = "3-charge active item#Sacrifices 1 familiar collectible you own#{{Damage}} +1.5 permanent damage#{{Range}} +1 permanent range#Drops 1-2 black hearts#If you have no familiar collectible to sacrifice, takes half a red heart of damage instead",
         },
         zh_cn = {
             name = "血颅蛊",
@@ -596,7 +600,7 @@ local EID_DESCRIPTIONS = {
     [Items.BossOrder] = {
         en_us = {
             name = "Boss's Order",
-            eidDescription = "3-charge active item#Spawns 1 hostile target#Small enemies come from the current floor#Bosses come from the Boss Rush pool#Small enemies have a 15% chance to become champions after spawning#Killing the target drops cards: 1 for a normal enemy, 2 for a champion, or 3 for a boss",
+            eidDescription = "3-charge active item#Spawns 1 hostile enemy#Normal enemies are drawn from the current floor; bosses are drawn from the Boss Rush pool#Normal enemies have a 15% chance to become champions after spawning#Killing the target drops cards: 1 for a normal enemy, 2 for a champion, or 3 for a boss",
         },
         zh_cn = {
             name = "老大的指令",
@@ -605,8 +609,8 @@ local EID_DESCRIPTIONS = {
     },
     [Items.BetweenDeathAndLife] = {
         en_us = {
-            name = "Between Death and Life",
-            eidDescription = "On pickup, activates Death Trial for the rest of the run:#Enemies become champions whenever possible#Bosses become champions when possible; otherwise, they are empowered#Defeating each floor boss spawns Death Certificate#Once per floor",
+            name = "Between Life and Death",
+            eidDescription = "Picking this up starts a Death Certificate trial for the rest of the run#Enemies become champions whenever possible#Bosses become champions when possible; otherwise, they are strengthened#Defeating a floor boss spawns Death Certificate#This reward can trigger once per floor",
         },
         zh_cn = {
             name = "生死一念间",
@@ -636,17 +640,17 @@ local EID_DESCRIPTIONS = {
     [Items.BlackTaisui] = {
         en_us = {
             name = "Black Taisui",
-            eidDescription = "Gain parasite value from red-heart healing, red heart containers, and red-heart damage#Each red heart container: +4 parasite; red-heart healing: +1 per half heart; red-heart damage: +2 per half heart#Without red heart containers: soul/black healing +1 per full heart; soul/black damage +1 per half heart#0-7: {{Damage}} -0.5, {{Speed}} -0.2, {{Luck}} -3 per copy (damage cannot fall below 1; speed cannot fall below 0.5)#8-15: {{Damage}} -0.5; reveal question-mark item pedestals and suppress Blind, Lost, Unknown, and Wavy Cap side effects#At 16+, all 8-15 effects remain; each copy grants {{Damage}} +1.5 damage, and Meat Lump is created once#At 16+, also blocks one lethal hit per floor, except IV Bag, devil deals, and cursed doors#Multiple copies share parasite value; Meat Lump still appears only once",
+            eidDescription = "Builds up parasite points from healing, heart containers, and damage taken#Each red heart container adds 4 points; each half red heart healed adds 1; each half red heart lost to damage adds 2#With no red heart containers: each full soul or black heart healed adds 1 point; each half heart lost adds 1#0-7 points: {{Damage}} -0.5 damage, {{Speed}} -0.2 speed, and {{Luck}} -3 luck per copy; damage cannot fall below 1 and speed cannot fall below 0.5#8-15 points: {{Damage}} -0.5 damage; reveals hidden pedestal items and suppresses the Curses of the Blind, the Lost, and the Unknown, plus Wavy Cap's side effects#16+ points: keeps the reveal and protection effects, replaces the damage penalty with {{Damage}} +1.5 damage per copy, and spawns Meat Lump once#At 16+ points, also blocks 1 lethal hit per floor, except damage from IV Bag, Devil Deals, and curse room doors#All copies share parasite points; Meat Lump is still granted only once",
         },
         zh_cn = {
             name = "黑太岁",
-            eidDescription = "红心治疗、红心容器和红心伤害会积累寄生值#每个红心容器+4；红心治疗每半心+1；红心伤害每半心+2#无红心容器时：魂心/黑心治疗每整心+1；魂心/黑心伤害每半心+1#0-7：每个黑太岁 {{Damage}} -0.5、{{Speed}} -0.2、{{Luck}} -3（攻击最低1，移速最低0.5）#8-15：{{Damage}} -0.5；揭示问号道具，并压制致盲/迷途/未知和波浪帽副作用#16+：继承二阶段；每个黑太岁 {{Damage}} +1.5；生成1次肉块#三阶段本体每层可挡1次致命伤；不挡献血袋、恶魔交易和诅咒门代价#多个黑太岁共享寄生值；肉块仍只生成一次",
+            eidDescription = "红心治疗、红心容器和红心伤害会积累寄生值#每个红心容器+4；红心治疗每半心+1；红心伤害每半心+2#无红心容器时：魂心/黑心治疗每整心+1；魂心/黑心伤害每半心+1#0-7：每个黑太岁 {{Damage}} -0.5、{{Speed}} -0.2、{{Luck}} -3（攻击最低1，移速最低0.5）#8-15：{{Damage}} -0.5；揭示问号道具，并压制致盲/迷途/未知和波浪帽副作用#16+：保留揭示与压制效果，取消攻击减益；每个黑太岁 {{Damage}} +1.5；生成1次肉块#三阶段本体每层可挡1次致命伤；不挡献血袋、恶魔交易和诅咒门代价#多个黑太岁共享寄生值；肉块仍只生成一次",
         },
     },
     [Items.MeatLump] = {
         en_us = {
             name = "Meat Lump",
-            eidDescription = "Blocks one lethal hit per copy#On trigger, keeps a little health and briefly grants invincibility#HUD +N shows remaining Meat Lump charges#This item does not appear in any item pool",
+            eidDescription = "Each copy blocks 1 lethal hit#Leaves you with a little health and grants brief invincibility#The HUD's +N counter shows how many hits Meat Lump can still block#Does not appear in item pools",
         },
         zh_cn = {
             name = "肉块",
@@ -656,27 +660,27 @@ local EID_DESCRIPTIONS = {
     [Items.CleansedWavyCap] = {
         en_us = {
             name = "Cleansed Wavy Cap",
-            eidDescription = "A Black Taisui-safe Wavy Cap#On use: {{Speed}} -0.03 speed, {{Tears}} +0.75 fire rate#Leaving the room doubles this room's speed loss and reduces its fire-rate gain to 40%#Clearing a room removes the lingering changes from one use",
+            eidDescription = "Wavy Cap purified by Black Taisui#Each use: {{Speed}} -0.03 speed and {{Tears}} -0.75 tear delay (faster firing)#Leaving the room doubles the speed penalty accumulated there and keeps 40% of its tear-delay reduction#Clearing a room removes one use's worth of these lingering effects",
         },
         zh_cn = {
             name = "净化迷幻菇",
-            eidDescription = "被黑太岁净化的迷幻蘑菇#使用后：{{Speed}} -0.03移速，{{Tears}} +0.75射速修正#离开房间时，本房间增减益转化：移速减益x2，射速增益x0.4#清理房间后，移除相当于1次使用的残留增减益",
+            eidDescription = "被黑太岁净化的迷幻蘑菇#使用后：{{Speed}} -0.03移速，{{Tears}} 射击间隔-0.75#离开房间时，本房间增减益转化：移速减益x2，射击间隔减免x0.4#清理房间后，移除相当于1次使用的残留增减益",
         },
     },
     [Items.GoodGirlOfBabylon] = {
         en_us = {
             name = "Good Girl of Babylon",
-            eidDescription = "At full red hearts, become prim and proper:#{{Tears}} +0.6 tears#{{Luck}} +2 luck#Each enemy has a 15% chance to be charmed for 3 seconds#Clearing a room without red-heart damage has a 33% chance to drop 1 Tarot card, half soul heart, or penny#Taking red-heart damage breaks the state:#{{Luck}} -2 luck for the room#Frighten enemies within 120 range for 2 seconds#Gain a 5-second echo: {{Damage}} +1.2, {{Speed}} +0.15",
+            eidDescription = "At full red health, become prim and proper:#{{Tears}} -0.6 tear delay (faster firing)#{{Luck}} +2 luck#Each enemy has a 15% chance to be charmed for 3 seconds#Clearing a room without taking red-heart damage has a 33% chance to drop a Tarot card, half a soul heart, or a penny#Taking red-heart damage breaks your composure:#{{Luck}} -2 luck for the room#Frightens enemies within a radius of 120 for 2 seconds#For 5 seconds: {{Damage}} +1.2 damage and {{Speed}} +0.15 speed",
         },
         zh_cn = {
             name = "巴比伦好女孩",
-            eidDescription = "满红心时进入端正状态：#{{Tears}} +0.6射速#{{Luck}} +2幸运#每个敌人有15%概率被魅惑3秒#无红心伤害清房时，有33%概率掉落1张塔罗牌、半魂心或1枚硬币#受到红心伤害时端正破裂：#{{Luck}} 本房间-2幸运#恐惧120范围内敌人2秒#获得5秒巴比伦回声：{{Damage}} +1.2攻击力，{{Speed}} +0.15移速",
+            eidDescription = "满红心时进入端正状态：#{{Tears}} 射击间隔-0.6#{{Luck}} +2幸运#每个敌人有15%概率被魅惑3秒#无红心伤害清房时，有33%概率掉落1张塔罗牌、半魂心或1枚硬币#受到红心伤害时端正破裂：#{{Luck}} 本房间-2幸运#恐惧120范围内敌人2秒#获得5秒巴比伦回声：{{Damage}} +1.2攻击力，{{Speed}} +0.15移速",
         },
     },
     [Items.DebugController] = {
         en_us = {
             name = "Debug Controller",
-            eidDescription = "Opens a directional debug command menu#Use again to close#Shooting directions select entries instead of firing while open#Runs debug 1 through debug 13",
+            eidDescription = "Opens a directional debug command menu#Use again to close it#While open, shooting directions select commands instead of firing tears#Supports debug commands 1 through 13",
         },
         zh_cn = {
             name = "调试控制器",
@@ -686,7 +690,7 @@ local EID_DESCRIPTIONS = {
     [Items.StrongLaxative] = {
         en_us = {
             name = "Strong Laxative",
-            eidDescription = "All creep is treated as friendly#Leave slippery creep while moving#Slippery creep slows grounded enemies and deals a base 10% of your damage every 10 frames#Aquarius-style synergies: poison, burning, homing and Playdough Cookie effects#Proptosis: 3x creep damage; Ipecac: uses Aquarius damage basis#Coal and acid do not break obstacles or add distance damage; no explosions or Godhead aura#Each copy gives a 5% chance per second to spawn random poop (max 100%)#Up to 15 poops per room",
+            eidDescription = "Treats all creep as friendly#Leaves slippery creep as you move#The creep slows grounded enemies and deals a base 10% of your damage every 10 frames#Supports Aquarius-style poison, burning, homing, and Playdough Cookie effects#Proptosis triples creep damage; Ipecac uses Aquarius's damage calculation#Lump of Coal and Sulfuric Acid add neither obstacle destruction nor distance-based damage; no explosions or Godhead aura#Each copy adds a 5% chance per second to spawn random poop, up to 100%#Spawns up to 15 poops per room",
         },
         zh_cn = {
             name = "强力泻药",
@@ -696,7 +700,7 @@ local EID_DESCRIPTIONS = {
     [Items.TowerOfBabel] = {
         en_us = {
             name = "Tower of Babel",
-            eidDescription = "Newly generated creep disappears immediately#Includes enemy, neutral, and player-created creep",
+            eidDescription = "All newly spawned creep disappears immediately#Affects enemy, neutral, and player-created creep",
         },
         zh_cn = {
             name = "通天塔",
@@ -706,7 +710,7 @@ local EID_DESCRIPTIONS = {
     [Items.TheMoonIsBeautiful] = {
         en_us = {
             name = "The Moon Is Beautiful",
-            eidDescription = "After entering an uncleared room, avoid firing tears for 1 continuous second within the first 2 seconds:#{{Damage}} +1 damage and {{Luck}} +1 luck for the room#Marks all enemies in the room#The first hit by a player on a marked enemy releases a moonlight wave#Moonlight waves deal 30% of your damage#Marked enemies have a 10% chance to drop an extra reward on death#In boss rooms, bosses take 50% more damage from player tears for the room#Once per room",
+            eidDescription = "Within 2 seconds of entering an uncleared room, go 1 full second without firing tears to activate:#{{Damage}} +1 damage and {{Luck}} +1 luck for the room#Marks all enemies in the room#The first player hit on each marked enemy releases a moonlight wave for 30% of your damage#Marked enemies have a 10% chance to drop an extra reward when killed#In boss rooms, bosses take 50% more damage from player tears for the room#Activates once per room",
         },
         zh_cn = {
             name = "月色真美",
@@ -716,17 +720,17 @@ local EID_DESCRIPTIONS = {
     [Items.BurnAwayResentment] = {
         en_us = {
             name = "Burn Away the Resentment",
-            eidDescription = "On first pickup: gain 2 resentment layers#Clearing a hostile room: +1 layer; boss rooms give +2#{{Speed}} -0.04 speed per layer (minimum 0.5), up to 6 layers#At 6 layers, your first direct hit in the next hostile room deals 300% damage to all enemies and burns them for 3 seconds#Taking actual damage from an enemy at 3-6 layers instead deals 50% damage per layer to all enemies#On the next floor, each spent or unspent layer gives {{Damage}} +0.35 damage and {{Tears}} +0.12 tears",
+            eidDescription = "First pickup: gain 2 resentment stacks#Clearing an enemy room adds 1 stack; boss rooms add 2#{{Speed}} -0.04 speed per stack, down to a minimum of 0.5; up to 6 stacks#At 6 stacks, your first direct hit in the next enemy room deals 300% of your damage to all enemies and burns them for 3 seconds#Taking damage from an enemy at 3-6 stacks instead deals 50% of your damage per stack to all enemies and burns them for 3 seconds#On the next floor, each spent or unspent stack grants {{Damage}} +0.35 damage and {{Tears}} -0.12 tear delay (faster firing)",
         },
         zh_cn = {
             name = "焚尽郁结",
-            eidDescription = "首次拾取获得2层郁结#清理敌对房间+1层，头目房总共+2层#{{Speed}} 每层-0.04移速（最低0.5），最多6层#满6层后，下一间敌对房的首次直接命中：全房造成300%角色伤害并燃烧3秒#3-6层受到真实敌方伤害时：每层造成50%角色伤害并燃烧3秒#下一层中，每层已消耗或未消耗的郁结提供 {{Damage}} +0.35攻击力和 {{Tears}} +0.12射速",
+            eidDescription = "首次拾取获得2层郁结#清理敌对房间+1层，头目房总共+2层#{{Speed}} 每层-0.04移速（最低0.5），最多6层#满6层后，下一间敌对房的首次直接命中：全房造成300%角色伤害并燃烧3秒#3-6层受到真实敌方伤害时：每层造成50%角色伤害并燃烧3秒#下一层中，每层已消耗或未消耗的郁结提供 {{Damage}} +0.35攻击力和 {{Tears}} 射击间隔-0.12",
         },
     },
     [Items.Needletick] = {
         en_us = {
-            name = "Needletick",
-            eidDescription = "5% chance at 0 luck; scales linearly to 15% at 10 luck (cap 15%)#Void needle tears instantly kill nearby normal enemies within 80",
+            name = "Void Needle",
+            eidDescription = "Chance to fire a void needle: 5% at 0 luck, rising linearly to 15% at 10 luck; capped at 15%#On impact or when the needle breaks, instantly kills normal enemies within a radius of 80 around that point",
         },
         zh_cn = {
             name = "虚空针尖",
@@ -736,7 +740,7 @@ local EID_DESCRIPTIONS = {
     [Items.CrazyCoconut] = {
         en_us = {
             name = "Crazy Coconut",
-            eidDescription = "{{Damage}} Each copy: +3 permanent damage#Afterwards, every pedestal item that does not increase actual damage grants +3 permanent damage per copy",
+            eidDescription = "{{Damage}} Each copy grants +3 permanent damage#After that, picking up an item from a pedestal grants another +3 permanent damage per copy if that item does not increase your actual damage",
         },
         zh_cn = {
             name = "疯狂的椰子",
@@ -746,7 +750,7 @@ local EID_DESCRIPTIONS = {
     [Items.FortuneRivallingHeavenGu] = {
         en_us = {
             name = "Fortune Rivalling Heaven Gu",
-            eidDescription = "{{Luck}} Raises luck enough to maximize the chance of luck-based items you hold#Room-clear, Boss, chest, beggar, and machine rewards have a 10% chance to pay out twice#1% chance for a collectible pedestal to create a second item from the same pool#Coins have a 5% chance to create a Lucky Penny",
+            eidDescription = "{{Luck}} Raises luck to the highest activation threshold among your supported items and trinkets#Only effects with a registered luck threshold are supported#Eligible room-clear, boss, chest, beggar, and machine rewards have a 10% chance to pay out a second time#Item pedestals have a 1% chance to spawn an extra item from the same pool#Coins have a 5% chance to spawn an extra Lucky Penny",
         },
         zh_cn = {
             name = "鸿运齐天蛊",
@@ -756,7 +760,7 @@ local EID_DESCRIPTIONS = {
     [Items.SterilizationCertificate] = {
         en_us = {
             name = "Sterilization Certificate",
-            eidDescription = "Prevents enemies from creating more enemies#Whenever a summon is prevented, the summoner takes backlash: normal enemies take 10 + 5% max HP; bosses take 3 + 1% max HP#Boss summons are only partially weakened",
+            eidDescription = "Prevents enemies from summoning more enemies#Each blocked summon damages its summoner: normal enemies take 10 + 5% of their max HP; bosses take 3 + 1% of their max HP#Boss summons are only partially suppressed",
         },
         zh_cn = {
             name = "绝育证明",
@@ -766,7 +770,7 @@ local EID_DESCRIPTIONS = {
     [Items.Condom] = {
         en_us = {
             name = "Condom",
-            eidDescription = "3-charge active item#On use, randomly bans up to 2 future baby items#Does not remove items you already own",
+            eidDescription = "3-charge active item#Randomly removes up to 2 baby-tagged collectibles from future item spawns#Does not remove items you already own",
         },
         zh_cn = {
             name = "避孕套",
@@ -786,7 +790,7 @@ local EID_DESCRIPTIONS = {
     [Items.Cleaver] = {
         en_us = {
             name = "Cleaver",
-            eidDescription = "Stranger only#Replaces tears with cleaver swings#Hitting enemy bodies deals 0.5 damage and heavy knockback#Hitting past shadows deals 2x your damage",
+            eidDescription = "Only works for Stranger#Replaces tears with cleaver swings#Hitting an enemy's body deals 0.5 damage and strong knockback#Hitting its past shadow deals 200% of your damage",
         },
         zh_cn = {
             name = "柴刀",
@@ -842,28 +846,28 @@ function Neverbirth:RegisterPickupBannerText(itemId, enName, enSubtitle, zhName,
     }
 end
 
-Neverbirth:RegisterPickupBannerText(Items.EssentialBalm, "Essential Balm", "Handle with care", "风油精", "3岁以下儿童慎用")
+Neverbirth:RegisterPickupBannerText(Items.EssentialBalm, "Essential Balm", "Use with caution under age three", "风油精", "3岁以下儿童慎用")
 Neverbirth:RegisterPickupBannerText(Items.Wuhu, "Wuhu!", "Dark wind, wild flight", "芜湖！~", "黑风吹过呜呼起飞")
 Neverbirth:RegisterPickupBannerText(Items.UncutCord, "Uncut Cord", "Half now, half later", "未剪断的脐带", "一半现在，一半以后")
 Neverbirth:RegisterPickupBannerText(Items.SterilizationCertificate, "Sterilization Certificate", "No more births", "绝育证明", "不许再生")
-Neverbirth:RegisterPickupBannerText(Items.EmptyCradle, "Empty Cradle", "Remembered harm", "空摇篮", "伤痕会回应")
+Neverbirth:RegisterPickupBannerText(Items.EmptyCradle, "Empty Cradle", "Scars remember", "空摇篮", "伤痕会回应")
 Neverbirth:RegisterPickupBannerText(Items.ShreddedTarot, "Shredded Tarot", "Cut the deck", "剪碎的塔罗", "把命运剪碎")
-Neverbirth:RegisterPickupBannerText(Items.BloodSkullGu, "Blood Skull Gu", "Slaughter your kin to purify your aptitude.", "血颅蛊", "杀亲证道，提纯资质。")
-Neverbirth:RegisterPickupBannerText(Items.BossOrder, "Boss's Order", "I wanna catch u!", "老大的指令", "兄弟，想抓杀你")
-Neverbirth:RegisterPickupBannerText(Items.BetweenDeathAndLife, "Between Death and Life", "Every life becomes testimony.", "生死一念间", "众生皆证。")
-Neverbirth:RegisterPickupBannerText(Items.CoinSewnSword, "Coin-Sewn Sword", "Coin and blade share the same edge.", "铜钱剑", "钱是香火，也是剑刃。")
-Neverbirth:RegisterPickupBannerText(Items.CoinFacedMask, "Coin-Faced Mask", "Buy yourself another face.", "铜钱面具", "买一张脸。")
-Neverbirth:RegisterPickupBannerText(Items.BlackTaisui, "Black Taisui", "Feeds on blood and lets you see clearly.", "黑太岁", "以血为食，替你看清世界。")
+Neverbirth:RegisterPickupBannerText(Items.BloodSkullGu, "Blood Skull Gu", "Slaughter your kin. Refine your potential.", "血颅蛊", "杀亲证道，提纯资质。")
+Neverbirth:RegisterPickupBannerText(Items.BossOrder, "Boss's Order", "Buddy, I'm coming for you!", "老大的指令", "兄弟，想抓杀你")
+Neverbirth:RegisterPickupBannerText(Items.BetweenDeathAndLife, "Between Life and Death", "Let every life bear witness", "生死一念间", "众生皆证。")
+Neverbirth:RegisterPickupBannerText(Items.CoinSewnSword, "Coin-Sewn Sword", "An offering and a blade", "铜钱剑", "钱是香火，也是剑刃。")
+Neverbirth:RegisterPickupBannerText(Items.CoinFacedMask, "Coin-Faced Mask", "Buy yourself another face", "铜钱面具", "买一张脸。")
+Neverbirth:RegisterPickupBannerText(Items.BlackTaisui, "Black Taisui", "It feeds on blood. You see the truth.", "黑太岁", "以血为食，替你看清世界。")
 Neverbirth:RegisterPickupBannerText(Items.MeatLump, "Meat Lump", "One more bite", "肉块", "再活一口")
-Neverbirth:RegisterPickupBannerText(Items.CleansedWavyCap, "Cleansed Wavy Cap", "A purified psychedelic mushroom.", "净化迷幻菇", "被净化的迷幻蘑菇。")
-Neverbirth:RegisterPickupBannerText(Items.GoodGirlOfBabylon, "Good Girl of Babylon", "Don't stain the dress.", "巴比伦好女孩", "别弄脏裙子。")
-Neverbirth:RegisterPickupBannerText(Items.Condom, "Condom", "It does not count", "避孕套", "她说戴了不算给")
+Neverbirth:RegisterPickupBannerText(Items.CleansedWavyCap, "Cleansed Wavy Cap", "A trip without the side effects", "净化迷幻菇", "被净化的迷幻蘑菇。")
+Neverbirth:RegisterPickupBannerText(Items.GoodGirlOfBabylon, "Good Girl of Babylon", "Don't stain the dress", "巴比伦好女孩", "别弄脏裙子。")
+Neverbirth:RegisterPickupBannerText(Items.Condom, "Condom", "She said it doesn't count with one on", "避孕套", "她说戴了不算给")
 Neverbirth:RegisterPickupBannerText(Items.DebugController, "Debug Controller", "Debug command menu", "调试控制器", "调试命令菜单")
 Neverbirth:RegisterPickupBannerText(Items.StrongLaxative, "Strong Laxative", "A thousand-mile purge", "强力泻药", "一泻千里")
-Neverbirth:RegisterPickupBannerText(Items.TowerOfBabel, "Tower of Babel", "No more flood.", "通天塔", "不再有洪水。")
-Neverbirth:RegisterPickupBannerText(Items.TheMoonIsBeautiful, "The Moon Is Beautiful", "Say that to me.", "月色真美", "请这样对我说。")
+Neverbirth:RegisterPickupBannerText(Items.TowerOfBabel, "Tower of Babel", "No more floods", "通天塔", "不再有洪水。")
+Neverbirth:RegisterPickupBannerText(Items.TheMoonIsBeautiful, "The Moon Is Beautiful", "Say it to me", "月色真美", "请这样对我说。")
 Neverbirth:RegisterPickupBannerText(Items.BurnAwayResentment, "Burn Away the Resentment", "I've never felt so refreshed.", "焚尽郁结", "我从未如此神清气爽过。")
-Neverbirth:RegisterPickupBannerText(Items.Needletick, "Needletick", "Next time, use a trash can...", "虚空针尖", "下次请吐在垃圾桶里……")
+Neverbirth:RegisterPickupBannerText(Items.Needletick, "Void Needle", "Next time, spit in the trash...", "虚空针尖", "下次请吐在垃圾桶里……")
 Neverbirth:RegisterPickupBannerText(Items.CrazyCoconut, "Crazy Coconut", "King of the Hollow Earth", "疯狂的椰子", "空心地球之王")
 Neverbirth:RegisterPickupBannerText(Items.FortuneRivallingHeavenGu, "Fortune Rivalling Heaven Gu", "The world bends your way.", "鸿运齐天蛊", "天命所归。")
 Neverbirth:RegisterPickupBannerText(Items.UtilityKnife, "Utility Knife", "Painful scars", "美工刀", "苦痛伤痕")
@@ -871,40 +875,35 @@ Neverbirth:RegisterPickupBannerText(Items.Cleaver, "Cleaver", "Tears become clea
 Neverbirth:RegisterPickupBannerText(Items.Chunyao, "Aphrodisiac", "Heat of the moment", "春药", "性奋")
 Neverbirth:RegisterPickupBannerText(Items.Musicbox, "Music Box", "Your life, on a timer", "八音盒", "为你的生命倒计时")
 Neverbirth:RegisterPickupBannerText(Items.Angelbox, "Angel Box", "Full hearts, heavenbound", "天使盒", "盈魂引向天国")
-Neverbirth:RegisterPickupBannerText(Items.Devilbox, "Devil Box", "Black hearts, below", "恶魔盒", "暗血引向深渊")
+Neverbirth:RegisterPickupBannerText(Items.Devilbox, "Devil Box", "Black hearts, hellbound", "恶魔盒", "暗血引向深渊")
 Neverbirth:RegisterPickupBannerText(Items.DS4, "ds4", "", "ds4", "")
 Neverbirth:RegisterPickupBannerText(Items.LittleLeatherShoes, "Little Leather Shoes", "Meowmermermer", "小皮鞋", "咪mermermer")
 Neverbirth:RegisterPickupBannerText(Items.TrafficUnboxing, "Traffic: Unboxing", "A promising debut", "流量：开箱", "初露锋芒")
 Neverbirth:RegisterPickupBannerText(Items.TrafficExposure, "Traffic: Exposure", "More eyes are on you", "流量：曝光", "更多人看见了你")
 Neverbirth:RegisterPickupBannerText(Items.TrafficHeat, "Traffic: Heat", "Are you sure this is what you want?", "流量：热度", "你确定这是你想要的吗？")
 Neverbirth:RegisterPickupBannerText(Items.CertificateOfNeverbirth, "Certificate of Neverbirth", "Enter the Neverbirth gallery", "未生证明", "进入未生陈列室")
-Neverbirth:RegisterPickupBannerText(Items.HouseVsElephant, "House VS Elephant", "Who wants a frantic game of House VS Elephant?", "再契象", "谁不想急头白脸来一把房子VS大象呢？")
+Neverbirth:RegisterPickupBannerText(Items.HouseVsElephant, "House VS Elephant", "Who's up for a frantic round of House VS Elephant?", "再契象", "谁不想急头白脸来一把房子VS大象呢？")
 Neverbirth:RegisterPickupBannerText(Items.Everchanging, "Everchanging", "A different look for this run", "千变万化", "本局换个模样")
 Neverbirth:RegisterPickupBannerText(Items.ProteinStrip, "Protein Strip", "A stronger bite", "高蛋白肉条", "更有力的一口")
 Neverbirth:RegisterPickupBannerText(Items.EnergyKibble, "Energy Kibble", "Stay lively", "活力狗饼干", "活力满满")
-Neverbirth:RegisterPickupBannerText(Items.LeanCan, "Lean Can", "Light on your feet", "轻盈低脂罐头", "身轻步快")
+Neverbirth:RegisterPickupBannerText(Items.LeanCan, "Low-Fat Chow", "Light on your feet", "轻盈低脂罐头", "身轻步快")
 Neverbirth:RegisterPickupBannerText(Items.DHAFishOil, "DHA Fish Oil", "See farther", "DHA 鱼油", "看得更远")
 Neverbirth:RegisterPickupBannerText(Items.DentalChew, "Dental Chew", "Push back", "护齿磨牙骨", "顶回去")
 Neverbirth:RegisterPickupBannerText(Items.LuckyLiverBites, "Lucky Liver Bites", "A lucky snack", "幸运肝粒", "幸运零食")
-Neverbirth:RegisterPickupBannerText(Items.GoatMilkPudding, "Goat Milk Pudding", "Soft and nourishing", "羊奶布丁", "柔软滋养")
+Neverbirth:RegisterPickupBannerText(Items.GoatMilkPudding, "Goat Milk Pudding", "A little comfort", "羊奶布丁", "柔软滋养")
 Neverbirth:RegisterPickupBannerText(Items.ACEAntiCheatSystem, "ACE Anti-Cheat System", "Built on 20+ years of experience", "ACE 反作弊系统", "基于20+年的经验沉淀")
 Neverbirth:RegisterPickupBannerText(Items.YinsCurse, "Yin's Curse", "Darkness suppresses the curse", "阴的诅咒", "唯有黑暗能压制诅咒")
-Neverbirth:RegisterPickupBannerText(Items.BigDogBark, "Big Dog Bark", "Charge up and let the big dog run", "大狗叫", "蓄力，放狗")
-Neverbirth:RegisterPickupBannerText(Items.WindChargeRod, "Wind Charge Rod", "No charge, bark backwards", "蓄风棒", "即刻反向出击")
-Neverbirth:RegisterPickupBannerText(Items.EchoShard, "Echo Shard", "The dash echoes once", "回响碎片", "冲刺后留下回响")
-Neverbirth:RegisterPickupBannerText(Items.ReviveMyLove, "Revive My Love", "Please open your eyes again.", "复活吧，我的爱人！", "请再次睁开眼睛。")
+Neverbirth:RegisterPickupBannerText(Items.BigDogBark, "Big Dog Bark", "Charge up. Let the dog loose.", "大狗叫", "蓄力，放狗")
+Neverbirth:RegisterPickupBannerText(Items.WindChargeRod, "Wind Charge Rod", "No windup. Strike backwards.", "蓄风棒", "即刻反向出击")
+Neverbirth:RegisterPickupBannerText(Items.EchoShard, "Echo Shard", "The dash comes back to haunt them", "回响碎片", "冲刺后留下回响")
+Neverbirth:RegisterPickupBannerText(Items.ReviveMyLove, "Arise, My Love!", "Please open your eyes again", "复活吧，我的爱人！", "请再次睁开眼睛。")
 Neverbirth:RegisterPickupBannerText(Items.NightOfTheCowards, "Night of the Cowards", "Everybody is a Scaredy-Shroom.", "胆小鬼之夜", "人人都是胆小菇")
-Neverbirth:RegisterPickupBannerText(Items.Annihilation, "Annihilation", "Feel My Pain!", "诛", "感受！我的痛苦！")
-Neverbirth:RegisterPickupBannerText(Items.KamikazeSquad, "Kamikaze Squad", "For victory! Sacrifice!", "神风特攻队", "为胜利！献身！")
+Neverbirth:RegisterPickupBannerText(Items.Annihilation, "Annihilation", "Feel my pain!", "诛", "感受！我的痛苦！")
+Neverbirth:RegisterPickupBannerText(Items.KamikazeSquad, "Kamikaze Squad", "For victory! Give it all!", "神风特攻队", "为胜利！献身！")
 Neverbirth:RegisterPickupBannerText(Items.MemoryDisorder, "Memory Disorder", "Who am I?", "记忆紊乱", "我是谁？")
 Neverbirth:RegisterPickupBannerText(Items.RingOfSevenCurses, "Ring of the Seven Curses", "This world isn't worth it.", "七咒之戒", "人间不值得")
 Neverbirth:RegisterPickupBannerText(Items.AvadaKedavra, "Avada Kedavra", "", "阿瓦达啃大瓜", "")
--- Only approved Chinese copy is available; leave English banner/EID unregistered.
-if IsValidItemId(Items.HealthySleep) then
-    Neverbirth.PickupBannerTexts[Items.HealthySleep] = {
-        zh_cn = { name = "健康睡眠", subtitle = "睡够八小时" },
-    }
-end
+Neverbirth:RegisterPickupBannerText(Items.HealthySleep, "Healthy Sleep", "Get your eight hours", "健康睡眠", "睡够八小时")
 
 local eidDescriptionsRegistered = false
 

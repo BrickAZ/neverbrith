@@ -8,7 +8,7 @@
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Protein Strip" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Energy Kibble" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Lean Can" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Low-Fat Chow" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="DHA Fish Oil" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Dental Chew" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Lucky Liver Bites" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -19,9 +19,9 @@
         <Item Name="Aphrodisiac" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Angel Box" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Between Life and Death" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Needletick" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Void Needle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Burn Away the Resentment" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Little Leather Shoes" Weight="0.1" DecreaseBy="1" RemoveOn="1"/>
@@ -47,7 +47,7 @@
         <Item Name="Yin's Curse" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Wind Charge Rod" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Echo Shard" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Revive My Love" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Arise, My Love!" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Memory Disorder" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Avada Kedavra" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -69,7 +69,7 @@
         <Item Name="Kamikaze Squad" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Protein Strip" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Energy Kibble" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Lean Can" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Low-Fat Chow" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="DHA Fish Oil" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Dental Chew" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Lucky Liver Bites" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -80,7 +80,7 @@
         <Item Name="Everchanging" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="ACE Anti-Cheat System" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Yin's Curse" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Revive My Love" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Arise, My Love!" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Memory Disorder" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Avada Kedavra" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -95,7 +95,7 @@
         <Item Name="Music Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Angel Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Devil Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Between Life and Death" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Black Taisui" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="House VS Elephant" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -105,7 +105,7 @@
         <Item Name="Devil Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Between Death and Life" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Between Life and Death" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Sewn Sword" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Black Taisui" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>

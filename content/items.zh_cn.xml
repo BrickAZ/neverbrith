@@ -357,7 +357,7 @@
   <active name="七咒之戒" cache="damage firedelay shotspeed luck flying" maxcharges="0" description="人间不值得" gfx="RingOfTheSevenCurses.png" id="56" quality="0" />
   <!-- 被动原版武器覆盖；以 0.1 权重加入宝箱房和商店池。 -->
   <passive name="阿瓦达啃大瓜" description="" gfx="AvadaKedavraMelon.png" id="57" quality="0" cache="damage firedelay tearflag" tags="offensive noeden nochallenge" />
-  <!-- 健康睡眠：英文显示文本、道具池和标签保持 TBD。 -->
+  <!-- 健康睡眠：中英文显示文本已补齐，道具池和标签保持原有状态。 -->
   <passive name="健康睡眠" description="睡够八小时" gfx="healthy_sleep.png" id="58" quality="0" />
   <!-- 隐藏技术饰品：仅用于在本局契约生效时占据饰品 HUD 栏位。 -->
   <trinket name="Seven Curses Slot Seal" description="" gfx="447586_trinket.png" id="1" hidden="true" />
