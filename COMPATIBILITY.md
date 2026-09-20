@@ -4,7 +4,7 @@
 
 | Neverbirth item | What another mod can add | Status | Entry points |
 | --- | --- | --- | --- |
-| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver` |
+| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver`, `InvalidateFortuneLuck` |
 | Dice Set | Custom dice-themed active items | Provisional and unversioned | `RegisterDiceItem` |
 
 Memory Disorder does not expose a public compatibility API in the published version.
@@ -65,15 +65,20 @@ Neverbirth:RegisterLuckCap(itemId, fixedCap)
 Neverbirth:RegisterLuckCapResolver(itemId, resolverFn)
 Neverbirth:RegisterTrinketLuckCap(trinketId, fixedCap)
 Neverbirth:RegisterTrinketLuckCapResolver(trinketId, resolverFn)
+Neverbirth:InvalidateFortuneLuck(player)
 ```
 
 Luck registration returns `true` for a positive runtime ID with a numeric fixed threshold or function resolver. Negative thresholds may register but are ignored during evaluation, so callers must not use them.
 
 Resolver calls are protected; errors, non-numeric results, and negative results are ignored. Multiple applicable entries use the highest threshold, and Neverbirth never lowers higher existing Luck.
 
-Duplicate Luck registrations create duplicate resolver calls. Callers must make registration idempotent. Resolver functions run in the Luck cache path and must remain fast, deterministic, and free of side effects.
+Duplicate Luck registrations create duplicate resolver calls. Callers must make registration idempotent. Resolver functions run in the custom Luck-threshold cache and must remain fast, deterministic, and free of side effects. A normal `CACHE_LUCK` evaluation reads the cached threshold; it does not necessarily call the resolver again.
 
-For a resolver, the arguments are `player`, the registered runtime ID, and the player's current copy count for that owner. Use the collectible functions for collectibles and the trinket functions for trinkets.
+For a resolver, the arguments are `player`, the registered runtime ID, and the owner's count: collectible copy count or effective trinket multiplier (including golden or smelted trinkets). Use the collectible functions for collectibles and the trinket functions for trinkets.
+
+`InvalidateFortuneLuck(player)` marks one live player for refresh. Omit `player` (or pass `nil`) to mark all current players. It has no return value and does not immediately change Luck. On the next Neverbirth update, the custom threshold cache refreshes first, followed by the normal Luck cache; a failed refresh is retried on a later update.
+
+Registration and changes to registered owner counts already trigger refreshes. If a resolver also depends on health, a timer, another unregistered item, or your mod's own state, call `InvalidateFortuneLuck` after that input changes. A plain `AddCacheFlags(CacheFlag.CACHE_LUCK)` / `EvaluateItems()` pair is insufficient for these external changes.
 
 ### Fixed-threshold example
 
@@ -138,6 +143,20 @@ MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneResolverC
 
 Keep this resolver side-effect free. In particular, do not register again from the resolver; registration belongs in an idempotent load-time or game-start path.
 
+The example above depends only on the registered item's copy count. If you extend a resolver to read other state, call a notification helper like this from your mod after updating that state. Pass the affected player, or omit the argument when the change affects every player. Do not call it from inside the resolver or every frame when nothing changed.
+
+```lua
+local function onMyLuckyThresholdChanged(player)
+    local neverbirth = _G and rawget(_G, "Neverbirth")
+    if neverbirth and type(neverbirth.InvalidateFortuneLuck) == "function" then
+        neverbirth:InvalidateFortuneLuck(player)
+    end
+end
+
+-- Call onMyLuckyThresholdChanged(player) after changing a resolver input.
+-- Call onMyLuckyThresholdChanged() for a change shared by all players.
+```
+
 ## Dice Set
 
 ### What the integration does
@@ -201,5 +220,5 @@ The source and behavior tests below are useful static references for maintainers
 
 | Integration | Implementation | Main tests |
 | --- | --- | --- |
-| Fortune Rivalling Heaven Gu | `RegisterLuckCap*` and `RegisterTrinketLuckCap*` in [`main.lua`](main.lua) | [`tests/condom_utility_knife_behavior_test.lua`](tests/condom_utility_knife_behavior_test.lua) |
+| Fortune Rivalling Heaven Gu | `RegisterLuckCap*`, `RegisterTrinketLuckCap*`, and `InvalidateFortuneLuck` in [`main.lua`](main.lua) | [Registration contracts](tests/condom_utility_knife_behavior_test.lua); [custom cache and refresh behavior](tests/fortune_custom_cache_behavior_test.lua) |
 | Dice Set | Dice Set functions in [`main.lua`](main.lua) | [`tests/dice_set_behavior_test.lua`](tests/dice_set_behavior_test.lua) |

@@ -585,7 +585,7 @@ local function test_registration_and_resource_contract()
     local entities = readFile("content/entities2.xml")
     local main = readFile("main.lua")
 
-    assertTruthy(items:find('<active name="Annihilation" cache="firedelay range" maxcharges="8" description="Feel My Pain!" gfx="Annihilation.png" id="53" quality="3" tags="offensive" />', 1, true), "active registration")
+    assertTruthy(items:find('<active name="Annihilation" cache="firedelay range" maxcharges="8" description="Feel my pain!" gfx="Annihilation.png" id="53" quality="3" tags="offensive" />', 1, true), "active registration")
     assertTruthy(itemsEn:find('name="Annihilation"', 1, true), "English item name")
     assertTruthy(itemsZh:find('name="诛"', 1, true), "Chinese item name")
     assertTruthy(itemsZh:find('description="感受！我的痛苦！"', 1, true), "Chinese subtitle")

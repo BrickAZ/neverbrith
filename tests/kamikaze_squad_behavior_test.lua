@@ -519,7 +519,7 @@ local function test_registration_text_pool_icon_and_no_custom_entity_contract()
     local entities = readFile("content/entities2.xml")
     local main = readFile("main.lua")
 
-    local registration = '<passive name="Kamikaze Squad" description="For victory! Sacrifice!" gfx="KamikazeSquad.png" id="54" quality="0" tags="offensive summonable" />'
+    local registration = '<passive name="Kamikaze Squad" description="For victory! Give it all!" gfx="KamikazeSquad.png" id="54" quality="0" tags="offensive summonable" />'
     assertTruthy(items:find(registration, 1, true), "base passive registration")
     assertTruthy(itemsEn:find(registration, 1, true), "English passive registration")
     assertTruthy(itemsZh:find('<passive name="神风特攻队" description="为胜利！献身！" gfx="KamikazeSquad.png" id="54" quality="0" tags="offensive summonable" />', 1, true), "Chinese passive registration")
@@ -534,7 +534,7 @@ local function test_registration_text_pool_icon_and_no_custom_entity_contract()
     assertEquals(entities:find("KamikazeSquad", 1, true), nil, "item must not register a custom NPC or effect")
     assertTruthy(main:find('KamikazeSquad = { "Kamikaze Squad", "神风特攻队" }', 1, true), "main item lookup")
     assertTruthy(main:find('include("kamikaze_squad")', 1, true), "main module bootstrap")
-    assertTruthy(main:find('Items.KamikazeSquad, "Kamikaze Squad", "For victory! Sacrifice!", "神风特攻队", "为胜利！献身！"', 1, true), "pickup banner text")
+    assertTruthy(main:find('Items.KamikazeSquad, "Kamikaze Squad", "For victory! Give it all!", "神风特攻队", "为胜利！献身！"', 1, true), "pickup banner text")
     local icon = io.open("resources/gfx/Items/Collectibles/KamikazeSquad.png", "rb")
     assertTruthy(icon, "missing handed-off collectible icon")
     if icon then icon:close() end

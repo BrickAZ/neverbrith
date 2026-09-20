@@ -7,11 +7,13 @@
 
 ## 运行要求
 
-- **The Binding of Isaac: Repentance**，以及与游戏版本匹配的 **REPENTOGON**。
-- **REPENTOGON 是必需前置。** 当前代码要求 `1.0.12a` 或更新的、可识别的稳定版本；缺失、过旧或无法识别的构建会让 Mod 停止初始化，并显示中英双语提示。`1.0.12a` 是本项目的最低版本门槛。
+- **游戏与 REPENTOGON 必须版本匹配。** 当前官方安装指南面向 **Repentance+**；旧版 **Repentance（忏悔）** 需要与其匹配的旧版 REPENTOGON。
+- **REPENTOGON 是必需前置。** 启动检查接受 `1.0.12a` 或更新的、可识别的稳定版本；缺失、过旧或无法识别的构建会让 Mod 停止初始化，并显示中英双语提示。这只是最低启动门槛，不是推荐版本或已经验证的游戏与加载器组合。
 - **External Item Descriptions（EID）可选。** 安装后可以查看本 Mod 已提供的道具说明；核心道具逻辑不依赖 EID。
 
-REPENTOGON 的安装方式、启动方式和支持的游戏版本请查阅[官方安装指南](https://repentogon.com/install.html)。通过本 Mod 的版本检查，不代表已完成所有游戏版本与第三方 Mod 组合的兼容性验证。
+REPENTOGON 当前支持的游戏版本和启动方式请查阅[官方安装指南](https://repentogon.com/install.html)。旧版 Repentance 用户需要核对对应发行版的说明，不能直接套用当前 Repentance+ 的启动器步骤。
+
+仓库目前没有记录经过实机验证的“游戏版本 + REPENTOGON 版本”组合。自动化行为检查使用游戏接口模拟，其中 REPENTOGON 测试环境标记为 `1.0.12a`；这些检查不验证已安装的游戏、当前启动器或第三方 Mod 组合。
 
 ## 从 GitHub 安装
 
@@ -33,7 +35,7 @@ git clone https://github.com/BrickAZ/neverbrith.git neverbrith
 
 ## 语言与道具说明
 
-项目维护简体中文与英文的道具 XML 模板、EID 说明和部分运行时提示。部分新道具目前只提供中文文本，例如健康睡眠；不能据此认为所有内容均已完整翻译。
+项目维护简体中文与英文的道具 XML 模板、EID 说明和部分运行时提示。反馈翻译问题时，请以涉及道具的实际文本为准；这些资源不代表每一条运行时提示都已完成双语覆盖。
 
 **原生拾取横幅本地化目前暂停开发。** 仓库中的语言模板与脚本保留作维护工具，不是游玩所必需的启动步骤，也不提供游戏内即时语言切换。
 
@@ -64,12 +66,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-neverbrith.ps1 -
 | `tests/` | 行为、资源和文档回归检查 |
 | `tools/` | 语言同步、资源生成和维护脚本 |
 
-开发检查使用 Lua 5.4 与 PowerShell 7（pwsh），以正确读取 UTF-8 中文脚本。当前仍有未通过的回归项，可在 Mod 根目录按需运行以下检查。它们覆盖各自的静态或模拟场景，不代表整套测试通过或游戏内验收完成。
+开发检查使用 Lua 5.4 与 PowerShell 7（pwsh），以正确读取 UTF-8 中文脚本。可在 Mod 根目录按需运行以下检查。它们覆盖各自的静态或模拟场景，不代表整套测试通过或游戏内验收完成。README 检查可以独立于兼容指南检查运行。
 
 ```powershell
 luac -p main.lua
 lua tests/repentogon_bootstrap_test.lua
 lua tests/localization_test.lua
+lua tests/fortune_custom_cache_behavior_test.lua
+lua tests/dice_set_behavior_test.lua
+pwsh -NoProfile -File tests/compatibility_docs_test.ps1 -ReadmeOnly
 pwsh -NoProfile -File tests/compatibility_docs_test.ps1
 ```
 

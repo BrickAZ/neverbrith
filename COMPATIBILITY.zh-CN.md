@@ -4,7 +4,7 @@
 
 | Neverbirth 道具 | 其他 Mod 可以添加什么 | 状态 | 入口 |
 | --- | --- | --- | --- |
-| 鸿运齐天蛊 | 自定义收藏品和饰品的幸运阈值 | 临时公开，尚未版本化 | `RegisterLuckCap`、`RegisterLuckCapResolver`、`RegisterTrinketLuckCap`、`RegisterTrinketLuckCapResolver` |
+| 鸿运齐天蛊 | 自定义收藏品和饰品的幸运阈值 | 临时公开，尚未版本化 | `RegisterLuckCap`、`RegisterLuckCapResolver`、`RegisterTrinketLuckCap`、`RegisterTrinketLuckCapResolver`、`InvalidateFortuneLuck` |
 | 骰子套装 | 自定义骰子类主动道具 | 临时公开，尚未版本化 | `RegisterDiceItem` |
 
 当前公开版本没有为记忆紊乱提供兼容接口。
@@ -65,15 +65,20 @@ Neverbirth:RegisterLuckCap(itemId, fixedCap)
 Neverbirth:RegisterLuckCapResolver(itemId, resolverFn)
 Neverbirth:RegisterTrinketLuckCap(trinketId, fixedCap)
 Neverbirth:RegisterTrinketLuckCapResolver(trinketId, resolverFn)
+Neverbirth:InvalidateFortuneLuck(player)
 ```
 
 幸运注册会在运行时 ID 为正数，且提供数值固定阈值或函数 resolver 时返回 `true`。负阈值可以注册，但计算时会被忽略，因此调用方不得使用负阈值。
 
 对 resolver 的调用受到保护；报错、非数值结果和负数结果都会被忽略。多个可用条目会采用最高阈值，Neverbirth 绝不会降低已存在的更高幸运值。
 
-重复的幸运注册会造成重复的 resolver 调用。调用方必须让注册具备幂等性。resolver 函数运行在幸运缓存路径中，必须快速、确定且没有副作用。
+重复的幸运注册会造成重复的 resolver 调用。调用方必须让注册具备幂等性。resolver 函数运行在自定义幸运阈值缓存中，必须快速、确定且没有副作用。普通的 `CACHE_LUCK` 求值读取已缓存的阈值，不一定重新调用 resolver。
 
-对于 resolver，参数依次是 `player`、已注册的运行时 ID，以及玩家当前拥有该拥有者的数量。收藏品使用对应的 collectible 函数，饰品使用对应的 trinket 函数。
+对于 resolver，参数依次是 `player`、已注册的运行时 ID，以及拥有数量：收藏品使用副本数量，饰品使用实际生效的倍率（包括金饰品或吞下的饰品）。收藏品使用对应的 collectible 函数，饰品使用对应的 trinket 函数。
+
+`InvalidateFortuneLuck(player)` 将一名仍有效的玩家标记为需要刷新。省略 `player` 或传入 `nil` 时，会标记当前所有玩家。此函数没有返回值，也不会立即改变幸运值；Neverbirth 在下一次更新时先刷新自定义阈值缓存，再刷新普通幸运缓存，刷新失败会在后续更新中重试。
+
+注册接口调用和已注册道具的持有数量变化已会触发刷新。如果 resolver 还依赖生命值、计时器、其他未注册道具或你的 Mod 自有状态，应在这些输入变化后调用 `InvalidateFortuneLuck`。对于这些外部变化，仅调用 `AddCacheFlags(CacheFlag.CACHE_LUCK)` / `EvaluateItems()` 不足以刷新阈值。
 
 ### 固定阈值示例
 
@@ -138,6 +143,20 @@ MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneResolverC
 
 请保持此 resolver 没有副作用。尤其不要从 resolver 中再次注册；注册应放在具备幂等性的加载期或游戏开始路径中。
 
+上面的示例只依赖已注册道具的持有数量。若扩展 resolver，让它读取其他状态，请在自己的 Mod 更新这些状态后调用下面这样的通知函数。传入受影响玩家；如果变化影响所有玩家，则省略参数。不要在 resolver 内调用，也不要在状态未变化时每帧调用。
+
+```lua
+local function onMyLuckyThresholdChanged(player)
+    local neverbirth = _G and rawget(_G, "Neverbirth")
+    if neverbirth and type(neverbirth.InvalidateFortuneLuck) == "function" then
+        neverbirth:InvalidateFortuneLuck(player)
+    end
+end
+
+-- Call onMyLuckyThresholdChanged(player) after changing a resolver input.
+-- Call onMyLuckyThresholdChanged() for a change shared by all players.
+```
+
 ## 骰子套装
 
 ### 这项兼容有什么用
@@ -201,5 +220,5 @@ MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterDiceCompat)
 
 | 对接项 | 实现 | 主要测试 |
 | --- | --- | --- |
-| 鸿运齐天蛊 | [`main.lua`](main.lua) 中的 `RegisterLuckCap*` 和 `RegisterTrinketLuckCap*` | [`tests/condom_utility_knife_behavior_test.lua`](tests/condom_utility_knife_behavior_test.lua) |
+| 鸿运齐天蛊 | [`main.lua`](main.lua) 中的 `RegisterLuckCap*`、`RegisterTrinketLuckCap*` 和 `InvalidateFortuneLuck` | [注册合同](tests/condom_utility_knife_behavior_test.lua)；[自定义缓存与刷新行为](tests/fortune_custom_cache_behavior_test.lua) |
 | 骰子套装 | [`main.lua`](main.lua) 中的骰子套装函数 | [`tests/dice_set_behavior_test.lua`](tests/dice_set_behavior_test.lua) |

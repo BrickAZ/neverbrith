@@ -1,4 +1,4 @@
--- Reuse only the established main fixture, not its stale XML assertions or modules.
+-- Reuse the established main fixture without unrelated XML checks or modules.
 local f = assert(io.open('tests/condom_utility_knife_behavior_test.lua', 'r'))
 local source = f:read('*a'); f:close()
 local originalSource = source
@@ -96,7 +96,11 @@ mod:RegisterLuckCapResolver(987, resolver)
 mod:RegisterLuckCapResolver(987, function() error('isolated') end)
 mod:RegisterLuckCap(987, -1)
 p.collectibles[987] = 1; update(); eq(p.Luck, 8, 'registered cap'); eq(calls, 2, 'duplicates append')
-external = 15; mod:InvalidateFortuneLuck(p); update(); eq(p.Luck, 15, 'external explicit invalidation')
+external = 15
+p:AddCacheFlags(CacheFlag.CACHE_LUCK); p:EvaluateItems(); update()
+eq(p.Luck, 8, 'ordinary Luck evaluation keeps the previous external threshold')
+eq(calls, 2, 'unchanged inventory does not rerun external resolvers')
+mod:InvalidateFortuneLuck(p); update(); eq(p.Luck, 15, 'external explicit invalidation')
 external = -1; mod:InvalidateFortuneLuck(p); update(); eq(p.Luck, 5, 'negative and exceptions ignored')
 mod:RegisterTrinketLuckCapResolver(987, function(_, _, multiplier) return multiplier * 7 end)
 p.trinkets[987] = 1; update(); eq(p.Luck, 7, 'normal trinket')
@@ -129,26 +133,10 @@ event(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, mod.OnFortuneCollectible
 n = custom; update(); eq(custom, n + 1, 'collectible removal invalidation')
 table.sort = originalSort
 -- Execute the two original Fortune suites unchanged, bypassing only their
--- unrelated XML entry assertion and module includes. The new suite above owns
--- native-order/lifecycle proof; this adapter supplies the newly native value.
+-- unrelated XML entry assertion and module includes. The suite above owns
+-- native-order/lifecycle proof; the shared fixture supplies custom cache values.
 local legacy = assert(originalSource:match('(local function test_fortune_rivalling_heaven_gu_uses_complete_audit_registry.-)\ntest_xml_registers_requested_items_and_pools%(%)'))
-local adapter = [[
-local oldLoad = loadNeverbirth
-loadNeverbirth = function(...)
-    local e = oldLoad(...)
-    local evaluate = e.runEvaluate
-    e.runEvaluate = function(p, flag)
-        local v = 0
-        if e.mod:PlayerHasFortuneRivallingHeavenGu(p) then
-            v = e.mod:EvaluateFortuneCustomCache(p, 'neverbrith_fortune_required_luck', 0)
-        end
-        p.GetCustomCacheValue = function() return v end
-        evaluate(p, flag)
-    end
-    return e
-end
-]]
-assert(load(source .. adapter .. legacy .. '\n' .. [[
+assert(load(source .. legacy .. '\n' .. [[
 test_fortune_rivalling_heaven_gu_uses_complete_audit_registry()
 test_public_luck_cap_api_contracts()
 ]], '@fortune-original-contracts'))()

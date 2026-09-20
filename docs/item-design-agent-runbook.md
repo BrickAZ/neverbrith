@@ -6,14 +6,26 @@ The design agent turns approved workbook rows into downstream-ready item design 
 
 It consumes rows from the OneDrive workbook, writes local handoff files, and advances the workbook queue so art and code agents can continue automatically.
 
-## Online Workbook
+## Workbook configuration example
 
-- Workbook title: `neverbirth 在线合作.xlsx`
-- Connector target:
-  - `type`: `drive_item`
-  - `drive_id`: `7BA8541E2C23CC59`
-  - `item_id`: `7BA8541E2C23CC59!s7bc674ce47be41f5bac8fb3025244d22`
-- Main sheet: `道具审批`
+This public runbook contains placeholders only. Before running the workflow, configure a workbook you are authorized to use through your authenticated OneDrive/SharePoint connector. Resolve its current drive and item IDs from that connector; do not infer them from a workbook title.
+
+```json
+{
+  "workbook_url": "<YOUR_WORKBOOK_URL>",
+  "target": {
+    "type": "drive_item",
+    "drive_id": "<YOUR_DRIVE_ID>",
+    "item_id": "<YOUR_ITEM_ID>"
+  },
+  "workbook_title": "<YOUR_WORKBOOK_TITLE>.xlsx",
+  "sheet": "道具审批"
+}
+```
+
+This is a configuration example, not a file automatically loaded by the mod. Keep actual values in your local or automation configuration outside the public repository. Share links and Graph shares URLs can carry access tokens; do not publish them here. Reading this runbook does not authorize workbook access or writeback: use only the target and actions authorized for your workflow.
+
+The column names below describe the expected sheet schema. Confirm them against your configured workbook before running a review or writeback.
 
 ## Queue Columns
 

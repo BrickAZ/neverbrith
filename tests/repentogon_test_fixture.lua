@@ -3,6 +3,12 @@ return function()
     REPENTOGON = { Real = true, Version = "1.0.12a" }
     CallbackPriority = { IMPORTANT = -200, EARLY = -100, DEFAULT = 0, LATE = 100 }
     WeaponType = WeaponType or { WEAPON_BRIMSTONE = 2 }
+    EffectVariant = EffectVariant or {}
+    if not include then
+        function include(name)
+            return dofile(name:gsub("%.", "/") .. ".lua")
+        end
+    end
     local registerMod = RegisterMod
     if registerMod then
         RegisterMod = function(...)
@@ -25,6 +31,7 @@ return function()
         MC_POST_TRIGGER_TRINKET_REMOVED = 1097,
         MC_POST_PLAYER_INIT = 9,
         MC_POST_GAME_STARTED = 15,
+        MC_PRE_GAME_EXIT = 16,
         MC_POST_NEW_ROOM = 19,
         MC_POST_WEAPON_FIRE = 1105,
         MC_PRE_PLAYER_TAKE_DMG = 1008,

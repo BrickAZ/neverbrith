@@ -270,15 +270,22 @@ local function loadNeverbirth(options)
     end
 
     local function runEvaluate(player, cacheFlag)
+        -- Supply the native custom-cache result before checking Luck contracts.
+        -- Engine ordering and invalidation are covered separately by
+        -- fortune_custom_cache_behavior_test.lua.
+        if cacheFlag == CacheFlag.CACHE_LUCK then
+            local tag, value = "neverbrith_fortune_required_luck", 0
+            for _, callback in ipairs(getCallbacks(ModCallbacks.MC_EVALUATE_CUSTOM_CACHE, tag)) do
+                value = callback(mod, player, tag, value) or value
+            end
+            function player:GetCustomCacheValue(requestedTag)
+                assertEquals(requestedTag, tag, "Fortune custom cache tag")
+                return value
+            end
+        end
         for _, callback in ipairs(getCallbacks(ModCallbacks.MC_EVALUATE_CACHE)) do
             callback(mod, player, cacheFlag)
         end
-    end
-
-    local function runPostAddUtilityKnife(player)
-        local callback = getCallbacks(ModCallbacks.MC_POST_ADD_COLLECTIBLE, itemIds.UtilityKnife)[1]
-        assertTruthy(callback, "Utility Knife pickup callback should be registered")
-        callback(mod, itemIds.UtilityKnife, 0, true, ActiveSlot.SLOT_PRIMARY, 0, player)
     end
 
     local function runPostAddCollectible(itemId, player)
@@ -288,6 +295,11 @@ local function loadNeverbirth(options)
             ran = true
         end
         assertTruthy(ran, "post-add collectible callback should run")
+    end
+
+    local function runPostAddUtilityKnife(player)
+        -- Dispatch filtered and unfiltered callbacks, as the game does.
+        runPostAddCollectible(itemIds.UtilityKnife, player)
     end
 
     local function runPostAddCollectibleWithoutPlayer(itemId)
@@ -1041,8 +1053,9 @@ local function test_public_luck_cap_api_contracts()
         [env.items.FortuneRivallingHeavenGu] = 1,
         [ownerId] = 1,
     }, trinkets = { [trinketId] = 1 } })
+    local callsBefore = resolverCalls
     env.runEvaluate(active, CacheFlag.CACHE_LUCK)
-    assertEquals(resolverCalls, 2, "repeated registrations must invoke each resolver independently")
+    assertEquals(resolverCalls - callsBefore, 2, "one custom cache refresh must invoke each duplicate resolver independently")
     assertEquals(active.Luck, 12, "resolver errors and invalid results must be contained while the highest valid owner cap wins")
 end
 local condomTests = {

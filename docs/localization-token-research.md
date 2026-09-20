@@ -1,5 +1,7 @@
 # Localization Token Research
 
+> **Historical research / archived workflow.** Native pickup banner localization is paused. This page records earlier experiments, not current installation instructions or verified runtime support. Use the [current README](../README.md) ([简体中文](../README.zh-CN.md)) for requirements and launch guidance. The current mod requires REPENTOGON.
+
 ## v2 stringtable attempt
 
 The v2 experiment changed mod item names and pickup descriptions in
@@ -25,7 +27,7 @@ REPENTOGON-only APIs.
 
 ## v3 language template switch
 
-The playable multilingual path uses explicit XML templates instead of inactive
+The v3 experiment used explicit XML templates instead of inactive
 stringtable tokens. The initial v3 attempt copied only
 `content/items.en_us.xml` or `content/items.zh_cn.xml` to `content/items.xml`
 before the game started.
@@ -40,7 +42,7 @@ The v3 template switch was not enough for native pickup banners because the
 pickup title comes from the item XML `name`, not from EID. Changing only
 `description` leaves titles such as `Angelbox` and `Musicbox` in the banner.
 
-The v3.1 playable path switches both `content/items.xml` and
+The v3.1 experiment switched both `content/items.xml` and
 `content/itempools.xml`. Chinese item templates use Chinese pickup names, and
 the matching Chinese item pool template uses the same names so item pool
 references stay valid. Lua item ID lookup must therefore try both English and
@@ -51,19 +53,22 @@ language switching.
 
 ## v3.2 synchronized launcher
 
-The manual switch script is not a player-safe guarantee because tests and normal
-launches can leave playable XML files in the wrong language. The v3.2 player
-entry point is `tools/start-neverbrith.ps1`, which synchronizes XML files before
-launching `isaac-ng.exe`.
+The v3.2 experiment introduced `tools/start-neverbrith.ps1` to synchronize XML
+files before directly launching `isaac-ng.exe`. That direct launch path is not
+the current REPENTOGON launch recommendation. Tests and manual edits can leave
+the active XML files different from either language template.
 
 `tools/check-items-language.ps1` reports the current playable XML state as
 `en_us`, `zh_cn`, `mixed`, or `unknown`. The launcher copies the requested
 language pack, runs the check, and refuses to launch the game if the playable
 XML files do not match the requested language.
 
-This is the strongest guarantee available without REPENTOGON or official
-resource modification: language correctness is guaranteed only when the game is
-started through the launcher script.
+Matching XML files only confirms file synchronization; it does not prove native
+pickup banner rendering or that REPENTOGON was loaded. For current maintenance,
+close the game and use `-Language en_us -NoLaunch` or `-Language zh_cn -NoLaunch`
+with this script, then launch through the appropriate REPENTOGON setup described
+in the README. The old experiment is not evidence that the current mod runs
+without REPENTOGON.
 
 ## Pause notice
 

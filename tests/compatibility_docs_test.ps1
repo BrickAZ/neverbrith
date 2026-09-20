@@ -1,5 +1,6 @@
 param(
-    [string]$Root = (Split-Path -Parent $PSScriptRoot)
+    [string]$Root = (Split-Path -Parent $PSScriptRoot),
+    [switch]$ReadmeOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -70,6 +71,27 @@ function CompileLuaBlock([string]$LuaPath, [string]$Block, [string]$Surface) {
     }
 }
 
+function CheckReadmes {
+    $readmePath = Join-Path $Root 'README.md'
+    $readme = Get-Content -Raw -LiteralPath $readmePath
+    RequireContains $readme '[English compatibility guide](COMPATIBILITY.md)' 'README.md'
+    $readmeChinesePath = Join-Path $Root 'README.zh-CN.md'
+    Require (Test-Path -LiteralPath $readmeChinesePath) 'README.zh-CN.md does not exist'
+    $readmeChinese = Get-Content -Raw -LiteralPath $readmeChinesePath
+    RequireContains $readmeChinese '[简体中文兼容指南](COMPATIBILITY.zh-CN.md)' 'README.zh-CN.md'
+    RequireContains $readme 'English | [简体中文](README.zh-CN.md)' 'README.md'
+    RequireContains $readmeChinese '[English](README.md) | 简体中文' 'README.zh-CN.md'
+    CheckRelativeLinks $readmePath $readme
+    CheckRelativeLinks $readmeChinesePath $readmeChinese
+    RequireContains $readme 'The public compatibility scope covers only Fortune Rivalling Heaven Gu Luck thresholds and Dice Set custom dice active items. Memory Disorder has no public compatibility API.' 'README.md'
+}
+
+CheckReadmes
+if ($ReadmeOnly) {
+    Write-Host 'README docs tests passed'
+    return
+}
+
 $englishPath = Join-Path $Root 'COMPATIBILITY.md'
 Require (Test-Path -LiteralPath $englishPath) 'COMPATIBILITY.md does not exist'
 
@@ -107,7 +129,7 @@ foreach ($heading in $requiredHeadings) {
     $previousHeadingOffset = $headingOffset
 }
 
-$openingLines = @('# Neverbirth compatibility guide', '', '[简体中文](COMPATIBILITY.zh-CN.md)', '', '| Neverbirth item | What another mod can add | Status | Entry points |', '| --- | --- | --- | --- |', '| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver` |', '| Dice Set | Custom dice-themed active items | Provisional and unversioned | `RegisterDiceItem` |', '', 'Memory Disorder does not expose a public compatibility API in the published version.')
+$openingLines = @('# Neverbirth compatibility guide', '', '[简体中文](COMPATIBILITY.zh-CN.md)', '', '| Neverbirth item | What another mod can add | Status | Entry points |', '| --- | --- | --- | --- |', '| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver`, `InvalidateFortuneLuck` |', '| Dice Set | Custom dice-themed active items | Provisional and unversioned | `RegisterDiceItem` |', '', 'Memory Disorder does not expose a public compatibility API in the published version.')
 $openingPattern = '\A' + [regex]::Escape($openingLines[0]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[2]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[4]) + '\r?\n' + [regex]::Escape($openingLines[5]) + '\r?\n' + [regex]::Escape($openingLines[6]) + '\r?\n' + [regex]::Escape($openingLines[7]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[9])
 Require ([regex]::IsMatch($english, $openingPattern)) 'COMPATIBILITY.md opening integration table is missing or differs from the two released integrations'
 Require (([regex]::Matches($normalizedEnglish, [regex]::Escape('| Neverbirth item | What another mod can add | Status | Entry points |'))).Count -eq 1) 'COMPATIBILITY.md must contain exactly one public integration table'
@@ -121,7 +143,9 @@ foreach ($sourceAnchor in @(
     'local ok, resolvedCap = pcall(entry.resolverFn, player, itemId, count)',
     'if cap and cap >= 0 then',
     'and (tonumber(player:GetCollectibleNum(Items.FortuneRivallingHeavenGu)) or 0) > 0',
-    'player.Luck = math.max(tonumber(player.Luck) or 0, self:GetFortuneRivallingHeavenGuRequiredLuck(player))'
+    'player:GetCustomCacheValue(self.FortuneRivallingHeavenGu.cacheTag)',
+    'state.players[key].dirty = true',
+    'player:AddCustomCacheTag(state.cacheTag, true)'
 )) {
     RequireContains $main $sourceAnchor 'main.lua source anchor'
 }
@@ -131,6 +155,9 @@ foreach ($sourceBackedGuideRule in @(
     'Luck registration returns `true` for a positive runtime ID with a numeric fixed threshold or function resolver. Negative thresholds may register but are ignored during evaluation, so callers must not use them.',
     'Resolver calls are protected; errors, non-numeric results, and negative results are ignored. Multiple applicable entries use the highest threshold, and Neverbirth never lowers higher existing Luck.',
     'Duplicate Luck registrations create duplicate resolver calls. Callers must make registration idempotent.',
+    '`InvalidateFortuneLuck(player)` marks one live player for refresh.',
+    'It has no return value and does not immediately change Luck.',
+    'A plain `AddCacheFlags(CacheFlag.CACHE_LUCK)` / `EvaluateItems()` pair is insufficient for these external changes.',
     '`itemId` is a positive runtime collectible ID. `options` must be a table or `nil`.',
     'Other types are unsupported and may raise an error.',
     'Only `protectStats = false` disables stat protection for that die.',
@@ -172,6 +199,7 @@ foreach ($signature in @(
     'function Neverbirth:RegisterLuckCapResolver(',
     'function Neverbirth:RegisterTrinketLuckCap(',
     'function Neverbirth:RegisterTrinketLuckCapResolver(',
+    'function Neverbirth:InvalidateFortuneLuck(',
     'function Neverbirth:RegisterDiceItem('
 )) {
     RequireContains $main $signature 'main.lua'
@@ -189,7 +217,9 @@ foreach ($required in @(
     'Provisional and unversioned',
     'Memory Disorder does not expose a public compatibility API in the published version.',
     '[`main.lua`](main.lua)',
-    '[`tests/condom_utility_knife_behavior_test.lua`](tests/condom_utility_knife_behavior_test.lua)',
+    '[Registration contracts](tests/condom_utility_knife_behavior_test.lua)',
+    '[custom cache and refresh behavior](tests/fortune_custom_cache_behavior_test.lua)',
+    'neverbirth:InvalidateFortuneLuck(player)',
     '[`tests/dice_set_behavior_test.lua`](tests/dice_set_behavior_test.lua)'
 )) {
     RequireContains $english $required 'COMPATIBILITY.md'
@@ -227,7 +257,9 @@ foreach ($required in @(
     '`options` 必须是表或 `nil`',
     '其他类型不受支持，且可能报错。',
     '临时公开，尚未版本化',
-    '当前公开版本没有为记忆紊乱提供兼容接口。'
+    '当前公开版本没有为记忆紊乱提供兼容接口。',
+    '此函数没有返回值，也不会立即改变幸运值',
+    'neverbirth:InvalidateFortuneLuck(player)'
 )) {
     RequireContains $chinese $required 'COMPATIBILITY.zh-CN.md'
 }
@@ -287,8 +319,8 @@ for ($index = 0; $index -lt $headingPairs.Count; $index++) {
 
 $englishBlocks = GetExecutableLuaBlocks $english
 $chineseBlocks = GetExecutableLuaBlocks $chinese
-Require ($englishBlocks.Count -eq 7) 'COMPATIBILITY.md must contain exactly seven Lua blocks'
-Require ($chineseBlocks.Count -eq 7) 'COMPATIBILITY.zh-CN.md must contain exactly seven Lua blocks'
+Require ($englishBlocks.Count -eq 8) 'COMPATIBILITY.md must contain exactly eight Lua blocks'
+Require ($chineseBlocks.Count -eq 8) 'COMPATIBILITY.zh-CN.md must contain exactly eight Lua blocks'
 Require ($englishBlocks.Count -eq $chineseBlocks.Count) 'English and Chinese Lua block counts differ'
 for ($index = 0; $index -lt $englishBlocks.Count; $index++) {
     Require ($englishBlocks[$index] -eq $chineseBlocks[$index]) "Lua block $($index + 1) differs between languages"
@@ -308,18 +340,5 @@ foreach ($guide in @(
 }
 
 CheckRelativeLinks $chinesePath $chinese
-
-$readmePath = Join-Path $Root 'README.md'
-$readme = Get-Content -Raw -LiteralPath $readmePath
-RequireContains $readme '[English compatibility guide](COMPATIBILITY.md)' 'README.md'
-$readmeChinesePath = Join-Path $Root 'README.zh-CN.md'
-Require (Test-Path -LiteralPath $readmeChinesePath) 'README.zh-CN.md does not exist'
-$readmeChinese = Get-Content -Raw -LiteralPath $readmeChinesePath
-RequireContains $readmeChinese '[简体中文兼容指南](COMPATIBILITY.zh-CN.md)' 'README.zh-CN.md'
-RequireContains $readme 'English | [简体中文](README.zh-CN.md)' 'README.md'
-RequireContains $readmeChinese '[English](README.md) | 简体中文' 'README.zh-CN.md'
-CheckRelativeLinks $readmePath $readme
-CheckRelativeLinks $readmeChinesePath $readmeChinese
-RequireContains $readme 'The public compatibility scope covers only Fortune Rivalling Heaven Gu Luck thresholds and Dice Set custom dice active items. Memory Disorder has no public compatibility API.' 'README.md'
 
 Write-Host 'compatibility docs tests passed'

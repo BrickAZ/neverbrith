@@ -1,16 +1,25 @@
 # neverbrith Item Approval AI Review Runbook
 
-## Online Workbook
+## Workbook configuration example
 
-- Human-facing link: `https://1drv.ms/x/c/7ba8541e2c23cc59/IQDOdMZ7vkf1QbrI-zAlJE0iAepZTrlscRLNOS-L2qh8GLc?e=x5zgjI`
-- Preferred connector target after the SharePoint/OneDrive connector is authorized:
-  - `type`: `drive_item`
-  - `drive_id`: `7BA8541E2C23CC59`
-  - `item_id`: `7BA8541E2C23CC59!s7bc674ce47be41f5bac8fb3025244d22`
-- Fallback connector-facing Graph shares URL, only useful while the anonymous share link exists:
-  `https://graph.microsoft.com/v1.0/shares/u!aHR0cHM6Ly9vbmVkcml2ZS5saXZlLmNvbS86eDovZy9wZXJzb25hbC83QkE4NTQxRTJDMjNDQzU5L0lRRE9kTVo3dmtmMVFickktekFsSkUwaUFlcFpUcmxzY1JMTk9TLUwycWg4R0xjP3Jlc2lkPTdCQTg1NDFFMkMyM0NDNTkhczdiYzY3NGNlNDdiZTQxZjViYWM4ZmIzMDI1MjQ0ZDIyJml0aGludD1maWxlJTJjeGxzeCZlPXg1emdqSSZtaWdyYXRlZHRvc3BvPXRydWUmcmVkZWVtPWFIUjBjSE02THk4eFpISjJMbTF6TDNndll5ODNZbUU0TlRReFpUSmpNak5qWXpVNUwwbFJSRTlrVFZvM2RtdG1NVkZpY2trdGVrRnNTa1V3YVVGbGNGcFVjbXh6WTFKTVRrOVRMVXd5Y1dnNFIweGpQMlU5ZURWNloycEo/driveItem`
-- Workbook title observed by connector: `neverbirth 在线合作.xlsx`
-- Main sheet: `道具审批`
+This public runbook contains placeholders only. Before running the workflow, configure a workbook you are authorized to use through your authenticated OneDrive/SharePoint connector. Resolve its current drive and item IDs from that connector; do not infer them from a workbook title.
+
+```json
+{
+  "workbook_url": "<YOUR_WORKBOOK_URL>",
+  "target": {
+    "type": "drive_item",
+    "drive_id": "<YOUR_DRIVE_ID>",
+    "item_id": "<YOUR_ITEM_ID>"
+  },
+  "workbook_title": "<YOUR_WORKBOOK_TITLE>.xlsx",
+  "sheet": "道具审批"
+}
+```
+
+This is a configuration example, not a file automatically loaded by the mod. Keep actual values in your local or automation configuration outside the public repository. Share links and Graph shares URLs can carry access tokens; do not publish them here. Reading this runbook does not authorize workbook access or writeback: use only the target and actions authorized for your workflow.
+
+The column names below describe the expected sheet schema. Confirm them against your configured workbook before running a review or writeback.
 
 ## Columns
 
