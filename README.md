@@ -43,7 +43,7 @@ This overwrites `content/items.xml` and `content/itempools.xml` with the chosen 
 
 - [English compatibility guide](COMPATIBILITY.md)
 
-The public compatibility scope covers only Fortune Rivalling Heaven Gu Luck thresholds and Dice Set custom dice active items. Memory Disorder has no public compatibility API.
+Compatibility covers Fortune Rivalling Heaven Gu Luck thresholds, Dice Set custom dice active items, and custom character registration for Memory Disorder's random identity pool.
 
 These interfaces are provisional and unversioned. Read the guides before integrating another mod.
 

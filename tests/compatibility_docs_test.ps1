@@ -1,344 +1,168 @@
 param(
     [string]$Root = (Split-Path -Parent $PSScriptRoot),
-    [switch]$ReadmeOnly
+    [switch]$ReadmeOnly,
+    [string]$MemorySourcePath
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-function Fail([string]$Message) {
-    throw "compatibility docs test failed: $Message"
-}
-
 function Require([bool]$Condition, [string]$Message) {
-    if (-not $Condition) { Fail $Message }
+    if (-not $Condition) { throw "compatibility docs test failed: $Message" }
 }
 
 function RequireContains([string]$Text, [string]$Needle, [string]$Surface) {
     Require $Text.Contains($Needle) "$Surface is missing: $Needle"
 }
 
-function RequireNotContains([string]$Text, [string]$Needle, [string]$Surface) {
-    Require (-not $Text.Contains($Needle)) "$Surface contains forbidden text: $Needle"
-}
-
 function CheckRelativeLinks([string]$DocumentPath, [string]$Text) {
-    $directory = Split-Path -Parent $DocumentPath
     foreach ($match in [regex]::Matches($Text, '\[[^\]]+\]\(([^)]+)\)')) {
         $target = $match.Groups[1].Value
         if ($target -match '^(https?://|#)') { continue }
         $pathOnly = $target.Split('#')[0]
         if ([string]::IsNullOrWhiteSpace($pathOnly)) { continue }
-        $resolved = Join-Path $directory $pathOnly
-        Require (Test-Path -LiteralPath $resolved) "broken relative link in ${DocumentPath}: $target"
+        $resolved = Join-Path (Split-Path -Parent $DocumentPath) $pathOnly
+        Require (Test-Path -LiteralPath $resolved) "broken link in ${DocumentPath}: $target"
     }
 }
 
-function GetHeadingLevels([string]$Text) {
-    return @([regex]::Matches($Text, '(?m)^(#{1,6})\s+') | ForEach-Object {
-        $_.Groups[1].Value.Length
-    })
+function ReadDocument([string]$Name) {
+    $path = Join-Path $Root $Name
+    Require (Test-Path -LiteralPath $path) "$Name does not exist"
+    $body = Get-Content -Raw -Encoding utf8 -LiteralPath $path
+    CheckRelativeLinks $path $body
+    return $body
 }
 
-function GetHeadings([string]$Text) {
-    return @([regex]::Matches($Text, '(?m)^(#{1,6})\s+(.+?)\s*$') | ForEach-Object {
-        [pscustomobject]@{
-            Level = $_.Groups[1].Value.Length
-            Text = $_.Groups[2].Value
-        }
-    })
+$readme = ReadDocument 'README.md'
+$readmeChinese = ReadDocument 'README.zh-CN.md'
+RequireContains $readme 'English | [简体中文](README.zh-CN.md)' 'README.md'
+RequireContains $readmeChinese '[English](README.md) | 简体中文' 'README.zh-CN.md'
+RequireContains $readme '(COMPATIBILITY.md)' 'README.md'
+RequireContains $readmeChinese '(COMPATIBILITY.zh-CN.md)' 'README.zh-CN.md'
+foreach ($name in @('Fortune Rivalling Heaven Gu', 'Dice Set', 'Memory Disorder')) {
+    RequireContains $readme $name 'README.md'
 }
-
-function GetExecutableLuaBlocks([string]$Text) {
-    return @([regex]::Matches($Text, '(?ms)^```lua\s*\r?\n(.*?)^```\s*$') | ForEach-Object {
-        $_.Groups[1].Value -replace "`r`n?", "`n"
-    })
+foreach ($name in @('鸿运齐天蛊', '骰子套装', '记忆紊乱')) {
+    RequireContains $readmeChinese $name 'README.zh-CN.md'
 }
-
-function CompileLuaBlock([string]$LuaPath, [string]$Block, [string]$Surface) {
-    $temporaryPath = Join-Path ([System.IO.Path]::GetTempPath()) ("compatibility-docs-$([guid]::NewGuid().ToString('N')).lua")
-    try {
-        [System.IO.File]::WriteAllText($temporaryPath, $Block, [System.Text.UTF8Encoding]::new($false))
-        $luaPathLiteral = $temporaryPath.Replace('\', '/')
-        $compileOnly = "local chunk, err = loadfile([[$luaPathLiteral]], 't'); if not chunk then error(err, 0) end"
-        & $LuaPath -e $compileOnly
-        Require ($LASTEXITCODE -eq 0) "$Surface does not syntax-compile"
-    }
-    finally {
-        if (Test-Path -LiteralPath $temporaryPath) {
-            Remove-Item -LiteralPath $temporaryPath -Force
-        }
-    }
-}
-
-function CheckReadmes {
-    $readmePath = Join-Path $Root 'README.md'
-    $readme = Get-Content -Raw -LiteralPath $readmePath
-    RequireContains $readme '[English compatibility guide](COMPATIBILITY.md)' 'README.md'
-    $readmeChinesePath = Join-Path $Root 'README.zh-CN.md'
-    Require (Test-Path -LiteralPath $readmeChinesePath) 'README.zh-CN.md does not exist'
-    $readmeChinese = Get-Content -Raw -LiteralPath $readmeChinesePath
-    RequireContains $readmeChinese '[简体中文兼容指南](COMPATIBILITY.zh-CN.md)' 'README.zh-CN.md'
-    RequireContains $readme 'English | [简体中文](README.zh-CN.md)' 'README.md'
-    RequireContains $readmeChinese '[English](README.md) | 简体中文' 'README.zh-CN.md'
-    CheckRelativeLinks $readmePath $readme
-    CheckRelativeLinks $readmeChinesePath $readmeChinese
-    RequireContains $readme 'The public compatibility scope covers only Fortune Rivalling Heaven Gu Luck thresholds and Dice Set custom dice active items. Memory Disorder has no public compatibility API.' 'README.md'
-}
-
-CheckReadmes
+Require (-not $readme.Contains('Memory Disorder has no public compatibility API')) 'README has outdated Memory Disorder scope'
+Require (-not $readmeChinese.Contains('记忆紊乱没有公开兼容 API')) 'Chinese README has outdated Memory Disorder scope'
 if ($ReadmeOnly) {
     Write-Host 'README docs tests passed'
     return
 }
 
-$englishPath = Join-Path $Root 'COMPATIBILITY.md'
-Require (Test-Path -LiteralPath $englishPath) 'COMPATIBILITY.md does not exist'
-
-$english = Get-Content -Raw -LiteralPath $englishPath
+$english = ReadDocument 'COMPATIBILITY.md'
+$chinese = ReadDocument 'COMPATIBILITY.zh-CN.md'
+RequireContains $english '(COMPATIBILITY.zh-CN.md)' 'COMPATIBILITY.md'
+RequireContains $chinese '(COMPATIBILITY.md)' 'COMPATIBILITY.zh-CN.md'
 $main = Get-Content -Raw -LiteralPath (Join-Path $Root 'main.lua')
-
-$normalizedEnglish = $english -replace "`r`n", "`n"
-$requiredHeadings = @(
-    '# Neverbirth compatibility guide',
-    '## What another mod can add',
-    '## Terms used in this guide',
-    '## API status and stability',
-    '## Finding Neverbirth and using runtime IDs',
-    '### Names and global object',
-    '### Runtime IDs, not XML-local IDs',
-    '## Load order',
-    '## Fortune Rivalling Heaven Gu',
-    '### What the integration does',
-    '### Functions and parameters',
-    '### Fixed-threshold example',
-    '### Dynamic-threshold example',
-    '## Dice Set',
-    '### What the integration does',
-    '### Function and parameters',
-    '### Registration example',
-    '### Automatic detection and EID',
-    '## Interfaces that are not public',
-    '## Maintainer appendix'
-)
-$previousHeadingOffset = -1
-foreach ($heading in $requiredHeadings) {
-    $headingOffset = $normalizedEnglish.IndexOf($heading, $previousHeadingOffset + 1, [System.StringComparison]::Ordinal)
-    Require ($headingOffset -ge 0) "COMPATIBILITY.md is missing required heading: $heading"
-    Require ($headingOffset -gt $previousHeadingOffset) "COMPATIBILITY.md headings are out of order at: $heading"
-    $previousHeadingOffset = $headingOffset
+foreach ($name in @('RegisterLuckCap', 'RegisterTrinketLuckCap', 'RegisterLuckCapResolver',
+    'RegisterTrinketLuckCapResolver', 'InvalidateFortuneLuck', 'RegisterDiceItem')) {
+    RequireContains $main "function Neverbirth:$name(" 'main.lua'
+    RequireContains $english "Neverbirth:$name(" 'COMPATIBILITY.md'
+    RequireContains $chinese "Neverbirth:$name(" 'COMPATIBILITY.zh-CN.md'
+}
+foreach ($token in @('MemoryDisorderCharacterProfiles', '`id`', '`playerType`', '`isCompatible`',
+    '`protectStats`', '`name`', 'CACHE_LUCK', 'Isaac.GetPlayerTypeByName')) {
+    RequireContains $english $token 'COMPATIBILITY.md'
+    RequireContains $chinese $token 'COMPATIBILITY.zh-CN.md'
 }
 
-$openingLines = @('# Neverbirth compatibility guide', '', '[简体中文](COMPATIBILITY.zh-CN.md)', '', '| Neverbirth item | What another mod can add | Status | Entry points |', '| --- | --- | --- | --- |', '| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver`, `InvalidateFortuneLuck` |', '| Dice Set | Custom dice-themed active items | Provisional and unversioned | `RegisterDiceItem` |', '', 'Memory Disorder does not expose a public compatibility API in the published version.')
-$openingPattern = '\A' + [regex]::Escape($openingLines[0]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[2]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[4]) + '\r?\n' + [regex]::Escape($openingLines[5]) + '\r?\n' + [regex]::Escape($openingLines[6]) + '\r?\n' + [regex]::Escape($openingLines[7]) + '\r?\n\r?\n' + [regex]::Escape($openingLines[9])
-Require ([regex]::IsMatch($english, $openingPattern)) 'COMPATIBILITY.md opening integration table is missing or differs from the two released integrations'
-Require (([regex]::Matches($normalizedEnglish, [regex]::Escape('| Neverbirth item | What another mod can add | Status | Entry points |'))).Count -eq 1) 'COMPATIBILITY.md must contain exactly one public integration table'
-
-foreach ($sourceAnchor in @(
-    'options = options or {}',
-    'protectStats = options.protectStats ~= false',
-    'if (ownerKind ~= "collectible" and ownerKind ~= "trinket") or itemId <= 0 then',
-    'if not fixedCap and type(resolverFn) ~= "function" then',
-    'buckets[itemId][#buckets[itemId] + 1] = {',
-    'local ok, resolvedCap = pcall(entry.resolverFn, player, itemId, count)',
-    'if cap and cap >= 0 then',
-    'and (tonumber(player:GetCollectibleNum(Items.FortuneRivallingHeavenGu)) or 0) > 0',
-    'player:GetCustomCacheValue(self.FortuneRivallingHeavenGu.cacheTag)',
-    'state.players[key].dirty = true',
-    'player:AddCustomCacheTag(state.cacheTag, true)'
-)) {
-    RequireContains $main $sourceAnchor 'main.lua source anchor'
+function LuaBlocks([string]$Text) {
+    return @([regex]::Matches($Text, '(?ms)^```lua\s*\r?\n(.*?)^```\s*$') | ForEach-Object {
+        $_.Groups[1].Value -replace "`r`n?", "`n"
+    })
 }
 
-foreach ($sourceBackedGuideRule in @(
-    'The effect applies only while the player has Fortune Rivalling Heaven Gu and owns the matching registered owner collectible or trinket.',
-    'Luck registration returns `true` for a positive runtime ID with a numeric fixed threshold or function resolver. Negative thresholds may register but are ignored during evaluation, so callers must not use them.',
-    'Resolver calls are protected; errors, non-numeric results, and negative results are ignored. Multiple applicable entries use the highest threshold, and Neverbirth never lowers higher existing Luck.',
-    'Duplicate Luck registrations create duplicate resolver calls. Callers must make registration idempotent.',
-    '`InvalidateFortuneLuck(player)` marks one live player for refresh.',
-    'It has no return value and does not immediately change Luck.',
-    'A plain `AddCacheFlags(CacheFlag.CACHE_LUCK)` / `EvaluateItems()` pair is insufficient for these external changes.',
-    '`itemId` is a positive runtime collectible ID. `options` must be a table or `nil`.',
-    'Other types are unsupported and may raise an error.',
-    'Only `protectStats = false` disables stat protection for that die.',
-    '`RegisterDiceItem` returns `true` for a valid positive ID and `false` for an invalid ID. Re-registering an ID replaces its options.',
-    'The caller must ensure the ID belongs to an active item.',
-    'EID is optional and does not control core registration or Dice Set behavior.',
-    'Memory Disorder does not expose a public compatibility API in the published version.',
-    'This list is not a versioned public contract; do not integrate against these surfaces.',
-    'They verify the released source contracts, but they do not prove in-game load order, third-party-mod interaction, gameplay balance, or visual behavior.'
-)) {
-    RequireContains $english $sourceBackedGuideRule 'COMPATIBILITY.md source-backed rule'
+# Compare executable contracts, not prose, headings, or a fixed block count.
+$englishBlocks = @(LuaBlocks $english)
+$chineseBlocks = @(LuaBlocks $chinese)
+Require ($englishBlocks.Count -gt 0) 'no Lua examples found'
+Require ($englishBlocks.Count -eq $chineseBlocks.Count) 'bilingual Lua example counts differ'
+$lua = (Get-Command lua -CommandType Application -ErrorAction Stop).Source
+$tempPrefix = Join-Path ([IO.Path]::GetTempPath()) ('neverbirth-docs-' + [guid]::NewGuid().ToString('N'))
+$blockPath = "$tempPrefix-block.lua"
+$harnessPath = "$tempPrefix-harness.lua"
+try {
+    for ($i = 0; $i -lt $englishBlocks.Count; $i++) {
+        Require ($englishBlocks[$i] -eq $chineseBlocks[$i]) "Lua example $($i + 1) differs between languages"
+        [IO.File]::WriteAllText($blockPath, $englishBlocks[$i], [Text.UTF8Encoding]::new($false))
+        & $lua -e 'assert(loadfile(assert(arg[0]), "t")); os.exit(0)' $blockPath
+        Require ($LASTEXITCODE -eq 0) "Lua example $($i + 1) has invalid syntax"
+    }
+
+    $examples = @($englishBlocks | Where-Object { $_.Contains('local function registerMemoryDisorderCompat()') })
+    Require ($examples.Count -eq 1) 'one complete Memory Disorder registration example is required'
+    [IO.File]::WriteAllText($blockPath, $examples[0], [Text.UTF8Encoding]::new($false))
+    if (-not $MemorySourcePath) { $MemorySourcePath = Join-Path $Root 'memory_disorder.lua' }
+    Require (Test-Path -LiteralPath $MemorySourcePath) 'Memory Disorder source is missing'
+    $harness = @"
+local initialize = assert(loadfile(arg[2]))()
+local holder, context = {}, { IsAchievementUnlocked = function() return false end }
+local function newMod()
+    local mod = {}
+    local api = initialize(mod, context)
+    return mod, api
+end
+local function exampleEnvironment(mod, typeId)
+    local callbacks = {}
+    local env = setmetatable({ Neverbirth = mod, MyMod = {},
+        ModCallbacks = { MC_POST_GAME_STARTED = 15 } }, { __index = _G })
+    env._G = env
+    env.Isaac = { GetPlayerTypeByName = function(name, tainted)
+        assert(name == 'My Character' and tainted == false, 'character lookup arguments')
+        return typeId
+    end }
+    function env.MyMod:AddCallback(id, fn)
+        assert(id == 15, 'registration retry callback')
+        callbacks[#callbacks + 1] = fn
+    end
+    assert(loadfile(arg[1], 't', env))()
+    return env, function() for _, fn in ipairs(callbacks) do fn(env.MyMod, true) end end
+end
+local function contains(api, id)
+    for _, p in ipairs(api.BuildAllCandidates(holder)) do if p.id == id then return true end end
+    return false
+end
+local mod, api = newMod()
+local profiles = mod.MemoryDisorderCharacterProfiles
+assert(type(profiles) == 'table' and #profiles == 0, 'profiles start empty')
+local env, retry = exampleEnvironment(nil, 9001)
+assert(#profiles == 0, 'missing Neverbirth skips registration')
+env.Neverbirth = mod
+retry(); retry()
+assert(#profiles == 1 and profiles == mod.MemoryDisorderCharacterProfiles, 'retry appends once without replacing array')
+local profile = profiles[1]
+assert(profile.id == 'my_mod:my_character' and profile.playerType == 9001, 'registered identity fields')
+assert(contains(api, profile.id), 'registered character becomes a candidate')
+assert(api.FindProfile(profile.id) == profile, 'stable id supports profile lookup')
+profile.isCompatible = function(player, ctx)
+    assert(player == holder and ctx == context, 'eligibility callback arguments')
+    return true
+end
+assert(contains(api, profile.id), 'true permits candidate')
+profile.isCompatible = function() return false end
+assert(not contains(api, profile.id), 'false excludes candidate')
+profile.isCompatible = function() return 1 end
+assert(not contains(api, profile.id), 'truthy non-boolean excludes candidate')
+profile.isCompatible = function() error('test error') end
+assert(not contains(api, profile.id), 'callback error excludes candidate')
+profile.isCompatible, profile.achievement = nil, 999999
+assert(contains(api, profile.id), 'mod achievement does not replace explicit eligibility check')
+local badMod = newMod()
+exampleEnvironment(badMod, -1)
+assert(#badMod.MemoryDisorderCharacterProfiles == 0, 'failed lookup is not registered')
+print('Memory Disorder example and candidate contract passed')
+"@
+    [IO.File]::WriteAllText($harnessPath, $harness, [Text.UTF8Encoding]::new($false))
+    & $lua $harnessPath $blockPath $MemorySourcePath
+    Require ($LASTEXITCODE -eq 0) 'Memory Disorder example does not satisfy the implemented contract'
 }
-
-$dynamicHeading = '### Dynamic-threshold example'
-$dynamicHeadingOffset = $english.IndexOf($dynamicHeading, [System.StringComparison]::Ordinal)
-Require ($dynamicHeadingOffset -ge 0) 'COMPATIBILITY.md is missing the dynamic Fortune heading'
-$dynamicFenceStart = $english.IndexOf('```lua', $dynamicHeadingOffset + $dynamicHeading.Length, [System.StringComparison]::Ordinal)
-Require ($dynamicFenceStart -ge 0) 'COMPATIBILITY.md is missing the dynamic Fortune Lua block'
-$dynamicFenceEnd = $english.IndexOf('```', $dynamicFenceStart + 6, [System.StringComparison]::Ordinal)
-Require ($dynamicFenceEnd -ge 0) 'COMPATIBILITY.md has an unterminated dynamic Fortune Lua block'
-$dynamicFortuneBlock = $english.Substring($dynamicFenceStart, $dynamicFenceEnd - $dynamicFenceStart + 3)
-
-foreach ($dynamicRequirement in @(
-    'local fortuneResolverCompatRegistered = false',
-    'local function tryRegisterFortuneResolverCompat()',
-    'local myLuckyItem = Isaac.GetItemIdByName("My Lucky Item")',
-    'neverbirth:RegisterLuckCapResolver(myLuckyItem, function(',
-    'MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneResolverCompat)'
-)) {
-    RequireContains $dynamicFortuneBlock $dynamicRequirement 'dynamic Fortune Lua block'
-}
-
-Require ([regex]::IsMatch($dynamicFortuneBlock, 'if type\(myLuckyItem\) ~= "number" or myLuckyItem <= 0 then\r?\n\s+return false')) 'dynamic Fortune Lua block must return false for a missing or non-positive runtime ID'
-Require ([regex]::IsMatch($dynamicFortuneBlock, '(?m)^tryRegisterFortuneResolverCompat\(\)\r?$')) 'dynamic Fortune Lua block must attempt registration immediately'
-
-
-foreach ($signature in @(
-    'function Neverbirth:RegisterLuckCap(',
-    'function Neverbirth:RegisterLuckCapResolver(',
-    'function Neverbirth:RegisterTrinketLuckCap(',
-    'function Neverbirth:RegisterTrinketLuckCapResolver(',
-    'function Neverbirth:InvalidateFortuneLuck(',
-    'function Neverbirth:RegisterDiceItem('
-)) {
-    RequireContains $main $signature 'main.lua'
-}
-
-foreach ($required in @(
-    '# Neverbirth compatibility guide',
-    'Fortune Rivalling Heaven Gu',
-    'Dice Set',
-    'not necessarily 100%',
-    'active item',
-    'dice-themed active item',
-    'collected, held, or used',
-    '`options` must be a table or `nil`',
-    'Provisional and unversioned',
-    'Memory Disorder does not expose a public compatibility API in the published version.',
-    '[`main.lua`](main.lua)',
-    '[Registration contracts](tests/condom_utility_knife_behavior_test.lua)',
-    '[custom cache and refresh behavior](tests/fortune_custom_cache_behavior_test.lua)',
-    'neverbirth:InvalidateFortuneLuck(player)',
-    '[`tests/dice_set_behavior_test.lua`](tests/dice_set_behavior_test.lua)'
-)) {
-    RequireContains $english $required 'COMPATIBILITY.md'
-}
-
-foreach ($forbidden in @(
-    'RegisterMod(',
-    'seen or used',
-    'MemoryDisorderCharacterProfiles',
-    'memory_disorder.lua',
-    'memory_disorder_behavior_test.lua',
-    'public compatibility version'
-)) {
-    RequireNotContains $english $forbidden 'COMPATIBILITY.md'
-}
-
-CheckRelativeLinks $englishPath $english
-
-$chinesePath = Join-Path $Root 'COMPATIBILITY.zh-CN.md'
-Require (Test-Path -LiteralPath $chinesePath) 'COMPATIBILITY.zh-CN.md does not exist'
-$chinese = Get-Content -Raw -LiteralPath $chinesePath
-
-RequireContains $english '[简体中文](COMPATIBILITY.zh-CN.md)' 'COMPATIBILITY.md'
-RequireContains $chinese '[English](COMPATIBILITY.md)' 'COMPATIBILITY.zh-CN.md'
-Require ([regex]::IsMatch($chinese, '\A# Neverbirth 兼容接口指南\r?\n\r?\n\[English\]\(COMPATIBILITY\.md\)')) 'COMPATIBILITY.zh-CN.md must place its English link immediately below the Chinese title'
-
-foreach ($required in @(
-    '# Neverbirth 兼容接口指南',
-    '鸿运齐天蛊',
-    '骰子套装',
-    '最高触发概率不一定是 100%',
-    '主动道具',
-    '骰子类主动道具',
-    '拾取、持有或使用',
-    '`options` 必须是表或 `nil`',
-    '其他类型不受支持，且可能报错。',
-    '临时公开，尚未版本化',
-    '当前公开版本没有为记忆紊乱提供兼容接口。',
-    '此函数没有返回值，也不会立即改变幸运值',
-    'neverbirth:InvalidateFortuneLuck(player)'
-)) {
-    RequireContains $chinese $required 'COMPATIBILITY.zh-CN.md'
-}
-
-foreach ($forbidden in @(
-    'RegisterMod(',
-    '满概率',
-    '兼容表面',
-    '目标能力',
-    '候选池',
-    '见过或使用过',
-    'MemoryDisorderCharacterProfiles',
-    'memory_disorder.lua',
-    'memory_disorder_behavior_test.lua',
-    '公共兼容版本'
-)) {
-    RequireNotContains $chinese $forbidden 'COMPATIBILITY.zh-CN.md'
-}
-
-$englishLevels = GetHeadingLevels $english
-$chineseLevels = GetHeadingLevels $chinese
-Require (($englishLevels -join ',') -eq ($chineseLevels -join ',')) 'English and Chinese heading levels differ'
-
-$headingPairs = @(
-    @{ Level = 1; English = 'Neverbirth compatibility guide'; Chinese = 'Neverbirth 兼容接口指南' },
-    @{ Level = 2; English = 'What another mod can add'; Chinese = '其他 Mod 可以接入什么' },
-    @{ Level = 2; English = 'Terms used in this guide'; Chinese = '本文术语' },
-    @{ Level = 2; English = 'API status and stability'; Chinese = '接口状态与稳定性' },
-    @{ Level = 2; English = 'Finding Neverbirth and using runtime IDs'; Chinese = '获取 Neverbirth 与运行时 ID' },
-    @{ Level = 3; English = 'Names and global object'; Chinese = '名称与全局对象' },
-    @{ Level = 3; English = 'Runtime IDs, not XML-local IDs'; Chinese = '使用运行时 ID，不要使用 XML 本地 ID' },
-    @{ Level = 2; English = 'Load order'; Chinese = '加载顺序' },
-    @{ Level = 2; English = 'Fortune Rivalling Heaven Gu'; Chinese = '鸿运齐天蛊' },
-    @{ Level = 3; English = 'What the integration does'; Chinese = '这项兼容有什么用' },
-    @{ Level = 3; English = 'Functions and parameters'; Chinese = '函数与参数' },
-    @{ Level = 3; English = 'Fixed-threshold example'; Chinese = '固定阈值示例' },
-    @{ Level = 3; English = 'Dynamic-threshold example'; Chinese = '动态阈值示例' },
-    @{ Level = 2; English = 'Dice Set'; Chinese = '骰子套装' },
-    @{ Level = 3; English = 'What the integration does'; Chinese = '这项兼容有什么用' },
-    @{ Level = 3; English = 'Function and parameters'; Chinese = '函数与参数' },
-    @{ Level = 3; English = 'Registration example'; Chinese = '注册示例' },
-    @{ Level = 3; English = 'Automatic detection and EID'; Chinese = '自动识别与 EID' },
-    @{ Level = 2; English = 'Interfaces that are not public'; Chinese = '不公开的接口' },
-    @{ Level = 2; English = 'Maintainer appendix'; Chinese = '维护者附录' }
-)
-$englishHeadings = GetHeadings $english
-$chineseHeadings = GetHeadings $chinese
-Require ($englishHeadings.Count -eq $headingPairs.Count) 'COMPATIBILITY.md heading count differs from the bilingual heading map'
-Require ($chineseHeadings.Count -eq $headingPairs.Count) 'COMPATIBILITY.zh-CN.md heading count differs from the bilingual heading map'
-for ($index = 0; $index -lt $headingPairs.Count; $index++) {
-    $pair = $headingPairs[$index]
-    Require ($englishHeadings[$index].Level -eq $pair.Level) "English heading $($index + 1) has an unexpected level"
-    Require ($englishHeadings[$index].Text -eq $pair.English) "English heading $($index + 1) differs from the bilingual heading map"
-    Require ($chineseHeadings[$index].Level -eq $pair.Level) "Chinese heading $($index + 1) has an unexpected level"
-    Require ($chineseHeadings[$index].Text -eq $pair.Chinese) "Chinese heading $($index + 1) differs from the bilingual heading map"
-}
-
-$englishBlocks = GetExecutableLuaBlocks $english
-$chineseBlocks = GetExecutableLuaBlocks $chinese
-Require ($englishBlocks.Count -eq 8) 'COMPATIBILITY.md must contain exactly eight Lua blocks'
-Require ($chineseBlocks.Count -eq 8) 'COMPATIBILITY.zh-CN.md must contain exactly eight Lua blocks'
-Require ($englishBlocks.Count -eq $chineseBlocks.Count) 'English and Chinese Lua block counts differ'
-for ($index = 0; $index -lt $englishBlocks.Count; $index++) {
-    Require ($englishBlocks[$index] -eq $chineseBlocks[$index]) "Lua block $($index + 1) differs between languages"
-}
-
-$loadOrderGlobalBlock = $englishBlocks[0]
-Require (-not [regex]::IsMatch($loadOrderGlobalBlock, '(?m)^\s*return\b')) 'load-order/global-object Lua block must not use a top-level early return'
-
-$lua = Get-Command lua -CommandType Application -ErrorAction Stop
-foreach ($guide in @(
-    @{ Name = 'COMPATIBILITY.md'; Blocks = $englishBlocks },
-    @{ Name = 'COMPATIBILITY.zh-CN.md'; Blocks = $chineseBlocks }
-)) {
-    for ($index = 0; $index -lt $guide.Blocks.Count; $index++) {
-        CompileLuaBlock $lua.Source $guide.Blocks[$index] "$($guide.Name) Lua block $($index + 1)"
+finally {
+    foreach ($path in @($blockPath, $harnessPath)) {
+        if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }
     }
 }
-
-CheckRelativeLinks $chinesePath $chinese
-
-Write-Host 'compatibility docs tests passed'
+Write-Host "compatibility docs tests passed ($($englishBlocks.Count) matching Lua blocks per language)"

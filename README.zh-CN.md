@@ -53,7 +53,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-neverbrith.ps1 -
 
 ## 为其他 Mod 作者提供的兼容接口
 
-公开接口目前仅覆盖**鸿运齐天蛊的幸运阈值登记**和**骰子套装的自定义骰子主动道具登记**。记忆紊乱没有公开兼容 API。这些接口仍是临时、未版本化的约定，接入前请阅读[简体中文兼容指南](COMPATIBILITY.zh-CN.md)。
+兼容入口包括**鸿运齐天蛊的幸运阈值登记**、**骰子套装的自定义骰子主动道具登记**，以及**记忆紊乱的自定义角色候选登记**。接口暂未版本化，接入方式见[简体中文兼容指南](COMPATIBILITY.zh-CN.md)。
 
 ## 开发与检查
 

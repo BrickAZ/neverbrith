@@ -1,224 +1,131 @@
-# Neverbirth compatibility guide
+# Neverbirth compatibility API
 
 [简体中文](COMPATIBILITY.zh-CN.md)
 
-| Neverbirth item | What another mod can add | Status | Entry points |
-| --- | --- | --- | --- |
-| Fortune Rivalling Heaven Gu | Luck thresholds for custom collectibles and trinkets | Provisional and unversioned | `RegisterLuckCap`, `RegisterLuckCapResolver`, `RegisterTrinketLuckCap`, `RegisterTrinketLuckCapResolver`, `InvalidateFortuneLuck` |
-| Dice Set | Custom dice-themed active items | Provisional and unversioned | `RegisterDiceItem` |
+| Integration | What it does |
+| --- | --- |
+| Fortune Rivalling Heaven Gu | Register the Luck needed for your item's proc chance to reach its maximum, so Fortune can raise the holder's Luck accordingly. |
+| Dice Set | Make your custom dice active count toward Dice Set. |
+| Memory Disorder | Add your custom character to the random identity pool. |
 
-Memory Disorder does not expose a public compatibility API in the published version.
-
-## What another mod can add
-
-Another mod can register its own collectibles or trinkets as Luck-threshold owners for Fortune Rivalling Heaven Gu, or explicitly register one of its active items as a die for Dice Set. These integrations are optional: Neverbirth continues to work when another mod does not register anything.
-
-## Terms used in this guide
-
-A Luck threshold is the Luck value where an effect reaches its highest possible activation chance. That chance is not necessarily 100%.
-
-An active item is a collectible the player activates manually from an active-item slot, such as the D6.
-
-A dice-themed active item is an active item presented as a die or built around a dice-like effect. It does not mean a die that is currently active.
-
-## API status and stability
-
-The entry points in this guide are provisional and unversioned. They are the published integration surface in the released source tree, not a promise that every unlisted Neverbirth function is stable. Check the current source and this guide when updating either mod.
-
-## Finding Neverbirth and using runtime IDs
-
-### Names and global object
-
-Neverbirth exposes its integration object through the global `Neverbirth` value. A compatible mod should look it up defensively and skip registration when the object or required function is unavailable.
-
-### Runtime IDs, not XML-local IDs
-
-Every `itemId` and `trinketId` in this guide is a runtime ID returned by Isaac's name lookup, not an XML-local ID from a content file. Resolve an ID only after the relevant mod content is available, and reject a missing or non-positive result.
-
-## Load order
-
-The examples below assume that your mod already has its own `MyMod` object. Do not call `RegisterMod` again just to add Neverbirth compatibility.
-
-```lua
-local neverbirth = _G and rawget(_G, "Neverbirth")
-if neverbirth and type(neverbirth.RegisterLuckCap) == "function" then
-    -- Optional Neverbirth compatibility registration goes here.
-end
-```
-
-```lua
-local myItemId = Isaac.GetItemIdByName("My Mod Item")
-```
-
-Do the lookup after both mods have loaded. The registration examples below try immediately and again after game start, so they remain safe if the global becomes available later in the startup sequence.
+Use the global `Neverbirth` after both mods have loaded; skip compatibility if the required function or table is absent. Item, trinket, and character IDs are **runtime IDs**. Register each entry once. These interfaces are provisional and unversioned; EID is optional.
 
 ## Fortune Rivalling Heaven Gu
 
-### What the integration does
+Only applies while the player holds Fortune and a registered owner item or trinket. The highest applicable threshold wins; higher existing Luck is preserved. A threshold is where the effect reaches its maximum chance, which need not be 100%.
 
-The effect applies only while the player has Fortune Rivalling Heaven Gu and owns the matching registered owner collectible or trinket. It finds the highest applicable Luck threshold and raises the player's Luck to that value when needed; it never lowers a higher Luck value already produced by the cache chain.
-
-### Functions and parameters
+### RegisterLuckCap
 
 ```lua
-Neverbirth:RegisterLuckCap(itemId, fixedCap)
-Neverbirth:RegisterLuckCapResolver(itemId, resolverFn)
-Neverbirth:RegisterTrinketLuckCap(trinketId, fixedCap)
-Neverbirth:RegisterTrinketLuckCapResolver(trinketId, resolverFn)
-Neverbirth:InvalidateFortuneLuck(player)
+Neverbirth:RegisterLuckCap(itemId, fixedCap) -- boolean
 ```
 
-Luck registration returns `true` for a positive runtime ID with a numeric fixed threshold or function resolver. Negative thresholds may register but are ignored during evaluation, so callers must not use them.
+Register a collectible's fixed threshold. `itemId`: positive integer collectible ID; `fixedCap`: non-negative number. Returns `true` on registration, `false` for an invalid ID or missing threshold.
 
-Resolver calls are protected; errors, non-numeric results, and negative results are ignored. Multiple applicable entries use the highest threshold, and Neverbirth never lowers higher existing Luck.
-
-Duplicate Luck registrations create duplicate resolver calls. Callers must make registration idempotent. Resolver functions run in the custom Luck-threshold cache and must remain fast, deterministic, and free of side effects. A normal `CACHE_LUCK` evaluation reads the cached threshold; it does not necessarily call the resolver again.
-
-For a resolver, the arguments are `player`, the registered runtime ID, and the owner's count: collectible copy count or effective trinket multiplier (including golden or smelted trinkets). Use the collectible functions for collectibles and the trinket functions for trinkets.
-
-`InvalidateFortuneLuck(player)` marks one live player for refresh. Omit `player` (or pass `nil`) to mark all current players. It has no return value and does not immediately change Luck. On the next Neverbirth update, the custom threshold cache refreshes first, followed by the normal Luck cache; a failed refresh is retried on a later update.
-
-Registration and changes to registered owner counts already trigger refreshes. If a resolver also depends on health, a timer, another unregistered item, or your mod's own state, call `InvalidateFortuneLuck` after that input changes. A plain `AddCacheFlags(CacheFlag.CACHE_LUCK)` / `EvaluateItems()` pair is insufficient for these external changes.
-
-### Fixed-threshold example
+### RegisterTrinketLuckCap
 
 ```lua
-local fortuneCompatRegistered = false
-
-local function tryRegisterFortuneCompat()
-    if fortuneCompatRegistered then
-        return true
-    end
-
-    local neverbirth = _G and rawget(_G, "Neverbirth")
-    if not neverbirth or type(neverbirth.RegisterLuckCap) ~= "function" then
-        return false
-    end
-
-    local myLuckyItem = Isaac.GetItemIdByName("My Lucky Item")
-    if type(myLuckyItem) ~= "number" or myLuckyItem <= 0 then
-        return false
-    end
-
-    fortuneCompatRegistered = neverbirth:RegisterLuckCap(myLuckyItem, 10) == true
-    return fortuneCompatRegistered
-end
-
-tryRegisterFortuneCompat()
-MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneCompat)
+Neverbirth:RegisterTrinketLuckCap(trinketId, fixedCap) -- boolean
 ```
 
-### Dynamic-threshold example
+The trinket equivalent. `trinketId`: positive integer trinket ID; `fixedCap` and return value follow `RegisterLuckCap`.
+
+### RegisterLuckCapResolver
 
 ```lua
-local fortuneResolverCompatRegistered = false
-
-local function tryRegisterFortuneResolverCompat()
-    if fortuneResolverCompatRegistered then
-        return true
-    end
-
-    local neverbirth = _G and rawget(_G, "Neverbirth")
-    if not neverbirth or type(neverbirth.RegisterLuckCapResolver) ~= "function" then
-        return false
-    end
-
-    local myLuckyItem = Isaac.GetItemIdByName("My Lucky Item")
-    if type(myLuckyItem) ~= "number" or myLuckyItem <= 0 then
-        return false
-    end
-
-    fortuneResolverCompatRegistered = neverbirth:RegisterLuckCapResolver(myLuckyItem, function(player, itemId, count)
-        if count >= 2 then
-            return 8
-        end
-        return 12
-    end) == true
-    return fortuneResolverCompatRegistered
-end
-
-tryRegisterFortuneResolverCompat()
-MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterFortuneResolverCompat)
+Neverbirth:RegisterLuckCapResolver(itemId, resolverFn) -- boolean
 ```
 
-Keep this resolver side-effect free. In particular, do not register again from the resolver; registration belongs in an idempotent load-time or game-start path.
+Register a dynamic collectible threshold. `resolverFn(player, itemId, count)` returns a non-negative number; `count` is the player's copy count. Returns `false` for an invalid ID or non-function resolver, otherwise `true`. Resolver errors and invalid or negative results are ignored.
 
-The example above depends only on the registered item's copy count. If you extend a resolver to read other state, call a notification helper like this from your mod after updating that state. Pass the affected player, or omit the argument when the change affects every player. Do not call it from inside the resolver or every frame when nothing changed.
+### RegisterTrinketLuckCapResolver
 
 ```lua
-local function onMyLuckyThresholdChanged(player)
-    local neverbirth = _G and rawget(_G, "Neverbirth")
-    if neverbirth and type(neverbirth.InvalidateFortuneLuck) == "function" then
-        neverbirth:InvalidateFortuneLuck(player)
-    end
-end
-
--- Call onMyLuckyThresholdChanged(player) after changing a resolver input.
--- Call onMyLuckyThresholdChanged() for a change shared by all players.
+Neverbirth:RegisterTrinketLuckCapResolver(trinketId, resolverFn) -- boolean
 ```
+
+The trinket equivalent. The callback receives `(player, trinketId, multiplier)`; `multiplier` includes golden and smelted trinket effects. Registration and return rules follow `RegisterLuckCapResolver`.
+
+**Register each Luck entry once:** duplicate registrations accumulate. Resolvers must be fast and free of side effects.
+
+### InvalidateFortuneLuck
+
+```lua
+Neverbirth:InvalidateFortuneLuck(player) -- no return value
+```
+
+Refresh a live player's dynamic threshold on the next Neverbirth update. `player`: `EntityPlayer` or `nil`; omit it to refresh all current players. Registration and registered owner-count changes already trigger refreshes. Call this after changing other resolver inputs, such as health or your mod's own state. Ordinary `CACHE_LUCK` evaluation alone does not refresh the threshold. Do not call from inside a resolver.
 
 ## Dice Set
 
-### What the integration does
-
-Dice Set counts recognized dice items that the player has collected, held, or used. Merely seeing a pedestal does not count. A recognized item contributes once per player toward the set; the caller is responsible for registering only an actual dice-themed active item.
-
-### Function and parameters
+### RegisterDiceItem
 
 ```lua
-Neverbirth:RegisterDiceItem(itemId, options)
+Neverbirth:RegisterDiceItem(itemId, options) -- boolean
 ```
 
-`itemId` is a positive runtime collectible ID. `options` must be a table or `nil`. Other types are unsupported and may raise an error. `options.name` is stored but does not change player-facing text. Only `protectStats = false` disables stat protection for that die.
+Register your dice-themed active item. Collected, held, or used dice count once per player; merely seeing a pedestal does not count. `itemId`: positive integer collectible ID. The caller must ensure it is an active item. Returns `true` for a valid ID, otherwise `false`.
 
-`RegisterDiceItem` returns `true` for a valid positive ID and `false` for an invalid ID. Re-registering an ID replaces its options. The caller must ensure the ID belongs to an active item.
+`options` is a table or `nil`:
 
-Crooked Penny and Glitched Crown remain excluded. There is no unregister API. `refundCharges` is not supported.
+| Field | Meaning |
+| --- | --- |
+| `protectStats` | Defaults to `true`; only `false` opts this die out of Dice Set's stat protection. |
+| `name` | Optional stored label; does not change the displayed item name. |
 
-### Registration example
+Re-registering the same ID replaces its options. Crooked Penny and Glitched Crown remain excluded. There is no unregister API or `refundCharges` option.
+
+## Memory Disorder
+
+### MemoryDisorderCharacterProfiles
 
 ```lua
-local diceCompatRegistered = false
+table.insert(Neverbirth.MemoryDisorderCharacterProfiles, profile)
+```
 
-local function tryRegisterDiceCompat()
-    if diceCompatRegistered then
-        return true
-    end
+An array of character profiles, initially empty. Appending a profile makes that character eligible for Memory Disorder's future random identity selections; it does not immediately transform a player. Unregistered mod characters are not selected automatically.
 
+| Profile field | Type | Meaning |
+| --- | --- | --- |
+| `id` | `string` | Required stable, unique key, such as `my_mod:my_character`. It is used to look up saved identities; do not reuse a vanilla profile ID or change it between sessions. |
+| `playerType` | `integer` | Required runtime character type, resolved with `Isaac.GetPlayerTypeByName`. Reject failed lookups before appending. |
+| `isCompatible` | `function` or `nil` | Optional `(player, context) -> boolean` eligibility check for the current holder. Only `true` admits the profile; errors exclude it. Omission allows it without this check. `context` is internal; do not rely on its fields. |
+
+For custom unlocks, check your own unlock state in `isCompatible`; a profile's `achievement` field is not automatically checked for mod characters. Append once, keep the original array, and register again on each mod load before a saved run is restored. The table does not validate character existence or remove duplicates.
+
+This entry point covers candidate registration. Custom health systems, linked bodies, and character-specific state still need their own compatibility testing. Other profile fields and `Neverbirth.MemoryDisorder` helpers are internal.
+
+<details>
+<summary>Complete example: register one always-unlocked custom character</summary>
+
+Assumes your mod already has `MyMod`. Replace `My Character` and `my_mod:my_character`. For an unlockable character, add `isCompatible` using your mod's unlock check.
+
+```lua
+local function registerMemoryDisorderCompat()
     local neverbirth = _G and rawget(_G, "Neverbirth")
-    if not neverbirth or type(neverbirth.RegisterDiceItem) ~= "function" then
-        return false
+    local profiles = neverbirth and neverbirth.MemoryDisorderCharacterProfiles
+    if type(profiles) ~= "table" then return end
+
+    local profileId = "my_mod:my_character"
+    for _, profile in ipairs(profiles) do
+        if profile.id == profileId then return end
     end
 
-    local myDice = Isaac.GetItemIdByName("My Custom Dice")
-    if type(myDice) ~= "number" or myDice <= 0 then
-        return false
-    end
+    local playerType = Isaac.GetPlayerTypeByName("My Character", false)
+    if type(playerType) ~= "number" or playerType < 0 then return end
 
-    diceCompatRegistered = neverbirth:RegisterDiceItem(myDice, {
-        name = "My Custom Dice",
-        protectStats = true,
-    }) == true
-    return diceCompatRegistered
+    table.insert(profiles, {
+        id = profileId,
+        playerType = playerType,
+    })
 end
 
-tryRegisterDiceCompat()
-MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, tryRegisterDiceCompat)
+registerMemoryDisorderCompat()
+MyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, registerMemoryDisorderCompat)
 ```
 
-### Automatic detection and EID
+The immediate attempt supports early registration; game start retries if Neverbirth loaded later. The ID check prevents repeated inserts.
 
-Name-based dice detection is a fallback. Explicit registration is preferred. EID is optional and does not control core registration or Dice Set behavior.
+</details>
 
-## Interfaces that are not public
-
-The following are not public integration interfaces: test APIs, carrier APIs, runtime state, `RegisterPickupBannerText`, `RegisterFortuneLuckEntry`, and any unlisted helper or callback. This list is not a versioned public contract; do not integrate against these surfaces.
-
-## Maintainer appendix
-
-The source and behavior tests below are useful static references for maintainers. They verify the released source contracts, but they do not prove in-game load order, third-party-mod interaction, gameplay balance, or visual behavior.
-
-| Integration | Implementation | Main tests |
-| --- | --- | --- |
-| Fortune Rivalling Heaven Gu | `RegisterLuckCap*`, `RegisterTrinketLuckCap*`, and `InvalidateFortuneLuck` in [`main.lua`](main.lua) | [Registration contracts](tests/condom_utility_knife_behavior_test.lua); [custom cache and refresh behavior](tests/fortune_custom_cache_behavior_test.lua) |
-| Dice Set | Dice Set functions in [`main.lua`](main.lua) | [`tests/dice_set_behavior_test.lua`](tests/dice_set_behavior_test.lua) |
+Source: [Luck and dice APIs](main.lua), [character profiles](memory_disorder.lua). Behavior checks: [Luck](tests/fortune_custom_cache_behavior_test.lua), [dice](tests/dice_set_behavior_test.lua), [characters](tests/memory_disorder_behavior_test.lua). These checks do not replace in-game compatibility testing.
