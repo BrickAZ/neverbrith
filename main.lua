@@ -1,4 +1,4 @@
--- Required REPENTOGON bootstrap: no registration or module side effects before this gate.
+-- Required REPENTOGON bootstrap: no gameplay registration or module side effects before this gate.
 do
     local function supportedRelease(runtime)
         if type(runtime) ~= "table" or runtime.Real ~= true
@@ -24,6 +24,10 @@ do
             elseif Isaac and type(Isaac.DebugString) == "function" then Isaac.DebugString(message)
             elseif type(print) == "function" then print(message) end
         end
+        -- Only vanilla-safe diagnostics and drop blocking may run without the dependency.
+        -- Do not export Neverbirth or load any gameplay / EID / menu modules here.
+        local dependencyMod = RegisterMod("neverbirth", 1)
+        include("repentogon_dependency_guard")(dependencyMod)
         return
     end
 end

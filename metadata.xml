@@ -33,6 +33,7 @@
 [h1]兼容性[/h1]
 
 [list]
+[*] 必须安装 REPENTOGON（忏悔龙）1.0.12a 或更新的可识别稳定版本。缺少或不兼容时停止加载玩法、屏蔽本模组掉落，并在初始房间的角色头顶显示警告。
 [*] External Item Descriptions：支持中文与英文说明。
 [/list]
 
@@ -76,6 +77,7 @@ It adds a growing set of custom items with EID support and Chinese / English ite
 [h1]Compatibility[/h1]
 
 [list]
+[*] Requires REPENTOGON 1.0.12a or a newer recognized stable release. Missing or incompatible builds disable gameplay and mod drops, with a warning above players in the starting room.
 [*] External Item Descriptions: supported in Chinese and English.
 [/list]
 

@@ -8,8 +8,10 @@
 ## 运行要求
 
 - **游戏与 REPENTOGON 必须版本匹配。** 当前官方安装指南面向 **Repentance+**；旧版 **Repentance（忏悔）** 需要与其匹配的旧版 REPENTOGON。
-- **REPENTOGON 是必需前置。** 启动检查接受 `1.0.12a` 或更新的、可识别的稳定版本；缺失、过旧或无法识别的构建会让 Mod 停止初始化，并显示中英双语提示。这只是最低启动门槛，不是推荐版本或已经验证的游戏与加载器组合。
+- **REPENTOGON 是必需前置。** 启动检查接受 `1.0.12a` 或更新的、可识别的稳定版本；缺失、过旧或无法识别的构建会停止加载全部玩法。每层初始房间内，每位角色头顶都会持续显示警告，说明前置要求，并提示安装或更新后重启游戏；文字跟随游戏的中文／英文设置。这只是最低启动门槛，不是推荐版本或已经验证的游戏与加载器组合。
 - **External Item Descriptions（EID）可选。** 安装后可以查看本 Mod 已提供的道具说明；核心道具逻辑不依赖 EID。
+
+前置检查失败时，仅加载原版接口可运行的警告与掉落屏蔽逻辑。本模组道具和封槽饰品会从掉落池移除；仍被直接生成或变形出来的模组道具替换为早餐，封槽饰品替换为回形针（保留金色状态），蓄风药剂映射为原版臭屁药丸。原版和其他模组的掉落不受影响，也不会清除存档中已持有的道具。为兼容 `1.0.12a`，游戏引擎仍会读取 XML／资源；这里停用的是玩法和掉落，不能撤销引擎已读取的注册。
 
 REPENTOGON 当前支持的游戏版本和启动方式请查阅[官方安装指南](https://repentogon.com/install.html)。旧版 Repentance 用户需要核对对应发行版的说明，不能直接套用当前 Repentance+ 的启动器步骤。
 
@@ -71,6 +73,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-neverbrith.ps1 -
 ```powershell
 luac -p main.lua
 lua tests/repentogon_bootstrap_test.lua
+lua tests/repentogon_dependency_guard_test.lua
 lua tests/localization_test.lua
 lua tests/fortune_custom_cache_behavior_test.lua
 lua tests/dice_set_behavior_test.lua

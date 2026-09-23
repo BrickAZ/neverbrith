@@ -8,8 +8,10 @@ A mod for The Binding of Isaac: Repentance by brick.
 ## Requirements and installation
 
 - **The game and REPENTOGON must be a matching pair.** The current official installation guide targets **Repentance+**; an older **Repentance** installation needs a compatible legacy REPENTOGON release.
-- **REPENTOGON is required.** The bootstrap accepts `1.0.12a` or a newer recognized stable release. Missing, outdated, or unrecognized builds stop initialization with a bilingual message. This is a minimum startup check, not a recommended or verified game-and-loader combination.
+- **REPENTOGON is required.** The bootstrap accepts `1.0.12a` or a newer recognized stable release. Missing, outdated, or unrecognized builds stop all gameplay initialization. A warning above each player in the starting room of each floor explains the requirement and asks them to install/update REPENTOGON and restart. It follows the game's Chinese/English language setting. This is a minimum startup check, not a recommended or verified game-and-loader combination.
 - **External Item Descriptions (EID) is optional.** It displays the descriptions supplied by this mod; core item behavior does not require EID.
+
+When the dependency check fails, only the vanilla-safe warning and drop blocker load. Mod collectibles and the slot-seal trinket are removed from the pools. Any remaining spawned/morphed mod collectibles become Breakfast; slot-seal trinkets become Paper Clip (preserving golden status), and Wind Charge Potion resolves to Bad Gas. Vanilla and other mods' drops are left alone. Existing held items are not stripped from saves. To preserve `1.0.12a` compatibility, the engine still reads the packaged XML/resources; this guard disables gameplay and drops rather than unloading those engine registrations.
 
 Follow the [official REPENTOGON installation guide](https://repentogon.com/install.html) for its currently supported game versions and launch instructions. Do not apply the current Repentance+ launcher instructions to an older Repentance installation without checking the matching release instructions.
 
@@ -63,6 +65,7 @@ Use Lua 5.4 and PowerShell 7 (pwsh) for development checks so UTF-8 scripts are 
 ```powershell
 luac -p main.lua
 lua tests/repentogon_bootstrap_test.lua
+lua tests/repentogon_dependency_guard_test.lua
 lua tests/localization_test.lua
 lua tests/fortune_custom_cache_behavior_test.lua
 lua tests/dice_set_behavior_test.lua
