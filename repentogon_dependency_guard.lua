@@ -4,6 +4,7 @@
 return function(mod)
     local game = Game()
     local active = true -- Also works when Lua is reloaded during an existing run.
+    local poolCleanupPending = true -- Reapply on the first update after a Lua reload.
     local collectibleIds = {}
     -- Pure generated data; never include gameplay modules from this branch.
     for _, entry in ipairs(include("generated.neverbirth_collectibles")) do
@@ -23,9 +24,17 @@ return function(mod)
     end
 
     local function removeFromPools()
+        if not active or not poolCleanupPending or game:GetNumPlayers() == 0 then return end
         local pool = game:GetItemPool()
         for id in pairs(collectibleIds) do pool:RemoveCollectible(id) end
         if sealId > 0 then pool:RemoveTrinket(sealId) end
+        poolCleanupPending = false
+    end
+
+    local function queuePoolCleanup()
+        -- PLAYER_INIT can run before the native pool is ready (vanilla crashes
+        -- inside RemoveCollectible). Only record intent during initialization.
+        poolCleanupPending = true
     end
 
     local function replacementCollectible(_, id)
@@ -111,13 +120,20 @@ return function(mod)
         end
     end
 
-    mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, removeFromPools)
+    mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, queuePoolCleanup)
     mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
         active = true
+        poolCleanupPending = true
         removeFromPools()
     end)
-    mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, removeFromPools)
-    mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function() active = false end)
+    -- NEW_LEVEL also runs before GAME_STARTED on the initial floor. Generation
+    -- and pickup callbacks below cover drops until this deferred cleanup runs.
+    mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, queuePoolCleanup)
+    mod:AddCallback(ModCallbacks.MC_POST_UPDATE, removeFromPools)
+    mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
+        active = false
+        poolCleanupPending = false
+    end)
     mod:AddCallback(ModCallbacks.MC_POST_GET_COLLECTIBLE, replacementCollectible)
     mod:AddCallback(ModCallbacks.MC_GET_TRINKET, replacementTrinket)
     mod:AddCallback(ModCallbacks.MC_GET_PILL_EFFECT, function(_, effect)

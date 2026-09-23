@@ -11,6 +11,8 @@ local function fixture(locale, failFont)
         owned[id] = true
     end
     local roomIndex, startingIndex, count = 84, 84, 2
+    local poolReady = false
+    local poolReads = 0
     local players = {
         { Position = { X = 300, Y = 180 }, PositionOffset = { X = 7, Y = -13 }, SpriteOffset = { X = 3, Y = -11 } },
         { Position = { X = 470, Y = 200 }, PositionOffset = { X = -9, Y = 17 }, SpriteOffset = { X = -5, Y = 19 } },
@@ -31,7 +33,7 @@ local function fixture(locale, failFont)
     end }
     local env = setmetatable({ Options = { Language = locale } }, { __index = _G })
     env._G = env
-    env.ModCallbacks = { MC_POST_RENDER = 2, MC_POST_PLAYER_INIT = 9,
+    env.ModCallbacks = { MC_POST_UPDATE = 1, MC_POST_RENDER = 2, MC_POST_PLAYER_INIT = 9,
         MC_POST_GAME_STARTED = 15, MC_PRE_GAME_EXIT = 16, MC_POST_NEW_LEVEL = 18,
         MC_POST_PICKUP_INIT = 34, MC_POST_PICKUP_UPDATE = 35,
         MC_POST_GET_COLLECTIBLE = 63, MC_GET_PILL_EFFECT = 65, MC_GET_TRINKET = 66 }
@@ -42,7 +44,11 @@ local function fixture(locale, failFont)
     env.EntityType = { ENTITY_PICKUP = 5 }
     env.Game = function() return {
         GetLevel = function() return level end, GetNumPlayers = function() return count end,
-        GetItemPool = function() return pool end,
+        GetItemPool = function()
+            assert(poolReady, "item pool accessed before run initialization completed")
+            poolReads = poolReads + 1
+            return pool
+        end,
     } end
     env.KColor = setmetatable({}, { __call = function(_, r, g, b, a)
         return setmetatable({ R = r, G = g, B = b, A = a }, colorMeta)
@@ -99,6 +105,8 @@ local function fixture(locale, failFont)
         players = players,
         moveRoom = function(value) roomIndex = value end,
         setPlayerCount = function(value) count = value end,
+        setPoolReady = function(value) poolReady = value end,
+        poolReads = function() return poolReads end,
         clearDraw = function() for i = #drawn, 1, -1 do drawn[i] = nil end end,
     }
 end
@@ -107,12 +115,24 @@ for _, locale in ipairs({ "en", "zh" }) do
     local f = fixture(locale)
     assert(f.env.Neverbirth == nil, "failed dependency must not export gameplay API")
     f.fire("MC_POST_PLAYER_INIT", f.players[1])
+    f.fire("MC_POST_NEW_LEVEL") -- Initial floor arrives before MC_POST_GAME_STARTED.
+    assert(f.poolReads() == 0 and next(f.removedItems) == nil,
+        "startup callbacks must not touch an uninitialized native item pool")
+    assert(f.fire("MC_POST_GET_COLLECTIBLE", 1001) == 25,
+        "early drops must still be blocked before pool cleanup")
+    f.setPoolReady(true)
+    f.fire("MC_POST_GAME_STARTED", false)
     for id in pairs(f.owned) do assert(f.removedItems[id], "owned item still in pools: " .. id) end
     assert(f.removedTrinkets[801], "hidden seal still in trinket pool")
+    local reads = f.poolReads()
+    f.fire("MC_POST_UPDATE")
+    f.fire("MC_POST_UPDATE")
+    assert(f.poolReads() == reads, "pool cleanup must not repeat every frame")
     for _, callback in ipairs({ "MC_POST_NEW_LEVEL", "MC_POST_GAME_STARTED" }) do
         for id in pairs(f.removedItems) do f.removedItems[id] = nil end
         f.removedTrinkets[801] = nil
         f.fire(callback, true)
+        f.fire("MC_POST_UPDATE")
         for id in pairs(f.owned) do assert(f.removedItems[id], "pool exclusion lost on run/floor change") end
         assert(f.removedTrinkets[801])
     end
@@ -158,6 +178,43 @@ for _, locale in ipairs({ "en", "zh" }) do
     f.fire("MC_POST_RENDER")
     assert(f.drawn[2].text:find(locale == "zh" and "neverbirth" or "未生", 1, true), "language switch ignored")
 end
+
+-- Continue, co-op initialization, in-run Lua reload and exit all use the same
+-- real entrypoint. The pool double refuses calls while native state is unready.
+local continued = fixture("en")
+continued.fire("MC_POST_PLAYER_INIT", continued.players[1])
+continued.setPoolReady(true)
+continued.fire("MC_POST_GAME_STARTED", true)
+assert(continued.poolReads() == 1, "continued run must clean the initialized pool")
+continued.setPoolReady(false)
+continued.fire("MC_POST_PLAYER_INIT", continued.players[2])
+continued.setPoolReady(true)
+continued.fire("MC_POST_UPDATE")
+assert(continued.poolReads() == 2, "co-op initialization must defer cleanup")
+continued.setPoolReady(false)
+continued.fire("MC_POST_NEW_LEVEL")
+continued.fire("MC_PRE_GAME_EXIT")
+continued.fire("MC_POST_UPDATE")
+assert(continued.poolReads() == 2, "queued cleanup must not run after exit")
+continued.fire("MC_POST_PLAYER_INIT", continued.players[1])
+continued.fire("MC_POST_NEW_LEVEL")
+continued.setPoolReady(true)
+continued.fire("MC_POST_GAME_STARTED", false)
+assert(continued.poolReads() == 3, "new run after exit must re-arm pool cleanup")
+
+local reloaded = fixture("zh")
+reloaded.setPlayerCount(0)
+reloaded.fire("MC_POST_UPDATE")
+assert(reloaded.poolReads() == 0, "no-player update must not access the pool")
+reloaded.setPlayerCount(1)
+reloaded.setPoolReady(true)
+reloaded.fire("MC_POST_UPDATE") -- Reload does not replay MC_POST_GAME_STARTED.
+for id in pairs(reloaded.owned) do
+    assert(reloaded.removedItems[id], "in-run reload must restore pool exclusion")
+end
+reloaded.fire("MC_POST_UPDATE")
+assert(reloaded.poolReads() == 1, "reload cleanup must run only once")
+
 local fallback = fixture("zh", true)
 fallback.fire("MC_POST_RENDER")
 assert(#fallback.drawn > 0 and fallback.drawn[1].text:find("neverbirth", 1, true), "font failure must still warn")

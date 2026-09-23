@@ -1,0 +1,18 @@
+[h1]英文环境启动修复 / English Startup Fix[/h1]
+[i]2026-09-23[/i]
+
+[b]简体中文[/b]
+[list]
+[*] 修复未安装 REPENTOGON（忏悔龙）时，英文环境进入或继续游戏可能崩溃的问题。
+[*] 将前置缺失时的道具池清理延后至安全阶段，避免在玩家初始化期间访问尚未就绪的道具池。
+[*] 英文环境现在与中文环境保持一致：停用未生玩法、屏蔽模组掉落，并在每层初始房间的角色头顶显示对应语言的前置警告。
+[*] 保留直接生成、读档和重骰的掉落保护，并覆盖继续游戏、多人角色加入、换层及脚本重载的处理。
+[/list]
+
+[b]English[/b]
+[list]
+[*] Fixed a crash that could occur when starting or continuing a run in English without REPENTOGON installed.
+[*] Deferred missing-dependency item-pool cleanup to a safe stage, avoiding access to an uninitialized item pool during player initialization.
+[*] English now follows the same behavior as Chinese: neverbirth gameplay stays disabled, mod drops are blocked, and a localized dependency warning appears above players in each floor's starting room.
+[*] Preserved protection for direct spawns, continued saves, and rerolls, including handling for continued runs, co-op player initialization, floor changes, and Lua reloads.
+[/list]
