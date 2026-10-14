@@ -89,3 +89,20 @@ pwsh -NoProfile -File tests/compatibility_docs_test.ps1
 - [GitHub 问题反馈](https://github.com/BrickAZ/neverbrith/issues)
 
 反馈问题时，请附上游戏版本、REPENTOGON 版本、涉及的道具、复现步骤，以及使用的其他 Mod。
+
+## 代码许可与素材权利
+
+- 维护者原创代码、脚本、测试、玩法配置 XML 与项目文档采用 **GPL-3.0-only**，
+  附加[游戏接口例外](GAME-INTERFACE-EXCEPTION.txt)；
+  见 [LICENSE](LICENSE) 和[版权与许可范围](COPYRIGHT.md)。
+- 维护者原创图片与对应 ANM2 动画资产采用 **CC BY-NC 4.0**。
+  满足署名等条件的非商业复用无需付费或逐次申请；商用需另外取得许可。
+  见[美术许可说明](ASSET-LICENSES.md)和[逐文件清单](ASSET-LICENSE-INVENTORY.csv)。
+- **现有全部音频来自互联网，原作者与再分发许可尚待核实**，
+  不纳入上述 GPL 或 CC 授权。非商业使用本身不能补足音频许可。
+  见[第三方说明与音频清单](THIRD-PARTY-NOTICES.md)。
+
+GPL 代码仍允许按 GPLv3 条件商用，美术的非商业条件不套用到代码上。
+整个仓库不属于“所有内容统一开源”或“全部素材已获非商业再分发授权”。
+游戏内容、第三方角色、商标等保留原权利。原创美术的商业许可联系入口
+见[版权与许可范围](COPYRIGHT.md)。

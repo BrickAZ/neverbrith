@@ -81,3 +81,23 @@ pwsh -NoProfile -File tests/compatibility_docs_test.ps1
 - [GitHub Issues](https://github.com/BrickAZ/neverbrith/issues)
 
 When reporting an issue, include your game and REPENTOGON versions, affected items, reproduction steps, and other enabled mods.
+
+## License and asset rights
+
+- Maintainer-authored code, scripts, tests, gameplay/configuration XML and documentation:
+  **GPL-3.0-only**, with the [game-interface exception](GAME-INTERFACE-EXCEPTION.txt).
+  See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md).
+- Maintainer-authored images and corresponding ANM2 animation assets:
+  **CC BY-NC 4.0**. Noncommercial reuse is permitted under the license's
+  attribution and other conditions; commercial use requires separate permission.
+  See [ASSET-LICENSES.md](ASSET-LICENSES.md) and the
+  [file inventory](ASSET-LICENSE-INVENTORY.csv).
+- **All current audio is Internet-sourced third-party material with unverified
+  original authors and redistribution licenses.** It is excluded from both
+  project license grants. Noncommercial use alone does not clear those rights.
+  See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+GPL-covered code may be used commercially under GPLv3. Artwork's NC condition
+does not apply to code. The entire repository is not uniformly open-source or
+cleared for unrestricted noncommercial redistribution. Game content and other
+third-party rights remain with their original rights holders.
