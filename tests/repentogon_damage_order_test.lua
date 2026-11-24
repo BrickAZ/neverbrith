@@ -5,7 +5,7 @@ local function read(path)
     local value = file:read("*a"); file:close(); return value
 end
 local native = read("E:/Isaac - Repentance/resources/scripts/main_ex.lua")
-assert(native:find('["Version"] = "1.0.12a"', 1, true))
+dofile("tests/repentogon_installed_dispatch_contract.lua")(native)
 local function section(source, first, last)
     local start = assert(source:find(first, 1, true))
     return source:sub(start, assert(source:find(last, start, true)) - 1)

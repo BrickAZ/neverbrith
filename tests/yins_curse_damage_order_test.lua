@@ -1,7 +1,8 @@
 -- Regression for the confirmed Black Candle contract (2026-09-16).
 -- Loads the real module. Native immunity/shield handling below is simulated.
 -- These checks cover removal of the erroneous extra immunity from Black Candle.
--- They do NOT prove the still-unimplemented no-Candle immunity suppression.
+-- This fixture lacks API v1 and covers fallback behavior only; precise
+-- suppression is covered separately, with native/game evidence still distinct.
 local function equal(actual, expected, message)
     assert(actual == expected, (message or "assertion failed")
         .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual))

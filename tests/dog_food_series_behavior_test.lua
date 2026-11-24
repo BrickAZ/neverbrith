@@ -391,7 +391,10 @@ local function test_xml_and_pool_registration()
             local escaped = name:gsub("([^%w])", "%%%1")
             local count = 0
             for _ in text:gmatch('<Item Name="' .. escaped .. '" Weight="0%.1" DecreaseBy="1" RemoveOn="0%.1"/>') do count = count + 1 end
-            assertEquals(count, 2, file .. " must place " .. name .. " only in boss and treasure")
+            assertEquals(count, 1, file .. " must place " .. name .. " only in boss")
+            local bossPool = assert(text:match('<Pool Name="boss">.-</Pool>'))
+            assertTruthy(bossPool:find('<Item Name="' .. name .. '" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+                file .. " must keep " .. name .. " in boss at weight 0.1")
         end
     end
 end

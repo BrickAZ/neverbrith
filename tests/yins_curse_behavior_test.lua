@@ -175,11 +175,14 @@ for _, poolPath in ipairs({
 }) do
     local pools = readFile(poolPath)
     local itemName = poolPath:find("zh_cn", 1, true) and "阴的诅咒" or "Yin's Curse"
-    for _, poolName in ipairs({ "treasure", "shop" }) do
-        local pool = pools:match('<Pool Name="' .. poolName .. '">.-</Pool>')
-        assertTruthy(pool and pool:find('<Item Name="' .. itemName .. '" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
-            poolPath .. " should include " .. itemName .. " in " .. poolName .. " at weight 0.1")
+    for _, spec in ipairs({ { "treasure", "0.1" }, { "curse", "1" } }) do
+        local pool = pools:match('<Pool Name="' .. spec[1] .. '">.-</Pool>')
+        assertTruthy(pool and pool:find('<Item Name="' .. itemName .. '" Weight="' .. spec[2] .. '" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+            poolPath .. " should include " .. itemName .. " in " .. spec[1] .. " at weight " .. spec[2])
     end
+    local shopPool = assert(pools:match('<Pool Name="shop">.-</Pool>'))
+    assertTruthy(not shopPool:find('<Item Name="' .. itemName .. '"', 1, true),
+        poolPath .. " should exclude " .. itemName .. " from shop")
 end
 
 local source = readFile("main.lua")

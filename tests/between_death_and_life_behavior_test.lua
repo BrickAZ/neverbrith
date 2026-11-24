@@ -253,7 +253,11 @@ local function loadNeverbirth(options)
             return entity
         end,
         GetItemConfig = function()
-            return { GetCollectible = function() return { Quality = 4 } end }
+            return {
+                GetCollectible = function() return { Quality = 4 } end,
+                -- Full-main callbacks query the catalog; this scenario defines no icon candidates.
+                GetCollectibles = function() return {} end,
+            }
         end,
     }
 

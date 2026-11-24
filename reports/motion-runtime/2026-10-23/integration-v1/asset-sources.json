@@ -1,0 +1,26 @@
+[
+  {
+    "key": "wave",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v7\\wave.anm2",
+    "sha256": "2ae959c9264903f850ddb9f062f46d38e197237a2096b416fb674b8afd37f5f9",
+    "version": "v7"
+  },
+  {
+    "key": "dp",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v7\\dp.anm2",
+    "sha256": "1a2283104747a014b3a7ad34a4866fdaf38cea188b400000534d847acf730302",
+    "version": "v7"
+  },
+  {
+    "key": "circle_360",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v7\\circle_360.anm2",
+    "sha256": "03ee2fd93ec30aa62ba311864fcc994bd9f98b4e1a8bf47ba8b7e102fc6b740c",
+    "version": "v7"
+  },
+  {
+    "key": "circle_720",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v9\\circle_720.anm2",
+    "sha256": "44f34e3dfbf54cd6850ebd012c0883da4021e3d079ce5664124485c916590ef9",
+    "version": "v9"
+  }
+]

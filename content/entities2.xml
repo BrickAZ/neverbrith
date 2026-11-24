@@ -367,4 +367,13 @@
     shadowSize="0"
     stageHP="0"
   />
+  <entity id="3" variant="3000" name="Echo Baby Familiar" anm2path="003.3000_echo_baby.anm2"
+    baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="10"
+    friction="1" numGridCollisionPoints="0" shadowSize="12" stageHP="0" />
+  <entity id="1000" variant="3025" name="Blinky Thrown Object" anm2path="Effects/Blinky/object.anm2"
+    baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="12"
+    friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
+  <entity id="1000" variant="3026" name="Neverbirth Motion Wave" anm2path="Effects/MotionShowcase/v7/wave_runtime.anm2"
+    baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="10"
+    friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
 </entities>

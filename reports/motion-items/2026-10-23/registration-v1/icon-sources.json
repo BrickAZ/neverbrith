@@ -1,0 +1,32 @@
+[
+  {
+    "local_id": 68,
+    "gfx": "resources\\gfx\\Items\\Collectibles\\motion_wave.png",
+    "source": "resources\\gfx\\Effects\\MotionShowcase\\v7\\wave.anm2",
+    "animation": "Preview",
+    "layer": "wave_a",
+    "texture": "resources\\gfx\\Effects\\MotionShowcase\\v7\\hadoken_cels.png",
+    "crop": [
+      31,
+      226,
+      486,
+      268
+    ],
+    "texture_sha256": "f520e06fd50a69e1cd3cf00887135090bd08536e91fa9da18ddb94db1ceb5e04"
+  },
+  {
+    "local_id": 69,
+    "gfx": "resources\\gfx\\Items\\Collectibles\\motion_dp.png",
+    "source": "resources\\gfx\\Effects\\MotionShowcase\\v7\\dp.anm2",
+    "animation": "ODPreview",
+    "layer": "fire_back_0",
+    "texture": "resources\\gfx\\Effects\\MotionShowcase\\v7\\uppercut_fire_cels.png",
+    "crop": [
+      446,
+      16,
+      397,
+      857
+    ],
+    "texture_sha256": "30608e6dda3f9b5299cbc74c1c1d355f2d8e6995b728c0cb17ad670559132174"
+  }
+]

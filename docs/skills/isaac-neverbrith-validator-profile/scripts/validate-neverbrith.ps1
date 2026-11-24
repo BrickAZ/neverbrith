@@ -1,13 +1,14 @@
 param(
-    [string]$Root
+    [string]$Root,
+    [string]$GameRoot
 )
 
 $ErrorActionPreference = "Stop"
 
 if (-not $Root) {
-    $Root = Resolve-Path .
+    $Root = (Resolve-Path .).Path
 } else {
-    $Root = Resolve-Path $Root
+    $Root = (Resolve-Path -LiteralPath $Root).Path
 }
 
 $failures = New-Object System.Collections.Generic.List[string]
@@ -21,6 +22,91 @@ function Add-Warning([string]$message) {
     $warnings.Add($message) | Out-Null
 }
 
+$luaScopeNotes = New-Object System.Collections.Generic.List[string]
+
+function Get-RuntimeLuaFiles {
+    # Follow the static union of literal loads, including conditional includes.
+    # This is a small loader tokenizer, not a Lua interpreter or alias resolver.
+    $tokenPattern = @'
+--\[(?<commentEquals>=*)\[[\s\S]*?\]\k<commentEquals>\]|--[^\r\n]*|(?<quoted>"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*')|\[(?<longEquals>=*)\[[\s\S]*?\]\k<longEquals>\]|(?<identifier>[A-Za-z_][A-Za-z0-9_]*)|[^\s]
+'@
+    $pending = New-Object 'System.Collections.Generic.Queue[string]'
+    $pending.Enqueue((Join-Path $Root 'main.lua'))
+    $visited = @{}
+    while ($pending.Count -gt 0) {
+        $path = $pending.Dequeue()
+        if ($visited.ContainsKey($path)) { continue }
+        $visited[$path] = $true
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            Add-Failure "Loaded Lua file is missing: $path"
+            continue
+        }
+        Get-Item -LiteralPath $path
+        $source = Get-Content -Raw -Encoding UTF8 -LiteralPath $path
+        $tokens = @([regex]::Matches([string]$source, $tokenPattern) | Where-Object { -not $_.Value.StartsWith('--') })
+        for ($i = 0; $i -lt $tokens.Count; $i++) {
+            $loader = $tokens[$i].Value
+            if (-not $tokens[$i].Groups['identifier'].Success -or $loader -notin @('include', 'require')) { continue }
+            if ($i -gt 0 -and $tokens[$i - 1].Value -in @('.', ':', 'function')) { continue }
+            $argumentIndex = $i + 1
+            if ($argumentIndex -ge $tokens.Count) { continue }
+            # Reading the function (for example `if include then`) is not a call.
+            $nextToken = $tokens[$argumentIndex]
+            if ($nextToken.Value -notin @('(', '{') -and -not $nextToken.Groups['quoted'].Success -and -not $nextToken.Value.StartsWith('[')) { continue }
+            $parenthesized = $argumentIndex -lt $tokens.Count -and $tokens[$argumentIndex].Value -eq '('
+            if ($parenthesized) { $argumentIndex++ }
+            $literal = $argumentIndex -lt $tokens.Count -and $tokens[$argumentIndex].Groups['quoted'].Success
+            if ($parenthesized) {
+                $literal = $literal -and $argumentIndex + 1 -lt $tokens.Count -and $tokens[$argumentIndex + 1].Value -eq ')'
+            }
+            if (-not $literal) {
+                Add-Warning "Dynamic Lua load ($loader) in $path; scope is incomplete"
+                continue
+            }
+            $quoted = $tokens[$argumentIndex].Value
+            $module = $quoted.Substring(1, $quoted.Length - 2)
+            # No escapes or traversal: unsupported literal forms remain visible.
+            if ($module -notmatch '^[A-Za-z_][A-Za-z0-9_]*(?:[./][A-Za-z_][A-Za-z0-9_]*)*$') {
+                Add-Warning "Unsupported Lua module literal '$module' in $path; scope is incomplete"
+                continue
+            }
+            $modulePath = Join-Path $Root (($module -replace '\.', '/') + '.lua')
+            if ($loader -eq 'require' -and -not (Test-Path -LiteralPath $modulePath -PathType Leaf)) {
+                if ($module -eq 'json') {
+                    $luaScopeNotes.Add("External Lua module: json in $path; supplied by the game, not scanned") | Out-Null
+                } else {
+                    Add-Warning "Unresolved require '$module' in $path; scope is incomplete"
+                }
+                continue
+            }
+            $pending.Enqueue([IO.Path]::GetFullPath($modulePath))
+        }
+    }
+}
+
+function Get-GameResourceDirectories {
+    $candidate = $GameRoot
+    if (-not $candidate) {
+        $mods = Split-Path -Parent $Root
+        if ((Split-Path -Leaf $mods) -eq 'mods') {
+            $game = Split-Path -Parent $mods
+            if (Test-Path -LiteralPath (Join-Path $game 'isaac-ng.exe') -PathType Leaf) { $candidate = $game }
+        }
+    }
+    if (-not $candidate) { return }
+    if (-not (Test-Path -LiteralPath $candidate -PathType Container)) {
+        Add-Failure "Invalid GameRoot: directory does not exist: $candidate"
+        return
+    }
+    $candidate = (Resolve-Path -LiteralPath $candidate).Path
+    $directories = @('resources-dlc3', 'resources-dlc2', 'resources') | ForEach-Object {
+        $directory = Join-Path $candidate $_
+        if (Test-Path -LiteralPath $directory -PathType Container) { $directory }
+    }
+    if (-not $directories -and $GameRoot) { Add-Failure "Invalid GameRoot: no extracted resource directories in $candidate" }
+    $directories
+}
+
 function Test-Xml([string]$path) {
     try {
         [xml]$doc = Get-Content -Raw -Encoding UTF8 -LiteralPath $path
@@ -31,49 +117,57 @@ function Test-Xml([string]$path) {
     }
 }
 
-function Resolve-AssetCandidates([string]$value, [string]$basePath) {
+function Resolve-AssetCandidates([string]$value, [string]$basePath, [string]$resourceRoot = (Join-Path $Root 'resources'), [switch]$ResourcesOnly) {
     $v = $value -replace "/", "\"
     $candidates = New-Object System.Collections.Generic.List[string]
-    $candidates.Add((Join-Path $Root $v)) | Out-Null
-    $candidates.Add((Join-Path $Root (Join-Path "resources" $v))) | Out-Null
+    if (-not $ResourcesOnly) { $candidates.Add((Join-Path $Root $v)) | Out-Null }
+    $candidates.Add((Join-Path $resourceRoot $v)) | Out-Null
     if (-not [string]::IsNullOrWhiteSpace($basePath)) {
         $base = $basePath -replace "/", "\"
-        $candidates.Add((Join-Path $Root (Join-Path "resources" (Join-Path $base $v)))) | Out-Null
-    }
-    if ($v -like "gfx\*") {
-        $candidates.Add((Join-Path $Root (Join-Path "resources" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path $base $v))) | Out-Null
     }
     if ($v -match "\.png$") {
-        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\Items\Collectibles" $v))) | Out-Null
-        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\Items\Trinkets" $v))) | Out-Null
-        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\PocketItems" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path "gfx\Items\Collectibles" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path "gfx\Items\Trinkets" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path "gfx\PocketItems" $v))) | Out-Null
     }
     if ($v -match "\.anm2$") {
-        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx" $v))) | Out-Null
-        $candidates.Add((Join-Path $Root (Join-Path "resources\gfx\characters" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path "gfx" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path "gfx\characters" $v))) | Out-Null
     }
     if ($v -match "\.(ogg|mp3|wav)$") {
-        $candidates.Add((Join-Path $Root (Join-Path "resources\music" $v))) | Out-Null
-        $candidates.Add((Join-Path $Root (Join-Path "resources\sfx" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path "music" $v))) | Out-Null
+        $candidates.Add((Join-Path $resourceRoot (Join-Path "sfx" $v))) | Out-Null
     }
     return $candidates
 }
 
 function Test-AssetPath([string]$source, [string]$attrName, [string]$value, [string]$basePath) {
-    if ($value -match "^(?:[A-Za-z]:\\|/)" ) {
+    if ([IO.Path]::IsPathRooted($value)) {
         Add-Warning "Absolute asset path in $source [$attrName=$value]"
         return
     }
-    $exists = $false
+    # Native items deathanm2 is relative to content/items*.xml, not resources.
+    if ($attrName -eq 'deathanm2') {
+        $contentPath = Join-Path (Split-Path -Parent $source) ($value -replace '/', '\')
+        if (-not (Test-Path -LiteralPath $contentPath -PathType Leaf)) {
+            Add-Warning "Asset path not found from $source [$attrName=$value]; expected content path: $contentPath"
+        }
+        return
+    }
     foreach ($candidate in (Resolve-AssetCandidates $value $basePath)) {
-        if (Test-Path -LiteralPath $candidate) {
-            $exists = $true
-            break
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return }
+    }
+    foreach ($directory in $gameResourceDirectories) {
+        foreach ($candidate in (Resolve-AssetCandidates $value $basePath $directory -ResourcesOnly)) {
+            if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+                Write-Output "INFO Native asset found from $source [$attrName=$value]: $candidate (file existence only)"
+                return
+            }
         }
     }
-    if (-not $exists) {
-        Add-Warning "Asset path not found from $source [$attrName=$value]"
-    }
+    $nativeStatus = if ($gameResourceDirectories.Count -gt 0) { 'checked mod and extracted game resources' } else { 'native resources not verified' }
+    Add-Warning "Asset path not found from $source [$attrName=$value]; $nativeStatus"
 }
 
 function Test-EntityAnm2([string]$entityName, [string]$anm2Path) {
@@ -165,8 +259,7 @@ function Test-RegisteredEntities([string]$entitiesPath) {
 }
 
 function Test-OwnedEntityLookups([hashtable]$knownNames) {
-    foreach ($file in Get-ChildItem -LiteralPath $Root -Recurse -Filter "*.lua") {
-        if ($file.FullName -match "[\\/]tests[\\/]") { continue }
+    foreach ($file in $runtimeLuaFiles) {
         $source = Get-Content -Raw -Encoding UTF8 -LiteralPath $file.FullName
         foreach ($match in [regex]::Matches($source, 'GetEntityVariantByName\s*\(\s*["'']([^"'']+)["'']')) {
             $name = $match.Groups[1].Value
@@ -212,8 +305,7 @@ function Test-PocketItemShape([string]$pocketItemsPath) {
 }
 
 function Test-CallbackRegistrationContracts {
-    $luaFiles = Get-ChildItem -LiteralPath $Root -Recurse -Filter "*.lua" |
-        Where-Object { $_.FullName -notmatch "[\\/]tests[\\/]" }
+    $luaFiles = $runtimeLuaFiles
     $definedHandlers = @{}
     foreach ($file in $luaFiles) {
         $source = Get-Content -Raw -Encoding UTF8 -LiteralPath $file.FullName
@@ -351,6 +443,16 @@ function Test-GeneratedCollectibleRegistry {
 }
 
 Write-Output "Validating neverbrith at $Root"
+$runtimeLuaFiles = @(Get-RuntimeLuaFiles)
+Write-Output "INFO Lua scope: $($runtimeLuaFiles.Count) files reachable by static literal loads from main.lua"
+foreach ($file in $runtimeLuaFiles) { Write-Output "INFO Lua source: $($file.FullName)" }
+foreach ($note in $luaScopeNotes) { Write-Output "INFO $note" }
+$gameResourceDirectories = @(Get-GameResourceDirectories)
+if ($gameResourceDirectories.Count -gt 0) {
+    Write-Output "INFO Game resource directories: $($gameResourceDirectories -join '; ')"
+} else {
+    Write-Output 'INFO Game resources unavailable; native assets are not verified.'
+}
 
 $contentDir = Join-Path $Root "content"
 if (Test-Path -LiteralPath $contentDir) {

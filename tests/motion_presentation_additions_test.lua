@@ -1,0 +1,22 @@
+local n=0;local function check(v,m)assert(v,m);n=n+1 end
+local A=dofile('motion_presentation_additions.lua')
+local assets=dofile('generated/motion_presentation.lua')
+local s={key='circle_360',variant='od',combat=true,asset=assets.circle_360,frame=65}
+local source=s.asset.od_frames[66];local oldY=source.feet[2]
+local peak=A.Frame(s,source)
+check(peak~=source and source.feet[2]==oldY,'OD reauthoring never mutates approved source data')
+check(peak.feet[2]<source.feet[2]-20,'OD has its own higher lift instead of normal motion recolor')
+check(peak.target[3]==180 and peak.target_depth~='none','OD carries an inverted real target')
+check(math.abs(peak.turnCos-1)<.001,'OD completes whole horizontal turns before descent')
+s.frame=73;local impact=A.Frame(s,s.asset.od_frames[74])
+check(impact.feet[2]==s.asset.start_feet[2]and impact.phase=='slam','OD lands on actual slam frame')
+s.variant='normal';check(A.Frame(s,s.asset.normal_frames[74])==s.asset.normal_frames[74],'normal authored motion preserved')
+s.key='dp';s.asset=assets.dp;s.frame=30;local fist=A.Fist(s)
+check(fist and fist.stage==1 and fist.alpha>0 and fist.alpha<1,'normal uppercut gets a translucent fist')
+s.frame=0;check(not A.Fist(s),'no fist while idle')
+s.frame=77;check(not A.Fist(s),'no lingering fist during recovery')
+s.variant='od';s.frame=23;check(A.Fist(s).stage==1,'OD first rise has a fist')
+s.frame=45;check(A.Fist(s).stage==2,'OD second rise has a fist')
+s.frame=34;check(not A.Fist(s),'OD descent between stages has no held fist')
+s.combat=false;s.frame=45;check(not A.Fist(s),'supplement does not rewrite approved offline rehearsal')
+print('motion_presentation_additions: '..n..' assertions passed')

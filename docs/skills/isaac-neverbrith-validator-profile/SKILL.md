@@ -1,32 +1,24 @@
 ---
 name: isaac-neverbrith-validator-profile
-description: Run the neverbrith-specific strict validation profile for Binding of Isaac Repentance changes. Use this only inside the neverbrith repository after generic validation, especially for its entity-to-ANM2 chain, pocket item shape, pool-language parity, owned entity lookups, and Neverbirth callback conventions. 中文触发：neverbirth 严格校验、项目专用校验、实体链检查、卡牌 HUD 校验、道具池语言一致性。
+description: "Use when verifying a confirmed neverbrith checkout or diagnosing its strict static checks for XML, entity assets, localized pools, generated collectible registration, or Neverbirth callbacks. 中文触发：neverbrith 检查、严格校验、实体链、道具池语言一致性、生成登记。"
 ---
 
 # Neverbrith Validator Profile
 
-Use this project overlay only after `isaac-validators` has run its generic
-validator. It encodes this repository's actual naming and content conventions;
-do not copy it into an unrelated mod.
+Read the repository's [project index](../../agent/index.md) and [verification guide](../../agent/testing.md).
 
-## Run
-
-From the neverbrith mod root:
+From the confirmed mod root, use PowerShell 7:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1 -Root .
+pwsh -NoProfile -File tools/check-neverbrith.ps1 -Profile Pilot
 ```
 
-## Coverage
+Use `LuaAll` or targeted checks when the project's guide calls for them. The
+unified entry runs the repository copies of the generic and strict validators
+alongside the selected behavior checks. For a static-only investigation or an
+explicit `-GameRoot`, use the repository script and documented invocation in
+the guide. If the checkout or runner is unavailable, report the blocked check
+and evidence gap.
 
-- `entities2.xml` registration through ANM2, spritesheet, and default animation.
-- Pocket item id, pickup, and HUD shape.
-- Base and project-supported pool language parity.
-- Owned entity lookups and direct `Neverbirth:AddCallback` registrations.
-- The local skill package's XML/JSON and self-contained-source checks.
-
-## Boundary
-
-- Treat findings as static evidence, not in-game proof.
-- Keep unknown third-party entities untouched; validate only neverbrith-owned spawns and replacements.
-- Update this profile only when a stable neverbrith convention changes, not to encode a one-off design choice.
+The [strict script](scripts/validate-neverbrith.ps1) is maintained here. The
+verification guide owns scan limitations, exit codes, and required evidence.

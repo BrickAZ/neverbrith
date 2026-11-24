@@ -83,6 +83,11 @@ ModCallbacks = {
     MC_PRE_GAME_EXIT = 4,
     MC_POST_PLAYER_INIT = 5,
     MC_POST_NPC_DEATH = 6,
+    MC_POST_ADD_COLLECTIBLE = 7,
+    MC_POST_PICKUP_UPDATE = 8,
+    MC_PRE_PICKUP_RENDER = 9,
+    MC_PRE_PICKUP_COLLISION = 10,
+    MC_PRE_PLAYER_RENDER = 11,
 }
 
 function GetPtrHash(entity) return entity.pointerHash or entity.InitSeed end
@@ -124,6 +129,9 @@ local function makePlayer(seed, playerType)
     function player:GetPlayerType() return self.playerType end
     function player:ChangePlayerType(newType)
         self.playerType = newType
+        if newType == 10 or newType == 31 then
+            self.health.maxHearts, self.health.hearts, self.health.soulHearts = 0, 0, 1
+        end
         self.changeCalls[#self.changeCalls + 1] = newType
         local injection = self.changeInjections[newType]
         if injection then
@@ -428,7 +436,7 @@ local function test_health_ledger_and_item_loss_restore_original_identity()
 
     env.api.ResolveIdentitySwitch(player, assert(env.api.FindProfile("the_lost")))
     assertEquals(player.health.maxHearts, 0, "Lost cannot actively carry red containers")
-    assertEquals(player.health.soulHearts, 0, "Lost cannot actively carry soul hearts")
+    assertEquals(player.health.soulHearts, 1, "Lost retains its native hidden half soul heart")
 
     env.api.ResolveIdentitySwitch(player, assert(env.api.FindProfile("isaac")))
     assertEquals(player.health.maxHearts, 6, "latent red containers return on a compatible identity")
@@ -482,12 +490,12 @@ local function test_coop_isolation_and_icon_fallback()
     assertEquals(#second.changeCalls, 1, "second holder advances independently")
     assertFalsy(env.api.GetRuntimeState(first) == env.api.GetRuntimeState(second), "co-op holders never share state tables")
 
-    assertEquals(env.api.ChooseIcon(first), 25, "empty icon pool falls back to Breakfast")
+    assertEquals(env.api.ChooseIcon(first), 0, "empty icon pool uses a neutral question mark")
     local additionsBefore = #first.addedCollectibles
     env.setIconConfigs({
-        { ID = 9000, GfxFileName = "self.png" },
-        { ID = 12, GfxFileName = "valid.png" },
-        { ID = 13, GfxFileName = "" },
+        { ID = 9000, Type = 1, GfxFileName = "self.png" },
+        { ID = 12, Type = 1, GfxFileName = "valid.png" },
+        { ID = 13, Type = 1, GfxFileName = "" },
     })
     env.api.InvalidateIconCache()
     assertEquals(env.api.ChooseIcon(first), 12, "valid loaded collectible icon is selected")
@@ -623,6 +631,8 @@ local function test_registration_contract()
     end
 end
 
+if ... == "fixture" then return { makeEnvironment = makeEnvironment, makePlayer = makePlayer } end
+
 local tests = {
     test_registered_room_transition_survives_fresh_player_references,
     test_fresh_references_keep_coop_holders_independent,
@@ -645,3 +655,4 @@ local tests = {
 
 for _, test in ipairs(tests) do test() end
 print("memory_disorder_behavior_test: ok")
+return { makeEnvironment = makeEnvironment, makePlayer = makePlayer }

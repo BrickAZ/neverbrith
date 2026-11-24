@@ -610,6 +610,17 @@ return function(Neverbirth, context)
         return getSavedState()
     end
 
+    local function preExplosionImmunity(_, player, hit, immunity)
+        if type(immunity) ~= "table" or immunity.reason ~= "EXPLOSION_IMMUNITY" then
+            return nil
+        end
+        local state = getSavedState()
+        if state and state.yinCurseActive and player and not hasCollectible(player, BLACK_CANDLE_ID) then
+            return false -- Veto this native immunity source, not the damage call.
+        end
+        return nil
+    end
+
     Neverbirth.YinsCurseTestAPI = {
         ItemId = ITEM_ID,
         BlackCandleId = BLACK_CANDLE_ID,
@@ -623,6 +634,7 @@ return function(Neverbirth, context)
         ProcessCandidate = processCandidate,
         ProcessCurrentRoom = processCurrentRoom,
         Callbacks = {
+            PreExplosionImmunity = preExplosionImmunity,
             PrePickupCollision = prePickupCollision,
             PostAddCollectible = postAddCollectible,
             PostUpdate = postUpdate,
@@ -639,11 +651,17 @@ return function(Neverbirth, context)
         return
     end
 
-    -- TODO: suppress only explosion immunity when the curse is active and the
-    -- damaged player lacks Black Candle, preserving every source's other effects.
-    -- 1.0.12a PRE damage can cancel a hit but cannot bypass native immunity.
-    -- Black Candle must never grant immunity itself. Do not cancel hits here or
-    -- disable whole items as a substitute; see reports/yins-curse/2026-09-16-black-candle-contract.md.
+    local explosionApiReady = false
+    if Isaac and type(Isaac.GetPlayerExplosionImmunityAPIVersion) == "function"
+        and ModCallbacks.MC_PRE_PLAYER_EXPLOSION_IMMUNITY then
+        local ok, version = pcall(Isaac.GetPlayerExplosionImmunityAPIVersion)
+        explosionApiReady = ok and version == 1
+    end
+    if explosionApiReady then
+        Neverbirth:AddCallback(ModCallbacks.MC_PRE_PLAYER_EXPLOSION_IMMUNITY, preExplosionImmunity)
+    else
+        debugLog("精确爆炸免疫封锁未启用：需要完整的 Explosion Immunity API v1 原生构建及配套脚本。")
+    end
     if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
         Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, postAddCollectible, ITEM_ID)
     end

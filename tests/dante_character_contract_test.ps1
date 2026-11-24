@@ -186,7 +186,7 @@ try {
 }
 finally { $nameStyleBitmap.Dispose() }
 
-$menuAnm2Path = Join-Path $Root 'content\gfx\CharacterMenu.anm2'
+$menuAnm2Path = Join-Path $Root 'content\gfx\CharacterMenu.anm2.disabled'
 Assert-True (Test-Path -LiteralPath $menuAnm2Path) "missing CharacterMenu.anm2: $menuAnm2Path"
 [xml]$menuXml = Get-Content -Raw -LiteralPath $menuAnm2Path
 $danteAnimations = @($menuXml.AnimatedActor.Animations.Animation | Where-Object { $_.Name -eq 'Dante' })

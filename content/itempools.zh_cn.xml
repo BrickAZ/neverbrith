@@ -2,9 +2,6 @@
 <ItemPools>
     <Pool Name="boss"> <!-- 首领房 -->
         <Item Name="风油精" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="八音盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="美工刀" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="通天塔" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="高蛋白肉条" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="活力狗饼干" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -16,11 +13,12 @@
     </Pool>
 
     <Pool Name="devil"> <!-- 恶魔房 -->
+        <Item Name="凸眼鱼" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="神的左手，恶魔之右手" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="春药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="天使盒" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="血颅蛊" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="生死一念间" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="虚空针尖" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="焚尽郁结" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -41,9 +39,10 @@
         <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
-    <Pool Name="treasure"> <!-- 宝箱 -->
-        <Item Name="千变万化" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="ACE 反作弊系统" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    <Pool Name="treasure">
+        <Item Name="斗气拳套" Weight="1" DecreaseBy="1" RemoveOn="0.1"/> <!-- 宝箱 -->
+        <Item Name="炸弹套装" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="神性过载" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="阴的诅咒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="蓄风棒" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="回响碎片" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -67,19 +66,11 @@
         <Item Name="大狗叫" Weight="1" DecreaseBy="1" RemoveOn="1"/>
         <Item Name="诛" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="神风特攻队" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="高蛋白肉条" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="活力狗饼干" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="轻盈低脂罐头" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="DHA 鱼油" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="护齿磨牙骨" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="幸运肝粒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="羊奶布丁" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
-    <Pool Name="shop"> <!-- 商店 -->
-        <Item Name="千变万化" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="ACE 反作弊系统" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="阴的诅咒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    <Pool Name="shop">
+        <Item Name="斗气拳套" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/> <!-- 商店 -->
+        <Item Name="千变万化" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="复活吧，我的爱人！" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="记忆紊乱" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="阿瓦达啃大瓜" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -92,6 +83,7 @@
     </Pool>
 
     <Pool Name="secret"> <!-- 隐藏 -->
+        <Item Name="回声宝宝" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="八音盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="天使盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="恶魔盒" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
@@ -102,6 +94,8 @@
     </Pool>
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
+        <Item Name="美工刀" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="阴的诅咒" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="恶魔盒" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="绝育证明" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="血颅蛊" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -110,7 +104,6 @@
         <Item Name="铜钱面具" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="黑太岁" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="巴比伦好女孩" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="强力泻药" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="焚尽郁结" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
@@ -121,7 +114,6 @@
     </Pool>
 
     <Pool Name="library"> <!-- 书房 -->
-        <Item Name="巴比伦好女孩" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
@@ -151,7 +143,15 @@
         <Item Name="鸿运齐天蛊" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
-    <Pool Name="greedTreasure"> <!-- 贪婪模式道具房 -->
+    <Pool Name="greedTreasure">
+        <Item Name="斗气拳套" Weight="1" DecreaseBy="1" RemoveOn="0.1"/> <!-- 贪婪模式道具房 -->
+        <Item Name="炸弹套装" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="神风特攻队" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+    <Pool Name="bombBum">
+        <Item Name="炸弹套装" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+    <Pool Name="greedShop">
+        <Item Name="斗气拳套" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 </ItemPools>

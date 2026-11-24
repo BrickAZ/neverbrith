@@ -1,0 +1,137 @@
+[h1]地下室里，又多了一些不太让人放心的东西。[/h1]
+
+《未生》是一款以道具为主的内容模组，加入了 [b]40+ 件新道具[/b]。
+
+换个房间，连自己的角色都变了；跟了你一路的小跟班，可以拿去献祭换属性；至于那只八音盒，它能保你20秒无敌，也会在倒计时结束时要了你的命。
+
+如果你喜欢试新道具、凑奇怪的组合，或者想给一局熟悉的以撒添点变数，欢迎来玩。
+
+[h2]先看几件？[/h2]
+[list]
+[*] [b]记忆紊乱[/b]：从下一间房开始，每次进房都会随机变成一名已解锁角色，带上对方的初始能力继续打。你原来攒的构筑还在。
+[*] [b]生死一念间[/b]：让本局的敌人和Boss变得更难对付，换取每层击败楼层Boss后的一张死亡证明。
+[*] [b]剪碎的塔罗[/b]：把地上的三张卡牌，换成一个宝箱房道具。要留着救命，还是拿去赌一件好东西？
+[*] [b]未剪断的脐带[/b]：有机会把这次受伤拖到以后。靠接下来连续两个房间无伤，争取减轻代价；再挨一下，欠的伤害立刻找上门。
+[/list]
+
+还有铜钱剑、黑太岁、鸿运齐天蛊、大狗叫……剩下的，进地下室慢慢捡。
+
+[h2]版本与维护说明[/h2]
+本模组基于 [b]REPENTOGON（忏悔龙）1.0.12a[/b] 开发，理论上兼容 [b]Repentance+ 对应的新版 REPENTOGON[/b]。
+
+[b]在 Repentance+ 正式版推出前，暂不针对该版本的游玩体验、Bug 及其他相关反馈进行适配与修复。[/b]
+
+[h2]游玩前请看[/h2]
+[list]
+[*] [b]必须安装 REPENTOGON[/b]，并使用与你的游戏版本匹配的版本。安装方法见 [url=https://repentogon.com/install.html]官方指南[/url]。
+[*] 推荐搭配 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=836319872]External Item Descriptions（EID）[/url]，可查看本模组提供的中文或英文道具说明。
+[*] 订阅并启用后，请重启游戏。
+[/list]
+
+[h2]致谢[/h2]
+感谢以下参考模组、工具及其作者。在《未生》的开发过程中，我们从这些作品的设计与实现中学到了很多。感谢你们为以撒模组社区付出的时间与心血。
+
+[list]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1348031964]Custom Stage API[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2488481628]There's No Rush[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3005090114]YSD[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=897795840]Samael[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2538556220]Reverie - Touhou Combinations（幻想曲：东方的结合）[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3361521431]![Touhou] Reimu as Keeper[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=943074431]Josuke and Crazy Diamond[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3615896177]loadout[Fixed][/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2489006943]Planetarium Chance[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=836319872]External Item Descriptions（EID）[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2768542054]Fancy Costumes[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3529211857]chusheng（明日方舟外观替换）[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2928427707]Elijah[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3290493485]Benighted Soul[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3756709057]大狗嚼嚼嚼音效[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3755682316]![Touhou] Nazrin as Isaac[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2900345009]!CuerLib[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3567731616]Anm2Ed (Animation Editor)[/url]
+[/list]
+
+[b]特别感谢[/b]
+[list]
+[*] [url=https://space.bilibili.com/10394398]控Loli的绅士[/url]
+[*] DJ BigSister (a.k.a. IliadCat)
+[/list]
+
+[h2]作者与反馈[/h2]
+作者：brick（青春啊砖在he边看月亮）
+
+模组仍在开发中。遇到Bug或有道具建议，欢迎在评论区留言，也可以提交到 [url=https://github.com/BrickAZ/neverbrith/issues]GitHub[/url]。反馈Bug时请带上涉及的道具、复现步骤、游戏与REPENTOGON版本，以及同时开启的其他模组。
+
+Bilibili：青春啊砖在he边看月亮
+[url=https://www.youtube.com/@Brickzhou]YouTube：Brickzhou[/url] · [url=https://github.com/BrickAZ/neverbrith]源代码[/url]
+
+[h1]English[/h1]
+
+[b]A few more questionable things have found their way into the basement.[/b]
+
+neverbrith adds [b]40+ new items[/b] to The Binding of Isaac.
+
+Walk into the next room as a different character. Sacrifice a familiar for permanent stats. Wind up a music box that makes you invincible for 20 seconds, then kills you when the timer runs out.
+
+If you enjoy trying new items, putting together strange builds, or giving a familiar run an unexpected turn, give it a go.
+
+[h2]A few things you might find[/h2]
+[list]
+[*] [b]Memory Disorder[/b]: Starting with the next room, each room turns you into a random unlocked character with their starting abilities. Your existing build stays with you.
+[*] [b]Between Life and Death[/b]: Tougher enemies and bosses for the rest of the run. In return, defeating a floor boss rewards you with Death Certificate, once per floor.
+[*] [b]Shredded Tarot[/b]: Turn three card pickups into a Treasure Room item. Keep those cards for later, or trade them for something new?
+[*] [b]Uncut Cord[/b]: Some hits can wait. Clear two enemy rooms without getting hit again to reduce what you owe. Take another hit, and the full amount comes due immediately.
+[/list]
+
+You might also find a Coin-Sewn Sword, Black Taisui, Fortune Rivalling Heaven Gu, or Big Dog Bark. There's more waiting in the item pools.
+
+[h2]Version support and maintenance[/h2]
+This mod is developed against [b]REPENTOGON 1.0.12a[/b]. It is expected to be compatible in theory with [b]the newer REPENTOGON builds for Repentance+[/b].
+
+[b]Until the full release of Repentance+, no adjustments or fixes will be made in response to gameplay issues, bug reports, or other feedback specific to Repentance+.[/b]
+
+[h2]Before you play[/h2]
+[list]
+[*] [b]REPENTOGON is required.[/b] Use a release compatible with your game version. See the [url=https://repentogon.com/install.html]official installation guide[/url].
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=836319872]External Item Descriptions (EID)[/url] is recommended for the mod's Chinese and English item descriptions.
+[*] Restart the game after subscribing and enabling the mod.
+[/list]
+
+[h2]Special thanks[/h2]
+Special thanks to the creators of the following mods and tools. We studied their designs and implementations while developing neverbrith, and learned a great deal from their work.
+
+[list]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1348031964]Custom Stage API[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2488481628]There's No Rush[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3005090114]YSD[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=897795840]Samael[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2538556220]Reverie - Touhou Combinations[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3361521431]![Touhou] Reimu as Keeper[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=943074431]Josuke and Crazy Diamond[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3615896177]loadout[Fixed][/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2489006943]Planetarium Chance[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=836319872]External Item Descriptions (EID)[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2768542054]Fancy Costumes[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3529211857]chusheng (Arknights reskin)[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2928427707]Elijah[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3290493485]Benighted Soul[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3756709057]大狗嚼嚼嚼音效 (Big Dog Chew Sounds)[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3755682316]![Touhou] Nazrin as Isaac[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2900345009]!CuerLib[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3567731616]Anm2Ed (Animation Editor)[/url]
+[/list]
+
+[b]Additional thanks[/b]
+[list]
+[*] [url=https://space.bilibili.com/10394398]控Loli的绅士[/url]
+[*] DJ BigSister (a.k.a. IliadCat)
+[/list]
+
+[h2]Author and feedback[/h2]
+Created by brick (青春啊砖在he边看月亮).
+
+The mod is still in development. Bug reports and item ideas are welcome in the comments or on [url=https://github.com/BrickAZ/neverbrith/issues]GitHub[/url]. For bug reports, include the item involved, steps to reproduce it, your game and REPENTOGON versions, and the other mods you have enabled.
+
+Bilibili: 青春啊砖在he边看月亮
+[url=https://www.youtube.com/@Brickzhou]YouTube: Brickzhou[/url] · [url=https://github.com/BrickAZ/neverbrith]Source code[/url]

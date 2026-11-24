@@ -1,0 +1,123 @@
+<sounds root="sfx/">
+	<sound name="Big Dog Bark Charge">
+		<sample weight="1" path="big_dog_bark/big_dog_charge.wav" />
+	</sound>
+	<sound name="Big Dog Bark Release">
+		<sample weight="1" path="big_dog_bark/big_dog_release.wav" />
+	</sound>
+	<sound name="Revive My Love">
+		<sample weight="1" path="revive_my_love/revive_my_love.wav" />
+	</sound>
+	<sound name="I Am a God Declaration">
+		<sample weight="1" path="i_am_a_god/i_just_told_you.wav" />
+	</sound>
+	<sound name="Drive Glove Guard">
+		<sample weight="1" path="drive_glove/guard.wav" />
+	</sound>
+	<sound name="Drive Glove Parry">
+		<sample weight="1" path="drive_glove/parry.wav" />
+	</sound>
+	<sound name="Drive Glove Perfect Parry">
+		<sample weight="1" path="drive_glove/perfect_parry.wav" />
+	</sound>
+	<sound name="Drive Glove Blue Start">
+		<sample weight="1" path="drive_glove/blue_start.wav" />
+	</sound>
+	<sound name="Drive Glove Rush Start">
+		<sample weight="1" path="drive_glove/rush_start.wav" />
+	</sound>
+	<sound name="Drive Glove Burnout Enter">
+		<sample weight="1" path="drive_glove/burnout_enter.wav" />
+	</sound>
+	<sound name="Drive Glove Burnout Exit">
+		<sample weight="1" path="drive_glove/burnout_exit.wav" />
+	</sound>
+	<!-- 桑吉尔夫 V2：原生招式请求表定位，效果音与英日语音分开；尚无玩法触发绑定 -->
+	<sound name="Zangief V2 360_sfx_6200">
+		<sample weight="1" path="zangief_v2/360_sfx_6200.wav" />
+	</sound>
+	<sound name="Zangief V2 360_sfx_6201">
+		<sample weight="1" path="zangief_v2/360_sfx_6201.wav" />
+	</sound>
+	<sound name="Zangief V2 360_sfx_6202">
+		<sample weight="1" path="zangief_v2/360_sfx_6202.wav" />
+	</sound>
+	<sound name="Zangief V2 360_sfx_6203">
+		<sample weight="1" path="zangief_v2/360_sfx_6203.wav" />
+	</sound>
+	<sound name="Zangief V2 720_sfx_6330">
+		<sample weight="1" path="zangief_v2/720_sfx_6330.wav" />
+	</sound>
+	<sound name="Zangief V2 720_sfx_6331">
+		<sample weight="1" path="zangief_v2/720_sfx_6331.wav" />
+	</sound>
+	<sound name="Zangief V2 720_sfx_6352">
+		<sample weight="1" path="zangief_v2/720_sfx_6352.wav" />
+	</sound>
+	<sound name="Zangief V2 720_sfx_6350">
+		<sample weight="1" path="zangief_v2/720_sfx_6350.wav" />
+	</sound>
+	<sound name="Zangief V2 720_sfx_6351">
+		<sample weight="1" path="zangief_v2/720_sfx_6351.wav" />
+	</sound>
+	<sound name="Zangief V2 360_voice_6200_eng">
+		<sample weight="1" path="zangief_v2/360_voice_6200_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 360_voice_6201_eng">
+		<sample weight="1" path="zangief_v2/360_voice_6201_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 360_voice_6203_eng">
+		<sample weight="1" path="zangief_v2/360_voice_6203_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6330_eng">
+		<sample weight="1" path="zangief_v2/720_voice_6330_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6331_eng">
+		<sample weight="1" path="zangief_v2/720_voice_6331_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6332_eng">
+		<sample weight="1" path="zangief_v2/720_voice_6332_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6334_eng">
+		<sample weight="1" path="zangief_v2/720_voice_6334_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6335_eng">
+		<sample weight="1" path="zangief_v2/720_voice_6335_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6336_eng">
+		<sample weight="1" path="zangief_v2/720_voice_6336_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6337_eng">
+		<sample weight="1" path="zangief_v2/720_voice_6337_eng.wav" />
+	</sound>
+	<sound name="Zangief V2 360_voice_6200_jpn">
+		<sample weight="1" path="zangief_v2/360_voice_6200_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 360_voice_6201_jpn">
+		<sample weight="1" path="zangief_v2/360_voice_6201_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 360_voice_6203_jpn">
+		<sample weight="1" path="zangief_v2/360_voice_6203_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6330_jpn">
+		<sample weight="1" path="zangief_v2/720_voice_6330_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6331_jpn">
+		<sample weight="1" path="zangief_v2/720_voice_6331_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6332_jpn">
+		<sample weight="1" path="zangief_v2/720_voice_6332_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6334_jpn">
+		<sample weight="1" path="zangief_v2/720_voice_6334_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6335_jpn">
+		<sample weight="1" path="zangief_v2/720_voice_6335_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6336_jpn">
+		<sample weight="1" path="zangief_v2/720_voice_6336_jpn.wav" />
+	</sound>
+	<sound name="Zangief V2 720_voice_6337_jpn">
+		<sample weight="1" path="zangief_v2/720_voice_6337_jpn.wav" />
+	</sound>
+</sounds>

@@ -1,5 +1,7 @@
 -- Real module + registered callback tests. Native pickup/damage internals are
 -- simulated; this is not evidence of an in-game run.
+-- This fixture has no explosion-immunity API: it tests the existing fallback
+-- and Q4/state contract. API v1 is tested in yins_curse_explosion_immunity_test.
 local function equal(actual, expected, message)
     assert(actual == expected, (message or "assertion failed")
         .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual))

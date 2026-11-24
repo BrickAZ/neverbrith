@@ -74,10 +74,43 @@ local function loadNeverbirthWithEID(options)
         RingOfSevenCurses = 788,
         AvadaKedavra = 789,
         HealthySleep = 990,
+        IAmAGod = 991,
+        GodComplex = 992,
+        DivineLeftHand = 993,
+        EchoBaby = 994,
+        Blinky = 996,
+        BombSuit = 995,
+        DriveGlove = 997,
+        Piledriver360 = 1101,
+        Ultimate720 = 1102,
+        MotionWave = 1103,
+        DragonPunch = 1104,
         CleansedWavyCap = 767,
         FortuneRivallingHeavenGu = 768,
     }
     local defaultItemIdsByLoadedName = {}
+    defaultItemIdsByLoadedName["Music Box"] = logicalItemIds.Musicbox
+    defaultItemIdsByLoadedName["八音盒"] = logicalItemIds.Musicbox
+    defaultItemIdsByLoadedName["Divine Left Hand, Demonic Right Hand"] = logicalItemIds.DivineLeftHand
+    defaultItemIdsByLoadedName["神的左手，恶魔之右手"] = logicalItemIds.DivineLeftHand
+    defaultItemIdsByLoadedName["Echo Baby"] = logicalItemIds.EchoBaby
+    defaultItemIdsByLoadedName["Blinky"] = logicalItemIds.Blinky
+    defaultItemIdsByLoadedName["凸眼鱼"] = logicalItemIds.Blinky
+    defaultItemIdsByLoadedName["回声宝宝"] = logicalItemIds.EchoBaby
+    defaultItemIdsByLoadedName["Bomb Suit"] = logicalItemIds.BombSuit
+    defaultItemIdsByLoadedName["炸弹套装"] = logicalItemIds.BombSuit
+    defaultItemIdsByLoadedName["Drive Glove"] = logicalItemIds.DriveGlove
+    defaultItemIdsByLoadedName["斗气拳套"] = logicalItemIds.DriveGlove
+    defaultItemIdsByLoadedName["360"] = logicalItemIds.Piledriver360
+    defaultItemIdsByLoadedName["720"] = logicalItemIds.Ultimate720
+    defaultItemIdsByLoadedName["Wave"] = logicalItemIds.MotionWave
+    defaultItemIdsByLoadedName["波动"] = logicalItemIds.MotionWave
+    defaultItemIdsByLoadedName["Dragon Punch"] = logicalItemIds.DragonPunch
+    defaultItemIdsByLoadedName["升龙"] = logicalItemIds.DragonPunch
+    defaultItemIdsByLoadedName["I Am a God"] = logicalItemIds.IAmAGod
+    defaultItemIdsByLoadedName["我即神明"] = logicalItemIds.IAmAGod
+    defaultItemIdsByLoadedName["God Complex"] = logicalItemIds.GodComplex
+    defaultItemIdsByLoadedName["神性过载"] = logicalItemIds.GodComplex
     defaultItemIdsByLoadedName['健康睡眠'] = logicalItemIds.HealthySleep
     for name, itemId in pairs(logicalItemIds) do
         defaultItemIdsByLoadedName[name] = itemId
@@ -219,6 +252,12 @@ local function loadNeverbirthWithEID(options)
         MC_POST_PICKUP_UPDATE = 35,
     }
 
+    for index,name in ipairs({"MC_PRE_PLAYER_RENDER", "MC_POST_PLAYERHUD_RENDER_HEARTS",
+        "MC_POST_TRIGGER_WEAPON_FIRED", "MC_PRE_USE_CARD", "MC_PRE_USE_PILL", "MC_PRE_TEAR_UPDATE",
+        "MC_PRE_FAMILIAR_UPDATE", "MC_PRE_PICKUP_UPDATE", "MC_PRE_KNIFE_UPDATE", "MC_PRE_PROJECTILE_UPDATE",
+        "MC_PRE_LASER_UPDATE", "MC_PRE_NPC_UPDATE", "MC_PRE_SLOT_UPDATE", "MC_POST_ADD_COLLECTIBLE", "MC_PRE_MOD_UNLOAD"}) do
+        ModCallbacks[name]=2200+index
+    end
     UseFlag = { USE_MIMIC = 1 }
 
     CollectibleType = { COLLECTIBLE_NULL = 0, COLLECTIBLE_PLAN_C = 475 }
@@ -415,6 +454,17 @@ local function loadNeverbirthWithEID(options)
 end
 
 local expectedXmlItems = {
+    Piledriver360 = { enName = "360", zhName = "360", description = "Hold Active, then circle once", zhDescription = "按住主动键，摇一圈" },
+    Ultimate720 = { enName = "720", zhName = "720", description = "Hold Active, then circle twice", zhDescription = "按住主动键，摇两圈" },
+    MotionWave = { enName = "Wave", zhName = "波动", description = "Hold Active, then tap a shooting direction", zhDescription = "按住主动键，再按一下射击方向" },
+    DragonPunch = { enName = "Dragon Punch", zhName = "升龙", description = "Hold Active, then enter a dragon-punch motion", zhDescription = "按住主动键，再输入升龙指令" },
+    BombSuit = { enName = "Bomb Suit", zhName = "炸弹套装", description = "Go! You're a real Bomberman now!", zhDescription = "上吧，你现在是真正的炸弹人了!" },
+    DivineLeftHand = { enName = "Divine Left Hand, Demonic Right Hand", zhName = "神的左手，恶魔之右手", description = "temporary copy", zhDescription = "临时性复制" },
+    EchoBaby = { enName = "Echo Baby", zhName = "回声宝宝", description = "Baby up baby up baby up baaaaaabyuuuuuupppp", zhDescription = "宝宝上升宝宝上升宝宝上升宝宝宝宝上升上升" },
+    Blinky = { enName = "Blinky", zhName = "凸眼鱼", description = "Can only absorb dead things", zhDescription = "只能吸死物" },
+    DriveGlove = { enName = "Drive Glove", zhName = "斗气拳套", description = "Parry, then punish!", zhDescription = "防住，再反击！" },
+    IAmAGod = { enName = "I Am a God", zhName = "我即神明", description = "I just told you who I thought I was.", zhDescription = "I just told you who I thought I was." },
+    GodComplex = { enName = "God Complex", zhName = "神性过载", description = "Too much power for one body.", zhDescription = "Too much power for one body." },
     HealthySleep = { enName = "Healthy Sleep", zhName = "健康睡眠", description = "Get your eight hours", zhDescription = "睡够八小时" },
     AvadaKedavra = { enName = "Avada Kedavra", zhName = "阿瓦达啃大瓜", description = "", zhDescription = "" },
     RingOfSevenCurses = {
@@ -721,6 +771,40 @@ local expectedXmlItems = {
 }
 
 local expectedEID = {
+    DriveGlove = {
+        en_us = { name = "Drive Glove", description = "6 Drive bars, independent of active charges#Move away from incoming attacks to guard; 1 bar per half heart#Hold Active: immobile blue parry, cannot shoot; costs 0.5 + 0.3/sec; ordinary parry returns 0.5#First 3 frames: Perfect Parry refills Drive and grants a shooting reward#Release within 6 frames after a parry: no recovery; otherwise 12 immobile frames#Press a movement direction during parry: spend 0.5 for a turning Drive Rush#Reverse after 4 movement frames to brake; shooting after 5 cancels rush#Rush/Perfect: one full charge, then 4 tears/sec for 3 seconds from your first shot; oldest reward only#Kills restore 1; natural recovery 0.1/sec, walking +50%#Empty Drive: damage and tears x0.75 until full; 20 seconds natural recovery#Blue parry excludes bombs and life payments; normal guard also excludes contact, lasers, floor and sourceless damage#Actual injury during rush deals double damage and stops it; shields do not" },
+        zh_cn = { name = "斗气拳套", description = "独立6格斗气，不使用普通主动充能#朝攻击来向的后方按移动进行普通防御，每半心扣1格#按住主动键蓝防：不能移动或射击，启动0.5格，持续每秒0.3格；普通蓝防成功回0.5格#启动前3帧完美蓝防：斗气回满并授予射击奖励#成功后6帧内松手免后摇；其余松手进入12帧不能移动或射击的后摇#蓝防中按下移动方向立即绿冲，额外消耗0.5格；冲刺可平滑转向#移动满4帧可反向刹车，满5帧可射击取消#绿冲或完美蓝防：一次满蓄力，首次实际射击起3秒内射速至少4.0；重复保留最早奖励#击杀回1格；自然每秒回0.1格，有输入且实际行走加快50%#斗气归零力竭：攻击与射速乘0.75，满槽解除；自然20秒回满#蓝防不能挡炸弹或生命代价；普通防御还不能挡接触、激光、地板及无来源伤害#绿冲实际受伤翻倍并中断；防御和其他护盾挡住可继续" },
+    },
+    Blinky = {
+        en_us = { name = "Blinky", description = "Hold Active: absorb obstacles and ground pickups in a 30-degree cone; range follows your range stat#Ctrl + Active: open storage; arrows select; Active spits forward#Infinite storage for this run, including Continue and Glowing Hourglass; prices and independent choice items are preserved#Close press: 20% damage melee and permanent Wounded mark#Suction deals 50% damage to Wounded enemies every 15 frames; only suction kills store one red heart#Rock: 5 + 20% damage; poop: 2 + 30% damage and four half-damage droplets on hit#Chests: 20 damage and open once; spikes: three nail tears; TNT: 40 explosion damage; fireplaces: Bird's Eye flames#Tinted rocks break instead; giant poop cannot be absorbed; shopkeeper corpses give no drops" },
+        zh_cn = { name = "凸眼鱼", description = "按住主动键：吸取前方总宽30度内的障碍和地面物品，距离随射程增加#Ctrl+主动键打开储物清单；方向键选择，主动键朝面向吐出#本局无限储物，继续游戏和发光沙漏保留；价格及同组选项独立保留#贴近时按下改为20%攻击力近战，永久标记受创#吸取对受创敌人每15帧造成50%攻击力伤害；仅吸取击杀存入一颗红心#石头：5+20%攻击；大便：2+30%攻击，命中分裂四颗半伤害粪滴#箱子：20伤害并开一次；尖刺：三根钉子；TNT：40爆炸伤害；火堆：鸟眼火焰#X石只破坏，巨型大便不可吸取；店主尸体无掉落" },
+    },
+    BombSuit = {
+        en_us = { name = "Bomb Suit", description = "After actual damage: +0.5 speed, cannot shoot, and immune to damage for 3 seconds#Then explode at your position using your current ordinary bomb damage and effects; the explosion cannot hurt you#Blood donation machines, IV Bag and Devil Beggars still hurt and never trigger this item#Extra copies do not stack; the timer does not refresh#The fuse follows you between rooms; death, item loss or exiting cancels it#Glowing Hourglass rewind cancels the fuse" },
+        zh_cn = { name = "炸弹套装", description = "实际受伤后，3秒内移速+0.5、无法射击，并免疫除卖血外的伤害#随后在自身位置爆炸，沿用当前普通炸弹的伤害及特效；此次自爆不伤自己#献血机、IV袋、恶魔乞丐正常扣血，且不触发效果#多份不叠加，倒计时不刷新#换房继续倒计时；死亡、失去道具或退出时取消#发光沙漏回溯会取消状态" },
+    },
+    DivineLeftHand = {
+        en_us = { name = "Divine Left Hand, Demonic Right Hand", description = "Copies the last normally acquired collectible that is still held#Only passive items and familiars are eligible; a last active item makes use fail#All copies created by this item expire on the next floor#Does not grant one-time pickup resources#Failed use does not consume charge" },
+        zh_cn = { name = "神的左手，恶魔之右手", description = "临时复制最后正常取得且仍持有的道具#只接受被动或跟班；最后取得的是主动时使用失败，不回溯#此道具创建的所有临时份数在下一层移除#不发放首次拾取资源#使用失败不消耗充能" },
+    },
+    EchoBaby = {
+        en_us = { name = "Echo Baby", description = "Spectral shooter: 3 damage every 28 frames#Immediately grants Conjoined#After acquiring this item, each new physical baby-tagged collectible copies its complete familiar group#Each such pickup has a 50% chance for +1 permanent damage, otherwise +0.5 permanent tears#Its own tears contribution stops at 5 tears per second; excess is remembered#Copies and bonuses remain for this run after losing the item; extra copies of Echo Baby do not multiply rewards" },
+        zh_cn = { name = "回声宝宝", description = "每28帧发射3伤害灵体泪弹#直接获得连体变身#取得后，新拾取的宝宝标签实物道具会复制对应的完整跟班组#每次互斥抽取：50%永久+1攻击，否则永久+0.5射速#自身射速贡献最多加到5.0；超出部分仍记录，其他突破上限来源保留#失去本道具后本局复制与属性保留；多份本道具不倍增奖励" },
+    },
+    IAmAGod = {
+        en_us = { name = "I Am a God", description = "Only usable in an uncleared hostile room#For 6 seconds: user damage x3, speed +0.30, range +4, shot speed +0.25, piercing and spectral tears#All players take double damage and lose damage invincibility frames during the declaration#This room permanently prevents heart drops and healing for everyone until the end of the floor, even after clearing or re-entering#At the end: clearing the room grants 1 golden chest; otherwise only the user takes 2 full red hearts of damage" },
+        zh_cn = { name = "我即神明", description = "仅限未清理的敌对房使用#6秒内使用者攻击力×3、移速+0.30、射程+4、弹速+0.25，常规泪弹获得穿透与幽灵效果#宣告期间全员受到伤害×2且受伤无敌帧失效#本房本层永久不掉落生命且全员无法回复生命，清房、离开重进后仍然有效#结束时清房生成1个金色宝箱，否则仅使用者受到2颗红心伤害" },
+    },
+    GodComplex = {
+        en_us = {
+            name = "God Complex",
+            description = "Only usable in an uncleared hostile room; lasts 8 seconds#Randomly grants one form, never the same form twice in a row#{{Warning}} Solar: suppresses normal direct attacks; burns nearby enemies, clears nearby ordinary enemy projectiles, and reduces speed#{{Warning}} War: double damage, faster tears, and piercing tears; directly killing a normal enemy or miniboss releases 8 hostile shots from its corpse#{{Warning}} Eye: automatically judges one target; your normal direct attacks (including explosive tears) can only hurt that target; indirect effects and real bombs can still hurt other enemies",
+        },
+        zh_cn = {
+            name = "神性过载",
+            description = "仅限未清理的敌对房使用，持续8秒#每次随机获得一种神性，且不会连续获得同一种#{{Warning}} 日冕：无法常规直接攻击，近身持续灼烧并清除近处普通敌方泪弹，移速降低#{{Warning}} 战争之手：攻击力翻倍、射速提高、泪弹穿透；直接击杀普通敌人或小Boss会在尸体处产生8向敌对泪弹#{{Warning}} 独眼审判：自动处刑单个目标；自身常规直接攻击（包括爆炸泪弹）只能伤害该目标，间接特效和真正炸弹仍可伤害其他敌人",
+        },
+    },
     HealthySleep = {
         en_us = { name = "Healthy Sleep", description = "Spawns a bed in the starting room once per floor#A full night's sleep takes 8 hours of real time; progress stops while paused or out of the game#Hold a gameplay input for 15 frames to speed up sleep#Hold different inputs together for a greater speedup, with diminishing returns#While asleep, inputs only help you wake up sooner#Finishing sleep fully restores red hearts, then grants 3 soul hearts" },
         zh_cn = { name = "健康睡眠", description = "每层初始房间生成一张原版床，每层仅一次#睡眠进度需要现实时间8小时，暂停和退出时停止计时#持续按住游戏操作15帧后加速；不同操作可叠加，遵循平方根递减收益#睡眠中操作仅用于催醒#睡满后先补满红心，再获得3颗魂心" },
@@ -732,21 +816,21 @@ local expectedEID = {
     RingOfSevenCurses = {
         en_us = {
             name = "Ring of the Seven Curses",
-            description = "Permanently occupies your primary active slot for the rest of the run#Forces the Curses of Darkness, the Lost, the Unknown, and the Maze#Disables trinkets and flight; prevents sleeping in beds except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Doubles enemy health and the damage you take#Caps health at 6 hearts, keys at 2, bombs at 1, and coins at 20#Every 2 rooms, adds 1 charge to your character's built-in secondary active, if retained#Quality 4 and modded items cannot be picked up; an item you can pick up spawns beside each one#Rerolling a blocked item checks it again; active items dropped when equipping the ring do not grant replacements#Taking an item that costs hearts also adds 1 broken heart",
+            description = "Only available in the starting room; disappears permanently when you leave#Permanently occupies your primary active slot for the rest of the run#Forces the Curses of Darkness, the Lost, the Unknown, and the Maze#Disables trinkets and flight; prevents sleeping in beds except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Doubles enemy health and the damage you take#Caps health at 6 hearts, keys at 2, bombs at 1, and coins at 20#Every 2 rooms, adds 1 charge to your character's built-in secondary active, if retained#Quality 4 and modded items cannot be picked up; an item you can pick up spawns beside each one#Rerolling a blocked item checks it again; active items dropped when equipping the ring do not grant replacements#Taking an item that costs hearts also adds 1 broken heart",
         },
         zh_cn = {
             name = "七咒之戒",
-            description = "本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#无法使用床，妈妈的床除外#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
+            description = "仅能在开局初始房间拾取，离开后永久消失#本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#无法使用床，妈妈的床除外#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
         },
     },
     MemoryDisorder = {
         en_us = {
             name = "Memory Disorder",
-            description = "Starting with the next room, entering a room turns you into a random unlocked character#Temporarily grants that character's starting items and abilities while preserving your existing build#Losing this item restores your original character#Once picked up, guarantees a Void portal after eligible endgame encounters for the rest of the run: Boss Rush, Hush, Mega Satan, and the final Greed Mode boss room",
+            description = "Starting with the next room, entering a room turns you into a random unlocked character#Temporarily grants that character's starting items and abilities while preserving your existing build#Disguised as a random passive item no player has acquired this run; the disguise grants no item effects#Losing this item restores your original character#Once picked up, guarantees a Void portal after eligible endgame encounters for the rest of the run: Boss Rush, Hush, Mega Satan, and the final Greed Mode boss room",
         },
         zh_cn = {
             name = "记忆紊乱",
-            description = "从下次进房开始，每次进房都会随机变为一名已解锁角色#角色初始组件随身份临时替换；正常构筑永久保留#失去本道具会恢复原始身份#本局曾拾取后，原版有效终局节点必定提供虚空入口",
+            description = "从下次进房开始，每次进房都会随机变为一名已解锁角色#角色初始组件随身份临时替换；正常构筑永久保留#外观随机伪装成本局所有玩家均未获得过的被动道具，不获得所示道具效果#失去本道具会恢复原始身份#本局曾拾取后，原版有效终局节点必定提供虚空入口",
         },
     },
     KamikazeSquad = {
@@ -1262,6 +1346,28 @@ local function test_eid_registers_explicit_english_and_chinese_descriptions()
     end
 
     local expectedCallCount = 0
+    for _,case in ipairs({
+        {field='Piledriver360',owner='circle_360',en='360',zh='360',profile='circle_360'},
+        {field='Ultimate720',owner='circle_720',en='720',zh='720',profile='circle_720'},
+        {field='MotionWave',owner='wave',en='Wave',zh='波动',profile='wave_tap'},
+        {field='DragonPunch',owner='dp',en='Dragon Punch',zh='升龙',profile='dp'},
+    }) do
+        local id=env.itemIds[case.field]
+        local en=findEIDCall(env.eidCalls,id,'en_us')
+        local zh=findEIDCall(env.eidCalls,id,'zh_cn')
+        assertTruthy(en and zh,'motion item EID exists before eager registration')
+        assertEquals(en.itemName,case.en)
+        assertEquals(zh.itemName,case.zh)
+        assertTruthy(en.description:find('damage',1,true))
+        assertTruthy(zh.description:find('伤害',1,true))
+        assertTruthy(not en.description:find('Presentation only',1,true))
+        assertTruthy(not zh.description:find('伤害和气量结算尚未接入',1,true))
+        local binding=Neverbirth.MotionInput.bindings['motion_item:'..case.owner]
+        assertTruthy(binding,'main loads actual item owner')
+        assertEquals(binding.collectibleId,id,'item uses name-resolved runtime ID')
+        assertEquals(binding.profile,case.profile)
+        expectedCallCount=expectedCallCount+2
+    end
     for _, languageExpectations in pairs(expectedEID) do
         for _ in pairs(languageExpectations) do
             expectedCallCount = expectedCallCount + 1
@@ -1275,7 +1381,7 @@ local function test_eid_registers_explicit_english_and_chinese_descriptions()
             assertEquals(containsHan(call.itemName), false, "English EID name should not contain Chinese")
             assertEquals(containsHan(call.description), false, "English EID description should not contain Chinese")
         elseif call.language == "zh_cn" and call.itemName ~= "ds4" then
-            assertTruthy(containsHan(call.itemName), "Chinese EID name should contain Chinese for " .. tostring(call.id))
+            assertTruthy(containsHan(call.itemName) or call.itemName=='360' or call.itemName=='720', "Chinese EID name should contain Chinese or the approved numeric move name for " .. tostring(call.id))
             assertTruthy(containsHan(call.description), "Chinese EID description should contain Chinese for " .. tostring(call.id))
         end
     end
@@ -1314,6 +1420,7 @@ local function getItemXmlBlockFromText(text, xmlName)
     local patternName = xmlName:gsub("([^%w])", "%%%1")
     local block = text:match('<active%s+name="' .. patternName .. '"(.-)/>')
         or text:match('<passive%s+name="' .. patternName .. '"(.-)/>')
+        or text:match('<familiar%s+name="' .. patternName .. '"(.-)/>')
     assertTruthy(block, "items.xml should contain item " .. xmlName)
     return block
 end
@@ -1391,11 +1498,12 @@ local function test_language_templates_are_parseable_and_localize_pickup_names()
         assertEquals(englishDescription, expected.description, itemName .. " English template description")
         assertEquals(chineseDescription, expected.zhDescription, itemName .. " Chinese template description")
         assertEquals(containsHan(expected.enName), false, itemName .. " English pickup name should not contain Chinese")
-        if itemName ~= "ds4" then
+        if itemName ~= "ds4" and itemName ~= 'Piledriver360' and itemName ~= 'Ultimate720' then
             assertTruthy(containsHan(expected.zhName), itemName .. " Chinese pickup name should contain Chinese")
         end
         assertEquals(containsHan(englishDescription), false, itemName .. " English template should not contain Chinese")
-        if itemName ~= "ds4" and expected.zhDescription ~= "" then
+        -- This subtitle is explicitly the same English quotation in both locales.
+        if itemName ~= "ds4" and itemName ~= "IAmAGod" and itemName ~= "GodComplex" and expected.zhDescription ~= "" then
             assertTruthy(containsHan(chineseDescription), itemName .. " Chinese template should contain Chinese")
         end
     end
@@ -1405,19 +1513,24 @@ local function test_language_templates_are_parseable_and_localize_pickup_names()
 end
 
 local function test_runtime_pickup_banner_table_matches_all_language_templates()
-    local source = readFile("main.lua")
+    local env = loadNeverbirthWithEID()
     local registrationCount = 0
-    for _ in source:gmatch("[\r\n]Neverbirth:RegisterPickupBannerText%(") do
+    for _ in pairs(Neverbirth.PickupBannerTexts) do
         registrationCount = registrationCount + 1
     end
 
     local expectedCount = 0
     for itemName, expected in pairs(expectedXmlItems) do
         expectedCount = expectedCount + 1
-        local needle = ', "' .. expected.enName .. '", "' .. expected.description
-            .. '", "' .. expected.zhName .. '", "' .. expected.zhDescription .. '")'
-        assertTruthy(source:find(needle, 1, true),
-            itemName .. " runtime pickup banner text should match the English and Chinese XML templates")
+        local text=Neverbirth.PickupBannerTexts[env.itemIds[itemName]]
+        assertTruthy(text,itemName .. ' runtime pickup banner exists')
+        assertEquals(text.en_us.name,expected.enName,itemName .. ' English banner name')
+        assertEquals(text.zh_cn.name,expected.zhName,itemName .. ' Chinese banner name')
+        local enSubtitle,zhSubtitle=expected.description,expected.zhDescription
+        -- The approved runtime shortcut does not rewrite frozen item XML.
+        if itemName=='Ultimate720'then enSubtitle='Hold Active: Up + Down, or circle twice';zhSubtitle='主动键＋↑↓，或摇两圈'end
+        assertEquals(text.en_us.subtitle,enSubtitle,itemName .. ' English banner subtitle')
+        assertEquals(text.zh_cn.subtitle,zhSubtitle,itemName .. ' Chinese banner subtitle')
     end
 
     local registeredNames = collectItemNamesFromItemsXml(readFile("content/items.xml"))

@@ -106,6 +106,7 @@ local function loadNeverbirth(options)
 
     function Game()
         return {
+            GetFrameCount = function() return 0 end,
             GetSeeds = function()
                 return { GetStartSeedString = function() return options.runSeed or "TEST RUN" end }
             end,
@@ -135,7 +136,10 @@ local function loadNeverbirth(options)
                 return { GetSpawnSeed = function() return 5000 end, GetType = function() return RoomType.ROOM_DEFAULT end, IsClear = function() return false end }
             end,
             GetLevel = function()
-                return { GetStage = function() return 1 end, GetStageType = function() return 0 end, GetCurrentRoomIndex = function() return 0 end, AddAngelRoomChance = function() end, InitializeDevilAngelRoom = function() end }
+                return { GetStage = function() return 1 end, GetStageType = function() return 0 end,
+                    GetCurrentRoomIndex = function() return 0 end,
+                    GetCurrentRoomDesc = function() return { ListIndex = 0, SafeGridIndex = 0 } end,
+                    AddAngelRoomChance = function() end, InitializeDevilAngelRoom = function() end }
             end,
             Spawn = function() end,
             GetStateFlag = function() return false end,
@@ -421,7 +425,10 @@ local function test_xml_registers_requested_items_and_pools()
     assertTruthy(items:find('<active%s+name="Condom".-maxcharges="3".-description="She said it doesn\'t count with one on".-gfx="Condom.png".-quality="0"', 1), "Condom XML should be a 3-charge quality 0 active")
     assertTruthy(items:find('<passive%s+name="Utility Knife".-cache="damage".-description="Painful scars".-gfx="UtilityKnife.png".-quality="2".-tags="offensive summonable"', 1), "Utility Knife XML should be a damage passive with requested tags")
     assertTruthy(pools:find('<Pool Name="oldChest".-<Item Name="Condom" Weight="1"', 1), "Condom should be in oldChest pool")
-    assertTruthy(pools:find('<Pool Name="boss".-<Item Name="Utility Knife" Weight="1"', 1), "Utility Knife should be in boss pool")
+    local bossPool = assert(pools:match('<Pool Name="boss">.-</Pool>'))
+    local cursePool = assert(pools:match('<Pool Name="curse">.-</Pool>'))
+    assertTruthy(not bossPool:find('<Item Name="Utility Knife"', 1, true), "Utility Knife should not be in boss pool")
+    assertTruthy(cursePool:find('<Item Name="Utility Knife" Weight="1"', 1, true), "Utility Knife should be in curse pool at weight 1")
     assertTruthy(items:find('<passive%s+name="Crazy Coconut".-cache="damage".-description="King of the Hollow Earth".-gfx="CrazyCoconut.png".-quality="4".-tags="offensive"', 1), "Crazy Coconut XML should be a quality 4 damage-cache passive")
     assertTruthy(pools:find('<Pool Name="treasure".-<Item Name="Crazy Coconut" Weight="1"', 1), "Crazy Coconut should be in treasure pool")
     assertTruthy(main:find('eidDescription = "{{Damage}} Each copy grants +3 permanent damage#After that, picking up an item from a pedestal grants another +3 permanent damage per copy if that item does not increase your actual damage"', 1, true),

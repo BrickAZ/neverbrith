@@ -805,10 +805,53 @@ return function(Neverbirth, context)
         end
     end
 
+    local function RemoveExpiredRingPickup(pickup)
+        if not pickup or pickup.Type ~= ENTITY_PICKUP or pickup.Variant ~= PICKUP_COLLECTIBLE
+            or pickup.SubType ~= ITEM_ID or not GetSavedState().startingPedestalExpired then return false end
+        pickup:Remove()
+        return true
+    end
+
+    local function UpdateStartingPedestalAvailability()
+        local state = GetSavedState()
+        if state.startingPedestalSpawned and not state.startingPedestalRoomKey
+            and not state.startingPedestalExpired then
+            -- Older saves have no offer history. Only a verified first visit
+            -- to the first floor's starting room can still retain the offer.
+            local game = Game and Game()
+            local level = game and game.GetLevel and game:GetLevel()
+            local desc = level and level.GetCurrentRoomDesc and level:GetCurrentRoomDesc()
+            local firstVisit = level and level.GetStage and level:GetStage() == 1
+                and level.GetCurrentRoomIndex and level.GetStartingRoomIndex
+                and level:GetCurrentRoomIndex() == level:GetStartingRoomIndex()
+                and (not level.GetDimension or level:GetDimension() == 0)
+                and desc and desc.VisitedCount == 1
+            if firstVisit then
+                state.startingPedestalRoomKey = GetRoomKey()
+            else
+                state.startingPedestalExpired = true
+            end
+            Save()
+        end
+        if state.startingPedestalRoomKey and not state.startingPedestalExpired
+            and state.startingPedestalRoomKey ~= GetRoomKey() then
+            -- The first departure closes this run's offer permanently, even
+            -- when the starting room's saved entities are restored later.
+            state.startingPedestalExpired = true
+            Save()
+        end
+        if state.startingPedestalExpired and Isaac and Isaac.GetRoomEntities then
+            for _, entity in ipairs(Isaac.GetRoomEntities()) do
+                RemoveExpiredRingPickup(entity)
+            end
+        end
+    end
+
     local function OnPostNewRoom()
         runtime.pendingTrades = {}
         runtime.pendingRingPickups = {}
         runtime.roomVisit = runtime.roomVisit + 1
+        UpdateStartingPedestalAvailability()
         local roomKey = GetRoomKey()
         local changed = false
         for _, player in ipairs(GetPlayers()) do
@@ -875,13 +918,16 @@ return function(Neverbirth, context)
         runtime.roomVisit = 0
         if not isContinue then
             local root = GetSaveRoot()
-            root.ringOfSevenCurses = { runSeed = GetRunSeed(), players = {}, startingPedestalSpawned = false }
+            root.ringOfSevenCurses = {
+                runSeed = GetRunSeed(), players = {}, startingPedestalSpawned = false,
+                startingPedestalRoomKey = GetRoomKey(), startingPedestalExpired = false,
+            }
             -- A false continue flag is a new run even if its seed is reused.
             -- Neither room/level callbacks nor continue may issue this reward.
             SpawnStartingPedestal()
             Save()
         else
-            GetSavedState()
+            UpdateStartingPedestalAvailability()
         end
         for _, player in ipairs(GetPlayers()) do ReconcilePlayer(player) end
         EnforceCurrentFloorCurses()
@@ -916,6 +962,7 @@ return function(Neverbirth, context)
     end
 
     local function OnPostPickupUpdate(_, pickup)
+        if RemoveExpiredRingPickup(pickup) then return end
         CompensateForbiddenPedestal(pickup)
     end
 
@@ -935,6 +982,7 @@ return function(Neverbirth, context)
     end
 
     local function OnPrePickupCollision(_, pickup, collider)
+        if RemoveExpiredRingPickup(pickup) then return true end
         local player = collider and collider.ToPlayer and collider:ToPlayer() or nil
         if not player then return nil end
         if not IsPlayerActive(player) then

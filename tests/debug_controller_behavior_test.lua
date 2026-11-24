@@ -513,4 +513,17 @@ test_up_down_and_right_left_and_down_up_return_to_root()
 test_input_debounce_prevents_held_direction_repeating()
 test_use_again_closes_and_tear_suppression_only_while_open()
 
+local controller = Neverbirth.DebugController
+local inputCalls = {}
+Input.IsActionPressed = function(_, controllerIndex)
+    inputCalls[#inputCalls + 1] = controllerIndex
+    return true
+end
+assertTruthy(controller.IsDirectionPressed({ ControllerIndex = 4294967294 }, "left"), "Repentance+ keyboard should be read")
+assertEquals(inputCalls[1], 4294967294, "keyboard index must reach the engine unchanged")
+assertTruthy(controller.IsDirectionPressed({ ControllerIndex = 0 }, "left"), "controller zero should be read for its owner")
+assertEquals(inputCalls[2], 0, "controller zero must reach the engine unchanged")
+assertEquals(controller.IsDirectionPressed({}, "left"), false, "an owner without a device must not read controller zero")
+assertEquals(#inputCalls, 2, "a missing device must not reach the input API")
+
 print("debug controller behavior tests passed")

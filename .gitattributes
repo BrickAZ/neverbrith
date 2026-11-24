@@ -1,0 +1,6 @@
+# Resource manifests and historical fixtures verify exact bytes.
+# Keep Git's platform line-ending conversion out of those contracts.
+*.anm2 -text
+content/*.xml -text
+reports/** -text
+generated/*.lua text eol=lf

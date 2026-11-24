@@ -265,6 +265,9 @@ local function loadNeverbirth(options)
                 GetCollectible = function(_, itemId)
                     return itemConfigs[itemId]
                 end,
+                GetCollectibles = function()
+                    return itemConfigs
+                end,
             }
         end,
     }

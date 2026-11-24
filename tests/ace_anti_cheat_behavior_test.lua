@@ -71,11 +71,8 @@ assertTruthy(xmlZh:find('description="基于20%+年的经验沉淀"'), "Chinese 
 for _, path in ipairs({ "content/itempools.xml", "content/itempools.en_us.xml", "content/itempools.zh_cn.xml" }) do
     local poolText = path == "content/itempools.xml" and pools or readFile(path)
     local itemName = path:find("zh_cn", 1, true) and "ACE 反作弊系统" or "ACE Anti-Cheat System"
-    for _, poolName in ipairs({ "treasure", "shop" }) do
-        local pool = poolText:match('<Pool Name="' .. poolName .. '">.-</Pool>')
-        assertTruthy(pool and pool:find('<Item Name="' .. itemName .. '" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
-            path .. " should include " .. itemName .. " in " .. poolName .. " at weight 0.1")
-    end
+    assertTruthy(not poolText:find('<Item Name="' .. itemName .. '"', 1, true),
+        path .. " should exclude " .. itemName .. " from natural item pools")
 end
 
 local block = source:match("%-%- ACE_ANTI_CHEAT_SYSTEM_BEGIN(.-)%-%- ACE_ANTI_CHEAT_SYSTEM_END")

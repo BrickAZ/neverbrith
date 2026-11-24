@@ -359,6 +359,20 @@
   <passive name="阿瓦达啃大瓜" description="" gfx="AvadaKedavraMelon.png" id="57" quality="0" cache="damage firedelay tearflag" tags="offensive noeden nochallenge" />
   <!-- 健康睡眠：中英文显示文本已补齐，道具池和标签保持原有状态。 -->
   <passive name="健康睡眠" description="睡够八小时" gfx="healthy_sleep.png" id="58" quality="0" />
+  <!-- 我即神明：道具池待用户决定，不添加 itempools 条目。 -->
+  <active name="我即神明" description="I just told you who I thought I was." gfx="i_am_a_god.png" id="59" quality="3" maxcharges="8" cache="damage speed range shotspeed tearflag" />
   <!-- 隐藏技术饰品：仅用于在本局契约生效时占据饰品 HUD 栏位。 -->
   <trinket name="Seven Curses Slot Seal" description="" gfx="447586_trinket.png" id="1" hidden="true" />
+  <active name="神性过载" description="Too much power for one body." gfx="god_complex.png" id="60" quality="3" maxcharges="2" cache="damage firedelay speed tearflag" />
+  <active name="神的左手，恶魔之右手" description="临时性复制" gfx="divine_left_hand.png" id="61" quality="4" maxcharges="3" tags="offensive nocantrip" />
+  <familiar name="回声宝宝" description="宝宝上升宝宝上升宝宝上升宝宝宝宝上升上升" gfx="echo_baby.png" id="62" quality="3" cache="damage firedelay familiars" tags="baby offensive lazarussharedglobal" />
+  <trinket name="零分考卷" description="全属性上升，重在参与" gfx="low_grade.png" id="2" cache="damage firedelay range" />
+  <passive name="炸弹套装" description="上吧，你现在是真正的炸弹人了!" gfx="bomb_suit.png" id="63" quality="3" cache="speed" />
+  <active name="凸眼鱼" description="只能吸死物" gfx="blinky.png" id="64" quality="3" maxcharges="0" tags="offensive nocantrip" />
+  <active name="斗气拳套" description="防住，再反击！" gfx="drive_glove_v1.png" id="65" quality="0" maxcharges="0" chargetype="special" cache="damage firedelay"/>
+  <!-- 本轮只接正式持有与演出；品质、道具池和战斗消耗尚未设置。 -->
+  <active name="360" description="按住主动键，摇一圈" gfx="zangief_360.png" id="66" maxcharges="0" chargetype="special" />
+  <active name="720" description="按住主动键，摇两圈" gfx="zangief_720.png" id="67" maxcharges="0" chargetype="special" />
+  <active name="波动" description="按住主动键，再按一下射击方向" gfx="motion_wave.png" id="68" maxcharges="0" chargetype="special" />
+  <active name="升龙" description="按住主动键，再输入升龙指令" gfx="motion_dp.png" id="69" maxcharges="0" chargetype="special" />
 </items>

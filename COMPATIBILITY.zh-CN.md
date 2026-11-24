@@ -10,6 +10,14 @@
 
 两个 Mod 加载后，通过全局对象 `Neverbirth` 接入；所需函数或表不存在时跳过。道具、饰品和角色 ID 均为**运行时 ID**。每个条目只登记一次。这些接口暂未版本化；EID 可选。
 
+## 阴的诅咒精确免爆封锁
+
+这项能力依赖本地 `1.0.12a-yin-api1-dev` 原生候选及其配套脚本，普通 REPENTOGON 1.0.12a 没有此接口。注册前需同时检查 `Isaac.GetPlayerExplosionImmunityAPIVersion() == 1` 与 `ModCallbacks.MC_PRE_PLAYER_EXPLOSION_IMMUNITY`。候选与安装范围见[交付记录](reports/yins-curse/native-interface/2026-10-02/delivery.md)。当前仍待安装及实机验收。
+
+监听器签名为 `(mod, player, hit, immunity)`，不接受注册过滤参数。`false` 只否决当前来源的爆炸免疫，让同一次原生伤害继续；`nil`/`true` 不干预、不赋予免疫。所有监听器按优先级及注册顺序执行，后续 `true`、异常或非法返回不能撤回已累积的 `false`。既有伤害回调的取消语义照常生效。
+
+`immunity` 含 `reason="EXPLOSION_IMMUNITY"`、`sourceKey`、`siteKey` 和可选 `collectibleId`；`hit` 含 `callId`、`damage`、`flags`、`source`、`countdown`。快照变化不反写原生参数，每个监听器获得独立 EntityRef 值副本；其中的实体引用仍指向实际实体，不得持久化到存档。已审计范围为纵火狂两出口、宿主帽、吐根限定炸弹/刀分支及合作宝宝皮肤 20；通用无敌、护盾、纯火焰保护和第三方独立取消不属于封锁目标。
+
 ## 鸿运齐天蛊
 
 仅在玩家同时持有鸿运和已登记道具或饰品时生效。多个有效阈值取最高值，不降低已有的更高幸运。阈值表示效果达到最高触发概率所需的幸运值，最高概率不一定是 100%。

@@ -435,7 +435,8 @@ local function test_xml_registers_good_girl_and_pools()
 
     assertTruthy(items:find('<passive%s+name="Good Girl of Babylon".-description="Don\'t stain the dress"', 1), "Good Girl of Babylon should be registered as passive")
     assertTruthy(pools:find('<Pool Name="angel".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in angel pool")
-    assertTruthy(pools:find('<Pool Name="library".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in library pool")
+    local libraryPool = assert(pools:match('<Pool Name="library">.-</Pool>'))
+    assertTruthy(not libraryPool:find('<Item Name="Good Girl of Babylon"', 1, true), "Good Girl should not be in library pool")
     assertTruthy(pools:find('<Pool Name="curse".-<Item Name="Good Girl of Babylon" Weight="1"', 1), "Good Girl should be in curse pool")
     assertTruthy(costumes:find('anm2path="costume_good_girl_of_babylon%.anm2"%s+type="none"', 1), "Good Girl body visual should be registered as a null costume")
 end

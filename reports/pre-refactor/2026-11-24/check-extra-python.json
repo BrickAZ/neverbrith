@@ -1,0 +1,37 @@
+[
+  {
+    "Command": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1123-915-0_26.1123.915.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe tests/pending_content_resources_test.py",
+    "ExitCode": 1,
+    "Output": "Traceback (most recent call last):\r\n  File \"E:\\Isaac - Repentance\\mods\\neverbrith\\tests\\pending_content_resources_test.py\", line 46, in <module>\r\n    assert changed=={61,62},changed\r\n           ^^^^^^^^^^^^^^^^\r\nAssertionError: {1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 25, 27, 28, 29, 30, 31, 61, 62}\r\n"
+  },
+  {
+    "Command": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1123-915-0_26.1123.915.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe tests/blinky_resource_contract_test.py",
+    "ExitCode": 1,
+    "Output": "Traceback (most recent call last):\r\n  File \"E:\\Isaac - Repentance\\mods\\neverbrith\\tests\\blinky_resource_contract_test.py\", line 27, in <module>\r\n    assert 64 in changed and changed<={63,64},changed\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError: {1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 25, 27, 28, 29, 30, 31, 64, 65, 66, 67, 68, 69}\r\n"
+  },
+  {
+    "Command": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1123-915-0_26.1123.915.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe tests/motion_items_resources_test.py",
+    "ExitCode": 1,
+    "Output": "Traceback (most recent call last):\r\n  File \"E:\\Isaac - Repentance\\mods\\neverbrith\\tests\\motion_items_resources_test.py\", line 74, in <module>\r\n    builder.build(check=True)\r\n  File \"E:\\Isaac - Repentance\\mods\\neverbrith\\tools\\build-motion-item-icons.py\", line 63, in build\r\n    assert Image.open(dest).convert('RGBA').tobytes() == icon.tobytes(), filename + ' stale'\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError: motion_dp.png stale\r\n"
+  },
+  {
+    "Command": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1123-915-0_26.1123.915.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe tests/motion_presentation_resources_test.py",
+    "ExitCode": 0,
+    "Output": "Approved source hashes and generated runtime transforms match.\r\nmotion_presentation_resources: PASS {\"assets\": 4, \"animations\": 12, \"visible_crop_keys\": 14900, \"audio_events\": 15}\r\nFour FX-only gameplay copies verified: no player/demo opponents, their textures or cinema shell; retained FX timing/crops/transforms unchanged.\r\n"
+  },
+  {
+    "Command": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1123-915-0_26.1123.915.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe tests/motion_additions_resources_test.py",
+    "ExitCode": 0,
+    "Output": "Punch frame 12: transparent crop and native scale checked\r\nmotion_additions_resources: PASS (12 crops; transparent original PNG; full official SPD reference)\r\n"
+  },
+  {
+    "Command": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1123-915-0_26.1123.915.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe tests/motion_cinematic_resources_test.py",
+    "ExitCode": 0,
+    "Output": "motion_cinematic_resources: PASS (one native opaque fill crop; original pixels; no actor art)\r\n"
+  },
+  {
+    "Command": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1123-915-0_26.1123.915.0_x64__3k8sg7r9htsxt\\dependencies\\python\\python.exe tests/motion_sa_hud_resources_test.py",
+    "ExitCode": 1,
+    "Output": "Traceback (most recent call last):\r\n  File \"E:\\Isaac - Repentance\\mods\\neverbrith\\tests\\motion_sa_hud_resources_test.py\", line 42, in <module>\r\n    assert core==(REPORT/'before/motion_combat_core.lua').read_text(encoding='utf-8'),'combat drift beyond approved 360 timing'\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError: combat drift beyond approved 360 timing\r\n"
+  }
+]

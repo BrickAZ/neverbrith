@@ -1,0 +1,21 @@
+[h1]Character Menu Fix and Item Pool Changes[/h1]
+[i]2026-09-22[/i]
+
+[b]Character Selection[/b]
+[list]
+[*] Fixed a leftover “NOT YET” placeholder page appearing in character selection after the character had been removed. Removed menu loading entries for disabled characters.
+[/list]
+
+[b]Item Pool Changes[/b]
+[list]
+[*] Everchanging: removed from the Treasure Room pool and now remains only in the Shop pool. Shop weight increased from 0.1 to 0.5.
+[*] ACE Anti-Cheat System: removed from the Treasure Room and Shop pools; the item itself remains available.
+[*] Utility Knife: moved from the Boss pool to the Curse Room pool, retaining a weight of 1.
+[*] Yin's Curse: removed from the Shop pool and added to the Curse Room pool with a weight of 1. Its Treasure Room weight remains 0.1.
+[*] Music Box and Tower of Babel: removed from the Boss pool, with their other pool sources retained.
+[*] Coin-Faced Mask: removed from the Devil Room pool; remains in the Shop and Curse Room pools.
+[*] Strong Laxative: removed from the Curse Room pool; remains in the Treasure Room and Rotten Beggar pools.
+[*] Good Girl of Babylon: removed from the Library pool; remains in the Angel Room and Curse Room pools.
+[*] All seven dog-food items (Protein Strip, Energy Kibble, Low-Fat Chow, DHA Fish Oil, Dental Chew, Lucky Liver Bites and Goat Milk Pudding): removed from the Treasure Room pool and now remain only in the Boss pool, each retaining a weight of 0.1.
+[*] Synchronized the default, English and Chinese item pools.
+[/list]

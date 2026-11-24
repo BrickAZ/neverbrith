@@ -8,7 +8,7 @@ arg = { "--fixture" }
 local loadFixture = dofile("tests/folk_horror_items_behavior_test.lua")
 arg = oldArg
 local native = read("E:/Isaac - Repentance/resources/scripts/main_ex.lua")
-assert(native:find('["Version"] = "1.0.12a"', 1, true))
+dofile("tests/repentogon_installed_dispatch_contract.lua")(native)
 local first = assert(native:find("function _RunEntityTakeDmgCallback(", 1, true))
 local last = assert(native:find("-- Custom handling for MC_PRE_TRIGGER_PLAYER_DEATH", first, true))
 local dispatchSource = native:sub(first, last - 1)

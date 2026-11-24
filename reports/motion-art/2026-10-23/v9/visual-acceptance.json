@@ -1,0 +1,29 @@
+{
+  "confirmed_on": "2026-10-23",
+  "authority": "user",
+  "user_message": "就这般了",
+  "status": "APPROVED",
+  "scope": "V9 circle_720 offline visual performance as shown",
+  "constraints": [
+    "原版以撒",
+    "无附加手臂",
+    "720单一版本",
+    "其他招式保持现状"
+  ],
+  "files": [
+    {
+      "path": "resources\\gfx\\Effects\\MotionShowcase\\v9\\circle_720.anm2",
+      "sha256": "44f34e3dfbf54cd6850ebd012c0883da4021e3d079ce5664124485c916590ef9"
+    },
+    {
+      "path": "reports\\motion-art\\2026-10-23\\v9\\circle_720_jpn.mp4",
+      "sha256": "825b508de33476c1778db111adaea0efd05c01510fe4b8f4c47ce17da692d8df"
+    },
+    {
+      "path": "reports\\motion-art\\2026-10-23\\v9\\circle_720_reference_compare.mp4",
+      "sha256": "f050decefe4c890d08e7ce435364408fb5664c1a5497f69d855e4121b73bd704"
+    }
+  ],
+  "runtime_integration": "NOT_DONE_BY_THIS_REVISION",
+  "in_game_acceptance": "NOT_RUN"
+}

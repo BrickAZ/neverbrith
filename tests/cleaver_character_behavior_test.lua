@@ -591,7 +591,11 @@ local function test_stranger_is_unregistered_but_cleaver_assets_remain_available
     assertEquals(players:match('<player name="Stranger"'), nil, "players.xml must keep Stranger unregistered")
     assertEquals(players:match('<player name="Dante"'), nil, "players.xml must keep Dante unregistered while custom characters are disabled")
 
-    local characterMenu = readFile("content/gfx/CharacterMenu.anm2")
+    local liveCharacterMenu = io.open("content/gfx/CharacterMenu.anm2", "rb")
+    if liveCharacterMenu then liveCharacterMenu:close() end
+    assertEquals(liveCharacterMenu, nil, "unregistered characters must not retain a live character-menu entry")
+    -- Preserve the art contract only in the archive, outside native menu discovery.
+    local characterMenu = readFile("content/gfx/CharacterMenu.anm2.disabled")
     assertTruthy(characterMenu:match('<Spritesheet Id="1" Path="stranger_not_yet_name%.png"'),
         "Stranger character menu should load the dedicated NOT YET name sheet")
     assertTruthy(characterMenu:match('<Spritesheet Id="2" Path="stranger_not_yet_item%.png"'),
@@ -1038,4 +1042,18 @@ test_self_shadow_uses_the_normal_player_damage_pipeline()
 test_stat_caps_and_conversion_are_recalculated_from_raw_stats()
 test_stat_conversion_respects_per_stat_and_total_caps()
 test_item_loss_style_type_change_and_new_room_clear_runtime_state()
+
+local inputFixture = loadNeverbirth()
+configureCleaver()
+local keyboardPlayer = inputFixture.newPlayer({ playerType = 42, controllerIndex = 4294967294 })
+Input.IsActionTriggered = function(action, controller)
+    return action == ButtonAction.ACTION_SHOOTRIGHT and controller == keyboardPlayer.ControllerIndex
+end
+inputFixture.runPostUpdate()
+assertTruthy(Neverbirth.Cleaver.GetState(keyboardPlayer).swing, "the raw shoot fallback must read the owning Repentance+ keyboard")
+Input.IsActionTriggered = function(action, controller)
+    return action == ButtonAction.ACTION_SHOOTRIGHT and controller == 0
+end
+assertEquals(Neverbirth.Cleaver.GetTriggeredShootDirection({}), nil, "the shoot fallback must not borrow controller zero")
+
 print("cleaver character behavior tests passed")

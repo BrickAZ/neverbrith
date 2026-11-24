@@ -1,0 +1,194 @@
+[
+  {
+    "path": "content/costumes2.xml",
+    "line_endings_only": true
+  },
+  {
+    "path": "content/gfx/CharacterMenu.anm2.disabled",
+    "line_endings_only": true
+  },
+  {
+    "path": "content/music.xml",
+    "line_endings_only": true
+  },
+  {
+    "path": "content/players.xml",
+    "line_endings_only": true
+  },
+  {
+    "path": "content/pocketitems.en_us.xml",
+    "line_endings_only": true
+  },
+  {
+    "path": "content/pocketitems.xml",
+    "line_endings_only": true
+  },
+  {
+    "path": "content/pocketitems.zh_cn.xml",
+    "line_endings_only": true
+  },
+  {
+    "path": "generated/motion_presentation.lua",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/BigDogBark/big_dog_entity.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/CleaverAttack/CleaverAttack.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/CleaverAttack/CleaverAttack_v2.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/CleaverAttack/CleaverAttack_v3.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/CleaverAttack/CleaverUnified.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/CleaverAttack/stranger_machete.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/DriveDefense/v1/SOURCES.md",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/DriveRecovery/v1/SOURCES.md",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/DriveRush/README.md",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/DriveRush/v2/README.md",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/DriveRush/v3/README.md",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/FortuneRivallingHeavenGu/fortune_coin.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/FortuneRivallingHeavenGu/fortune_fork.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/FortuneRivallingHeavenGu/fortune_mark.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/FortuneRivallingHeavenGu/fortune_pedestal.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/TheMoonIsBeautiful/moon_mark.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/TheMoonIsBeautiful/moon_mark_boss.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/TheMoonIsBeautiful/moon_mark_wave.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/TheMoonIsBeautiful/moon_reward_drop.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/TheMoonIsBeautiful/moon_silence_success.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/archive_controls.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Effects/traffic_choice_link.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Items/Collectibles/traffic_exposure.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Items/Collectibles/traffic_heat.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/Items/Collectibles/traffic_unboxing.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/UI/DebugController/DebugControllerKeys.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/UI/DriveGauge/v2/README.md",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/UI/DriveItem/v1/README.md",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/UI/traffic_meter.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_blue_banana_peel.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_coin_faced_mask.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_coin_faced_mask_broken.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_daodao_hair.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_daodao_tissue_tears.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_ringotsuga_headgear.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_tantan_glasses.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_tantan_hair.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_tokarev_cloak.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_yoontoons_glasses.anm2",
+    "line_endings_only": true
+  },
+  {
+    "path": "resources/gfx/characters/costume_yoontoons_hair.anm2",
+    "line_endings_only": true
+  }
+]

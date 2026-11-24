@@ -17,6 +17,12 @@ return function(mod)
         end
     end
     local sealId = Isaac.GetTrinketIdByName("Seven Curses Slot Seal")
+    local trinketIds = {}
+    if sealId > 0 then trinketIds[sealId] = true end
+    for _, name in ipairs({ "Low Grade", "零分考卷" }) do
+        local id = Isaac.GetTrinketIdByName(name)
+        if id and id > 0 then trinketIds[id] = true end
+    end
     local pillIds = {}
     for _, name in ipairs({ "Wind Charge Potion", "蓄风药剂" }) do
         local id = Isaac.GetPillEffectByName(name)
@@ -27,7 +33,7 @@ return function(mod)
         if not active or not poolCleanupPending or game:GetNumPlayers() == 0 then return end
         local pool = game:GetItemPool()
         for id in pairs(collectibleIds) do pool:RemoveCollectible(id) end
-        if sealId > 0 then pool:RemoveTrinket(sealId) end
+        for id in pairs(trinketIds) do pool:RemoveTrinket(id) end
         poolCleanupPending = false
     end
 
@@ -43,7 +49,7 @@ return function(mod)
 
     local function replacementTrinket(_, id)
         local goldenFlag = TrinketType.TRINKET_GOLDEN_FLAG
-        if sealId > 0 and id % goldenFlag == sealId then
+        if trinketIds[id % goldenFlag] then
             return TrinketType.TRINKET_PAPER_CLIP + (id >= goldenFlag and goldenFlag or 0)
         end
     end

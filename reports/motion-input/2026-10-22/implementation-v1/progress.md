@@ -1,0 +1,32 @@
+# Execution ledger — docs/superpowers/plans/2026-10-22-motion-input-system.md
+
+- Authorization: implement shared input, attack restrictions and integration only; no unconfirmed item numbers, art, XML or pools.
+- Baseline: baseline-status.txt, baseline-hashes.json, main.lua.baseline capture the existing dirty installed checkout.
+- Ruling: work in the user-selected installed checkout with a narrow file allowlist and baseline snapshots. Its untracked modules and approved documents are required inputs; a clean worktree would omit them. No Git commits, resets or publication.
+- Pre-flight: task 1 produces Core.New/Step/Reset; task 3 consumes these exact sample/event shapes. Task 2 produces Shooting.New and gate operations; task 3 owns registration/ownership and command provenance. No conflicting interface found.
+- Ruling: use the discovered PATH Lua 5.4 executable. Sandboxed LOCALAPPDATA points elsewhere; do not install a second interpreter.
+- Task 1: in progress; tests must fail before core is written.
+- Task 1: core RED observed (missing module); GREEN `lua tests/motion_input_core_test.lua` exit 0, 72 assertions. A charge initialization branch was corrected after a failing charge test exposed it.
+- Task 2: gate RED observed (missing module); 54 initial assertions passed. Added a regression that failed when a direct player spawner hid a command-marked parent; resolve now traverses for provenance before falling back to ownership.
+- Ruling: restrictions do not mutate CanShoot. Native input polling is gated separately from raw reads; attack entities and outgoing damage are checked by provenance. This avoids restoring stale CanShoot snapshots over another mod's restriction.
+- Ruling: outgoing attack cancellation does not cancel damage to player health; environmental/unattributed sources are not guessed. Exact native DOT attribution is consumed only when the installed optional capability is present.
+- Pre-integration LuaAll: 81 passed, 1 failed, 0 blocked, 6 known generic asset warnings. The sole failure was the deliberately missing shooting module during RED. Report: pre-integration.json.
+- Task 2 GREEN: `lua tests/motion_input_shooting_test.lua` exit 0, 55 assertions, including marked-parent/direct-spawner regression. Status records use stable engine entity identity, not transient Lua userdata identity.
+- Task 3 RED: `lua tests/motion_input_behavior_test.lua` failed because adapter did not exist. GREEN after adapter: 37 assertions, including raw-read bypass, single/double clicks, coop, pocket/ownership separation, lifecycle and no CanShoot writes.
+- Additional core RED: reverse rejection plus a changed facing could count a phantom cardinal. Store the original world input and its new-facing snapshot, rather than interpreting an old relative number in a new basis.
+- Main integration: one MOTION_INPUT_BEGIN/END include, no default registrations or item IDs. No unconfirmed XML/resources/pools changed.
+- Review RED→GREEN: installed 1.0.12a requires boolean true from PRE_USE_ITEM; corrected adapter and replaced the table-return test with native-use/charge cancellation semantics.
+- Review RED→GREEN: hard invalid direction and long neutral retry reproject world input in the new facing; no held-key phantom cardinal.
+- Review RED→GREEN: current head fallback updates before the first explicit shot; explicit shot memory is independent of owner/room resets and clears at run boundaries.
+- Review RED→GREEN: circles only ignore natural adjacent diagonal bridges, and opposite diagonals cannot overwrite an undecided bridge to erase an error.
+- Additional RED→GREEN: successful diagnostics report 已释放; completion serials remain unique per player across bindings and lifecycle resets.
+- Expanded adapter evidence: unselected Schoolbag ownership, selected pocket active, simultaneous active keys, execution failure, resource refusal, recovery buffering and death cancellation. behavior test currently 61 assertions, exit 0.
+- Follow-up RED→GREEN: charge neutral/release expiry is settled before retry and translates current world input in the new facing. Continuous 30Hz changed-facing regression plus charged-release restart now pass. Core currently 90 assertions, shooting 55, adapter 61 (206 total), all exit 0.
+- Ruling: keep native game acceptance pending. No confirmed concrete family item exists to bind; production registration remains empty. Delivery provides injection contract and a separate per-weapon/manual acceptance matrix rather than granting or registering placeholder items.
+- Task 1: complete (shared code + core 90 assertions, exit 0).
+- Task 2: complete for implementation and simulated source/type contracts (55 assertions, exit 0); actual weapon/engine acceptance NOT_RUN.
+- Task 3: complete (adapter 61 assertions, exit 0); no production owner registered.
+- Final fresh-context review: prior issues and follow-up counterexamples closed. Reviewer independently ran 206 assertions plus 16 natural circle sequences and opposite-diagonal rejection, all exit 0; no remaining blocking correctness findings in scope.
+- Task 4: automatic regression complete. `pwsh -NoProfile -File tools/check-neverbrith.ps1 -Profile LuaAll -ReportPath reports/motion-input/2026-10-22/implementation-v1/final-checks.json` exit 0: 83 passed, 0 failed, 0 blocked, 6 existing generic resource warnings. Native runtime NOT_RUN.
+- Navigation: `pwsh -NoProfile -File tests/agent_wiki_navigation_test.ps1` exit 0, 5 pages/99 local links.
+- Integrity: main diff is only the shared include block and separator; baseline content/itempool/entity/sound XML and generated registry hashes unchanged. No commit or publication.

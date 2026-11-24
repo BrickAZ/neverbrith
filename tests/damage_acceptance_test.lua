@@ -13,7 +13,7 @@ local function eq(actual, expected, label)
     assert(actual == expected, label .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual))
 end
 local native = read("E:/Isaac - Repentance/resources/scripts/main_ex.lua")
-assert(native:find('["Version"] = "1.0.12a"', 1, true), "audit is pinned to 1.0.12a")
+dofile("tests/repentogon_installed_dispatch_contract.lua")(native)
 local comparator = assert(load(section(native, "local function CallbackComparator(",
     "-- Normally if you execute") .. "\nreturn CallbackComparator"))()
 local fixture = read("tests/localization_test.lua")

@@ -4,6 +4,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $Root = [IO.Path]::GetFullPath($Root)
+$runtimeRoots = @((Join-Path $Root 'content'))
+$runtimeRoots += @(Get-ChildItem -LiteralPath $Root -Directory -Filter 'resources*' | ForEach-Object { $_.FullName })
+foreach ($runtimeRoot in $runtimeRoots) {
+    $characterMenus = @(Get-ChildItem -LiteralPath $runtimeRoot -Recurse -File -Filter 'CharacterMenu*.anm2')
+    if ($characterMenus.Count -ne 0) {
+        throw "Custom character menu must remain disabled even when players.xml is empty: $($characterMenus[0].FullName)"
+    }
+}
+
 $registrationFiles = @(Get-ChildItem -LiteralPath (Join-Path $Root 'content') -Filter 'players*.xml' -File)
 foreach ($resourceRoot in @(Get-ChildItem -LiteralPath $Root -Directory -Filter 'resources*')) {
     $registrationFiles += @(Get-ChildItem -LiteralPath $resourceRoot.FullName -Filter 'players*.xml' -File)
@@ -22,4 +31,4 @@ if ($characterLoads.Count -ne 0) {
     throw "Custom character module is still loaded: $($characterLoads[0].Value.Trim())"
 }
 
-Write-Output 'No custom character registrations or character-module bootstrap calls: passed'
+Write-Output 'No custom character menus, registrations or character-module bootstrap calls: passed'

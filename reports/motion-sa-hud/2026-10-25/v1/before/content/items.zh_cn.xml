@@ -1,0 +1,378 @@
+<items gfxroot="gfx/Items/" deathanm2="gfx/UI/NeverbirthDeathItems.anm2" version="1">
+  <!-- 被动道具：风油精 -->
+  <passive
+    name="风油精"
+    cache="all"
+    description="3岁以下儿童慎用"
+    gfx="P_EssentialBalm.png"
+    id="1"
+    quality="3"
+    tags="offensive summonable"
+  />
+    <!-- 被动道具：芜湖 -->
+  <passive
+    name="芜湖！~"
+    cache="all"
+    description="黑风吹过呜呼起飞"
+    gfx="Wuhu.png"
+    id="2"
+    quality="4"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：未剪断的脐带 -->
+  <passive
+    name="未剪断的脐带"
+    cache="all"
+    description="一半现在，一半以后"
+    gfx="UncutCord.png"
+    id="3"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 被动道具：绝育证明 -->
+  <passive
+    name="绝育证明"
+    cache="all"
+    description="不许再生"
+    gfx="SterilizationCertificate.png"
+    id="4"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：空摇篮 -->
+  <passive
+    name="空摇篮"
+    cache="damage"
+    description="伤痕会回应"
+    gfx="EmptyCradle.png"
+    id="5"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 主动道具：剪碎的塔罗 -->
+  <active
+    name="剪碎的塔罗"
+    cache="luck"
+    maxcharges="0"
+    description="把命运剪碎"
+    gfx="ShreddedTarot.png"
+    id="6"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 主动道具：血颅蛊 -->
+  <active
+    name="血颅蛊"
+    cache="damage range"
+    maxcharges="3"
+    description="杀亲证道，提纯资质。"
+    gfx="BloodSkullGu.png"
+    id="7"
+    quality="3"
+    tags="devil offensive summonable"
+  />
+  <!-- 主动道具：老大的指令 -->
+  <active
+    name="老大的指令"
+    maxcharges="3"
+    initcharge="3"
+    description="兄弟，想抓杀你"
+    gfx="BossOrder.png"
+    id="8"
+    quality="2"
+    tags="nochallenge nolostbr"
+  />
+  <!-- 主动道具：生死一念间 -->
+  <active
+    name="生死一念间"
+    cache="all"
+    maxcharges="12"
+    description="众生皆证。"
+    gfx="BetweenDeathAndLife.png"
+    id="9"
+    quality="4"
+    tags="dead devil noeden nochallenge offensive"
+  />
+  <!-- 主动道具：铜钱剑 -->
+  <active
+    name="铜钱剑"
+    maxcharges="3"
+    description="钱是香火，也是剑刃。"
+    gfx="CoinSewnSword.png"
+    id="10"
+    quality="2"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：铜钱面具 -->
+  <passive
+    name="铜钱面具"
+    cache="luck"
+    description="买一张脸。"
+    gfx="CoinFacedMask.png"
+    id="11"
+    quality="2"
+    tags="summonable"
+  />
+  <!-- 被动道具：黑太岁 -->
+  <passive
+    name="黑太岁"
+    cache="all"
+    description="以血为食，替你看清世界。"
+    gfx="BlackTaisui.png"
+    id="12"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：肉块 -->
+  <passive
+    name="肉块"
+    cache="all"
+    description="再活一口"
+    gfx="BlackTaisuiMeat.png"
+    id="13"
+    quality="2"
+    tags="dead summonable"
+  />
+  <!-- 主动道具：净化迷幻菇，黑太岁内部替换道具 -->
+  <active
+    name="净化迷幻菇"
+    maxcharges="900"
+    chargetype="timed"
+    description="被净化的迷幻蘑菇。"
+    gfx="PurifiedMushroom.png"
+    id="14"
+    quality="0"
+    tags="summonable"
+  />
+  <!-- 被动道具：巴比伦好女孩 -->
+  <passive
+    name="巴比伦好女孩"
+    cache="all"
+    description="别弄脏裙子。"
+    gfx="GoodGirlOfBabylon.png"
+    id="15"
+    quality="3"
+    tags="angel summonable"
+  />
+  <!-- 主动道具：避孕套 -->
+  <active
+    name="避孕套"
+    maxcharges="3"
+    description="她说戴了不算给"
+    gfx="Condom.png"
+    id="16"
+    quality="0"
+  />
+  <!-- 主动道具：调试控制器 -->
+  <active
+    name="调试控制器"
+    maxcharges="0"
+    description="调试命令菜单"
+    gfx="DebugController.png"
+    id="17"
+    quality="0"
+    tags="noeden nochallenge"
+  />
+  <!-- 被动道具：强力泻药 -->
+  <passive
+    name="强力泻药"
+    description="一泻千里"
+    gfx="StrongLaxative.png"
+    id="18"
+    quality="0"
+    tags="summonable"
+  />
+  <!-- 被动道具：通天塔 -->
+  <passive
+    name="通天塔"
+    description="不再有洪水。"
+    gfx="TowerOfBabel.png"
+    id="19"
+    quality="1"
+  />
+  <!-- 被动道具：月色真美 -->
+  <passive
+    name="月色真美"
+    cache="damage luck"
+    description="请这样对我说。"
+    gfx="collectible_the_moon_is_beautiful.png"
+    id="20"
+    quality="3"
+    tags="angel summonable"
+  />
+  <!-- 被动道具：焚尽郁结 -->
+  <passive
+    name="焚尽郁结"
+    cache="damage firedelay speed"
+    description="我从未如此神清气爽过。"
+    gfx="BurnAwayResentment.png"
+    id="21"
+    quality="3"
+    tags="offensive"
+  />
+  <!-- 被动道具：虚空针尖 -->
+  <passive
+    name="虚空针尖"
+    description="下次请吐在垃圾桶里……"
+    gfx="Needletick.png"
+    id="22"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：疯狂的椰子 -->
+  <passive
+    name="疯狂的椰子"
+    cache="damage"
+    description="空心地球之王"
+    gfx="CrazyCoconut.png"
+    id="23"
+    quality="4"
+    tags="offensive"
+  />
+  <!-- 被动道具：鸿运齐天蛊 -->
+  <passive
+    name="鸿运齐天蛊"
+    cache="luck"
+    description="天命所归。"
+    gfx="fortune_rivalling_heaven_gu.png"
+    id="24"
+    quality="4"
+  />
+  <!-- 被动道具：美工刀 -->
+  <passive
+    name="美工刀"
+    cache="damage"
+    description="苦痛伤痕"
+    gfx="UtilityKnife.png"
+    id="25"
+    quality="2"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：柴刀，Stranger 起始道具 -->
+  <passive
+    name="柴刀"
+    cache="damage firedelay range shotspeed"
+    description="眼泪替换为柴刀挥砍"
+    gfx="Cleaver.png"
+    id="26"
+    quality="0"
+    tags="offensive"
+  />  <!-- 主动道具：春药 -->
+  <active
+    name="春药"
+    cache="all"
+    maxcharges="1"
+    description="性奋"
+    gfx="Chunyao.png"
+    id="27"
+    quality="2"
+    tags="devil offensive"
+  />
+  <!-- 主动道具：八音盒 -->
+  <active
+    name="八音盒"
+    cache="all"
+    maxcharges="12"
+    description="为你的生命倒计时"
+    gfx="Musicbox.png"
+    id="28"
+    quality="4"
+    tags="dead noeden nochallenge angel"
+  /><!-- 主动道具：天使盒 -->
+  <active
+    name="天使盒"
+    cache="all"
+    maxcharges="4"
+    initcharge="4"
+    chargetype="special"
+    description="盈魂引向天国"
+    gfx="Angelbox.png"
+    id="29"
+    quality="3"
+    tags="noeden nochallenge angel offensive"
+  />
+    <!-- 主动道具：恶魔盒 -->
+  <active
+    name="恶魔盒"
+    cache="all"
+    maxcharges="4"
+    initcharge="4"
+    chargetype="special"
+    description="暗血引向深渊"
+    gfx="Devilbox.png"
+    id="30"
+    quality="4"
+    tags="noeden nochallenge devil offensive"
+  />
+  <!-- 主动道具：ds4 -->
+  <active
+    name="ds4"
+    cache="all"
+    maxcharges="0"
+    description=""
+    gfx="ds4.png"
+    id="31"
+    quality="4"
+    tags="noeden nochallenge"
+  />
+  <!-- 被动道具：小皮鞋 -->
+  <passive name="小皮鞋" cache="all" description="咪mermermer" gfx="little_leather_shoes.png" id="32" quality="2" tags="offensive summonable" />
+  <!-- 隐藏一次性流量奖励 -->
+  <passive name="流量：开箱" cache="all" description="初露锋芒" gfx="traffic_unboxing.png" id="33" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <passive name="流量：曝光" cache="all" description="更多人看见了你" gfx="traffic_exposure.png" id="34" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <passive name="流量：热度" cache="firedelay" description="你确定这是你想要的吗？" gfx="traffic_heat.png" id="35" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <!-- 开发者陈列主动道具：未生证明 -->
+  <active name="未生证明" maxcharges="0" description="进入未生陈列室" gfx="certificate_of_neverbirth.png" id="36" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <!-- 一次性特殊选择主动道具：再契象 -->
+  <active name="再契象" maxcharges="0" description="谁不想急头白脸来一把房子VS大象呢？" gfx="saikeissho.png" id="37" quality="4" tags="summonable offensive nochallenge" />
+  <!-- 被动外观系统：千变万化 -->
+  <passive name="千变万化" description="本局换个模样" gfx="Everchanging.png" id="38" quality="0" />
+  <!-- 简单被动道具：狗粮系列 -->
+  <passive name="高蛋白肉条" cache="damage" description="更有力的一口" gfx="protein_strip.png" id="39" quality="1" tags="food" />
+  <passive name="活力狗饼干" cache="firedelay" description="活力满满" gfx="energy_kibble.png" id="40" quality="1" tags="food" />
+  <passive name="轻盈低脂罐头" cache="speed" description="身轻步快" gfx="lean_can.png" id="41" quality="1" tags="food" />
+  <passive name="DHA 鱼油" cache="range" description="看得更远" gfx="dha_fish_oil.png" id="42" quality="1" tags="food" />
+  <passive name="护齿磨牙骨" description="顶回去" gfx="dental_chew.png" id="43" quality="1" tags="food" />
+  <passive name="幸运肝粒" cache="luck" description="幸运零食" gfx="lucky_liver_bites.png" id="44" quality="1" tags="food" />
+  <passive name="羊奶布丁" description="柔软滋养" gfx="goat_milk_pudding.png" id="45" quality="1" tags="food" />
+  <!-- 被动审查道具：ACE 反作弊系统 -->
+  <passive name="ACE 反作弊系统" description="基于20+年的经验沉淀" gfx="ace_anti_cheat_blue.png" id="46" quality="0" tags="noeden nochallenge" />
+  <!-- 被动本局诅咒：阴的诅咒 -->
+  <passive name="阴的诅咒" description="唯有黑暗能压制诅咒" gfx="yins_curse.png" id="47" quality="0" tags="noeden nochallenge" />
+  <!-- 主动道具：大狗叫；两个强化的品质暂未指定，仅宝箱房池、权重 1；Lua 按当前是否持有大狗叫筛选。 -->
+  <active name="大狗叫" maxcharges="0" description="蓄力，放狗" gfx="big_dog_bark.png" id="48" quality="3" />
+  <passive name="蓄风棒" description="即刻反向出击" gfx="wind_charge_rod.png" id="49" tags="offensive noeden" />
+  <passive name="回响碎片" description="冲刺后留下回响" gfx="echo_shard.png" id="50" tags="offensive noeden" />
+  <!-- 被动复活道具；以 0.1 权重加入宝箱房和商店池。 -->
+  <passive name="复活吧，我的爱人！" description="请再次睁开眼睛。" gfx="revive_my_beloved.png" id="51" quality="3" persistent="true" customtags="reviveeffect" />
+  <!-- 被动敌人转换与恐惧光环道具。 -->
+  <passive name="胆小鬼之夜" description="人人都是胆小菇" gfx="NightOfTheCowards.png" id="52" quality="0" />
+  <!-- 主动环形光环与冲击波替换道具。 -->
+  <active name="诛" cache="firedelay range" maxcharges="8" description="感受！我的痛苦！" gfx="Annihilation.png" id="53" quality="3" tags="offensive" />
+  <!-- 被动友好原版炸弹棉花怪小队。 -->
+  <passive name="神风特攻队" description="为胜利！献身！" gfx="KamikazeSquad.png" id="54" quality="0" tags="offensive summonable" />
+  <!-- 被动逐房身份紊乱；以 0.1 权重加入宝箱房和商店池。 -->
+  <passive name="记忆紊乱" description="我是谁？" gfx="Collectibles_025_Breakfast.png" id="55" quality="0" tags="noeden nochallenge nocantrip" />
+  <!-- 主动永久本局契约；刻意不加入任何道具池。 -->
+  <active name="七咒之戒" cache="damage firedelay shotspeed luck flying" maxcharges="0" description="人间不值得" gfx="RingOfTheSevenCurses.png" id="56" quality="0" />
+  <!-- 被动原版武器覆盖；以 0.1 权重加入宝箱房和商店池。 -->
+  <passive name="阿瓦达啃大瓜" description="" gfx="AvadaKedavraMelon.png" id="57" quality="0" cache="damage firedelay tearflag" tags="offensive noeden nochallenge" />
+  <!-- 健康睡眠：中英文显示文本已补齐，道具池和标签保持原有状态。 -->
+  <passive name="健康睡眠" description="睡够八小时" gfx="healthy_sleep.png" id="58" quality="0" />
+  <!-- 我即神明：道具池待用户决定，不添加 itempools 条目。 -->
+  <active name="我即神明" description="I just told you who I thought I was." gfx="i_am_a_god.png" id="59" quality="3" maxcharges="8" cache="damage speed range shotspeed tearflag" />
+  <!-- 隐藏技术饰品：仅用于在本局契约生效时占据饰品 HUD 栏位。 -->
+  <trinket name="Seven Curses Slot Seal" description="" gfx="447586_trinket.png" id="1" hidden="true" />
+  <active name="神性过载" description="Too much power for one body." gfx="god_complex.png" id="60" quality="3" maxcharges="2" cache="damage firedelay speed tearflag" />
+  <active name="神的左手，恶魔之右手" description="临时性复制" gfx="divine_left_hand.png" id="61" quality="4" maxcharges="3" tags="offensive nocantrip" />
+  <familiar name="回声宝宝" description="宝宝上升宝宝上升宝宝上升宝宝宝宝上升上升" gfx="echo_baby.png" id="62" quality="3" cache="damage firedelay familiars" tags="baby offensive lazarussharedglobal" />
+  <trinket name="零分考卷" description="全属性上升，重在参与" gfx="low_grade.png" id="2" cache="damage firedelay range" />
+  <passive name="炸弹套装" description="上吧，你现在是真正的炸弹人了!" gfx="bomb_suit.png" id="63" quality="3" cache="speed" />
+  <active name="凸眼鱼" description="只能吸死物" gfx="blinky.png" id="64" quality="3" maxcharges="0" tags="offensive nocantrip" />
+  <active name="斗气拳套" description="防住，再反击！" gfx="drive_glove_v1.png" id="65" quality="0" maxcharges="0" chargetype="special" cache="damage firedelay"/>
+  <!-- 本轮只接正式持有与演出；品质、道具池和战斗消耗尚未设置。 -->
+  <active name="360" description="按住主动键，摇一圈" gfx="zangief_360.png" id="66" maxcharges="0" chargetype="special" />
+  <active name="720" description="按住主动键，摇两圈" gfx="zangief_720.png" id="67" maxcharges="0" chargetype="special" />
+  <active name="波动" description="按住主动键，再按一下射击方向" gfx="motion_wave.png" id="68" maxcharges="0" chargetype="special" />
+  <active name="升龙" description="按住主动键，再输入升龙指令" gfx="motion_dp.png" id="69" maxcharges="0" chargetype="special" />
+</items>

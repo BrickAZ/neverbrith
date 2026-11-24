@@ -51,6 +51,15 @@ These interfaces are provisional and unversioned. Read the guides before integra
 
 ## Development and checks
 
+Start with the [project knowledge index](docs/agent/index.md) and read the implementation map, verification guide, and relevant topic on demand. The unified runner provides focused pilot regression and all Lua behavior tests:
+
+```powershell
+pwsh -NoProfile -File tools/check-neverbrith.ps1 -Profile Pilot
+pwsh -NoProfile -File tools/check-neverbrith.ps1 -Profile LuaAll
+```
+
+Use `-LuaPath` to select Lua 5.4 when it is not on `PATH`, and `-ReportPath` to save results. The [verification guide](docs/agent/testing.md) documents coverage, exit codes, temporary files, and in-game boundaries. `LuaAll` does not include every PowerShell, Python, or Node check.
+
 | Path | Purpose |
 | --- | --- |
 | `main.lua` and root Lua modules | Bootstrap, item behavior, and integrations |

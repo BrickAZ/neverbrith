@@ -1,0 +1,164 @@
+--- before/drive_glove.lua
++++ drive_glove.lua
+@@ -7,6 +7,9 @@
+     local audio=include('drive_glove_audio')()
+     local runtime,readingInput,freezeUntil,frozen={},0,-1,{}
+     local hits={}
++    local attackOwners={}
++    local nativeAttribution=Isaac.GetStatusAttributionAPIVersion and Isaac.GetStatusAttributionAPIVersion()==1
++    local statusOwnerFields={'poisonOwner','burnOwner','bleedOwner'}
+     local ready=false
+     local visuals
+     local function now() return game:GetFrameCount() end
+@@ -149,7 +152,7 @@
+     end
+     local function cancelRoom()
+         restoreAll()
+-        hits={}
++        hits={}; attackOwners={}
+         for _,t in pairs(runtime) do
+             if busy(t) then C.End(t,'room') end
+             t.planned=nil; t.walkOrigin=nil; t.damageReceipts={}; t.rushShot=nil
+@@ -347,37 +350,64 @@
+         local familiar=entity:ToFamiliar(); if familiar then return familiar.Player end
+         return owner(entity.Parent,(depth or 0)+1,seen) or owner(entity.SpawnerEntity,(depth or 0)+1,seen)
+     end
+-    local function npcDamage(_,e,_,flags,source)
+-        if not e:ToNPC() then return end
+-        local attack=source and source.Entity
+-        local p=owner(attack)
++    local function ownerKey(entity)
++        if not entity then return end
++        local id=GetPtrHash(entity)..':'..entity.InitSeed
++        local p=owner(entity)
++        if p then attackOwners[id]={entity=entity,key=key(p)}
++        elseif exists(entity) and (exists(entity.Parent) or exists(entity.SpawnerEntity)) then
++            -- A real replacement source can revoke ownership. A disappeared
++            -- familiar merely clears native pointers; retain its projectile's
++            -- creation snapshot until that projectile itself is removed.
++            attackOwners[id]={entity=entity,key=false}
++        end
++        return p and key(p) or attackOwners[id] and attackOwners[id].key
++    end
++    local function hitRecord(e)
+         -- Native death may expose a new GetData table. Keep attribution outside
+         -- that table, scoped to this room and the entity's pointer plus InitSeed.
+         local id=GetPtrHash(e)..':'..e.InitSeed
+-        local d=hits[id] or {entity=e}; hits[id]=d
+-        -- An already poisoned target does not make the next ordinary hit a
+-        -- poison application. Record only explicit status flags on the attack.
+-        local statusAttack=attack and (attack:ToTear() or attack:ToLaser() or attack:ToKnife() or attack:ToBomb())
+-        local tearFlags=statusAttack and statusAttack.TearFlags
+-        if p and tearFlags then
+-            if tearFlags & TearFlags.TEAR_POISON~=0 then d.poisonOwner=key(p) end
+-            if tearFlags & TearFlags.TEAR_BURN~=0 then d.burnOwner=key(p) end
+-        end
+-        if not p and D.Flag(flags,'DAMAGE_POISON_BURN') then
+-            local hasPoison=e:HasEntityFlags(EntityFlag.FLAG_POISON)
+-            local hasBurn=e:HasEntityFlags(EntityFlag.FLAG_BURN)
+-            -- Different simultaneous status owners with no native source are
+-            -- ambiguous; never award the last ordinary attacker by guessing.
+-            local dotOwner
+-            if hasPoison and hasBurn then
+-                if d.poisonOwner==d.burnOwner then dotOwner=d.poisonOwner end
+-            elseif hasPoison then dotOwner=d.poisonOwner
+-            elseif hasBurn then dotOwner=d.burnOwner end
+-            d.NeverbirthDriveLastHit=dotOwner or false
++        local d=hits[id]
++        if not d or d.type~=e.Type or d.variant~=e.Variant then
++            d={entity=e,type=e.Type,variant=e.Variant};hits[id]=d
++        end
++        return d
++    end
++    local function statusApplied(_,e,source,kind)
++        if not ready or not exists(e) or not e:ToNPC() or not statusOwnerFields[kind] then return end
++        -- Emitted only after native eligibility and payload selection. Store a
++        -- player key now, while a tear/familiar source is still alive.
++        local k=ownerKey(source and source.Entity)
++        hitRecord(e)[statusOwnerFields[kind]]=k or false
++    end
++    local function statusCopied(_,from,to,overwrite)
++        if not ready or not exists(from) or not exists(to) or not to:ToNPC() then return end
++        local a,b=hitRecord(from),hitRecord(to)
++        for _,info in ipairs({{'poisonOwner',EntityFlag.FLAG_POISON,'GetPoisonDamage'},
++            {'burnOwner',EntityFlag.FLAG_BURN,'GetBurnDamage'},
++            {'bleedOwner',EntityFlag.FLAG_BLEED_OUT,'GetBleedingCountdown'}}) do
++            -- Match native CopyStatusEffects payload overwrite/nonzero rules.
++            if overwrite or from[info[3]] and from[info[3]](from)~=0 then
++                b[info[1]]=from:HasEntityFlags(info[2]) and a[info[1]] or false
++            end
++        end
++    end
++    local function npcAttackSource(_,e,_,_,source)
++        if e:ToNPC() then ownerKey(source and source.Entity) end
++    end
++    local function npcDamage(_,e,amount,flags,source)
++        if not e:ToNPC() or amount<=0 or D.Flag(flags,'DAMAGE_FAKE') then return end
++        local d=hitRecord(e)
++        local k=ownerKey(source and source.Entity)
++        local kind=nativeAttribution and source and Isaac.GetCurrentDotDamageKind(e,source) or 0
++        if statusOwnerFields[kind] then
++            d.NeverbirthDriveLastHit=d[statusOwnerFields[kind]] or false
+             return
+         end
++        -- Unscoped/sourceless synthetic damage is not a native status tick.
++        -- Never infer its owner from active flags or the last ordinary attacker.
+         -- Clear stale ownership on a genuine environmental final hit.
+-        d.NeverbirthDriveLastHit=p and key(p) or false
++        d.NeverbirthDriveLastHit=k or false
+     end
+     local function died(_,npc)
+         local d=hits[GetPtrHash(npc)..':'..npc.InitSeed]
+@@ -481,7 +511,11 @@
+             else
+                 if not hit.entity:HasEntityFlags(EntityFlag.FLAG_POISON) then hit.poisonOwner=nil end
+                 if not hit.entity:HasEntityFlags(EntityFlag.FLAG_BURN) then hit.burnOwner=nil end
+-            end
++                if not hit.entity:HasEntityFlags(EntityFlag.FLAG_BLEED_OUT) then hit.bleedOwner=nil end
++            end
++        end
++        for id,attack in pairs(attackOwners) do
++            if not exists(attack.entity) then attackOwners[id]=nil end
+         end
+         for _,t in pairs(runtime) do
+             if exists(t.player) then
+@@ -501,7 +535,7 @@
+         end
+     end
+     local function started(_,continued)
+-        restoreAll(); runtime={}; hits={}; ready=true
++        restoreAll(); runtime={}; hits={}; attackOwners={}; ready=true
+         if not continued then context.GetSaveRoot().driveGlove=nil end
+         for _,p in ipairs(players()) do
+             local s=data(p)
+@@ -510,7 +544,7 @@
+         if visuals then visuals.ClearRoom() end
+     end
+     local function exit()
+-        restoreAll(); if ready then save() end; ready=false; runtime={}; hits={}
++        restoreAll(); if ready then save() end; ready=false; runtime={}; hits={}; attackOwners={}
+         if visuals then visuals.ClearRoom() end
+     end
+     local api={ItemId=ID,GetState=function(p) return data(p),state(p) end,
+@@ -528,8 +562,20 @@
+     mod:AddPriorityCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG,-30000,earlyDamage)
+     mod:AddPriorityCallback(ModCallbacks.MC_ENTITY_TAKE_DMG,30000,lateDamage,EntityType.ENTITY_PLAYER)
+     mod:AddPriorityCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG,30000,postDamage,EntityType.ENTITY_PLAYER)
+-    mod:AddPriorityCallback(ModCallbacks.MC_ENTITY_TAKE_DMG,30000,npcDamage)
++    -- PRE only captures a live attack chain. Credit is committed by the native
++    -- accepted-damage POST, so a later canceller cannot steal a queued death.
++    mod:AddPriorityCallback(ModCallbacks.MC_ENTITY_TAKE_DMG,30000,npcAttackSource)
++    mod:AddPriorityCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG,30000,npcDamage)
+     mod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH,died)
++    if nativeAttribution then
++        mod:AddCallback('REPENTOGON_POST_DOT_APPLIED',statusApplied)
++        mod:AddCallback('REPENTOGON_POST_DOT_COPY',statusCopied)
++        for _,name in ipairs({'MC_POST_TEAR_INIT','MC_POST_LASER_INIT','MC_POST_KNIFE_INIT','MC_POST_BOMB_INIT','MC_POST_EFFECT_INIT'}) do
++            if ModCallbacks[name] then mod:AddCallback(ModCallbacks[name],function(_,entity) ownerKey(entity) end) end
++        end
++    else
++        Isaac.DebugString('[Drive Glove] Status attribution API unavailable; sourceless DOT kills are not guessed.')
++    end
+     mod:AddPriorityCallback(ModCallbacks.MC_INPUT_ACTION,-30000,input)
+     mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM,preUse)
+     mod:AddCallback(ModCallbacks.MC_USE_ITEM,use,ID)

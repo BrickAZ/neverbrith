@@ -1,0 +1,214 @@
+--- a/repentogon/Patches/ASMPatches.cpp
++++ b/repentogon/Patches/ASMPatches.cpp
+@@ -15,6 +15,7 @@
+ 
+ #include "ASMPatches/ASMCallbacks.h"
+ #include "ASMPatches/ASMExplosionImmunity.h"
++#include "StatusAttribution.h"
+ #include "ASMPatches/ASMDelirium.h"
+ #include "ASMPatches/ASMEntityNPC.h"
+ #include "ASMPatches/ASMGridEntity.h"
+@@ -85,6 +86,7 @@
+ 	PatchPreEntityTakeDamageCallbacks();
+ 	PatchPostEntityTakeDamageCallbacks();
+ 	InstallPlayerExplosionImmunityPatches();
++	status_attribution::Install();
+ 	ASMPatchPrePlayerUseBomb();
+ 	ASMPatchPostPlayerUseBomb();
+ 	ASMPatchPreMMorphActiveCallback();
+--- a/repentogon/LuaInterfaces/LuaIsaac.cpp
++++ b/repentogon/LuaInterfaces/LuaIsaac.cpp
+@@ -12,6 +12,16 @@
+ 
+ #include "../MiscFunctions.h"
+ #include "../Patches/PlayerExplosionImmunity.h"
++#include "../Patches/StatusAttribution.h"
++
++LUA_FUNCTION(Lua_StatusAttributionVersion) {
++    lua_pushinteger(L,status_attribution::Version()); return 1;
++}
++LUA_FUNCTION(Lua_CurrentDotKind) {
++    auto entity=lua::GetUserdata<Entity*>(L,1,lua::Metatables::ENTITY,"Entity");
++    auto source=lua::GetUserdata<EntityRef*>(L,2,lua::Metatables::ENTITY_REF,"EntityRef");
++    lua_pushinteger(L,status_attribution::CurrentKind(entity,source)); return 1;
++}
+ 
+ LUA_FUNCTION(Lua_IsaacGetPlayerExplosionImmunityAPIVersion) {
+ 	lua_pushinteger(L,explosion_immunity::GetPlayerExplosionImmunityAPIVersion());
+@@ -744,6 +754,8 @@
+ 
+ 	// new functions
+ 	lua::RegisterGlobalClassFunction(_state, lua::GlobalClasses::Isaac, "GetPlayerExplosionImmunityAPIVersion", Lua_IsaacGetPlayerExplosionImmunityAPIVersion);
++	lua::RegisterGlobalClassFunction(_state, lua::GlobalClasses::Isaac, "GetStatusAttributionAPIVersion", Lua_StatusAttributionVersion);
++	lua::RegisterGlobalClassFunction(_state, lua::GlobalClasses::Isaac, "GetCurrentDotDamageKind", Lua_CurrentDotKind);
+ 	lua::RegisterGlobalClassFunction(_state, lua::GlobalClasses::Isaac, "_CopyExplosionImmunityEntityRef", Lua_CopyExplosionImmunityEntityRef);
+ 	lua::RegisterGlobalClassFunction(_state, lua::GlobalClasses::Isaac, "CanStartTrueCoop", Lua_IsaacCanStartTrueCoop);
+ 	lua::RegisterGlobalClassFunction(_state, lua::GlobalClasses::Isaac, "ClearBossHazards", Lua_IsaacClearBossHazards);
+--- a/repentogon/LuaInterfaces/Entities/LuaEntity.cpp
++++ b/repentogon/LuaInterfaces/Entities/LuaEntity.cpp
+@@ -362,6 +362,7 @@
+ 	return 0;
+ }
+ 
++#include "../../Patches/StatusAttribution.h"
+ #define nonzero(a,b)	((a == 0) ? (b) : (a))
+ 
+ inline void SlowTrackCopyStatusEffects(Entity* ent1, Entity* ent2) {
+@@ -457,6 +458,7 @@
+ }
+ 
+ void CopyStatusEffects(Entity* ent1, Entity* ent2, bool overwrite) {
++    status_attribution::Copy(ent1,ent2,overwrite);
+ 	if (overwrite) {
+ 		FastTrackCopyStatusEffects(ent1, ent2);
+ 	}
+@@ -902,4 +904,4 @@
+ 		{ NULL, NULL }
+ 	};
+ 	lua::RegisterFunctions(_state, lua::Metatables::ENTITY, functions);
+-}+}
+--- /dev/null
++++ b/repentogon/Patches/StatusAttribution.cpp
+@@ -0,0 +1,130 @@
++#include "StatusAttribution.h"
++#include "IsaacRepentance.h"
++#include "LuaCore.h"
++#include "ASMPatcher.hpp"
++#include "PlayerExplosionImmunity.h"
++#include "Log.h"
++#include <Windows.h>
++#include <array>
++#include <string>
++
++// Observers only: native application eligibility, max damage, duration, tick
++// timing, and TakeDamage return paths are unchanged. This extension is tied to
++// the same SHA-256 audited executable as the installed Yin interface.
++namespace status_attribution {
++static bool installed=false;
++struct TickContext { Entity* entity; EntityRef* source; int kind; };
++static thread_local const TickContext* current=nullptr;
++int Version() { return installed ? 1 : 0; }
++int CurrentKind(Entity* entity,EntityRef* source) {
++    return current && current->entity==entity && current->source==source ? current->kind : 0;
++}
++static void __stdcall Applied(Entity* entity,EntityRef* source,int kind,float incoming) {
++    if (!installed || !g_LuaEngine || !g_LuaEngine->_state) return;
++    const auto flag=kind==1 ? EntityFlag::FLAG_POISON : EntityFlag::FLAG_BURN;
++    const float previous=kind==1 ? entity->_poisonDamage : entity->_burnDamage;
++    // Native max keeps the previous payload only for a strictly lower input.
++    // A duration-only extension must not steal that payload's owner.
++    if (kind!=3 && (entity->_flags & flag)!=0 && previous>incoming) return;
++    auto L=g_LuaEngine->_state;
++    lua::LuaStackProtector guard(L);
++    lua_rawgeti(L,LUA_REGISTRYINDEX,g_LuaEngine->runCallbackRegistry->key);
++    auto result=lua::LuaCaller(L).push("REPENTOGON_POST_DOT_APPLIED").pushnil()
++        .push(entity,lua::Metatables::ENTITY).push(source,lua::Metatables::ENTITY_REF)
++        .push(kind).call(0);
++    if (result) KAGE::LogMessage(0,"[StatusAttribution] application observer error\n");
++}
++void Copy(Entity* from,Entity* to,bool overwrite) {
++    if (!installed || !g_LuaEngine || !g_LuaEngine->_state) return;
++    auto L=g_LuaEngine->_state;
++    lua::LuaStackProtector guard(L);
++    lua_rawgeti(L,LUA_REGISTRYINDEX,g_LuaEngine->runCallbackRegistry->key);
++    auto result=lua::LuaCaller(L).push("REPENTOGON_POST_DOT_COPY").pushnil()
++        .push(from,lua::Metatables::ENTITY).push(to,lua::Metatables::ENTITY)
++        .push(overwrite).call(0);
++    if (result) KAGE::LogMessage(0,"[StatusAttribution] copy observer error\n");
++}
++static void __stdcall NativeCopy(Entity* from,Entity* to) { Copy(from,to,true); }
++static bool __stdcall Tick(Entity* entity,int kind,float damage,unsigned long long flags,EntityRef* source,int countdown) {
++    const TickContext context{entity,source,kind};
++    struct Scope {
++        const TickContext* prior;
++        Scope(const TickContext* c):prior(current) {current=c;}
++        ~Scope() {current=prior;}
++    } scope(&context);
++    return entity->TakeDamage(damage,flags,source,countdown);
++}
++static void Save(ASMPatch& p) {
++    // Keep GP registers, EFLAGS, x87, XMM and MXCSR, with aligned FXSAVE storage.
++    ByteBuffer bytes;bytes.AddAny("\x9c\x60\x89\xe3\x81\xec\x10\x02\x00\x00\x83\xe4\xf0\x0f\xae\x04\x24",17);
++    p.AddBytes(bytes);
++}
++static void Exact(ASMPatch& p,const std::string& data) {
++    // ASMPatch's string overload uses C-string length; byte buffers are required
++    // for original instructions containing a zero displacement byte.
++    ByteBuffer bytes;bytes.AddAny(data.data(),data.size());p.AddBytes(bytes);
++}
++static void Restore(ASMPatch& p) {
++    p.AddBytes(std::string("\x0f\xae\x0c\x24\x89\xdc\x61\x9d",8));
++}
++bool Install() {
++    installed=false;
++    // The preceding installer checks the whole executable hash. No patch is
++    // attempted when it is unsupported; verify every additional byte as well.
++    if (!explosion_immunity::capability.buildVerified) return false;
++    auto image=reinterpret_cast<unsigned char*>(GetModuleHandleW(nullptr));
++    struct Site { unsigned rva; std::string bytes; };
++    const std::array<Site,7> sites{{
++        {0x28532c,std::string("\xf3\x0f\x11\x86\x78\x02\x00\x00",8)},
++        {0x285de1,std::string("\xf3\x0f\x11\x86\x7c\x02\x00\x00",8)},
++        {0x287124,std::string("\xff\x52\x20\x8b\x8f\x60\x01\x00\x00",9)},
++        {0x2871ee,std::string("\xff\x52\x20\x8b\x87\x60\x01\x00\x00",9)},
++        {0x281479,std::string("\x8b\x83\x78\x02\x00\x00",6)},
++        {0x285ea8,std::string("\x89\x8e\x40\x02\x00\x00",6)},
++        {0x287306,std::string("\xff\x52\x20\xf3\x0f\x10\x5c\x24\x10",9)}
++    }};
++    for (const auto& s:sites) if (std::memcmp(image+s.rva,s.bytes.data(),s.bytes.size())!=0) {
++        KAGE::LogMessage(0,"[StatusAttribution] site mismatch; API disabled\n"); return false;
++    }
++    unsigned attempted=0;
++    try {
++        for (unsigned i=0;i<sites.size();++i) {
++            const auto& s=sites[i]; ASMPatch p;
++            if (i<2 || i==5) {
++                Save(p);
++                p.AddBytes("\x83\xec\x04\xf3\x0f\x11\x0c\x24"); // incoming XMM1
++                p.AddBytes(i==5 ? "\x6a\x03" : i==0 ? "\x6a\x01" : "\x6a\x02");
++                p.AddBytes("\xff\x75\x08\x56").AddInternalCall(Applied);
++                Restore(p); Exact(p,s.bytes);
++            } else if (i<4 || i==6) {
++                // Original five TakeDamage argument words are already on the
++                // stack. Our stdcall consumes those plus entity and kind.
++                p.AddBytes(i==6 ? "\x6a\x03" : i==2 ? "\x6a\x01" : "\x6a\x02");
++                p.AddBytes("\x51").AddInternalCall(Tick);
++                Exact(p,s.bytes.substr(3));
++            } else {
++                // Preserve EBX (native copy source) before Save uses it.
++                p.AddBytes("\x50\x8b\xc3"); Save(p);
++                p.AddBytes("\x57\x50").AddInternalCall(NativeCopy);
++                Restore(p);p.AddBytes("\x58");Exact(p,s.bytes);
++            }
++            p.AddRelativeJump(image+s.rva+s.bytes.size());
++            attempted=i+1; ASMPatcher::instance().PatchAt(image+s.rva,&p);
++        }
++        installed=true;
++        KAGE::LogMessage(0,"[StatusAttribution] API 1: all seven native observer sites installed\n");
++        return true;
++    } catch (const std::exception& e) {
++        for(unsigned i=0;i<attempted;++i) {
++            const auto& s=sites[i];DWORD old=0,unused=0;
++            if(VirtualProtect(image+s.rva,s.bytes.size(),PAGE_EXECUTE_READWRITE,&old)) {
++                std::memcpy(image+s.rva,s.bytes.data(),s.bytes.size());
++                VirtualProtect(image+s.rva,s.bytes.size(),old,&unused);
++            }
++        }
++        FlushInstructionCache(GetCurrentProcess(),nullptr,0);
++        KAGE::_LogMessage(0,"[StatusAttribution] install failed; API disabled: %s\n",e.what());
++        return false;
++    }
++}
++}
+--- /dev/null
++++ b/repentogon/Patches/StatusAttribution.h
+@@ -0,0 +1,9 @@
++#pragma once
++struct Entity;
++struct EntityRef;
++namespace status_attribution {
++bool Install();
++int Version();
++int CurrentKind(Entity* entity, EntityRef* source);
++void Copy(Entity* from, Entity* to, bool overwrite);
++}

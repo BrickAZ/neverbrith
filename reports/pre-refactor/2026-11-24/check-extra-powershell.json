@@ -1,0 +1,37 @@
+[
+  {
+    "Command": "pwsh -NoProfile -File tests/mystuff_resource_contract_test.ps1",
+    "ExitCode": 0,
+    "Output": "My Stuff validation passed: 69 stable IDs across 3 XML files, 65 visible sketches, 4 hidden blank cells; native content ANM2 and relative atlas path verified.\r\nMy Stuff resource regression checks passed: rejects resources-only entrypoint, broken relative PNG path, and an empty newest visible item.\r\n"
+  },
+  {
+    "Command": "pwsh -NoProfile -File tests/god_complex_resource_contract_test.ps1",
+    "ExitCode": 0,
+    "Output": "Verified 69 neverbrith collectible rows in E:\\Isaac - Repentance\\mods\\neverbrith\\generated\\neverbirth_collectibles.lua\r\nMy Stuff validation passed: 69 stable IDs across 3 XML files, 65 visible sketches, 4 hidden blank cells; native content ANM2 and relative atlas path verified.\r\nGod Complex resource contract passed: 3 metadata/pool pairs, 6 animations, 34 crops, exact cell 60, generated registry. Native rendering remains unverified.\r\n"
+  },
+  {
+    "Command": "pwsh -NoProfile -File tests/no_custom_characters_test.ps1",
+    "ExitCode": 0,
+    "Output": "No custom character menus, registrations or character-module bootstrap calls: passed\r\n"
+  },
+  {
+    "Command": "pwsh -NoProfile -File tests/dante_character_contract_test.ps1",
+    "ExitCode": 0,
+    "Output": "No custom character menus, registrations or character-module bootstrap calls: passed\r\nDante remains unregistered; archived visual-surface contract passed\r\n"
+  },
+  {
+    "Command": "pwsh -NoProfile -File tests/dante_character_geometry_test.ps1",
+    "ExitCode": 0,
+    "Output": "Dante official-ANM2 crop geometry and native evidence contract passed\r\n"
+  },
+  {
+    "Command": "pwsh -NoProfile -File tests/compatibility_docs_test.ps1",
+    "ExitCode": 0,
+    "Output": "Memory Disorder example and candidate contract passed\r\ncompatibility docs tests passed (8 matching Lua blocks per language)\r\n"
+  },
+  {
+    "Command": "pwsh -NoProfile -File tests/motion_native_state_test.ps1",
+    "ExitCode": 0,
+    "Output": "motion_native_state: PASS (concurrent edit, missing original, exact owned addition, unknown addition, clean restoration, runner integration)\r\n"
+  }
+]

@@ -1,0 +1,647 @@
+[
+  {
+    "bytes": 945625,
+    "sha256": "AF5F11AC35631DCEC9715EE25EBA27BF7513C4F86A4292337F59B3F086556BDE",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\charge_back_forward_slow.gif"
+  },
+  {
+    "bytes": 11602,
+    "sha256": "C601A0B566FED9348A8DF76F6E813AD938DC4FB7CA29313A6B493245EEAA5E62",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\charge_back_forward_strip.png"
+  },
+  {
+    "bytes": 945625,
+    "sha256": "9B88B91BFA6289497ACFD7D6DA7845066324F11701919AA2BE31099ECF59AB56",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\charge_back_forward.gif"
+  },
+  {
+    "bytes": 1043840,
+    "sha256": "5D0C8432FECB2C580D9FDA6E0B3017FF0AB00B39E5B10C8446B1D0421676FA74",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\double_wave_slow.gif"
+  },
+  {
+    "bytes": 15883,
+    "sha256": "413EF1BA68A8CDF1EAC89C84494F2E7F4390BF1262163FA907EAD6A98FCA250E",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\double_wave_strip.png"
+  },
+  {
+    "bytes": 1043840,
+    "sha256": "6202C903DBF4A5F42435FBBB2720047C67DF00E1E7C6A2F3D68F970476E7B861",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\double_wave.gif"
+  },
+  {
+    "bytes": 958243,
+    "sha256": "A3C58596C7104E11E818E1226592602C58FE6DC8D9FF3EBFF43BE2094B79670F",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\reverse_qcf_slow.gif"
+  },
+  {
+    "bytes": 15059,
+    "sha256": "6CFDD775A6F2580641106D62E6BF9BE082269F3567B345016E6055A449BDA41E",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\reverse_qcf_strip.png"
+  },
+  {
+    "bytes": 958243,
+    "sha256": "EADA44C8350A3A6727D9A249910204E6B9FD41F3C2E72054106B32234504CCF1",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\reverse_qcf.gif"
+  },
+  {
+    "bytes": 945625,
+    "sha256": "AF5F11AC35631DCEC9715EE25EBA27BF7513C4F86A4292337F59B3F086556BDE",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\charge_back_forward_slow.gif"
+  },
+  {
+    "bytes": 11602,
+    "sha256": "C601A0B566FED9348A8DF76F6E813AD938DC4FB7CA29313A6B493245EEAA5E62",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\charge_back_forward_strip.png"
+  },
+  {
+    "bytes": 945625,
+    "sha256": "9B88B91BFA6289497ACFD7D6DA7845066324F11701919AA2BE31099ECF59AB56",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\charge_back_forward.gif"
+  },
+  {
+    "bytes": 1043840,
+    "sha256": "5D0C8432FECB2C580D9FDA6E0B3017FF0AB00B39E5B10C8446B1D0421676FA74",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\double_wave_slow.gif"
+  },
+  {
+    "bytes": 15883,
+    "sha256": "413EF1BA68A8CDF1EAC89C84494F2E7F4390BF1262163FA907EAD6A98FCA250E",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\double_wave_strip.png"
+  },
+  {
+    "bytes": 1043840,
+    "sha256": "6202C903DBF4A5F42435FBBB2720047C67DF00E1E7C6A2F3D68F970476E7B861",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\double_wave.gif"
+  },
+  {
+    "bytes": 958243,
+    "sha256": "A3C58596C7104E11E818E1226592602C58FE6DC8D9FF3EBFF43BE2094B79670F",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\reverse_qcf_slow.gif"
+  },
+  {
+    "bytes": 15059,
+    "sha256": "6CFDD775A6F2580641106D62E6BF9BE082269F3567B345016E6055A449BDA41E",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\reverse_qcf_strip.png"
+  },
+  {
+    "bytes": 958243,
+    "sha256": "EADA44C8350A3A6727D9A249910204E6B9FD41F3C2E72054106B32234504CCF1",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\reports\\motion-art\\2026-10-22\\v1\\reverse_qcf.gif"
+  },
+  {
+    "bytes": 1485942,
+    "sha256": "83DC39269625D0AA2AF375A0BEC49A0FCFD802DBC4921D12A6DF90E27AC275B6",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\resources\\gfx\\Effects\\MotionShowcase\\v1\\charge_back_forward.anm2"
+  },
+  {
+    "bytes": 1612480,
+    "sha256": "24191B6E57B4B5822BF2BB4666C0473193DEB62B130CEB30641E424907F34514",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\resources\\gfx\\Effects\\MotionShowcase\\v1\\double_wave.anm2"
+  },
+  {
+    "bytes": 1364536,
+    "sha256": "8A5EBFF5C65C562AB781ADE087028A2686E3070EE699B18A5FF4ACCB2833EE6F",
+    "path": "reports\\motion-art\\2026-10-22\\v1\\motion-preview-v1\\resources\\gfx\\Effects\\MotionShowcase\\v1\\reverse_qcf.anm2"
+  },
+  {
+    "bytes": 43528,
+    "sha256": "8599D0C86146B291C8A8A7DC49AF2D456C9AD9C502A131257337C64F6E9F2783",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\charge_back_forward_silent.mp4"
+  },
+  {
+    "bytes": 979496,
+    "sha256": "B4F055A7B4855B617746AC128B10EA2D0AA735B288BF0F281FF621D3B7164E01",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\charge_back_forward_slow.gif"
+  },
+  {
+    "bytes": 18707,
+    "sha256": "29262DF04206F99612615948E961C4DCFDBE3C041BC6CCE51B7AA057241AAC27",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\charge_back_forward_strip.png"
+  },
+  {
+    "bytes": 979496,
+    "sha256": "EA0DEADA0AF54E9982303812609CB04B18A143D7BF5D3CFBF8738DECA6941F16",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\charge_back_forward.gif"
+  },
+  {
+    "bytes": 91424,
+    "sha256": "3D49AC08780ECFC5D1C325E2CECCFEEE4D601AAF2C5828F6E87642E8BEF1F62A",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\double_wave_silent.mp4"
+  },
+  {
+    "bytes": 1156879,
+    "sha256": "4B99D151BD759B83384E301BAC779589917A13C6744C01A5BE5CDADCDEE3F03F",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\double_wave_slow.gif"
+  },
+  {
+    "bytes": 25984,
+    "sha256": "30E327B10AB2DD37BA762BD47224E3A3AAE904129C544E6CECBFCB8B894EDFEA",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\double_wave_strip.png"
+  },
+  {
+    "bytes": 1156879,
+    "sha256": "BD911E9D7C352A81E577E0E13C157DECAFEE49C162798C5E77985982ACA90CCD",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\double_wave.gif"
+  },
+  {
+    "bytes": 55898,
+    "sha256": "96F862A8822B2EF3D96AB390D19B64951519565F73BB353FD480E09F7114EBFB",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\reverse_qcf_silent.mp4"
+  },
+  {
+    "bytes": 1009331,
+    "sha256": "CA480C01E067226A3B39885AE2EEFB828AA8F99C870358E89F14F88F5A63C9AF",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\reverse_qcf_slow.gif"
+  },
+  {
+    "bytes": 24232,
+    "sha256": "C01D8E4CCAD90EE332B02247DF4F57BE7141085D8B6F2299B0B32363AF8F0BDD",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\reverse_qcf_strip.png"
+  },
+  {
+    "bytes": 1009331,
+    "sha256": "899888FBDA019866D9F8A3EF9FD1BE621FBC8CD622C8919CC42B6F5F203EF035",
+    "path": "reports\\motion-art\\2026-10-23\\v2\\reverse_qcf.gif"
+  },
+  {
+    "bytes": 41069,
+    "sha256": "FA6F3E015F0CB89EB544FAAB7D587BE59946A05B0DB135C77520BB4D4C457525",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\charge_back_forward_silent.mp4"
+  },
+  {
+    "bytes": 1033620,
+    "sha256": "9F353D4B5E0203C69244B74CF60057A5AC39DFC568816B59BF584A4FA857EE7F",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\charge_back_forward_slow.gif"
+  },
+  {
+    "bytes": 13539,
+    "sha256": "052AB5BD9BCD8052FFC5096CAB958DDE9111791F39F8FFBA1E5EF6DF9568B720",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\charge_back_forward_strip.png"
+  },
+  {
+    "bytes": 1033620,
+    "sha256": "6D6A4F2837BD573F9C8ED36AC9408089E78FADA3E66641844716A757F45DF152",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\charge_back_forward.gif"
+  },
+  {
+    "bytes": 90224,
+    "sha256": "F478E2F60DD511B72440D42AF4899BD90FC0388F779473411AB24082767A4673",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\double_wave_silent.mp4"
+  },
+  {
+    "bytes": 1245884,
+    "sha256": "C9E3BD86D4A23CF5D4DB1D1BE98171089C339B2C0024B768D766A8DFB4246F51",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\double_wave_slow.gif"
+  },
+  {
+    "bytes": 21924,
+    "sha256": "7CC6BEB21CBFA6E45A62422BB2676FE5E7E01D8E0B05BE820438228F8D835138",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\double_wave_strip.png"
+  },
+  {
+    "bytes": 1245884,
+    "sha256": "01CE81240645A0AFA85AAECEE06C21252DA2A046C171248FC4B5FA35C796819C",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\double_wave.gif"
+  },
+  {
+    "bytes": 52981,
+    "sha256": "E9F7C984E4ED9F5CAFF50C76D7B5B7170F515DB76F1E152CF754D09E7D82B76B",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\reverse_qcf_silent.mp4"
+  },
+  {
+    "bytes": 1082932,
+    "sha256": "98EFC8AC638FEB9B8FAC95A7025C58B1237F4916982F479B5F00C130BF599297",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\reverse_qcf_slow.gif"
+  },
+  {
+    "bytes": 19074,
+    "sha256": "2AFDE71C08641C7C1D9191564058F31F8F331D9BE5E2700BF9E20A3CAA7C08B4",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\reverse_qcf_strip.png"
+  },
+  {
+    "bytes": 1082932,
+    "sha256": "1F76F0CC85243E098CF5FD7B4F30F6D3530C60DB2ACDACDD41CD39F64888FEE8",
+    "path": "reports\\motion-art\\2026-10-23\\v3\\reverse_qcf.gif"
+  },
+  {
+    "bytes": 40106,
+    "sha256": "64EE16C1603B44F0FB31A607FC6BFC850A200C592EAF16927A42A1A5CFBEB9C7",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\charge_back_forward_silent.mp4"
+  },
+  {
+    "bytes": 1038248,
+    "sha256": "43C12DD9F813F5FB366BC87A2D7C4E85082BAF979F8E829ABAA8DB0A43211018",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\charge_back_forward_slow.gif"
+  },
+  {
+    "bytes": 12463,
+    "sha256": "9F57B3288AFD520A4CBE94CBC724FFEFE1F293261BD2ECAB9ADA736E727A8C20",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\charge_back_forward_strip.png"
+  },
+  {
+    "bytes": 1038248,
+    "sha256": "B43EFBA33A820325A45E1D7C92605AA97402DEA075D6C1A24373919E7E45BB72",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\charge_back_forward.gif"
+  },
+  {
+    "bytes": 88777,
+    "sha256": "FF4C8DC8F0E56DA7893907C8B6EE8BB040102F8329226A92F01A00EFE3A00AE4",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\double_wave_silent.mp4"
+  },
+  {
+    "bytes": 1250927,
+    "sha256": "F319F4177063D16AE8FD1BD0421882569B88F8A44DD52119F76FEFA7A22DA1A1",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\double_wave_slow.gif"
+  },
+  {
+    "bytes": 21392,
+    "sha256": "DFE538E0C3CE1D286AB545EFD936DFC526DE53159D812FC099B698838859BB5B",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\double_wave_strip.png"
+  },
+  {
+    "bytes": 1250927,
+    "sha256": "515A32677407EF90E8961704945C5681D6BF102E0ABC665696E51056E7425D7F",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\double_wave.gif"
+  },
+  {
+    "bytes": 52365,
+    "sha256": "6F1A85F3153ED414F180AF1FE119894E02B56ED239C7FB7976A8AD3562038997",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\reverse_qcf_silent.mp4"
+  },
+  {
+    "bytes": 1088572,
+    "sha256": "933F7A4105912FAF8401D47E184BAA68FA616EEB924F8F8F0E32A38FE470E13A",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\reverse_qcf_slow.gif"
+  },
+  {
+    "bytes": 18212,
+    "sha256": "33A8C4DC1A6EB6C900FC96D051AAFF5A9CB20EA39C7BDDE7A35BF700187EC805",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\reverse_qcf_strip.png"
+  },
+  {
+    "bytes": 1088572,
+    "sha256": "60C953FF5C3F11824D6559F4126EAD5F5EEB1F5A7948B8ADC00BD14BFDF13843",
+    "path": "reports\\motion-art\\2026-10-23\\v4\\reverse_qcf.gif"
+  },
+  {
+    "bytes": 50748,
+    "sha256": "1E778C411EB0E7246465851C2E24D94F98D89F279C6C0508868324EBB6DDE976",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward_compare.mp4"
+  },
+  {
+    "bytes": 9673,
+    "sha256": "27D497E4D88A24C962ED4B06A59695BB998EC2E29D3B0A536908123B67F0137B",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward_key.png"
+  },
+  {
+    "bytes": 906397,
+    "sha256": "15ECCAE1C83AADEA3ABE7834F99C3FF09F1DB11CC88B24627FD38D3326FB24B1",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward_od_slow.gif"
+  },
+  {
+    "bytes": 906397,
+    "sha256": "CB0C1559DA44F7A59DA9C177136A8BADAA2442CDA91650CB1D2F1035922F4C2E",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward_od.gif"
+  },
+  {
+    "bytes": 30625,
+    "sha256": "20175AC61B29AEC2FF454D2845AA13BF326E5A83EB84055A0C718BDE1187EFF6",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward_od.mp4"
+  },
+  {
+    "bytes": 903639,
+    "sha256": "FB4E14195163C6545A8A03ED7EF34448A40C48FEC39C8B9A07CF7ACFC7C6ECFD",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward_slow.gif"
+  },
+  {
+    "bytes": 10397,
+    "sha256": "263E0472106CD199D759F4EA0025261FB279726D9ABB5E1AD8C622E502C4FAF8",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward_strip.png"
+  },
+  {
+    "bytes": 903639,
+    "sha256": "0CEBFFFC48B1AAE370445FB53FE0A21B5524D3A7A20BAC015B5C3F5FB846EE46",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward.gif"
+  },
+  {
+    "bytes": 26069,
+    "sha256": "285BCF4B21A8EAA6A5EFCFFC1CAC9003B96543D0C78E5319D92172BA5E5FCCB6",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\charge_back_forward.mp4"
+  },
+  {
+    "bytes": 93018,
+    "sha256": "29D95193E08674AFCEC153B25810552F82E34D776572023E41FADC4E8AF4FCF9",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave_compare.mp4"
+  },
+  {
+    "bytes": 12709,
+    "sha256": "5751978862D672C95E8A667E455D29A3D8DB7563250BC092966DAB0D756C5735",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave_key.png"
+  },
+  {
+    "bytes": 1037653,
+    "sha256": "B40076C75188FEE2EB70BB763D760F64EFA69431C4480E21344B8A14ED70DC7A",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave_od_slow.gif"
+  },
+  {
+    "bytes": 1037653,
+    "sha256": "B23E73FF6B98349898BCBC50822C94E40C618A1C4B64B7DD25465803F008E03B",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave_od.gif"
+  },
+  {
+    "bytes": 52360,
+    "sha256": "8AF918A0547A67909C02208E473D09937BB477D561B140E7104F23E6E9025A49",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave_od.mp4"
+  },
+  {
+    "bytes": 1029003,
+    "sha256": "AA3ECDD60E69A71374DFA9DF9818B9D3B13DF505D607A4910751E28A6DEB27EC",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave_slow.gif"
+  },
+  {
+    "bytes": 13922,
+    "sha256": "68EED353AACD76AA5E6B179BC760E2EC7BD7443DAEC2DBE4CFD5C999B4267658",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave_strip.png"
+  },
+  {
+    "bytes": 1029003,
+    "sha256": "12D2E850D7A44C6327C6ADE1AF19CCDC19C045D070C48DC43D70D6D8EF39E528",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave.gif"
+  },
+  {
+    "bytes": 47476,
+    "sha256": "5E04B3895C6367B084B2FFB0F159D78EFA42515C737666A2BA41867B37D60C76",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\double_wave.mp4"
+  },
+  {
+    "bytes": 61932,
+    "sha256": "BD8CCBBD2C19AE4921C4082080903C983CFF051B80A5AAD86F714411B6D0FAC8",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf_compare.mp4"
+  },
+  {
+    "bytes": 12444,
+    "sha256": "3DBD7DB9844134D8C22111C7C247AAEF640D700E9F1BA15FCF77008B7B09D7BA",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf_key.png"
+  },
+  {
+    "bytes": 867205,
+    "sha256": "B05EA33C7520A7C5472C6C730A596285E8109EB92705B3500BBD26352393258D",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf_od_slow.gif"
+  },
+  {
+    "bytes": 867205,
+    "sha256": "A0C8F977FECEDFF5189BF0500EF7EC4238BB94ED86D6F73997EC0364AF3D2F4C",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf_od.gif"
+  },
+  {
+    "bytes": 36056,
+    "sha256": "34FD8DA329AB0D1FA681A5D639EBEAFCE6321ABC4CE36E4E557C7DA6C7EF9C09",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf_od.mp4"
+  },
+  {
+    "bytes": 862951,
+    "sha256": "4017AC4CD81E709E96DCED60F6D6A3C91D358C79706224C5A28B28792DF7B0D9",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf_slow.gif"
+  },
+  {
+    "bytes": 12082,
+    "sha256": "33CE292F9C05C0A98AE93E3D454CD0502AE5DC5F4AB4508882FAF554E4C1DAED",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf_strip.png"
+  },
+  {
+    "bytes": 862951,
+    "sha256": "61796C1E7AC660103F17E43212CEF5AF144CB55BF984550151EE77681F78B06D",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf.gif"
+  },
+  {
+    "bytes": 31472,
+    "sha256": "2DCBA40A09DA96E80968BDA8E9D292B52FCF0F41F87FA5197F230A3126114799",
+    "path": "reports\\motion-art\\2026-10-23\\v5\\reverse_qcf.mp4"
+  },
+  {
+    "bytes": 53346,
+    "sha256": "309A69B38F2651487F589AE3C931880A5394C0FD60C3EBBA5A459A2B61BDCBBB",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward_compare.mp4"
+  },
+  {
+    "bytes": 9649,
+    "sha256": "98ADC7833A81699A6876BC0AAC6AAFF3B29C3E38034B3E91DF6BDE721D6F667E",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward_key.png"
+  },
+  {
+    "bytes": 906339,
+    "sha256": "4CE88AF2F1EB791D9E1F642C1DE7DAA7A3857C2673FC4B4E35B239CBE4A7881E",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward_od_slow.gif"
+  },
+  {
+    "bytes": 906339,
+    "sha256": "77E509B61E3CCCBAD959F07FA3E7DF2065A7CA0CFB099E6222DE9084F4A7CA36",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward_od.gif"
+  },
+  {
+    "bytes": 32136,
+    "sha256": "B19BB2E59339E8707569343239A8C468F74968F0DBCACABFFBC29A95CB96EE7E",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward_od.mp4"
+  },
+  {
+    "bytes": 903723,
+    "sha256": "D216555AA92BF50E28DEE04BF30EF348A1A9AC472251E0975F365456BC761F55",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward_slow.gif"
+  },
+  {
+    "bytes": 10445,
+    "sha256": "1DB272928A9B2D8186EF99DD4B94E623C62510D089698488999EA2591AC184F5",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward_strip.png"
+  },
+  {
+    "bytes": 903723,
+    "sha256": "1D67BB9257B1BFF4782E52C18DD930CB96D1174A5188C0787F607F567554DE27",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward.gif"
+  },
+  {
+    "bytes": 27458,
+    "sha256": "8BA54BF5A1635C31CD47B207915C35AB5FDC5BE96DC7183ED05F1FACBE959E30",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\charge_back_forward.mp4"
+  },
+  {
+    "bytes": 87838,
+    "sha256": "300CB20B261AF1FD23C4A9B6D267A1011B1D63115433C129F6A27D112922E7AB",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave_compare.mp4"
+  },
+  {
+    "bytes": 12718,
+    "sha256": "868B0293C84BDF7B53CA5604CCAA8E4AE258F7EE8DAF6A63F78D0E7ABD5F9C36",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave_key.png"
+  },
+  {
+    "bytes": 1037283,
+    "sha256": "DA4F12C966011B9D25AD55A842723679A1F95C8B91F38740F1EB357A83EF0DD4",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave_od_slow.gif"
+  },
+  {
+    "bytes": 1037283,
+    "sha256": "914587963EF4E97502FC3642584AECBAC955B613D895E23D582FB156B8E2A8F5",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave_od.gif"
+  },
+  {
+    "bytes": 50405,
+    "sha256": "BF9654185CDAA61EAABF8B65BB0A6E9B6DD437EC277F211D75C91C5074FA4F9E",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave_od.mp4"
+  },
+  {
+    "bytes": 1029017,
+    "sha256": "0005C3CB9EABBE9CB59F6FB8EE1948580A1793BA20475FD5CF800C8059D39D89",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave_slow.gif"
+  },
+  {
+    "bytes": 14035,
+    "sha256": "3C826FBB59BCB68481E6713684EB42C88CAAC5A6B6655D514184B5CEC70E8287",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave_strip.png"
+  },
+  {
+    "bytes": 1029017,
+    "sha256": "C489CB357B16A0BB3675EB1B6591C207DD93E06A3634E888FA3EEF93ACDEB5A1",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave.gif"
+  },
+  {
+    "bytes": 44119,
+    "sha256": "6ECAE7B50675C59866C0068E7C5028D5DDFB864A6BC45D8344C7EADCA28DF5C1",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\double_wave.mp4"
+  },
+  {
+    "bytes": 60214,
+    "sha256": "5AB1BF6A28C7A087E21EE2EA516381715B6EDAB8FEAB9ACEA86840A57CFE922C",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf_compare.mp4"
+  },
+  {
+    "bytes": 12447,
+    "sha256": "8B2564587DB9345A3396FDA4042DB87B538E82A8A95BC5FF28190279916CA37E",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf_key.png"
+  },
+  {
+    "bytes": 866711,
+    "sha256": "22F284D6EA327176BB381EFFDA4FF39F4FA89B743C4F8B8D9BEAADB3B89AE583",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf_od_slow.gif"
+  },
+  {
+    "bytes": 866711,
+    "sha256": "EF80A14C9014A31398D23032AE17B263CD7F2C5E4009CE258D4EEE1D622F6E83",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf_od.gif"
+  },
+  {
+    "bytes": 35364,
+    "sha256": "737DA659E06E9351ABE3FDF4F069CA9BA1EA6243A456769758C226152FBD3457",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf_od.mp4"
+  },
+  {
+    "bytes": 862988,
+    "sha256": "419F5884A2559624BB8202598507B44ADF58A07A984A023F0D42E7CC05978162",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf_slow.gif"
+  },
+  {
+    "bytes": 12256,
+    "sha256": "4F04BFA70B841B3E7EDED3BDCCECAB979E54DD63008FF48A6718DB5128D9C13C",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf_strip.png"
+  },
+  {
+    "bytes": 862988,
+    "sha256": "DDEB6D5DFEE8B6A036CC9BB3E7682359D36DA67073E6DE6AD30A32C56CEB57D7",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf.gif"
+  },
+  {
+    "bytes": 30410,
+    "sha256": "67C319BCBE1F2D6010654375A471F87DCC31767526F231FE82443F451D32DB27",
+    "path": "reports\\motion-art\\2026-10-23\\v6\\reverse_qcf.mp4"
+  },
+  {
+    "bytes": 1485942,
+    "sha256": "83DC39269625D0AA2AF375A0BEC49A0FCFD802DBC4921D12A6DF90E27AC275B6",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v1\\charge_back_forward.anm2"
+  },
+  {
+    "bytes": 1612480,
+    "sha256": "24191B6E57B4B5822BF2BB4666C0473193DEB62B130CEB30641E424907F34514",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v1\\double_wave.anm2"
+  },
+  {
+    "bytes": 1364536,
+    "sha256": "8A5EBFF5C65C562AB781ADE087028A2686E3070EE699B18A5FF4ACCB2833EE6F",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v1\\reverse_qcf.anm2"
+  },
+  {
+    "bytes": 2123963,
+    "sha256": "9F10D82D5F06BC6577631C2C616F1FDC9C0FDD081A5017097B2F052415182E29",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v2\\charge_back_forward.anm2"
+  },
+  {
+    "bytes": 2292915,
+    "sha256": "F4F12083F8FC55D5DD8BBBB15A4A106F347498BBAEBDFCAFE64EF5B312676F5B",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v2\\double_wave.anm2"
+  },
+  {
+    "bytes": 1962989,
+    "sha256": "567311686B57A38B9F271346AE2A147CA47E19DFED0F6009FC297AD0BD4AB864",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v2\\reverse_qcf.anm2"
+  },
+  {
+    "bytes": 2319774,
+    "sha256": "72DB0025E5FC1FC256A39128DCDD3130DCE2C296DA5C421720056FFD1EFDA188",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v3\\charge_back_forward.anm2"
+  },
+  {
+    "bytes": 2502288,
+    "sha256": "0038C99A397AAF779549460FAAD53EEDCF65860DBF1140B465AA31357BBEBBF2",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v3\\double_wave.anm2"
+  },
+  {
+    "bytes": 2143176,
+    "sha256": "F7632B6B9BC09A2C7D90E819CB275B23F2F21566B7017FC782ADBB59514F4B0A",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v3\\reverse_qcf.anm2"
+  },
+  {
+    "bytes": 2120256,
+    "sha256": "E0D47B0E190E6380A11CA4D0CCB5AA7DA12897BCC4C0FDC5367F6F432FA9DDF1",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v4\\charge_back_forward.anm2"
+  },
+  {
+    "bytes": 2288050,
+    "sha256": "AAA465DAAC1CEBF23379FE063F4D2204256614B11D45EAF118DE8DF553D1E3C5",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v4\\double_wave.anm2"
+  },
+  {
+    "bytes": 1959514,
+    "sha256": "69B6A6F01DB030F41D675D89240C7B2B8C173398D0F5CC25607D65367B8BA7A2",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v4\\reverse_qcf.anm2"
+  },
+  {
+    "bytes": 601412,
+    "sha256": "8A7E11EB1684F7D44449FC74198642703801A4448BE9EFA5200BA7195FE3B8BA",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v5\\charge_back_forward.anm2"
+  },
+  {
+    "bytes": 759534,
+    "sha256": "A25E7A985645C355F95F21346794B07F7B2E4175B8A22F73371F03A77186ECE6",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v5\\double_wave.anm2"
+  },
+  {
+    "bytes": 577510,
+    "sha256": "5388CF3FC98863DF0CEB0F14C3D9265CFCB53830FB1CA848AA8F44EC255265B3",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v5\\reverse_qcf.anm2"
+  },
+  {
+    "bytes": 676350,
+    "sha256": "A3D5D6CB7B1D2701589C8510408F6DC29D222C114F7B3CEE58683BE209F21611",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v6\\charge_back_forward.anm2"
+  },
+  {
+    "bytes": 829748,
+    "sha256": "8B6A62407B686F0F3C0597AFCF54408779EF768B7565D0DF67A9E70D85EE773B",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v6\\double_wave.anm2"
+  },
+  {
+    "bytes": 652480,
+    "sha256": "C88B84AD2167C1E559C9E8266A385FB770DB4BE05EBAD5E54FA85E7CFDC034C0",
+    "path": "resources\\gfx\\Effects\\MotionShowcase\\v6\\reverse_qcf.anm2"
+  }
+]

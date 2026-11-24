@@ -14,6 +14,9 @@ local cases = {
     { label = "unknown", runtime = { Real = true, Version = "1.0.12a-custom" } },
     { label = "leading zero", runtime = { Real = true, Version = "1.00.12a" } },
     { label = "not table", runtime = true },
+    { label = "approved Yin candidate", runtime = { Real = true, Version = "1.0.12a-yin-api1-dev" }, supported = true },
+    { label = "candidate missing damage dispatcher", runtime = { Real = true, Version = "1.0.12a-yin-api1-dev" }, noDispatcher = true },
+    { label = "unknown Yin build", runtime = { Real = true, Version = "1.0.12a-yin-api2-dev" } },
 }
 for _, case in ipairs(cases) do
     local registrations, includes, messages = 0, 0, {}
@@ -58,4 +61,4 @@ for _, case in ipairs(cases) do
             and messages[1]:find("stopped", 1, true), "bilingual actionable dependency message")
     end
 end
-print("REPENTOGON bootstrap tests passed (14 cases, repeated loads)")
+print("REPENTOGON bootstrap tests passed (17 cases, repeated loads)")

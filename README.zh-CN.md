@@ -59,6 +59,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-neverbrith.ps1 -
 
 ## 开发与检查
 
+开发导航从[项目知识索引](docs/agent/index.md)开始，按任务阅读实现地图、检查说明和相关专题。统一入口支持试点回归与全部 Lua 行为测试：
+
+```powershell
+pwsh -NoProfile -File tools/check-neverbrith.ps1 -Profile Pilot
+pwsh -NoProfile -File tools/check-neverbrith.ps1 -Profile LuaAll
+```
+
+Lua 不在 `PATH` 时使用 `-LuaPath` 指定 Lua 5.4；需要保存结果时使用 `-ReportPath`。覆盖范围、退出码、临时文件与实机边界见[检查与证据](docs/agent/testing.md)。`LuaAll` 不包含所有 PowerShell、Python 和 Node 检查。
+
 | 路径 | 用途 |
 | --- | --- |
 | `main.lua` 与根目录 Lua 模块 | 启动、道具逻辑和兼容接入 |

@@ -2,9 +2,6 @@
 <ItemPools>
     <Pool Name="boss"> <!-- 首领房 -->
         <Item Name="Essential Balm" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Music Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Utility Knife" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Tower of Babel" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Protein Strip" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Energy Kibble" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -16,11 +13,12 @@
     </Pool>
 
     <Pool Name="devil"> <!-- 恶魔房 -->
+        <Item Name="Blinky" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Divine Left Hand, Demonic Right Hand" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Aphrodisiac" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Angel Box" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Between Life and Death" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Void Needle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Burn Away the Resentment" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -41,9 +39,10 @@
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
-    <Pool Name="treasure"> <!-- 宝箱 -->
-        <Item Name="Everchanging" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="ACE Anti-Cheat System" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    <Pool Name="treasure">
+        <Item Name="Drive Glove" Weight="1" DecreaseBy="1" RemoveOn="0.1"/> <!-- 宝箱 -->
+        <Item Name="Bomb Suit" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="God Complex" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Yin's Curse" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Wind Charge Rod" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Echo Shard" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -67,19 +66,11 @@
         <Item Name="Big Dog Bark" Weight="1" DecreaseBy="1" RemoveOn="1"/>
         <Item Name="Annihilation" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Kamikaze Squad" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Protein Strip" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Energy Kibble" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Low-Fat Chow" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="DHA Fish Oil" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Dental Chew" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Lucky Liver Bites" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Goat Milk Pudding" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
-    <Pool Name="shop"> <!-- 商店 -->
-        <Item Name="Everchanging" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="ACE Anti-Cheat System" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Yin's Curse" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
+    <Pool Name="shop">
+        <Item Name="Drive Glove" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/> <!-- 商店 -->
+        <Item Name="Everchanging" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Arise, My Love!" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Memory Disorder" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Avada Kedavra" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -92,6 +83,7 @@
     </Pool>
 
     <Pool Name="secret"> <!-- 隐藏 -->
+        <Item Name="Echo Baby" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Music Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Angel Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Devil Box" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
@@ -102,6 +94,8 @@
     </Pool>
 
     <Pool Name="curse"> <!-- 刺房/诅咒房 -->
+        <Item Name="Utility Knife" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Yin's Curse" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Devil Box" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Sterilization Certificate" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Blood Skull Gu" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -110,7 +104,6 @@
         <Item Name="Coin-Faced Mask" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Black Taisui" Weight="0.2" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Good Girl of Babylon" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-        <Item Name="Strong Laxative" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Burn Away the Resentment" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
@@ -121,7 +114,6 @@
     </Pool>
 
     <Pool Name="library"> <!-- 书房 -->
-        <Item Name="Good Girl of Babylon" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
@@ -151,7 +143,15 @@
         <Item Name="Fortune Rivalling Heaven Gu" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 
-    <Pool Name="greedTreasure"> <!-- 贪婪模式道具房 -->
+    <Pool Name="greedTreasure">
+        <Item Name="Drive Glove" Weight="1" DecreaseBy="1" RemoveOn="0.1"/> <!-- 贪婪模式道具房 -->
+        <Item Name="Bomb Suit" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
         <Item Name="Kamikaze Squad" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+    <Pool Name="bombBum">
+        <Item Name="Bomb Suit" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+    <Pool Name="greedShop">
+        <Item Name="Drive Glove" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/>
     </Pool>
 </ItemPools>

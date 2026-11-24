@@ -1,0 +1,262 @@
+{
+  "scope": "V9 720 only: complete ordinary SA3 restaging; native Isaac, no arms",
+  "in_game": "NOT_RUN",
+  "textures": [
+    {
+      "source": "E:\\Isaac - Repentance\\resources-dlc3\\gfx\\effects\\succ_trail.png",
+      "copy": "trail_vanilla.png",
+      "sha256": "1b1ef976900cae5f2e53b418b9dc34ad0c4f0df7c5d6b6c63b942f109bfa3fbd"
+    },
+    {
+      "source": "E:\\Isaac - Repentance\\resources-dlc3\\gfx\\effects\\spirit_sword.png",
+      "copy": "arc_vanilla.png",
+      "sha256": "2e65b76a4703139ae0d463b0ce019f8ec7468ca0bc08bc94a7200a45cd0501b7"
+    },
+    {
+      "source": "E:\\Isaac - Repentance\\resources\\gfx\\effects\\effect_impact.png",
+      "copy": "impact_vanilla.png",
+      "sha256": "9f76cee01bbc814b172113adf15730a0285c9d41348a9565a1c208c74f0961ed"
+    },
+    {
+      "source": "E:\\Isaac - Repentance\\resources\\gfx\\characters\\costumes\\character_001_isaac.png",
+      "copy": "isaac_vanilla.png",
+      "sha256": "0b2e616820b17f5780c34c57543281977ac1f4c1ac40e980a23e8492c1ec9006"
+    },
+    {
+      "source": "E:\\Isaac - Repentance\\resources\\gfx\\monsters\\classic\\monster_000_bodies01.png",
+      "copy": "target_body.png",
+      "sha256": "22f92247267281ce8761d472a27c64caf078513a685438c25a8f91caeff47bcf"
+    },
+    {
+      "source": "E:\\Isaac - Repentance\\resources\\gfx\\monsters\\classic\\monster_024_frowninggaper.png",
+      "copy": "target_head.png",
+      "sha256": "a6e1c71c9064d373b2ed1c90bc3753934dec446a67d9546024f02e83234ae7de"
+    },
+    {
+      "source": "E:\\Isaac - Repentance\\mods\\neverbrith\\reports\\motion-art\\2026-10-23\\v2\\source-images\\exec-2b4bbf91-059a-4fd3-9846-42195d7fa72f.png",
+      "copy": "hadoken_cels.png",
+      "sha256": "f520e06fd50a69e1cd3cf00887135090bd08536e91fa9da18ddb94db1ceb5e04"
+    },
+    {
+      "source": "E:\\Isaac - Repentance\\mods\\neverbrith\\reports\\motion-art\\2026-10-23\\v2\\source-images\\exec-f9e5e2ff-f7b0-4fa2-aa71-5dfc2359ca04.png",
+      "copy": "uppercut_fire_cels.png",
+      "sha256": "30608e6dda3f9b5299cbc74c1c1d355f2d8e6995b728c0cb17ad670559132174"
+    }
+  ],
+  "assets": [
+    {
+      "key": "wave",
+      "title": "波动",
+      "anm2": "resources\\gfx\\Effects\\MotionShowcase\\v9\\wave.anm2",
+      "frames": 66,
+      "fps": 30,
+      "variants": {
+        "normal": [
+          "Preview",
+          "Effect"
+        ]
+      }
+    },
+    {
+      "key": "dp",
+      "title": "升龙",
+      "anm2": "resources\\gfx\\Effects\\MotionShowcase\\v9\\dp.anm2",
+      "frames": 78,
+      "fps": 30,
+      "variants": {
+        "normal": [
+          "Preview",
+          "Effect"
+        ],
+        "od": [
+          "ODPreview",
+          "ODEffect"
+        ]
+      }
+    },
+    {
+      "key": "circle_360",
+      "title": "360 指令投",
+      "anm2": "resources\\gfx\\Effects\\MotionShowcase\\v9\\circle_360.anm2",
+      "frames": 108,
+      "fps": 30,
+      "variants": {
+        "normal": [
+          "Preview",
+          "Effect"
+        ],
+        "od": [
+          "ODPreview",
+          "ODEffect"
+        ]
+      }
+    },
+    {
+      "key": "circle_720",
+      "title": "720 演出",
+      "anm2": "resources\\gfx\\Effects\\MotionShowcase\\v9\\circle_720.anm2",
+      "frames": 394,
+      "fps": 30,
+      "variants": {
+        "normal": [
+          "Preview",
+          "Effect"
+        ]
+      }
+    }
+  ],
+  "audio": {
+    "circle_360": {
+      "language": "jpn",
+      "scope": "offline review only; no gameplay timing",
+      "tail_policy": "WAV preserves source tails; video follows visual duration",
+      "mix_gain": 1,
+      "timeline": [
+        {
+          "tick": 12,
+          "key": "360_sfx_6200",
+          "gain": 0.65
+        },
+        {
+          "tick": 12,
+          "key": "360_voice_6200_jpn",
+          "gain": 0.9
+        },
+        {
+          "tick": 24,
+          "key": "360_sfx_6201",
+          "gain": 0.65
+        },
+        {
+          "tick": 24,
+          "key": "360_voice_6201_jpn",
+          "gain": 0.9
+        },
+        {
+          "tick": 59,
+          "key": "360_sfx_6202",
+          "gain": 0.65
+        },
+        {
+          "tick": 73,
+          "key": "360_sfx_6203",
+          "gain": 0.65
+        },
+        {
+          "tick": 73,
+          "key": "360_voice_6203_jpn",
+          "gain": 0.9
+        }
+      ]
+    },
+    "circle_720": {
+      "language": "jpn",
+      "scope": "offline review only; no gameplay timing",
+      "tail_policy": "WAV preserves source tails; video follows visual duration",
+      "mix_gain": 1,
+      "timeline": [
+        {
+          "tick": 3,
+          "key": "720_voice_6330_jpn",
+          "gain": 0.9
+        },
+        {
+          "tick": 48,
+          "key": "720_sfx_6330",
+          "gain": 0.48
+        },
+        {
+          "tick": 48,
+          "key": "720_sfx_6331",
+          "gain": 0.48
+        },
+        {
+          "tick": 66,
+          "key": "720_voice_6331_jpn",
+          "gain": 0.9
+        },
+        {
+          "tick": 96,
+          "key": "720_voice_6332_jpn",
+          "gain": 0.9
+        },
+        {
+          "tick": 172,
+          "key": "720_voice_6334_jpn",
+          "gain": 0.9
+        },
+        {
+          "tick": 200,
+          "key": "720_voice_6335_jpn",
+          "gain": 0.9
+        },
+        {
+          "tick": 265,
+          "key": "720_voice_6336_jpn",
+          "gain": 0.9
+        }
+      ]
+    }
+  },
+  "gold_offsets": [
+    [
+      -2,
+      0
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      0,
+      -2
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      -1,
+      0
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      -1
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "camera_cuts": [
+    21,
+    69,
+    72,
+    96,
+    112,
+    160,
+    182,
+    196,
+    217,
+    235,
+    255,
+    261,
+    289
+  ],
+  "comparison_baseline": "official_603",
+  "reference": {
+    "source_page": "https://www.streetfighter.com/6/character/zangief/movelist",
+    "source_media": "https://www.streetfighter.com/6/assets/images/character/zangief/skill/movie/603.mp4",
+    "sha256": "12cc7b34b3cf6ac7406b923e0df96288b869c647e36765649e1a42c00b99a86b",
+    "fps": 30.0,
+    "frames": 394,
+    "duration": "13.133333",
+    "width": 400,
+    "height": 224,
+    "review": "Every decoded frame, sequential contact sheets, no temporal sampling; source is the full official clip."
+  }
+}

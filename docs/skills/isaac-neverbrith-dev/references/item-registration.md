@@ -6,16 +6,28 @@ Read `item-basic-spec.md` first for new items, item rewrites, handoff prompts, o
 
 **Required generic contract:** use `isaac-collectible-registration` before this project adapter. Every custom collectible entry must have an explicit, unique, stable local `id`. That XML-local id is not the runtime/global ItemConfig id returned by name lookup and must not be derived from current mod load order. If legacy entries lack local ids, stop the affected registration/death-portrait work and use an append-only migration approved for this project.
 
-## Files To Check
+## Locate Project Registration
 
-- `content/items.xml`
-- `content/items.en_us.xml`
-- `content/items.zh_cn.xml`
-- `content/itempools.xml`
-- `content/itempools.en_us.xml`
-- `content/itempools.zh_cn.xml`
-- `main.lua`
-- `tests/localization_test.lua` or the behavior test closest to the new item
+Use the target checkout's `AGENTS.md` and `docs/agent/project-map.md`. Match
+entries by declared XML-local ID across `content/items.xml` and its locale
+templates. Keep native pool and locale parity when the requested change
+touches those surfaces. Discover `gfxroot + gfx` on the actual XML entry.
+
+The repository generator reads `content/items.xml` as its base and joins
+localized names by local ID. When those inputs change the rows, regenerate
+`generated/neverbirth_collectibles.lua` with the repository tool after the
+XML changes. Running it without `-Check` writes the generated file. From the
+mod root verify synchronization with:
+
+```powershell
+pwsh -NoProfile -File tools/generate-neverbirth-collectibles.ps1 -Root . -Check
+```
+
+Never hand-edit generated rows. The generated registry is used by a runtime
+consumer loaded from `main.lua`. It neither registers native collectibles nor
+provides their runtime IDs. Inspect the actual behavior owner and its test
+for live lookup by registered name; retain the project's existing owner and
+callback structure.
 
 ## XML Shape
 
@@ -23,7 +35,7 @@ Passive item:
 
 ```xml
 <passive
-  id="TBD_LOCAL_ID"
+  id="STABLE_LOCAL_ID"
   name="Item Name"
   cache="damage speed"
   description="Short pickup text"
@@ -37,7 +49,7 @@ Active item:
 
 ```xml
 <active
-  id="TBD_LOCAL_ID"
+  id="STABLE_LOCAL_ID"
   name="Item Name"
   cache="luck"
   maxcharges="3"
@@ -53,13 +65,10 @@ Only include `cache` values that are actually handled in `MC_EVALUATE_CACHE`.
 
 ## Lua ID Lookup
 
-Follow the repo's existing `Items.<Name>` pattern for runtime behavior. The runtime ItemConfig id must come from Isaac's item config lookup, not a hand-written numeric id. Keep it separate from the explicit stable XML-local `id` used by registration and native frame mappings.
-
-When adding a new item:
-
-1. Add it to the central `Items` table or the repo's current item lookup block.
-2. Use the same internal name as XML.
-3. Do not invent a fallback collectible ID for a custom item unless an existing helper already does this for a specific vanilla item.
+Follow the existing runtime lookup in the owning module. Keep the runtime
+ItemConfig ID separate from the XML-local ID used by registration and native
+frame mappings. Confirm the resolved runtime ID and callback filters in the
+closest relevant test.
 
 ## Callback Registration
 
@@ -131,7 +140,7 @@ When changing pools, preserve language variants. The user's known mapping includ
 
 - Basic item spec exists, with unresolved fields marked `TBD` instead of guessed.
 - XML item type matches design: `passive` or `active`.
-- `gfx` path matches an asset under `resources/gfx/Items/Collectibles/`.
+- `gfxroot + gfx` resolves to the intended asset in the discovered resource root.
 - `cache` attribute matches actual cache flags handled in Lua.
 - Lua item lookup uses the same name as XML.
 - Callback is registered with the correct item parameter when the callback supports one.

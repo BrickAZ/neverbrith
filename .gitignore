@@ -5,6 +5,23 @@ node_modules/
 outputs/
 .worktrees/
 
+# Local build copies, media exports and task scratch files
+/worktrees/
+/release/
+/output/
+/videos/
+/*.patch
+/task-1-*
+**/_backups/
+/resources/music/*.mp4
+
+# Historical artifacts stay local; explicitly add required evidence/fixtures.
+/reports/
+/diagnostics/*/
+
+# Superseded motion previews; v7/v8/v9 remain source/test dependencies.
+/resources/gfx/Effects/MotionShowcase/v[1-6]/
+
 # Local editor and OS files
 .DS_Store
 Thumbs.db

@@ -160,6 +160,7 @@ local function loadNeverbirth(options)
 
     function Game()
         return {
+            IsPaused = function() return false end,
             GetSeeds = function() return { GetStartSeedString = function() return "TEST RUN" end } end,
             GetNumPlayers = function() return #players end,
             GetPlayer = function(_, index) return players[(index or 0) + 1] end,

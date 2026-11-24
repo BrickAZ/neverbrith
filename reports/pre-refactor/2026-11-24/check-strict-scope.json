@@ -1,0 +1,346 @@
+{
+  "TimestampUtc": "2026-11-24T16:00:44.2524544Z",
+  "ValidatorPath": "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+  "ValidatorHash": "E37FB5D1958F52C26E4D7D155A35B1BCDDD11CFD391B5754458C198F78839ACC",
+  "Total": 22,
+  "Failed": 0,
+  "InGameVerified": false,
+  "Cases": [
+    {
+      "Name": "historical-copies",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\historical-copies"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\historical-copies\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\historical-copies\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nStatic validation completed with 0 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "backup-cannot-supply-handler",
+      "Passed": true,
+      "ExpectedExitCode": 1,
+      "ExitCode": 1,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\backup-cannot-supply-handler"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\backup-cannot-supply-handler\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\backup-cannot-supply-handler\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nFailures:\r\nFAIL Callback MC_POST_UPDATE registers missing Neverbirth handler 'Tick' in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\backup-cannot-supply-handler\\main.lua\r\n"
+    },
+    {
+      "Name": "reachable-duplicate",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-duplicate"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-duplicate\r\nINFO Lua scope: 2 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-duplicate\\main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-duplicate\\modules\\live.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Callback registration is duplicated: MC_POST_UPDATE:Tick: in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-duplicate\\modules\\live.lua and C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-duplicate\\main.lua\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "reachable-missing-handler",
+      "Passed": true,
+      "ExpectedExitCode": 1,
+      "ExitCode": 1,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-missing-handler"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-missing-handler\r\nINFO Lua scope: 2 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-missing-handler\\main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-missing-handler\\modules\\live.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nFailures:\r\nFAIL Callback MC_POST_UPDATE registers missing Neverbirth handler 'Absent' in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\reachable-missing-handler\\modules\\live.lua\r\n"
+    },
+    {
+      "Name": "local-require",
+      "Passed": true,
+      "ExpectedExitCode": 1,
+      "ExitCode": 1,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-require"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-require\r\nINFO Lua scope: 2 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-require\\main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-require\\modules\\live.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nFailures:\r\nFAIL Callback MC_POST_UPDATE registers missing Neverbirth handler 'Absent' in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-require\\modules\\live.lua\r\n"
+    },
+    {
+      "Name": "active-entity-lookup",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\active-entity-lookup"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\active-entity-lookup\r\nINFO Lua scope: 2 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\active-entity-lookup\\main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\active-entity-lookup\\modules\\live.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Lua resolves unregistered entity name 'CurrentUnknown' in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\active-entity-lookup\\modules\\live.lua; this is only safe behind an explicit optional-mod guard\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "ignored-loader-text",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\ignored-loader-text"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\ignored-loader-text\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\ignored-loader-text\\main.lua\r\nINFO External Lua module: json in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\ignored-loader-text\\main.lua; supplied by the game, not scanned\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nStatic validation completed with 0 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "loader-availability-guard",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\loader-availability-guard"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\loader-availability-guard\r\nINFO Lua scope: 2 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\loader-availability-guard\\main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\loader-availability-guard\\modules\\live.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nStatic validation completed with 0 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "missing-include",
+      "Passed": true,
+      "ExpectedExitCode": 1,
+      "ExitCode": 1,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-include"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-include\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-include\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nFailures:\r\nFAIL Loaded Lua file is missing: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-include\\missing.lua\r\n"
+    },
+    {
+      "Name": "dynamic-include",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\dynamic-include"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\dynamic-include\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\dynamic-include\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Dynamic Lua load (include) in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\dynamic-include\\main.lua; scope is incomplete\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "concatenated-include",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\concatenated-include"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\concatenated-include\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\concatenated-include\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Dynamic Lua load (include) in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\concatenated-include\\main.lua; scope is incomplete\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "unknown-require",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\unknown-require"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\unknown-require\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\unknown-require\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Unresolved require 'external_package' in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\unknown-require\\main.lua; scope is incomplete\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "content-death-animation",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\content-death-animation"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\content-death-animation\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\content-death-animation\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nStatic validation completed with 0 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "wrong-death-animation-location",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\wrong-death-animation-location"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\wrong-death-animation-location\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\wrong-death-animation-location\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Asset path not found from C:\\Users\\Anton\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\wrong-death-animation-location\\content\\items.xml [deathanm2=gfx/UI/death.anm2]; expected content path: C:\\Users\\Anton\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\wrong-death-animation-location\\content\\gfx\\UI\\death.anm2\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "local-asset",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-asset"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-asset\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\local-asset\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nStatic validation completed with 0 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "native-assets",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\native-assets",
+        "-GameRoot",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\native-assets\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\native-assets\\main.lua\r\nINFO Game resource directories: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources-dlc3; C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources\r\nINFO Native asset found from C:\\Users\\Anton\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\native-assets\\content\\items.xml [gfx=vanilla.png]: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources\\gfx\\items\\collectibles\\vanilla.png (file existence only)\r\nINFO Native asset found from C:\\Users\\Anton\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\native-assets\\content\\items.xml [gfx=dlc.png]: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources-dlc3\\gfx\\items\\collectibles\\dlc.png (file existence only)\r\n\r\nStatic validation completed with 0 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "game/mods/auto-discovery",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\mods\\auto-discovery"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\mods\\auto-discovery\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\mods\\auto-discovery\\main.lua\r\nINFO Game resource directories: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources-dlc3; C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources\r\nINFO Native asset found from C:\\Users\\Anton\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\mods\\auto-discovery\\content\\items.xml [gfx=vanilla.png]: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources\\gfx\\items\\collectibles\\vanilla.png (file existence only)\r\n\r\nStatic validation completed with 0 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "no-game-root",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\no-game-root"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\no-game-root\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\no-game-root\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Asset path not found from C:\\Users\\Anton\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\no-game-root\\content\\items.xml [gfx=vanilla.png]; native resources not verified\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "missing-native-asset",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-native-asset",
+        "-GameRoot",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-native-asset\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-native-asset\\main.lua\r\nINFO Game resource directories: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources-dlc3; C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\game\\resources\r\n\r\nWarnings:\r\nWARN Asset path not found from C:\\Users\\Anton\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-native-asset\\content\\items.xml [gfx=missing.png]; checked mod and extracted game resources\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    },
+    {
+      "Name": "invalid-game-root",
+      "Passed": true,
+      "ExpectedExitCode": 1,
+      "ExitCode": 1,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\invalid-game-root",
+        "-GameRoot",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\no-such-game"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\invalid-game-root\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\invalid-game-root\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nFailures:\r\nFAIL Invalid GameRoot: directory does not exist: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\no-such-game\r\n"
+    },
+    {
+      "Name": "missing-entry",
+      "Passed": true,
+      "ExpectedExitCode": 1,
+      "ExitCode": 1,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-entry"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-entry\r\nINFO Lua scope: 0 files reachable by static literal loads from main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nFailures:\r\nFAIL Loaded Lua file is missing: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\missing-entry\\main.lua\r\n"
+    },
+    {
+      "Name": "independent-snapshot/outputs/package",
+      "Passed": true,
+      "ExpectedExitCode": 0,
+      "ExitCode": 0,
+      "Arguments": [
+        "-NoProfile",
+        "-File",
+        "E:\\Isaac - Repentance\\mods\\neverbrith\\docs\\skills\\isaac-neverbrith-validator-profile\\scripts\\validate-neverbrith.ps1",
+        "-Root",
+        "C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\independent-snapshot\\outputs\\package"
+      ],
+      "Errors": [],
+      "Output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\independent-snapshot\\outputs\\package\r\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\r\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\independent-snapshot\\outputs\\package\\main.lua\r\nINFO Game resources unavailable; native assets are not verified.\r\n\r\nWarnings:\r\nWARN Callback registration is duplicated: MC_POST_UPDATE:Tick: in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\independent-snapshot\\outputs\\package\\main.lua and C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{314635b5-4931-4901-8963-aca76e08c392}\\Temp\\neverbrith strict 572c69d2c3cf408e91c9d9a06222070a\\independent-snapshot\\outputs\\package\\main.lua\r\n\r\nStatic validation completed with 1 warning(s) and 0 failure(s).\r\n"
+    }
+  ]
+}

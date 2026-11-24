@@ -1,0 +1,133 @@
+--- before/drive_glove_behavior_test.lua
++++ tests\drive_glove_behavior_test.lua
+@@ -12,7 +12,7 @@
+  'MC_PRE_PROJECTILE_UPDATE','MC_PRE_LASER_UPDATE','MC_PRE_EFFECT_UPDATE','MC_PRE_NPC_UPDATE','MC_PRE_SLOT_UPDATE',
+  'MC_PRE_MOD_UNLOAD','MC_EXECUTE_CMD','MC_POST_WEAPON_FIRE'}) do ModCallbacks[name]=i end
+ EntityType={ENTITY_PLAYER=1,ENTITY_TEAR=2,ENTITY_BOMBDROP=4,ENTITY_PICKUP=5,ENTITY_SLOT=6,ENTITY_LASER=7,ENTITY_PROJECTILE=9,ENTITY_EFFECT=1000}
+-EntityFlag={FLAG_NO_SPRITE_UPDATE=1<<32,FLAG_FRIENDLY=1<<29,FLAG_POISON=1<<6,FLAG_BURN=1<<27}
++EntityFlag={FLAG_NO_SPRITE_UPDATE=1<<32,FLAG_FRIENDLY=1<<29,FLAG_POISON=1<<6,FLAG_BURN=1<<27,FLAG_BLEED_OUT=1<<34}
+ TearFlags={TEAR_POISON=1<<4,TEAR_BURN=1<<22}
+ WeaponType={WEAPON_TEARS=1,WEAPON_BRIMSTONE=2,WEAPON_LASER=3,WEAPON_KNIFE=4,WEAPON_BOMBS=5,WEAPON_ROCKETS=6,
+  WEAPON_MONSTROS_LUNGS=7,WEAPON_LUDOVICO_TECHNIQUE=8,WEAPON_TECH_X=9,WEAPON_BONE=10,WEAPON_SPIRIT_SWORD=11,WEAPON_FETUS=12}
+@@ -53,7 +53,7 @@
+ Game=function()return game end
+ local function dispatch(name,filter,...)
+     local result
+-    for _,c in ipairs(callbacks[ModCallbacks[name]] or {}) do
++    for _,c in ipairs(callbacks[ModCallbacks[name] or name] or {}) do
+         if not c.filter or c.filter==filter then
+             local v=c.fn(nil,...)
+             if v~=nil then result=v; if type(v)~='table' then return v end end
+@@ -117,7 +117,8 @@
+  soundCalls[#soundCalls+1]={id=id,volume=volume,delay=delay,loop=loop,pitch=pitch}
+ end}end
+ Isaac={GetRoomEntities=function()return entities end,GetItemConfig=function()return {GetCollectible=function(_,id)return {Type=id==7 and 3 or 1}end}end,
+- ConsoleOutput=function()end,GetSoundIdByName=function(name)return soundIds[name]end,DebugString=function()end}
++ ConsoleOutput=function()end,GetSoundIdByName=function(name)return soundIds[name]end,DebugString=function()end,
++ GetStatusAttributionAPIVersion=function()return 1 end,GetCurrentDotDamageKind=function(_,ref)return ref.DotKind or 0 end}
+ include=function(path)
+  if path=='drive_glove_visuals' then return function()return {Events=function()end,Update=function()end,ClearRoom=function()end}end end
+  return dofile(path..'.lua')
+@@ -212,13 +213,13 @@
+  local enemy=entity(10);enemy.SpawnerEntity=nil
+  local familiar=entity(3);familiar.familiar={Player=p}
+  local tear=entity(2);tear.SpawnerEntity=familiar
+- dispatch('MC_ENTITY_TAKE_DMG',10,enemy,3,0,{Entity=tear},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,enemy,3,0,{Entity=tear},0)
+  -- The native death callback can expose a fresh GetData table.
+  function enemy:GetData()return {} end
+  dispatch('MC_POST_NPC_DEATH',nil,enemy)
+  near(s.gauge,1.01,'owned familiar kill restores one');dispatch('MC_POST_NPC_DEATH',nil,enemy);near(s.gauge,1.01,'death paid once')
+- local otherEnemy=entity(10);dispatch('MC_ENTITY_TAKE_DMG',10,otherEnemy,3,0,{Entity=tear},0)
+- dispatch('MC_ENTITY_TAKE_DMG',10,otherEnemy,3,0,{Entity=nil},0);dispatch('MC_POST_NPC_DEATH',nil,otherEnemy)
++ local otherEnemy=entity(10);dispatch('MC_POST_ENTITY_TAKE_DMG',10,otherEnemy,3,0,{Entity=tear},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,otherEnemy,3,0,{Entity=nil},0);dispatch('MC_POST_NPC_DEATH',nil,otherEnemy)
+  near(s.gauge,1.01,'environment final hit clears stale owner')
+ end
+ do
+@@ -251,24 +252,26 @@
+  local e=entity(10);e.flags=EntityFlag.FLAG_POISON
+  local poison=entity(2);poison.SpawnerEntity=p;poison.TearFlags=TearFlags.TEAR_POISON
+  local plain=entity(2);plain.SpawnerEntity=q;plain.TearFlags=0
+- dispatch('MC_ENTITY_TAKE_DMG',10,e,1,0,{Entity=poison},0)
+- dispatch('MC_ENTITY_TAKE_DMG',10,e,1,0,{Entity=plain},0)
+- dispatch('MC_ENTITY_TAKE_DMG',10,e,1,DamageFlag.DAMAGE_POISON_BURN,{Entity=nil},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,e,1,0,{Entity=poison},0)
++ dispatch('REPENTOGON_POST_DOT_APPLIED',nil,e,{Entity=poison},1)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,e,1,0,{Entity=plain},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,e,1,DamageFlag.DAMAGE_POISON_BURN,{DotKind=1},0)
+  dispatch('MC_POST_NPC_DEATH',nil,e)
+  near(a.gauge,3,'poison kill stays with status attacker');near(b.gauge,2,'plain hit cannot steal poison kill')
+  local unknown=entity(10);unknown.flags=EntityFlag.FLAG_POISON
+- dispatch('MC_ENTITY_TAKE_DMG',10,unknown,1,0,{Entity=plain},0)
+- dispatch('MC_ENTITY_TAKE_DMG',10,unknown,1,DamageFlag.DAMAGE_POISON_BURN,{Entity=nil},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,unknown,1,0,{Entity=plain},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,unknown,1,DamageFlag.DAMAGE_POISON_BURN,{Entity=nil},0)
+  dispatch('MC_POST_NPC_DEATH',nil,unknown);near(b.gauge,2,'untraceable poison never credits unrelated hit')
+ end
+ do
+  local a=reset(p);local b=reset(q);a.gauge=2;b.gauge=2
+  local e=entity(10);e.flags=EntityFlag.FLAG_POISON
+  local poison=entity(2);poison.SpawnerEntity=p;poison.TearFlags=TearFlags.TEAR_POISON
+- dispatch('MC_ENTITY_TAKE_DMG',10,e,1,0,{Entity=poison},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,e,1,0,{Entity=poison},0)
++ dispatch('REPENTOGON_POST_DOT_APPLIED',nil,e,{Entity=poison},1)
+  e.flags=0;tick() -- Observe the original status ending before an unknown reapplication.
+  e.flags=EntityFlag.FLAG_POISON
+- dispatch('MC_ENTITY_TAKE_DMG',10,e,1,DamageFlag.DAMAGE_POISON_BURN,{Entity=nil},0)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,e,1,DamageFlag.DAMAGE_POISON_BURN,{Entity=nil},0)
+  dispatch('MC_POST_NPC_DEATH',nil,e)
+  near(a.gauge,2+1/300,'expired poison owner cannot claim unknown reapplication')
+  near(b.gauge,2+1/300,'unknown reapplication leaves other player unchanged')
+@@ -426,4 +429,51 @@
+  ok(t.rushShot==nil and Input.GetActionValue(5,0)==1,'room change cannot retain the release input mask')
+  p.weapon=nil
+ end
++do
++ local a=reset(p);local b=reset(q);a.gauge=2;b.gauge=2
++ local function apply(e,who,kind)
++  dispatch('REPENTOGON_POST_DOT_APPLIED',nil,e,{Entity=who},kind)
++  e.flags=e.flags|(kind==1 and EntityFlag.FLAG_POISON or EntityFlag.FLAG_BURN)
++ end
++ local function kill(e,kind)
++  dispatch('MC_POST_ENTITY_TAKE_DMG',10,e,3.5,DamageFlag.DAMAGE_POISON_BURN,{DotKind=kind},0)
++  dispatch('MC_POST_NPC_DEATH',nil,e)
++ end
++ local e=entity(10);apply(e,p,1);apply(e,q,2);kill(e,1)
++ near(a.gauge,3,'native poison payload owns lethal tick with both statuses');near(b.gauge,2,'other burn owner receives nothing')
++ e=entity(10);apply(e,p,1);apply(e,q,2);kill(e,2)
++ near(a.gauge,3,'poison owner cannot steal lethal burn');near(b.gauge,3,'native burn payload owns lethal tick')
++ local familiar=entity(3);familiar.familiar={Player=q}
++ e=entity(10);apply(e,familiar,1);familiar.removed=true;kill(e,1)
++ near(b.gauge,4,'script familiar status keeps owner after applicator disappears')
++ local removed=entity(2);removed.SpawnerEntity=p
++ local late=entity(10);dispatch('MC_POST_ENTITY_TAKE_DMG',10,late,.1,0,{Entity=removed},0)
++ removed.removed=true;apply(late,removed,2);kill(late,2)
++ near(a.gauge,4,'status applied after tear removal uses its hit snapshot')
++ a.gauge=3
++ local lost=entity(2);lost.SpawnerEntity=p;local victim=entity(10)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,victim,.1,0,{Entity=lost},0)
++ lost.SpawnerEntity=nil;apply(victim,lost,2);kill(victim,2)
++ near(a.gauge,4,'living projectile retains owner when familiar pointer disappears')
++ a.gauge=3
++ e=entity(10);apply(e,p,1);apply(e,q,1);kill(e,1)
++ near(a.gauge,3,'replaced status does not credit old owner');near(b.gauge,5,'accepted replacement takes payload ownership')
++ e=entity(10);apply(e,p,1);apply(e,nil,1);kill(e,1)
++ near(a.gauge,3,'unowned accepted payload clears old player')
++ e=entity(10);apply(e,p,1);kill(e,0)
++ near(a.gauge,3,'unscoped synthetic poison hit cannot steal native status credit')
++ local copy=entity(10);dispatch('REPENTOGON_POST_DOT_COPY',nil,e,copy,true)
++ copy.flags=e.flags;kill(copy,1);near(a.gauge,4,'copied native status carries payload owner')
++ e=entity(10);apply(e,p,1);dispatch('MC_POST_NEW_ROOM',nil);kill(e,1)
++ near(a.gauge,4,'room reset removes delayed ownership')
++ local cancelled=entity(10)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,cancelled,100,0,{Entity=p},0)
++ dispatch('MC_ENTITY_TAKE_DMG',10,cancelled,100,0,{Entity=q},0) -- cancelled after PRE; no POST
++ dispatch('MC_POST_NPC_DEATH',nil,cancelled)
++ near(a.gauge,5,'cancelled later hit cannot steal a queued death');near(b.gauge,5,'cancelled attacker gains nothing')
++ local bleed=entity(10);bleed.flags=EntityFlag.FLAG_BLEED_OUT
++ dispatch('REPENTOGON_POST_DOT_APPLIED',nil,bleed,{Entity=q},3)
++ dispatch('MC_POST_ENTITY_TAKE_DMG',10,bleed,3.1,0,{DotKind=3},0)
++ dispatch('MC_POST_NPC_DEATH',nil,bleed);near(b.gauge,6,'native bleeding uses its own payload owner')
++end
+ print('Drive Glove callbacks: '..count..' assertions passed')

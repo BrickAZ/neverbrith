@@ -295,7 +295,8 @@ local function test_xml_registers_tower_of_babel_item_and_pools()
     assertTruthy(zhItems:find('name="通天塔"', 1), "zh item xml should register Tower of Babel")
     assertTruthy(enItems:find('name="Tower of Babel"', 1), "en item xml should register Tower of Babel")
     assertTruthy(pools:find('<Pool Name="treasure".-<Item Name="Tower of Babel" Weight="1"', 1), "Tower of Babel should be in treasure")
-    assertTruthy(pools:find('<Pool Name="boss".-<Item Name="Tower of Babel" Weight="1"', 1), "Tower of Babel should be in boss")
+    local bossPool = assert(pools:match('<Pool Name="boss">.-</Pool>'))
+    assertTruthy(not bossPool:find('<Item Name="Tower of Babel"', 1, true), "Tower of Babel should not be in boss")
 end
 
 local function test_tower_of_babel_removes_new_enemy_player_and_neutral_creep()

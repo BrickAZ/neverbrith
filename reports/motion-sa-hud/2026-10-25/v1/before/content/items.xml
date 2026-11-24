@@ -1,0 +1,378 @@
+<items gfxroot="gfx/Items/" deathanm2="gfx/UI/NeverbirthDeathItems.anm2" version="1">
+  <!-- 被动道具：风油精 -->
+  <passive
+    name="EssentialBalm"
+    cache="all"
+    description="Use with caution under age three"
+    gfx="P_EssentialBalm.png"
+    id="1"
+    quality="3"
+    tags="offensive summonable"
+  />
+    <!-- 被动道具：芜湖 -->
+  <passive
+    name="Wuhu"
+    cache="all"
+    description="Dark wind, wild flight"
+    gfx="Wuhu.png"
+    id="2"
+    quality="4"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：未剪断的脐带 -->
+  <passive
+    name="Uncut Cord"
+    cache="all"
+    description="Half now, half later"
+    gfx="UncutCord.png"
+    id="3"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 被动道具：绝育证明 -->
+  <passive
+    name="Sterilization Certificate"
+    cache="all"
+    description="No more births"
+    gfx="SterilizationCertificate.png"
+    id="4"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：空摇篮 -->
+  <passive
+    name="Empty Cradle"
+    cache="damage"
+    description="Scars remember"
+    gfx="EmptyCradle.png"
+    id="5"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 主动道具：剪碎的塔罗 -->
+  <active
+    name="Shredded Tarot"
+    cache="luck"
+    maxcharges="0"
+    description="Cut the deck"
+    gfx="ShreddedTarot.png"
+    id="6"
+    quality="3"
+    tags="summonable"
+  />
+  <!-- 主动道具：血颅蛊 -->
+  <active
+    name="Blood Skull Gu"
+    cache="damage range"
+    maxcharges="3"
+    description="Slaughter your kin. Refine your potential."
+    gfx="BloodSkullGu.png"
+    id="7"
+    quality="3"
+    tags="devil offensive summonable"
+  />
+  <!-- 主动道具：老大的指令 -->
+  <active
+    name="Boss's Order"
+    maxcharges="3"
+    initcharge="3"
+    description="Buddy, I'm coming for you!"
+    gfx="BossOrder.png"
+    id="8"
+    quality="2"
+    tags="nochallenge nolostbr"
+  />
+  <!-- 主动道具：生死一念间 -->
+  <active
+    name="Between Death and Life"
+    cache="all"
+    maxcharges="12"
+    description="Let every life bear witness"
+    gfx="BetweenDeathAndLife.png"
+    id="9"
+    quality="4"
+    tags="dead devil noeden nochallenge offensive"
+  />
+  <!-- 主动道具：铜钱剑 -->
+  <active
+    name="Coin-Sewn Sword"
+    maxcharges="3"
+    description="An offering and a blade"
+    gfx="CoinSewnSword.png"
+    id="10"
+    quality="2"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：铜钱面具 -->
+  <passive
+    name="Coin-Faced Mask"
+    cache="luck"
+    description="Buy yourself another face"
+    gfx="CoinFacedMask.png"
+    id="11"
+    quality="2"
+    tags="summonable"
+  />
+  <!-- 被动道具：黑太岁 -->
+  <passive
+    name="Black Taisui"
+    cache="all"
+    description="It feeds on blood. You see the truth."
+    gfx="BlackTaisui.png"
+    id="12"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：肉块 -->
+  <passive
+    name="Meat Lump"
+    cache="all"
+    description="One more bite"
+    gfx="BlackTaisuiMeat.png"
+    id="13"
+    quality="2"
+    tags="dead summonable"
+  />
+  <!-- 主动道具：净化迷幻菇，黑太岁内部替换道具 -->
+  <active
+    name="Cleansed Wavy Cap"
+    maxcharges="900"
+    chargetype="timed"
+    description="A trip without the side effects"
+    gfx="PurifiedMushroom.png"
+    id="14"
+    quality="0"
+    tags="summonable"
+  />
+  <!-- 被动道具：巴比伦好女孩 -->
+  <passive
+    name="Good Girl of Babylon"
+    cache="all"
+    description="Don't stain the dress"
+    gfx="GoodGirlOfBabylon.png"
+    id="15"
+    quality="3"
+    tags="angel summonable"
+  />
+  <!-- 主动道具：避孕套 -->
+  <active
+    name="Condom"
+    maxcharges="3"
+    description="She said it doesn't count with one on"
+    gfx="Condom.png"
+    id="16"
+    quality="0"
+  />
+  <!-- 主动道具：Debug Controller -->
+  <active
+    name="Debug Controller"
+    maxcharges="0"
+    description="Debug command menu"
+    gfx="DebugController.png"
+    id="17"
+    quality="0"
+    tags="noeden nochallenge"
+  />
+  <!-- 被动道具：强力泻药 -->
+  <passive
+    name="Strong Laxative"
+    description="A thousand-mile purge"
+    gfx="StrongLaxative.png"
+    id="18"
+    quality="0"
+    tags="summonable"
+  />
+  <!-- 被动道具：通天塔 -->
+  <passive
+    name="Tower of Babel"
+    description="No more floods"
+    gfx="TowerOfBabel.png"
+    id="19"
+    quality="1"
+  />
+  <!-- 被动道具：月色真美 -->
+  <passive
+    name="The Moon Is Beautiful"
+    cache="damage luck"
+    description="Say it to me"
+    gfx="collectible_the_moon_is_beautiful.png"
+    id="20"
+    quality="3"
+    tags="angel summonable"
+  />
+  <!-- 被动道具：焚尽郁结 -->
+  <passive
+    name="Burn Away the Resentment"
+    cache="damage firedelay speed"
+    description="I've never felt so refreshed."
+    gfx="BurnAwayResentment.png"
+    id="21"
+    quality="3"
+    tags="offensive"
+  />
+  <!-- 被动道具：虚空针尖 -->
+  <passive
+    name="Needletick"
+    description="Next time, spit in the trash..."
+    gfx="Needletick.png"
+    id="22"
+    quality="3"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：疯狂的椰子 -->
+  <passive
+    name="Crazy Coconut"
+    cache="damage"
+    description="King of the Hollow Earth"
+    gfx="CrazyCoconut.png"
+    id="23"
+    quality="4"
+    tags="offensive"
+  />
+  <!-- 被动道具：鸿运齐天蛊 -->
+  <passive
+    name="Fortune Rivalling Heaven Gu"
+    cache="luck"
+    description="The world bends your way."
+    gfx="fortune_rivalling_heaven_gu.png"
+    id="24"
+    quality="4"
+  />
+  <!-- 被动道具：美工刀 -->
+  <passive
+    name="Utility Knife"
+    cache="damage"
+    description="Painful scars"
+    gfx="UtilityKnife.png"
+    id="25"
+    quality="2"
+    tags="offensive summonable"
+  />
+  <!-- 被动道具：柴刀，Stranger 起始道具 -->
+  <passive
+    name="Cleaver"
+    cache="damage firedelay range shotspeed"
+    description="Tears become cleaver swings"
+    gfx="Cleaver.png"
+    id="26"
+    quality="0"
+    tags="offensive"
+  />  <!-- 主动道具：春药 -->
+  <active
+    name="Aphrodisiac"
+    cache="all"
+    maxcharges="1"
+    description="Heat of the moment"
+    gfx="Chunyao.png"
+    id="27"
+    quality="2"
+    tags="devil offensive"
+  />
+  <!-- 主动道具：八音盒 -->
+  <active
+    name="Music Box"
+    cache="all"
+    maxcharges="12"
+    description="Your life, on a timer"
+    gfx="Musicbox.png"
+    id="28"
+    quality="4"
+    tags="dead noeden nochallenge angel"
+  /><!-- 主动道具：天使盒 -->
+  <active
+    name="Angelbox"
+    cache="all"
+    maxcharges="4"
+    initcharge="4"
+    chargetype="special"
+    description="Full hearts, heavenbound"
+    gfx="Angelbox.png"
+    id="29"
+    quality="3"
+    tags="noeden nochallenge angel offensive"
+  />
+    <!-- 主动道具：恶魔盒 -->
+  <active
+    name="Devilbox"
+    cache="all"
+    maxcharges="4"
+    initcharge="4"
+    chargetype="special"
+    description="Black hearts, hellbound"
+    gfx="Devilbox.png"
+    id="30"
+    quality="4"
+    tags="noeden nochallenge devil offensive"
+  />
+  <!-- 主动道具：ds4 -->
+  <active
+    name="ds4"
+    cache="all"
+    maxcharges="0"
+    description=""
+    gfx="ds4.png"
+    id="31"
+    quality="4"
+    tags="noeden nochallenge"
+  />
+  <!-- Passive: Little Leather Shoes -->
+  <passive name="Little Leather Shoes" cache="all" description="Meowmermermer" gfx="little_leather_shoes.png" id="32" quality="2" tags="offensive summonable" />
+  <!-- Hidden one-shot Traffic rewards -->
+  <passive name="Traffic: Unboxing" cache="all" description="A promising debut" gfx="traffic_unboxing.png" id="33" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <passive name="Traffic: Exposure" cache="all" description="More eyes are on you" gfx="traffic_exposure.png" id="34" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <passive name="Traffic: Heat" cache="firedelay" description="Are you sure this is what you want?" gfx="traffic_heat.png" id="35" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <!-- Developer gallery active: Certificate of Neverbirth -->
+  <active name="Certificate of Neverbirth" maxcharges="0" description="Enter the Neverbirth gallery" gfx="certificate_of_neverbirth.png" id="36" quality="0" hidden="true" tags="noeden nochallenge nodaily nogreed" />
+  <!-- One-use special selection active: House VS Elephant -->
+  <active name="House VS Elephant" maxcharges="0" description="Who's up for a frantic round of House VS Elephant?" gfx="saikeissho.png" id="37" quality="4" tags="summonable offensive nochallenge" />
+  <!-- Passive visual system: Everchanging -->
+  <passive name="Everchanging" description="A different look for this run" gfx="Everchanging.png" id="38" quality="0" />
+  <!-- Simple passive dog food series -->
+  <passive name="Protein Strip" cache="damage" description="A stronger bite" gfx="protein_strip.png" id="39" quality="1" tags="food" />
+  <passive name="Energy Kibble" cache="firedelay" description="Stay lively" gfx="energy_kibble.png" id="40" quality="1" tags="food" />
+  <passive name="Lean Can" cache="speed" description="Light on your feet" gfx="lean_can.png" id="41" quality="1" tags="food" />
+  <passive name="DHA Fish Oil" cache="range" description="See farther" gfx="dha_fish_oil.png" id="42" quality="1" tags="food" />
+  <passive name="Dental Chew" description="Push back" gfx="dental_chew.png" id="43" quality="1" tags="food" />
+  <passive name="Lucky Liver Bites" cache="luck" description="A lucky snack" gfx="lucky_liver_bites.png" id="44" quality="1" tags="food" />
+  <passive name="Goat Milk Pudding" description="A little comfort" gfx="goat_milk_pudding.png" id="45" quality="1" tags="food" />
+  <!-- Passive audit item: ACE Anti-Cheat System -->
+  <passive name="ACE Anti-Cheat System" description="Built on 20+ years of experience" gfx="ace_anti_cheat_blue.png" id="46" quality="0" tags="noeden nochallenge" />
+  <!-- Passive run curse: Yin's Curse -->
+  <passive name="Yin's Curse" description="Darkness suppresses the curse" gfx="yins_curse.png" id="47" quality="0" tags="noeden nochallenge" />
+  <!-- Active: Big Dog Bark; upgrade quality remains TBD; treasure only, weight 1; Lua requires a currently held Big Dog Bark. -->
+  <active name="Big Dog Bark" maxcharges="0" description="Charge up. Let the dog loose." gfx="big_dog_bark.png" id="48" quality="3" />
+  <passive name="Wind Charge Rod" description="No windup. Strike backwards." gfx="wind_charge_rod.png" id="49" tags="offensive noeden" />
+  <passive name="Echo Shard" description="The dash comes back to haunt them" gfx="echo_shard.png" id="50" tags="offensive noeden" />
+  <!-- Passive revival item; enters treasure and shop at weight 0.1. -->
+  <passive name="Revive My Love" description="Please open your eyes again" gfx="revive_my_beloved.png" id="51" quality="3" persistent="true" customtags="reviveeffect" />
+  <!-- Passive enemy-conversion and fear-aura item. -->
+  <passive name="Night of the Cowards" description="Everybody is a Scaredy-Shroom." gfx="NightOfTheCowards.png" id="52" quality="0" />
+  <!-- Active radial aura and shockwave replacement item. -->
+  <active name="Annihilation" cache="firedelay range" maxcharges="8" description="Feel my pain!" gfx="Annihilation.png" id="53" quality="3" tags="offensive" />
+  <!-- Passive friendly vanilla Mulliboom squad. -->
+  <passive name="Kamikaze Squad" description="For victory! Give it all!" gfx="KamikazeSquad.png" id="54" quality="0" tags="offensive summonable" />
+  <!-- Passive room-by-room identity disorder; enters treasure and shop at weight 0.1. -->
+  <passive name="Memory Disorder" description="Who am I?" gfx="Collectibles_025_Breakfast.png" id="55" quality="0" tags="noeden nochallenge nocantrip" />
+  <!-- Active permanent run contract; intentionally absent from all item pools. -->
+  <active name="Ring of the Seven Curses" cache="damage firedelay shotspeed luck flying" maxcharges="0" description="This world isn't worth it." gfx="RingOfTheSevenCurses.png" id="56" quality="0" />
+  <!-- Passive native weapon override; enters treasure and shop at weight 0.1. -->
+  <passive name="Avada Kedavra" description="" gfx="AvadaKedavraMelon.png" id="57" quality="0" cache="damage firedelay tearflag" tags="offensive noeden nochallenge" />
+  <!-- HealthySleep: bilingual display text; existing pool and tag choices are unchanged. -->
+  <passive name="Healthy Sleep" description="Get your eight hours" gfx="healthy_sleep.png" id="58" quality="0" />
+  <!-- I Am a God: pool placement intentionally pending; no itempools entry. -->
+  <active name="I Am a God" description="I just told you who I thought I was." gfx="i_am_a_god.png" id="59" quality="3" maxcharges="8" cache="damage speed range shotspeed tearflag" />
+  <!-- Hidden technical trinket used only to occupy the trinket HUD slot while the run contract is active. -->
+  <trinket name="Seven Curses Slot Seal" description="" gfx="447586_trinket.png" id="1" hidden="true" />
+  <active name="God Complex" description="Too much power for one body." gfx="god_complex.png" id="60" quality="3" maxcharges="2" cache="damage firedelay speed tearflag" />
+  <active name="Divine Left Hand, Demonic Right Hand" description="temporary copy" gfx="divine_left_hand.png" id="61" quality="4" maxcharges="3" tags="offensive nocantrip" />
+  <familiar name="Echo Baby" description="Baby up baby up baby up baaaaaabyuuuuuupppp" gfx="echo_baby.png" id="62" quality="3" cache="damage firedelay familiars" tags="baby offensive lazarussharedglobal" />
+  <trinket name="Low Grade" description="All stats up,Focus on participation" gfx="low_grade.png" id="2" cache="damage firedelay range" />
+  <passive name="Bomb Suit" description="Go! You're a real Bomberman now!" gfx="bomb_suit.png" id="63" quality="3" cache="speed" />
+  <active name="Blinky" description="Can only absorb dead things" gfx="blinky.png" id="64" quality="3" maxcharges="0" tags="offensive nocantrip" />
+  <active name="Drive Glove" description="Parry, then punish!" gfx="drive_glove_v1.png" id="65" quality="0" maxcharges="0" chargetype="special" cache="damage firedelay"/>
+  <!-- Presentation-only motion actives. Quality, pools and combat costs remain undecided. -->
+  <active name="360" description="Hold Active, then circle once" gfx="zangief_360.png" id="66" maxcharges="0" chargetype="special" />
+  <active name="720" description="Hold Active, then circle twice" gfx="zangief_720.png" id="67" maxcharges="0" chargetype="special" />
+  <active name="Wave" description="Hold Active, then tap a shooting direction" gfx="motion_wave.png" id="68" maxcharges="0" chargetype="special" />
+  <active name="Dragon Punch" description="Hold Active, then enter a dragon-punch motion" gfx="motion_dp.png" id="69" maxcharges="0" chargetype="special" />
+</items>

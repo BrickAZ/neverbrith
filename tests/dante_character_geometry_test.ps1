@@ -119,7 +119,7 @@ finally {
     $dante.Dispose()
 }
 
-$menuAnm2Path = Join-Path $Root 'content\gfx\CharacterMenu.anm2'
+$menuAnm2Path = Join-Path $Root 'content\gfx\CharacterMenu.anm2.disabled'
 [xml]$menuAnm2 = Get-Content -Raw -LiteralPath $menuAnm2Path
 $sheetById = @{}
 foreach ($sheet in $menuAnm2.AnimatedActor.Content.Spritesheets.Spritesheet) {

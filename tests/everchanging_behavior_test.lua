@@ -49,11 +49,12 @@ end
 for _, path in ipairs({ "content/itempools.xml", "content/itempools.en_us.xml", "content/itempools.zh_cn.xml" }) do
     local text = readFile(path)
     local itemName = path:find("zh_cn", 1, true) and "千变万化" or "Everchanging"
-    for _, poolName in ipairs({ "treasure", "shop" }) do
-        local pool = text:match('<Pool Name="' .. poolName .. '">.-</Pool>')
-        assertTruthy(pool and pool:find('<Item Name="' .. itemName .. '" Weight="0.1" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
-            path .. " should include " .. itemName .. " in " .. poolName .. " at weight 0.1")
-    end
+    local shopPool = assert(text:match('<Pool Name="shop">.-</Pool>'))
+    local treasurePool = assert(text:match('<Pool Name="treasure">.-</Pool>'))
+    assertTruthy(shopPool:find('<Item Name="' .. itemName .. '" Weight="0.5" DecreaseBy="1" RemoveOn="0.1"/>', 1, true),
+        path .. " should include " .. itemName .. " in shop at weight 0.5")
+    assertTruthy(not treasurePool:find('<Item Name="' .. itemName .. '"', 1, true),
+        path .. " should exclude " .. itemName .. " from treasure")
 end
 
 local icon = readFile("resources/gfx/Items/Collectibles/Everchanging.png", "rb")

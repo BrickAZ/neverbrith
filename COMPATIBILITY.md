@@ -10,8 +10,23 @@
 
 Use the global `Neverbirth` after both mods have loaded; skip compatibility if the required function or table is absent. Item, trinket, and character IDs are **runtime IDs**. Register each entry once. These interfaces are provisional and unversioned; EID is optional.
 
-## Fortune Rivalling Heaven Gu
+## Yin's Curse explosion immunity veto
 
+This capability requires the local `1.0.12a-yin-api1-dev` native candidate and matching scripts. Stock REPENTOGON 1.0.12a does not provide it. Before registering, check both `Isaac.GetPlayerExplosionImmunityAPIVersion() == 1` and `ModCallbacks.MC_PRE_PLAYER_EXPLOSION_IMMUNITY`. See the [candidate delivery record](reports/yins-curse/native-interface/2026-10-02/delivery.md). Installation and in-game acceptance remain pending.
+
+The listener signature is `(mod, player, hit, immunity)` with no registration filter. `false` vetoes only this source's explosion immunity, continuing the same native damage call; nil/true neither intervene nor grant immunity. All listeners execute in priority/registration order. Later true, errors or invalid returns cannot undo an accumulated false. Existing damage callbacks keep their cancellation semantics.
+
+`immunity` contains `reason="EXPLOSION_IMMUNITY"`, `sourceKey`, `siteKey` and optional `collectibleId`; `hit` contains `callId`, `damage`, `flags`, `source`, `countdown`. Snapshot edits never rewrite native arguments. Each listener receives its own EntityRef value copy; entity references still point to real entities and must not be persisted. Audited coverage includes both Pyromaniac exits, Host Hat, Ipecac's qualified bomb/knife branches and coop baby skin 20. General invulnerability, shields, fire-only protection and opaque third-party cancellation are outside the veto's scope.
+
+## Yin's Curse explosion immunity veto
+
+This capability requires the local `1.0.12a-yin-api1-dev` native candidate and matching scripts. Stock REPENTOGON 1.0.12a does not provide it. Before registering, check both `Isaac.GetPlayerExplosionImmunityAPIVersion() == 1` and `ModCallbacks.MC_PRE_PLAYER_EXPLOSION_IMMUNITY`. See the [candidate delivery record](reports/yins-curse/native-interface/2026-10-02/delivery.md). Installation and in-game acceptance remain pending.
+
+The listener signature is `(mod, player, hit, immunity)` with no registration filter. `false` vetoes only this source's explosion immunity, continuing the same native damage call; nil/true neither intervene nor grant immunity. All listeners execute in priority/registration order. Later true, errors or invalid returns cannot undo an accumulated false. Existing damage callbacks keep their cancellation semantics.
+
+`immunity` contains `reason="EXPLOSION_IMMUNITY"`, `sourceKey`, `siteKey` and optional `collectibleId`; `hit` contains `callId`, `damage`, `flags`, `source`, `countdown`. Snapshot edits never rewrite native arguments. Each listener receives its own EntityRef value copy; entity references still point to real entities and must not be persisted. Audited coverage includes both Pyromaniac exits, Host Hat, Ipecac's qualified bomb/knife branches and coop baby skin 20. General invulnerability, shields, fire-only protection and opaque third-party cancellation are outside the veto's scope.
+
+## Fortune Rivalling Heaven Gu
 Only applies while the player holds Fortune and a registered owner item or trinket. The highest applicable threshold wins; higher existing Luck is preserved. A threshold is where the effect reaches its maximum chance, which need not be 100%.
 
 ### RegisterLuckCap

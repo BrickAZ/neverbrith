@@ -2,7 +2,8 @@ return function(Neverbirth, context)
     context = context or {}
 
     local ITEM_ID = context.ItemId or 0
-    local FALLBACK_ICON_ID = 25
+    local FALLBACK_ICON_ID = 0 -- Neutral question mark when no unseen passive remains.
+    local QUESTION_MARK_GFX = "gfx/items/collectibles/questionmark.png"
     local SAVE_VERSION = 1
     local TRANSITION_SWITCH_FRAME = 15
     local TRANSITION_END_FRAME = 30
@@ -18,6 +19,10 @@ return function(Neverbirth, context)
         states = {},
         roomSerial = 0,
         iconCandidates = nil,
+        iconConfigs = {},
+        collectibleGfx = {},
+        iconHistoryPlayers = {},
+        iconHistoryDirty = false,
         portalSpawnedThisRoom = false,
         terminalKind = nil,
         diagnostics = {},
@@ -166,8 +171,12 @@ return function(Neverbirth, context)
             saved.runSeed = currentRunSeed()
             saved.memoryDisorderVoidUnlockedThisRun = false
             saved.players = {}
+            saved.pickedIconItems = {}
+            saved.pedestalIconIds = {}
         end
         if type(saved.players) ~= "table" then saved.players = {} end
+        if type(saved.pickedIconItems) ~= "table" then saved.pickedIconItems = {} end
+        if type(saved.pedestalIconIds) ~= "table" then saved.pedestalIconIds = {} end
         if saved.memoryDisorderVoidUnlockedThisRun ~= true then
             saved.memoryDisorderVoidUnlockedThisRun = false
         end
@@ -229,11 +238,36 @@ return function(Neverbirth, context)
         return tonumber(value) or 0
     end
 
+    local function pairMain(player)
+        local kind = getPlayerType(player)
+        local expected = ({ [20] = 19, [40] = 35, [17] = 16 })[kind]
+        if not expected then return player end
+        for _, method in ipairs({ "GetMainTwin", "GetOtherTwin", "GetSubPlayer" }) do
+            local candidate = safeCall(player, method)
+            if candidate and playerExists(candidate) and getPlayerType(candidate) == expected
+                and candidate.ControllerIndex == player.ControllerIndex then return candidate end
+        end
+        return player
+    end
+
+    local function pairPartner(player)
+        local expected = ({ [19] = 20, [35] = 40, [16] = 17 })[getPlayerType(player)]
+        if not expected then return nil end
+        for _, method in ipairs({ "GetOtherTwin", "GetSubPlayer" }) do
+            local other = safeCall(player, method)
+            if other and playerExists(other) and getPlayerType(other) == expected
+                and other.ControllerIndex == player.ControllerIndex then return other end
+        end
+        return nil
+    end
+
     local function hasItem(player)
         if not player or ITEM_ID <= 0 then return false end
         local value, ok = safeCall(player, "HasCollectible", ITEM_ID)
-        if ok then return value == true end
-        return getCollectibleCount(player, ITEM_ID) > 0
+        if ok and value == true then return true end
+        if getCollectibleCount(player, ITEM_ID) > 0 then return true end
+        local other = pairPartner(player)
+        return other ~= nil and getCollectibleCount(other, ITEM_ID) > 0
     end
 
     local function slotSnapshot(player, slot)
@@ -275,12 +309,21 @@ return function(Neverbirth, context)
         { key = "eternalHearts", getter = "GetEternalHearts", adder = "AddEternalHearts" },
         { key = "goldenHearts", getter = "GetGoldenHearts", adder = "AddGoldenHearts" },
         { key = "brokenHearts", getter = "GetBrokenHearts", adder = "AddBrokenHearts" },
+        { key = "soulCharge", getter = "GetSoulCharge" },
+        { key = "bloodCharge", getter = "GetBloodCharge" },
     }
 
     local function readHealth(player)
         local result = {}
         for _, field in ipairs(HEALTH_FIELDS) do
             result[field.key] = numberCall(player, field.getter)
+        end
+        if getPlayerType(player) == playerType("PLAYER_THEFORGOTTEN", 16) then
+            local soul = pairPartner(player)
+            if soul then
+                result.soulHearts = numberCall(soul, "GetSoulHearts")
+                result.blackMask = numberCall(soul, "GetBlackHearts")
+            end
         end
         return result
     end
@@ -312,7 +355,7 @@ return function(Neverbirth, context)
         total = math.max(0, tonumber(total) or 0)
         blackMask = math.max(0, tonumber(blackMask) or 0)
         for index = 0, total - 1 do
-            local isBlack = math.floor(blackMask / (2 ^ index)) % 2 == 1
+            local isBlack = math.floor(blackMask / (2 ^ math.floor(index / 2))) % 2 == 1
             if isBlack then
                 safeCall(player, "AddBlackHearts", 1)
             else
@@ -321,45 +364,147 @@ return function(Neverbirth, context)
         end
     end
 
+    local function healthMode(player, profile)
+        local kind = getPlayerType(player)
+        if kind == playerType("PLAYER_BETHANY", 18) then return "red_only" end
+        local native = safeCall(player, "GetHealthType")
+        if native == 1 then return "soul_only" end
+        if native == 2 then return "lost" end
+        if native == 3 then return "keeper" end
+        if native == 4 then return "bone" end
+        if kind == 12 or kind == 17 or kind == 24 or kind == 35 or kind == 36 or kind == 40 then return "soul_only" end
+        if kind == 16 then return "bone" end
+        return profile and profile.healthMode or "ordinary"
+    end
+
+    local function healthAmount(health)
+        return (health.hearts or 0) + (health.soulHearts or 0) + (health.boneHearts or 0) * 2
+    end
+
+    local function restoreCharges(player, ledger)
+        for _, entry in ipairs({ {"soulCharge", "SetSoulCharge", "GetSoulCharge", "AddSoulCharge"},
+            {"bloodCharge", "SetBloodCharge", "GetBloodCharge", "AddBloodCharge"} }) do
+            if ledger[entry[1]] ~= nil then
+                local _, ok = safeCall(player, entry[2], ledger[entry[1]])
+                if not ok then adjustHealth(player, entry[3], entry[4], ledger[entry[1]]) end
+            end
+        end
+    end
+
     local function applyHealth(player, ledger, profile)
         ledger = ledger or readHealth(player)
         profile = profile or { healthMode = "ordinary" }
+        local mode = healthMode(player, profile)
+        -- Lost is alive through a native hidden half-heart. Never clear it.
+        if mode == "lost" then
+            if numberCall(player, "GetSoulHearts") < 1 then safeCall(player, "AddSoulHearts", 1) end
+            restoreCharges(player, ledger)
+            return mode
+        end
+        local projected = copyTable(ledger)
+        local total = healthAmount(ledger)
+        if mode == "soul_only" then
+            projected.maxHearts, projected.hearts, projected.boneHearts = 0, 0, 0
+            projected.soulHearts, projected.rottenHearts = total, 0
+        elseif mode == "red_only" or mode == "keeper" then
+            projected.soulHearts, projected.boneHearts = 0, 0
+            projected.maxHearts = math.max(ledger.maxHearts or 0, math.ceil(total / 2) * 2)
+            if mode == "keeper" then
+                local limit = numberCall(player, "GetHeartLimit")
+                if limit <= 0 then limit = profile.keeperHeartCap or 6 end
+                projected.maxHearts = math.min(projected.maxHearts, limit, profile.keeperHeartCap or 6)
+                projected.rottenHearts = 0
+            end
+            projected.hearts = math.min(total, projected.maxHearts)
+        elseif mode == "bone" then
+            projected.boneHearts = math.max(ledger.boneHearts or 0, math.ceil((ledger.maxHearts or 0) / 2))
+            if projected.boneHearts == 0 and total > 0 then projected.boneHearts = 1 end
+            projected.maxHearts = 0
+        end
+        local soulTarget = mode == "bone" and pairPartner(player) or player
         clearHealth(player)
-
-        if profile.healthMode == "lost" then return end
-        if profile.healthMode == "soul_only" then
-            addSoulLedger(player, ledger.soulHearts, ledger.blackMask)
-            adjustHealth(player, "GetBoneHearts", "AddBoneHearts", ledger.boneHearts)
-            return
-        end
-        if profile.healthMode == "keeper" then
-            local maximum = math.min(ledger.maxHearts or 0, profile.keeperHeartCap or 6)
-            adjustHealth(player, "GetMaxHearts", "AddMaxHearts", maximum)
-            adjustHealth(player, "GetHearts", "AddHearts", math.min(ledger.hearts or 0, maximum))
-            adjustHealth(player, "GetBrokenHearts", "AddBrokenHearts", ledger.brokenHearts)
-            return
-        end
-
-        adjustHealth(player, "GetMaxHearts", "AddMaxHearts", ledger.maxHearts)
-        adjustHealth(player, "GetHearts", "AddHearts", math.min(ledger.hearts or 0, ledger.maxHearts or 0))
-        addSoulLedger(player, ledger.soulHearts, ledger.blackMask)
-        adjustHealth(player, "GetBoneHearts", "AddBoneHearts", ledger.boneHearts)
-        adjustHealth(player, "GetRottenHearts", "AddRottenHearts", ledger.rottenHearts)
-        adjustHealth(player, "GetEternalHearts", "AddEternalHearts", ledger.eternalHearts)
-        adjustHealth(player, "GetGoldenHearts", "AddGoldenHearts", ledger.goldenHearts)
-        adjustHealth(player, "GetBrokenHearts", "AddBrokenHearts", ledger.brokenHearts)
+        if soulTarget and soulTarget ~= player then clearHealth(soulTarget) end
+        adjustHealth(player, "GetBrokenHearts", "AddBrokenHearts", projected.brokenHearts)
+        adjustHealth(player, "GetMaxHearts", "AddMaxHearts", projected.maxHearts)
+        adjustHealth(player, "GetBoneHearts", "AddBoneHearts", projected.boneHearts)
+        adjustHealth(player, "GetHearts", "AddHearts", math.min(projected.hearts or 0,
+            (projected.maxHearts or 0) + (projected.boneHearts or 0) * 2))
+        addSoulLedger(soulTarget or player, projected.soulHearts, projected.blackMask)
+        adjustHealth(player, "GetRottenHearts", "AddRottenHearts", projected.rottenHearts)
+        adjustHealth(player, "GetEternalHearts", "AddEternalHearts", projected.eternalHearts)
+        adjustHealth(player, "GetGoldenHearts", "AddGoldenHearts", projected.goldenHearts)
+        restoreCharges(player, ledger)
+        return mode
     end
 
     local function profileForType(value)
         return profilesByType[value] or { id = "unknown", playerType = value, healthMode = "ordinary" }
     end
 
+    local function copySoulColors(mask, start, sourceMask, sourceStart, count)
+        mask, sourceMask = mask or 0, sourceMask or 0
+        for offset = 0, count - 1 do
+            local bit = 2 ^ math.floor((start + offset) / 2)
+            local sourceBit = 2 ^ math.floor((sourceStart + offset) / 2)
+            local current = math.floor(mask / bit) % 2
+            local desired = math.floor(sourceMask / sourceBit) % 2
+            mask = mask + (desired - current) * bit
+        end
+        return mask
+    end
+
     local function captureHealthLedger(player, state)
         local profile = state.currentProfile or profileForType(getPlayerType(player))
-        if profile.healthMode == "lost" then return end
+        if healthMode(player, profile) == "lost" then return end
 
         local current = readHealth(player)
         local applied = state.appliedHealth or current
+        if state.healthProjection and state.healthProjection ~= "ordinary" and state.healthProjection ~= "jacob" then
+            local ledger = state.healthLedger
+            local delta = healthAmount(current) - healthAmount(applied)
+            local preferred = state.healthProjection == "soul_only" and "soulHearts" or "hearts"
+            local soulProjection = state.healthProjection == "soul_only"
+            local tail = soulProjection and (state.projectedSoulTail or 0) or 0
+            if delta >= 0 then
+                ledger[preferred] = (ledger[preferred] or 0) + delta
+                if soulProjection then tail = tail + delta end
+            else
+                local loss = -delta
+                local tailLoss = math.min(tail, loss)
+                ledger.soulHearts = math.max(0, (ledger.soulHearts or 0) - tailLoss)
+                tail, loss = tail - tailLoss, loss - tailLoss
+                local other = preferred == "hearts" and "soulHearts" or "hearts"
+                -- Converted health was appended outside the native heart pool.
+                local order = state.healthProjection == "soul_only"
+                    and {"hearts", "boneHearts", "soulHearts"} or {preferred, other, "boneHearts"}
+                for _, key in ipairs(order) do
+                    local unit = key == "boneHearts" and 2 or 1
+                    local available = (ledger[key] or 0) * unit
+                    local removed = math.min(available, loss)
+                    ledger[key] = math.max(0, (ledger[key] or 0) - math.ceil(removed / unit))
+                    loss = loss - removed
+                end
+            end
+            if soulProjection then
+                local nativeSouls = math.max(0, math.min((ledger.soulHearts or 0) - tail, current.soulHearts - tail))
+                ledger.blackMask = copySoulColors(ledger.blackMask, 0, current.blackMask, 0, nativeSouls)
+                if tail > 0 then
+                    ledger.blackMask = copySoulColors(ledger.blackMask, (ledger.soulHearts or 0) - tail,
+                        current.blackMask, current.soulHearts - tail, tail)
+                end
+                state.projectedSoulTail = tail
+                ledger.blackMask = (ledger.blackMask or 0) % (2 ^ math.ceil((ledger.soulHearts or 0) / 2))
+            end
+            if state.healthProjection == "red_only" or state.healthProjection == "keeper" then
+                ledger.maxHearts = math.max(0, (ledger.maxHearts or 0) + current.maxHearts - (applied.maxHearts or 0))
+            end
+            for _, key in ipairs({"brokenHearts", "goldenHearts", "eternalHearts", "soulCharge", "bloodCharge"}) do
+                ledger[key] = math.max(0, (ledger[key] or 0) + current[key] - (applied[key] or 0))
+            end
+            -- Advancing the baseline makes save + continue + next switch idempotent.
+            state.appliedHealth = current
+            return
+        end
         if profile.healthMode == "soul_only" then
             state.healthLedger.soulHearts = math.max(0,
                 (state.healthLedger.soulHearts or 0) + current.soulHearts - (applied.soulHearts or 0))
@@ -396,6 +541,10 @@ return function(Neverbirth, context)
             permanentPockets = copyTable(savedPlayer and savedPlayer.permanentPockets or capturePockets(player)),
             healthLedger = copyTable(savedPlayer and savedPlayer.healthLedger or readHealth(player)),
             appliedHealth = savedPlayer and savedPlayer.appliedHealth and copyTable(savedPlayer.appliedHealth) or nil,
+            healthProjection = savedPlayer and savedPlayer.healthProjection or nil,
+            projectedSoulTail = savedPlayer and savedPlayer.projectedSoulTail or 0,
+            pairSnapshots = copyTable(savedPlayer and savedPlayer.pairSnapshots or {}),
+            pairProxies = copyTable(savedPlayer and savedPlayer.pairProxies or {}),
             currentIconId = savedPlayer and savedPlayer.currentIconId or FALLBACK_ICON_ID,
             switchSerial = savedPlayer and savedPlayer.switchSerial or 0,
         }
@@ -418,6 +567,10 @@ return function(Neverbirth, context)
             permanentPockets = copyTable(state.permanentPockets),
             healthLedger = copyTable(state.healthLedger),
             appliedHealth = copyTable(state.appliedHealth),
+            healthProjection = state.healthProjection,
+            projectedSoulTail = state.projectedSoulTail,
+            pairSnapshots = copyTable(state.pairSnapshots),
+            pairProxies = copyTable(state.pairProxies),
             currentIconId = state.currentIconId,
             switchSerial = state.switchSerial,
         }
@@ -690,18 +843,31 @@ return function(Neverbirth, context)
 
     local function buildIconCandidates()
         local result = {}
+        runtime.iconConfigs = {}
+        runtime.collectibleGfx = {}
         local configs = getCollectibleConfigs()
         local function consider(config)
             if not config then return end
             local id = tonumber(config.ID)
             local gfx = config.GfxFileName or config.GfxFile or config.gfx
             local hidden = config.Hidden == true or config.Hidden == 1
-            if id and id > 0 and id ~= ITEM_ID and not hidden and type(gfx) == "string" and gfx ~= "" then
+            if id and id > 0 and type(gfx) == "string" and gfx ~= "" then
+                runtime.collectibleGfx[id] = gfx
+            end
+            if id and id > 0 and id ~= ITEM_ID and not hidden
+                and config.Type == (ItemType and ItemType.ITEM_PASSIVE or 1)
+                and type(gfx) == "string" and gfx ~= "" then
                 result[#result + 1] = id
+                runtime.iconConfigs[id] = config
             end
         end
-        if type(configs) == "table" and configs.Size and type(configs.Get) == "function" then
-            for index = 1, configs.Size - 1 do consider(configs:Get(index)) end
+        -- ItemConfigList:Get returns opaque userdata. Use Size only for the ID range
+        -- and GetCollectible for typed ItemConfig.Item values (including modded IDs).
+        if configs and configs.Size then
+            local itemConfig = Isaac and Isaac.GetItemConfig and Isaac.GetItemConfig()
+            if itemConfig then
+                for id = 1, configs.Size - 1 do consider(itemConfig:GetCollectible(id)) end
+            end
         elseif type(configs) == "table" then
             for _, config in pairs(configs) do consider(config) end
         end
@@ -710,21 +876,350 @@ return function(Neverbirth, context)
         return result
     end
 
+    local function rememberPickedIcon(itemId)
+        itemId = tonumber(itemId)
+        if not itemId or itemId <= 0 then return end
+        local seen = ensureSavedState().pickedIconItems
+        local key = tostring(itemId) -- JSON object keys must survive a save/load round trip.
+        if not seen[key] then
+            seen[key] = true
+            runtime.iconHistoryDirty = true
+        end
+    end
+
+    local function importIconHistory(player)
+        if not player then return end
+        local history = safeCall(player, "GetHistory")
+        local entries = safeCall(history, "GetCollectiblesHistory")
+        for _, entry in ipairs(type(entries) == "table" and entries or {}) do
+            if safeCall(entry, "IsTrinket") ~= true then
+                rememberPickedIcon(safeCall(entry, "GetItemID"))
+            end
+        end
+        -- Also include starting items and real inventory missing from the history HUD.
+        for _, id in ipairs(runtime.iconCandidates or buildIconCandidates()) do
+            if numberCall(player, "GetCollectibleNum", id, true) > 0 then rememberPickedIcon(id) end
+        end
+        runtime.iconHistoryPlayers[runtimePlayerKey(player)] = true
+    end
+
+    local function syncIconHistory()
+        for _, player in ipairs(getPlayers()) do importIconHistory(player) end
+    end
+
+    local function iconIsEligible(id)
+        return runtime.iconConfigs[id] ~= nil and not ensureSavedState().pickedIconItems[tostring(id)]
+    end
+
+    local function selectIcon(player, salt, previous)
+        local available, alternatives = {}, {}
+        for _, id in ipairs(runtime.iconCandidates or buildIconCandidates()) do
+            if iconIsEligible(id) then
+                available[#available + 1] = id
+                if id ~= previous then alternatives[#alternatives + 1] = id end
+            end
+        end
+        if #alternatives > 0 then available = alternatives end
+        if #available == 0 then return FALLBACK_ICON_ID end
+        return available[randomIndex(#available, player, salt)]
+    end
+
     local function chooseIcon(player)
-        local candidates = runtime.iconCandidates or buildIconCandidates()
-        if #candidates == 0 then return FALLBACK_ICON_ID end
-        local state = runtime.states[runtimePlayerKey(player)]
+        syncIconHistory()
+        local state = runtime.states[runtimePlayerKey(pairMain(player))]
         local salt = "icon:" .. runtime.roomSerial .. ":" .. (state and state.switchSerial or 0)
-        local selected = candidates[randomIndex(#candidates, player, salt)] or FALLBACK_ICON_ID
+        local selected = selectIcon(player, salt, state and state.currentIconId)
         if state then state.currentIconId = selected end
         return selected
     end
 
-    local function resolveIdentitySwitch(player, profile)
+    local function iconGfx(id)
+        local config = runtime.iconConfigs[id]
+        return config and (config.GfxFileName or config.GfxFile or config.gfx) or QUESTION_MARK_GFX
+    end
+
+    local function pickupIconRecord(pickup)
+        local data = safeCall(pickup, "GetData")
+        return data and data.NeverbirthMemoryDisorderIcon, data
+    end
+
+    local function pickupIsBlind(pickup)
+        if safeCall(pickup, "IsBlind") == true then return true end
+        if Game and LevelCurse then
+            local level = Game():GetLevel()
+            local curses = numberCall(level, "GetCurses")
+            return (curses & (LevelCurse.CURSE_OF_BLIND or 0)) ~= 0
+        end
+        return false
+    end
+
+    local function updatePickupIcon(pickup)
+        if not pickup then return end
+        local record, data = pickupIconRecord(pickup)
+        if pickup.SubType ~= ITEM_ID then
+            if record then
+                -- A rerolled pedestal must stop wearing our old disguise.
+                -- ReloadGraphics is not part of REPENTOGON 1.0.12a.
+                -- Restore only a layer still bearing our replacement; otherwise
+                -- preserve the engine's new artwork (including blind/empty states).
+                local sprite = safeCall(pickup, "GetSprite")
+                local layer = safeCall(sprite, "GetLayer", 1)
+                local actual = safeCall(layer, "GetSpritesheetPath")
+                local gfx = runtime.collectibleGfx[pickup.SubType]
+                if gfx and record.appliedGfx and actual == record.appliedGfx then
+                    if pickupIsBlind(pickup) then gfx = QUESTION_MARK_GFX end
+                    local _, replaced = safeCall(sprite, "ReplaceSpritesheet", 1, gfx)
+                    if replaced then safeCall(sprite, "LoadGraphics") end
+                end
+                data.NeverbirthMemoryDisorderIcon = nil
+            end
+            return
+        end
+        if not data then return end
+        for _, player in ipairs(getPlayers()) do
+            if not runtime.iconHistoryPlayers[runtimePlayerKey(player)] then importIconHistory(player) end
+        end
+        local roomSeed = Game and numberCall(Game():GetRoom(), "GetSpawnSeed") or 0
+        local key = tostring(roomSeed) .. ":" .. tostring(pickup.InitSeed)
+        local savedIcons = ensureSavedState().pedestalIconIds
+        if not record and savedIcons[key] ~= nil then record = { id = savedIcons[key] } end
+        if not record or (record.id ~= FALLBACK_ICON_ID and not iconIsEligible(record.id)) then
+            local salt = "pedestal:" .. key
+            local previous = record and record.id
+            record = { id = selectIcon(nil, salt, previous) }
+            savedIcons[key] = record.id
+            runtime.iconHistoryDirty = true
+        end
+        data.NeverbirthMemoryDisorderIcon = record
+    end
+
+    local function renderPickupIcon(pickup)
+        if not pickup or pickup.SubType ~= ITEM_ID then return end
+        local record = pickupIconRecord(pickup)
+        if not record then return end
+        local blind = pickupIsBlind(pickup)
+        local gfx = (blind or not iconIsEligible(record.id)) and QUESTION_MARK_GFX or iconGfx(record.id)
+        local sprite = safeCall(pickup, "GetSprite")
+        -- REPENTOGON layer state lets us notice engine graphic reloads without
+        -- reloading a spritesheet on every render. Never restart its animation.
+        local layer = safeCall(sprite, "GetLayer", 1)
+        local actual = safeCall(layer, "GetSpritesheetPath")
+        if actual ~= gfx and (actual ~= nil or record.appliedGfx ~= gfx) then
+            local _, replaced = safeCall(sprite, "ReplaceSpritesheet", 1, gfx)
+            if replaced then
+                safeCall(sprite, "LoadGraphics")
+                record.appliedGfx = gfx
+            end
+        end
+    end
+
+    local function capturePickupIcon(pickup, collider)
+        if not pickup or pickup.SubType ~= ITEM_ID then return end
+        local player = safeCall(collider, "ToPlayer")
+        local data = safeCall(player, "GetData")
+        local record = pickupIconRecord(pickup)
+        if data and record then data.NeverbirthMemoryDisorderHeldIcon = record.id end
+        -- No return: this callback never authorizes, cancels or grants a pickup.
+    end
+
+    local function renderHeldIcon(player)
+        local queued = player and player.QueuedItem
+        if not queued or not queued.Item or queued.Item.ID ~= ITEM_ID then return end
+        local data = safeCall(player, "GetData")
+        local state = runtime.states[runtimePlayerKey(pairMain(player))]
+        local id = data and data.NeverbirthMemoryDisorderHeldIcon or (state and state.currentIconId)
+        if not iconIsEligible(id) then id = state and state.currentIconId end
+        if not iconIsEligible(id) then id = FALLBACK_ICON_ID end
+        local sprite = safeCall(player, "GetHeldSprite")
+        local gfx = iconGfx(id)
+        local layer = safeCall(sprite, "GetLayer", 0)
+        if safeCall(layer, "GetSpritesheetPath") ~= gfx then
+            local _, replaced = safeCall(sprite, "ReplaceSpritesheet", 0, gfx)
+            if replaced then safeCall(sprite, "LoadGraphics") end
+        end
+    end
+
+    local eidIconOwner
+    local function registerIconDescription()
+        if not EID or EID == eidIconOwner or type(EID.addDescriptionModifier) ~= "function"
+            or type(EID.createItemIconObject) ~= "function" then return end
+        EID:addDescriptionModifier("neverbirth Memory Disorder icon", function(desc)
+            return desc.ObjType == 5 and desc.ObjVariant == 100 and desc.ObjSubType == ITEM_ID
+        end, function(desc)
+            local record = desc.Entity and pickupIconRecord(desc.Entity)
+            local player = desc.Player or desc.PlayerEntity or EID.player
+            local state = player and runtime.states[runtimePlayerKey(pairMain(player))]
+            local id = record and record.id or (state and state.currentIconId)
+            if desc.Entity and pickupIsBlind(desc.Entity) then id = FALLBACK_ICON_ID end
+            if iconIsEligible(id) then
+                desc.Icon = EID:createItemIconObject("Collectible" .. id)
+            elseif EID.InlineIcons then
+                desc.Icon = EID.InlineIcons.QuestionMark
+            end
+            return desc
+        end)
+        eidIconOwner = EID
+    end
+
+    local function collectibleSnapshot(player)
+        local list, ok = safeCall(player, "GetCollectiblesList")
+        if not ok or type(list) ~= "table" then return nil end
+        local result = {}
+        for id, count in pairs(list) do
+            id, count = tonumber(id), tonumber(count)
+            if id and count and id > 0 and count > 0 then result[tostring(id)] = count end
+        end
+        return result
+    end
+
+    local function snapshotPartner(player)
+        -- Normal Forgotten forms share inventory and are native subplayers,
+        -- not co-op actors. Their combined health is handled by read/applyHealth.
+        if getPlayerType(player) == 16 then return nil end
+        local other = pairPartner(player)
+        if not other then return nil end
+        local inventory = collectibleSnapshot(other)
+        if not inventory then return nil, "partner inventory API unavailable" end
+        return {
+            player = other, runtimeKey = runtimePlayerKey(other), mainType = getPlayerType(player),
+            snapshot = { playerType = getPlayerType(other), health = readHealth(other),
+                collectibles = inventory, slots = captureSlots(other), pockets = capturePockets(other),
+                smeltedTrinkets = copyTable(safeCall(other, "GetSmeltedTrinkets")),
+                trinkets = { numberCall(other, "GetTrinket", 0), numberCall(other, "GetTrinket", 1) } },
+        }
+    end
+
+    local function canSwitchPair(player, targetType)
+        if getPlayerType(player) == targetType then return true end
+        if (targetType == 19 or targetType == 35)
+            and not (PlayerManager and type(PlayerManager.RemoveCoPlayer) == "function") then return false end
+        local other = pairPartner(player)
+        if other and getPlayerType(player) ~= 16 then
+            if not (PlayerManager and type(PlayerManager.RemoveCoPlayer) == "function") then
+                diagnosticOnce("pair-remove-api", "Pair switch skipped: safe extra-player removal API unavailable")
+                return false
+            end
+            if not collectibleSnapshot(other) then
+                diagnosticOnce("pair-inventory-api", "Pair switch skipped: cannot preserve partner inventory")
+                return false
+            end
+        end
+        return true
+    end
+
+    local function parkPartner(player, state, prior)
+        if not prior then return end
+        local key = tostring(prior.mainType)
+        state.pairSnapshots[key] = prior.snapshot
+        -- Carry the item's ownership while its original holder is parked. The
+        -- rest of that partner's inventory remains in its own saved snapshot.
+        local count = tonumber(prior.snapshot.collectibles[tostring(ITEM_ID)]) or 0
+        if count > 0 then
+            local before = getCollectibleCount(player, ITEM_ID)
+            for _ = 1, count do safeCall(player, "AddCollectible", ITEM_ID, 0, false) end
+            state.pairProxies[key] = (state.pairProxies[key] or 0) + math.max(0, getCollectibleCount(player, ITEM_ID) - before)
+        end
+    end
+
+    local function removeFormerPartner(player, prior)
+        if not prior or prior.mainType == 16 then return true end
+        -- Reacquire a live wrapper after ChangePlayerType. Never call Remove on
+        -- a stale userdata, the main player, or an unrelated co-op participant.
+        for _, candidate in ipairs(getPlayers()) do
+            if runtimePlayerKey(candidate) == prior.runtimeKey and playerExists(candidate)
+                and getPlayerType(candidate) == prior.snapshot.playerType
+                and runtimePlayerKey(candidate) ~= runtimePlayerKey(player) then
+                local ok = pcall(PlayerManager.RemoveCoPlayer, candidate)
+                if not ok then return false end
+            end
+        end
+        for _, candidate in ipairs(getPlayers()) do
+            if runtimePlayerKey(candidate) == prior.runtimeKey and playerExists(candidate) then return false end
+        end
+        return true
+    end
+
+    local function ensureNativePair(player)
+        local kind = getPlayerType(player)
+        if kind ~= 19 and kind ~= 35 then return true end
+        if pairPartner(player) then return true end
+        -- A surviving former partner can prevent native target-pair creation.
+        -- Retry only after that exact former partner has been removed.
+        safeCall(player, "ChangePlayerType", kind)
+        return pairPartner(player) ~= nil
+    end
+
+    local function restorePartner(player, state, losingItem)
+        local other = pairPartner(player)
+        if not other then return end
+        local key = tostring(getPlayerType(player))
+        local saved = state.pairSnapshots[key]
+        if not saved then return end -- First native creation supplies its kit.
+        local desired = copyTable(saved.collectibles)
+        local proxy = tonumber(state.pairProxies[key]) or 0
+        local returned = math.min(proxy, getCollectibleCount(player, ITEM_ID))
+        if proxy > 0 then
+            for _ = 1, returned do safeCall(player, "RemoveCollectible", ITEM_ID) end
+            desired[tostring(ITEM_ID)] = losingItem and 0 or returned
+            state.pairProxies[key] = nil
+        elseif losingItem then
+            desired[tostring(ITEM_ID)] = 0
+        end
+        for _, slot in ipairs({ SLOT_PRIMARY, SLOT_SECONDARY, SLOT_POCKET }) do
+            restoreSlot(other, slot, saved.slots[slot] or saved.slots[tostring(slot)])
+        end
+        local actual = collectibleSnapshot(other) or {}
+        for id, count in pairs(actual) do
+            for _ = 1, math.max(0, count - (desired[id] or 0)) do safeCall(other, "RemoveCollectible", tonumber(id)) end
+        end
+        for id, count in pairs(desired) do
+            for _ = 1, math.max(0, count - getCollectibleCount(other, tonumber(id))) do
+                safeCall(other, "AddCollectible", tonumber(id), 0, false)
+            end
+        end
+        for _, slot in ipairs({ POCKET_PRIMARY, POCKET_SECONDARY }) do
+            safeCall(other, "SetCard", slot, saved.pockets.cards[slot] or saved.pockets.cards[tostring(slot)] or 0)
+            safeCall(other, "SetPill", slot, saved.pockets.pills[slot] or saved.pockets.pills[tostring(slot)] or 0)
+        end
+        for slot = 0, 1 do
+            local current = numberCall(other, "GetTrinket", slot)
+            if current ~= 0 then safeCall(other, "TryRemoveTrinket", current) end
+        end
+        for _, id in ipairs(saved.trinkets or {}) do if id ~= 0 then safeCall(other, "AddTrinket", id, false) end end
+        local smelted = safeCall(other, "GetSmeltedTrinkets") or {}
+        for id, counts in pairs(saved.smeltedTrinkets or {}) do
+            local current = smelted[tonumber(id)] or smelted[tostring(id)] or {}
+            for _, entry in ipairs({ {"trinketAmount", 0}, {"goldenTrinketAmount", 32768} }) do
+                for _ = 1, math.max(0, (counts[entry[1]] or 0) - (current[entry[1]] or 0)) do
+                    safeCall(other, "AddSmeltedTrinket", tonumber(id) + entry[2], false)
+                end
+            end
+        end
+        applyHealth(other, saved.health, profileForType(saved.playerType))
+        state.pairSnapshots[key] = nil -- A live partner is now authoritative.
+    end
+
+    local function resolveIdentitySwitch(player, profile, losingItem)
+        player = pairMain(player)
         local state = runtime.states[runtimePlayerKey(player)]
-        if not state or not profile then return false end
+        if not state or not profile or playerIsDead(player) then return false end
+        if not canSwitchPair(player, profile.playerType) then return false end
+        local previousType = getPlayerType(player)
+        if previousType == 20 or previousType == 40 or previousType == 17 then
+            diagnosticOnce("orphan-body", "Identity switch skipped: secondary body has no valid main player")
+            return false
+        end
+        local prior = previousType ~= profile.playerType and snapshotPartner(player) or nil
 
         captureHealthLedger(player, state)
+        if healthAmount(state.healthLedger) <= 0 then
+            if healthMode(player, state.currentProfile or profileForType(previousType)) == "lost" then
+                state.healthLedger.soulHearts = math.max(1, numberCall(player, "GetSoulHearts"))
+            else
+                return false -- Never turn an actual zero-health/death state into a heal.
+            end
+        end
+        local previousProfile = state.currentProfile
         if state.currentProfile and type(state.currentProfile.onRemove) == "function" then
             local ok, errorMessage = pcall(state.currentProfile.onRemove, player, state, context)
             if not ok then diagnosticOnce("profile-remove-" .. tostring(state.currentProfile.id), "profile " .. tostring(state.currentProfile.id) .. " remove failed: " .. tostring(errorMessage)) end
@@ -737,11 +1232,41 @@ return function(Neverbirth, context)
             for _, active in ipairs(candidate.actives or {}) do beforeById[active.id] = getCollectibleCount(player, active.id) end
         end
 
-        local _, changed = safeCall(player, "ChangePlayerType", profile.playerType)
-        if not changed then
-            diagnosticOnce("change-player-type", "EntityPlayer:ChangePlayerType is unavailable; identity switch was not applied")
+        if losingItem and prior then
+            prior.snapshot.collectibles[tostring(ITEM_ID)] = 0
+            state.pairSnapshots[tostring(prior.mainType)] = prior.snapshot
+        else
+            parkPartner(player, state, prior)
+        end
+        local function rollback(reason)
+            local failedPartner = getPlayerType(player) ~= previousType and snapshotPartner(player) or nil
+            removeTemporaryComponents(player, state)
+            if getPlayerType(player) ~= previousType then safeCall(player, "ChangePlayerType", previousType) end
+            local cleaned = removeFormerPartner(player, failedPartner)
+            if getPlayerType(player) == previousType and cleaned and ensureNativePair(player) then
+                state.healthProjection = applyHealth(player, state.healthLedger, profileForType(previousType))
+                state.projectedSoulTail = 0
+                restorePartner(player, state, losingItem)
+                state.appliedHealth = readHealth(player)
+                if previousProfile then addProfileComponents(player, state, previousProfile) end
+            end
+            persistState(state)
+            save()
+            diagnosticOnce(reason, "Identity switch failed; original identity state retained for recovery: " .. reason)
             return false
         end
+        local changed = previousType == profile.playerType and pairPartner(player) ~= nil
+        if not changed then
+            local _, ok = safeCall(player, "ChangePlayerType", profile.playerType)
+            changed = ok and getPlayerType(player) == profile.playerType
+        end
+        if not changed then
+            return rollback("change-player-type")
+        end
+        if not removeFormerPartner(player, prior) then
+            return rollback("pair-remove-failed")
+        end
+        if not ensureNativePair(player) then return rollback("pair-create-failed") end
 
         -- If the engine automatically injected any known starting component,
         -- record it as temporary before filling missing profile components.
@@ -750,13 +1275,21 @@ return function(Neverbirth, context)
             if after > before then recordTemporaryCopy(state, itemId, before, after) end
         end
 
+        local projection = applyHealth(player, state.healthLedger, profile)
+        if projection ~= "lost" and healthAmount(readHealth(player)) <= 0 then
+            return rollback("health-restore-failed")
+        end
         state.currentProfile = profile
         state.currentProfileId = profile.id
         state.switchSerial = state.switchSerial + 1
-        applyHealth(player, state.healthLedger, profile)
+        state.healthProjection = projection
+        state.projectedSoulTail = 0
+        restorePartner(player, state, losingItem)
         state.appliedHealth = readHealth(player)
-        addProfileComponents(player, state, profile)
-        chooseIcon(player)
+        if not losingItem then
+            addProfileComponents(player, state, profile)
+            chooseIcon(player)
+        end
 
         if profile.highRisk then
             diagnosticOnce("high-risk-" .. profile.id,
@@ -768,13 +1301,7 @@ return function(Neverbirth, context)
     end
 
     local function restoreOriginalIdentity(player, state)
-        captureHealthLedger(player, state)
-        if state.currentProfile and type(state.currentProfile.onRemove) == "function" then
-            pcall(state.currentProfile.onRemove, player, state, context)
-        end
-        removeTemporaryComponents(player, state)
-        safeCall(player, "ChangePlayerType", state.originalType)
-        applyHealth(player, state.healthLedger, profileForType(state.originalType))
+        if not resolveIdentitySwitch(player, profileForType(state.originalType), true) then return false end
         local saved = ensureSavedState()
         saved.players[state.key] = nil
         runtime.states[runtimePlayerKey(player)] = nil
@@ -784,6 +1311,7 @@ return function(Neverbirth, context)
 
     local function onOwnershipUpdate(player)
         if not player then return false end
+        player = pairMain(player)
         local key = runtimePlayerKey(player)
         local state = runtime.states[key]
         if state then state.player = player end
@@ -793,6 +1321,7 @@ return function(Neverbirth, context)
             local savedPlayer = saved.players[playerKey(player)]
             state = makeState(player, savedPlayer and savedPlayer.active and savedPlayer or nil)
             runtime.states[key] = state
+            if not savedPlayer or not iconIsEligible(state.currentIconId) then chooseIcon(player) end
             saved.memoryDisorderVoidUnlockedThisRun = true
             persistState(state)
             save()
@@ -959,13 +1488,20 @@ return function(Neverbirth, context)
     end
 
     local function onPostUpdate()
+        registerIconDescription()
         local livePlayers = {}
         local stateChanged = false
         for _, player in ipairs(getPlayers()) do
+            if not runtime.iconHistoryPlayers[runtimePlayerKey(player)] then importIconHistory(player) end
+            player = pairMain(player)
             local key = runtimePlayerKey(player)
             livePlayers[key] = true
             onOwnershipUpdate(player)
             local state = runtime.states[key]
+            if state and runtime.iconHistoryDirty and not iconIsEligible(state.currentIconId) then
+                chooseIcon(player)
+                persistState(state)
+            end
             if state and playerIsDead(player) and state.transition then
                 state.transition = nil
                 persistState(state)
@@ -979,13 +1515,15 @@ return function(Neverbirth, context)
                 stateChanged = true
             end
         end
-        if stateChanged then save() end
+        if stateChanged or runtime.iconHistoryDirty then save() end
+        runtime.iconHistoryDirty = false
         advanceFrame()
         local roomContext = liveRoomContext()
         if roomContext then trySpawnVoidPortal(roomContext) end
     end
 
     local function onNewRoom()
+        syncIconHistory()
         runtime.portalSpawnedThisRoom = false
         runtime.terminalKind = nil
         for _, player in ipairs(getPlayers()) do onOwnershipUpdate(player) end
@@ -998,6 +1536,11 @@ return function(Neverbirth, context)
         runtime.portalSpawnedThisRoom = false
         runtime.terminalKind = nil
         runtime.diagnostics = {}
+        runtime.iconCandidates = nil
+        runtime.iconConfigs = {}
+        runtime.collectibleGfx = {}
+        runtime.iconHistoryPlayers = {}
+        runtime.iconHistoryDirty = false
         local root = context.GetSaveRoot and context.GetSaveRoot() or {}
         if not continued then
             root.memoryDisorder = {
@@ -1005,15 +1548,20 @@ return function(Neverbirth, context)
                 runSeed = currentRunSeed(),
                 memoryDisorderVoidUnlockedThisRun = false,
                 players = {},
+                pickedIconItems = {},
+                pedestalIconIds = {},
             }
             save()
         else
             ensureSavedState()
+            syncIconHistory()
             for _, player in ipairs(getPlayers()) do onOwnershipUpdate(player) end
         end
+        syncIconHistory()
     end
 
     local function onPreGameExit()
+        syncIconHistory()
         for _, state in pairs(runtime.states) do
             local player = state.player
             captureHealthLedger(player, state)
@@ -1043,9 +1591,10 @@ return function(Neverbirth, context)
         AdvanceFrame = advanceFrame,
         TransitionDarkness = transitionDarkness,
         ChooseIcon = chooseIcon,
-        InvalidateIconCache = function() runtime.iconCandidates = nil end,
+        InvalidateIconCache = function() runtime.iconCandidates = nil; runtime.iconConfigs = {} end,
+        RememberPickedIcon = rememberPickedIcon,
         TrySpawnVoidPortal = trySpawnVoidPortal,
-        GetRuntimeState = function(player) return runtime.states[runtimePlayerKey(player)] end,
+        GetRuntimeState = function(player) return runtime.states[runtimePlayerKey(pairMain(player))] end,
         GetSavedState = ensureSavedState,
         OnGameStarted = onGameStarted,
         OnPreGameExit = onPreGameExit,
@@ -1065,6 +1614,21 @@ return function(Neverbirth, context)
         end
         if ModCallbacks.MC_POST_NPC_DEATH then
             Neverbirth:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, function(_, npc) onNpcDeath(npc) end)
+        end
+        if ModCallbacks.MC_POST_ADD_COLLECTIBLE then
+            Neverbirth:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, id) rememberPickedIcon(id) end)
+        end
+        if ModCallbacks.MC_POST_PICKUP_UPDATE then
+            Neverbirth:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, function(_, pickup) updatePickupIcon(pickup) end, 100)
+        end
+        if ModCallbacks.MC_PRE_PICKUP_RENDER then
+            Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_RENDER, function(_, pickup) renderPickupIcon(pickup) end, 100)
+        end
+        if ModCallbacks.MC_PRE_PICKUP_COLLISION then
+            Neverbirth:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, function(_, pickup, collider) capturePickupIcon(pickup, collider) end, 100)
+        end
+        if ModCallbacks.MC_PRE_PLAYER_RENDER then
+            Neverbirth:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function(_, player) renderHeldIcon(player) end)
         end
     end
 

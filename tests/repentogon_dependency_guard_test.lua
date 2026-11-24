@@ -20,7 +20,7 @@ local function fixture(locale, failFont)
     local colorMeta = {}
     local pool = {
         RemoveCollectible = function(_, id) assert(owned[id], "foreign item removed"); removedItems[id] = true end,
-        RemoveTrinket = function(_, id) assert(id == 801, "foreign trinket removed"); removedTrinkets[id] = true end,
+        RemoveTrinket = function(_, id) assert(id == 801 or id == 802, "foreign trinket removed"); removedTrinkets[id] = true end,
     }
     local level = {
         GetCurrentRoomIndex = function() return roomIndex end,
@@ -69,7 +69,11 @@ local function fixture(locale, failFont)
     env.Isaac = {
         ConsoleOutput = function() end,
         GetItemIdByName = function(name) lookedUp[name] = true; return names[name] or -1 end,
-        GetTrinketIdByName = function(name) assert(name == "Seven Curses Slot Seal"); return 801 end,
+        GetTrinketIdByName = function(name)
+            if name == "Seven Curses Slot Seal" then return 801 end
+            assert(name == "Low Grade" or name == "零分考卷", "unexpected trinket lookup")
+            return 802
+        end,
         GetPillEffectByName = function(name)
             return name == (locale == "zh" and "蓄风药剂" or "Wind Charge Potion") and 91 or -1
         end,
@@ -124,6 +128,7 @@ for _, locale in ipairs({ "en", "zh" }) do
     f.fire("MC_POST_GAME_STARTED", false)
     for id in pairs(f.owned) do assert(f.removedItems[id], "owned item still in pools: " .. id) end
     assert(f.removedTrinkets[801], "hidden seal still in trinket pool")
+    assert(f.removedTrinkets[802], "Low Grade still in pool without required native APIs")
     local reads = f.poolReads()
     f.fire("MC_POST_UPDATE")
     f.fire("MC_POST_UPDATE")
@@ -141,6 +146,8 @@ for _, locale in ipairs({ "en", "zh" }) do
     assert(f.fire("MC_POST_GET_COLLECTIBLE", 5000) == nil, "changed another mod's item")
     assert(f.fire("MC_GET_TRINKET", 801) == 19)
     assert(f.fire("MC_GET_TRINKET", 32768 + 801) == 32768 + 19)
+    assert(f.fire("MC_GET_TRINKET", 802) == 19)
+    assert(f.fire("MC_GET_TRINKET", 32768 + 802) == 32768 + 19)
     assert(f.fire("MC_GET_TRINKET", 61) == nil)
     assert(f.fire("MC_GET_PILL_EFFECT", 91) == 0)
     assert(f.fire("MC_GET_PILL_EFFECT", 1) == nil)

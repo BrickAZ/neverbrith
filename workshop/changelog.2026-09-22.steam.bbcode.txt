@@ -1,0 +1,44 @@
+[h1]角色菜单修复与道具池调整 / Character Menu Fix and Item Pool Changes[/h1]
+[i]2026-09-22[/i]
+
+[h2]中文[/h2]
+
+[b]角色选择界面[/b]
+[list]
+[*] 修复已移除角色仍在角色选择界面显示“NOT YET”占位页面的问题，移除已停用角色的菜单加载入口。
+[/list]
+
+[b]道具池调整[/b]
+[list]
+[*] 千变万化：移出宝箱房道具池，仅保留在商店道具池；商店权重由 0.1 提高至 0.5。
+[*] ACE 反作弊系统：移出宝箱房和商店道具池，保留道具本身。
+[*] 美工刀：从首领房道具池移至诅咒房道具池，权重保持 1。
+[*] 阴的诅咒：移出商店道具池，以权重 1 加入诅咒房道具池；宝箱房权重仍为 0.1。
+[*] 八音盒、通天塔：移出首领房道具池，保留各自的其他道具池来源。
+[*] 铜钱面具：移出恶魔房道具池，保留商店和诅咒房道具池。
+[*] 强力泻药：移出诅咒房道具池，保留宝箱房和腐烂乞丐道具池。
+[*] 巴比伦好女孩：移出书房道具池，保留天使房和诅咒房道具池。
+[*] 七件狗粮系列道具（高蛋白肉条、活力狗饼干、轻盈低脂罐头、DHA 鱼油、护齿磨牙骨、幸运肝粒、羊奶布丁）：全部移出宝箱房道具池，仅保留在首领房道具池，各自权重仍为 0.1。
+[*] 默认、中英文道具池同步调整。
+[/list]
+
+[h2]English[/h2]
+
+[b]Character Selection[/b]
+[list]
+[*] Fixed a leftover “NOT YET” placeholder page appearing in character selection after the character had been removed. Removed menu loading entries for disabled characters.
+[/list]
+
+[b]Item Pool Changes[/b]
+[list]
+[*] Everchanging: removed from the Treasure Room pool and now remains only in the Shop pool. Shop weight increased from 0.1 to 0.5.
+[*] ACE Anti-Cheat System: removed from the Treasure Room and Shop pools; the item itself remains available.
+[*] Utility Knife: moved from the Boss pool to the Curse Room pool, retaining a weight of 1.
+[*] Yin's Curse: removed from the Shop pool and added to the Curse Room pool with a weight of 1. Its Treasure Room weight remains 0.1.
+[*] Music Box and Tower of Babel: removed from the Boss pool, with their other pool sources retained.
+[*] Coin-Faced Mask: removed from the Devil Room pool; remains in the Shop and Curse Room pools.
+[*] Strong Laxative: removed from the Curse Room pool; remains in the Treasure Room and Rotten Beggar pools.
+[*] Good Girl of Babylon: removed from the Library pool; remains in the Angel Room and Curse Room pools.
+[*] All seven dog-food items (Protein Strip, Energy Kibble, Low-Fat Chow, DHA Fish Oil, Dental Chew, Lucky Liver Bites and Goat Milk Pudding): removed from the Treasure Room pool and now remain only in the Boss pool, each retaining a weight of 0.1.
+[*] Synchronized the default, English and Chinese item pools.
+[/list]

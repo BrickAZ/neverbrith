@@ -3,7 +3,7 @@ local sourcePath = arg[1] or "E:/Isaac - Repentance/resources/scripts/main_ex.lu
 local file = assert(io.open(sourcePath, "r"))
 local source = file:read("*a")
 file:close()
-assert(source:find('["Version"] = "1.0.12a"', 1, true), "dispatcher evidence must match selected 1.0.12a")
+dofile("tests/repentogon_installed_dispatch_contract.lua")(source)
 local first = assert(source:find("function _RunEntityTakeDmgCallback(", 1, true))
 local last = assert(source:find("-- Custom handling for MC_PRE_TRIGGER_PLAYER_DEATH", first, true))
 local dispatchSource = source:sub(first, last - 1)

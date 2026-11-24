@@ -360,7 +360,8 @@ local function test_xml_registers_strong_laxative_item_and_pools()
     assertTruthy(zhItems:find('name="强力泻药"', 1), "zh item xml should register Strong Laxative")
     assertTruthy(enItems:find('name="Strong Laxative"', 1), "en item xml should register Strong Laxative")
     assertTruthy(pools:find('<Pool Name="treasure".-<Item Name="Strong Laxative" Weight="1"', 1), "Strong Laxative should be in treasure")
-    assertTruthy(pools:find('<Pool Name="curse".-<Item Name="Strong Laxative" Weight="1"', 1), "Strong Laxative should be in curse")
+    local cursePool = assert(pools:match('<Pool Name="curse">.-</Pool>'))
+    assertTruthy(not cursePool:find('<Item Name="Strong Laxative"', 1, true), "Strong Laxative should not be in curse")
     assertTruthy(pools:find('<Pool Name="rottenBeggar".-<Item Name="Strong Laxative" Weight="1"', 1), "Strong Laxative should be in rotten beggar")
 end
 

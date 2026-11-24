@@ -5,6 +5,9 @@ do
             or type(runtime.Version) ~= "string"
             or type(_RunEntityTakeDmgCallback) ~= "function"
         then return false end
+        -- This fixed-source local candidate is explicitly approved for Yin's
+        -- native API. Capability 0 still falls back within the Yin module.
+        if runtime.Version == "1.0.12a-yin-api1-dev" then return true end
         local major, minor, patch, suffix = runtime.Version:match("^(%d+)%.(%d+)%.(%d+)([a-z]?)$")
         if not major then return false end
         for _, component in ipairs({ major, minor, patch }) do
@@ -19,7 +22,7 @@ do
     if not supportedRelease(REPENTOGON) then
         if not _G.NeverbirthRepentogonDependencyMessageShown then
             _G.NeverbirthRepentogonDependencyMessageShown = true
-            local message = "[neverbirth] 需要 REPENTOGON 1.0.12a 或更新的可识别稳定版本；当前前置缺失、过旧或构建未知，已停止初始化。Required: REPENTOGON 1.0.12a or newer recognized stable release; initialization stopped (missing, old or unknown build)."
+            local message = "[neverbirth] 需要 REPENTOGON 1.0.12a 或更新的可识别稳定版本，或已认可的 Yin API 本地候选；当前前置缺失、过旧或构建未知，已停止初始化。Required: REPENTOGON 1.0.12a or newer recognized stable release, or the approved local Yin API candidate; initialization stopped (missing, old or unknown build)."
             if Isaac and type(Isaac.ConsoleOutput) == "function" then Isaac.ConsoleOutput(message .. "\n")
             elseif Isaac and type(Isaac.DebugString) == "function" then Isaac.DebugString(message)
             elseif type(print) == "function" then print(message) end
@@ -96,6 +99,17 @@ local ITEM_NAME_CANDIDATES = {
     RingOfSevenCurses = { "Ring of the Seven Curses", "七咒之戒" },
     AvadaKedavra = { "Avada Kedavra", "阿瓦达啃大瓜" },
     HealthySleep = { "Healthy Sleep", "健康睡眠" },
+    IAmAGod = { "I Am a God", "我即神明" },
+    GodComplex = { "God Complex", "神性过载" },
+    DivineLeftHand = { "Divine Left Hand, Demonic Right Hand", "神的左手，恶魔之右手" },
+    EchoBaby = { "Echo Baby", "回声宝宝" },
+    Blinky = { "Blinky", "凸眼鱼" },
+    BombSuit = { "Bomb Suit", "炸弹套装" },
+    DriveGlove = { "Drive Glove", "斗气拳套" },
+    Piledriver360 = { "360" },
+    Ultimate720 = { "720" },
+    MotionWave = { "Wave", "波动" },
+    DragonPunch = { "Dragon Punch", "升龙" },
     DS4 = { "ds4" },
 }
 
@@ -168,6 +182,17 @@ local Items = {
     RingOfSevenCurses = FindItemIdByNames(ITEM_NAME_CANDIDATES.RingOfSevenCurses),
     AvadaKedavra = FindItemIdByNames(ITEM_NAME_CANDIDATES.AvadaKedavra),
     HealthySleep = FindItemIdByNames(ITEM_NAME_CANDIDATES.HealthySleep),
+    IAmAGod = FindItemIdByNames(ITEM_NAME_CANDIDATES.IAmAGod),
+    GodComplex = FindItemIdByNames(ITEM_NAME_CANDIDATES.GodComplex),
+    DivineLeftHand = FindItemIdByNames(ITEM_NAME_CANDIDATES.DivineLeftHand),
+    EchoBaby = FindItemIdByNames(ITEM_NAME_CANDIDATES.EchoBaby),
+    Blinky = FindItemIdByNames(ITEM_NAME_CANDIDATES.Blinky),
+    BombSuit = FindItemIdByNames(ITEM_NAME_CANDIDATES.BombSuit),
+    DriveGlove = FindItemIdByNames(ITEM_NAME_CANDIDATES.DriveGlove),
+    Piledriver360 = FindItemIdByNames(ITEM_NAME_CANDIDATES.Piledriver360),
+    Ultimate720 = FindItemIdByNames(ITEM_NAME_CANDIDATES.Ultimate720),
+    MotionWave = FindItemIdByNames(ITEM_NAME_CANDIDATES.MotionWave),
+    DragonPunch = FindItemIdByNames(ITEM_NAME_CANDIDATES.DragonPunch),
     DS4 = FindItemIdByNames(ITEM_NAME_CANDIDATES.DS4),
 }
 
@@ -294,7 +319,59 @@ end
 local DEBUG_PRINT_ITEM_IDS = true
 local bloodSkullGuBacklashDepth = 0
 
+local yinExplosionApiReady = false
+if type(Isaac.GetPlayerExplosionImmunityAPIVersion) == "function" then
+    local ok, version = pcall(Isaac.GetPlayerExplosionImmunityAPIVersion)
+    yinExplosionApiReady = ok and version == 1
+end
+
 local EID_DESCRIPTIONS = {
+    [Items.DriveGlove] = {
+        en_us = { name = "Drive Glove", eidDescription = "6 Drive bars, independent of active charges#Move away from incoming attacks to guard; 1 bar per half heart#Hold Active: immobile blue parry, cannot shoot; costs 0.5 + 0.3/sec; ordinary parry returns 0.5#First 3 frames: Perfect Parry refills Drive and grants a shooting reward#Release within 6 frames after a parry: no recovery; otherwise 12 immobile frames#Press a movement direction during parry: spend 0.5 for a turning Drive Rush#Reverse after 4 movement frames to brake; shooting after 5 cancels rush#Rush/Perfect: one full charge, then 4 tears/sec for 3 seconds from your first shot; oldest reward only#Kills restore 1; natural recovery 0.1/sec, walking +50%#Empty Drive: damage and tears x0.75 until full; 20 seconds natural recovery#Blue parry excludes bombs and life payments; normal guard also excludes contact, lasers, floor and sourceless damage#Actual injury during rush deals double damage and stops it; shields do not" },
+        zh_cn = { name = "斗气拳套", eidDescription = "独立6格斗气，不使用普通主动充能#朝攻击来向的后方按移动进行普通防御，每半心扣1格#按住主动键蓝防：不能移动或射击，启动0.5格，持续每秒0.3格；普通蓝防成功回0.5格#启动前3帧完美蓝防：斗气回满并授予射击奖励#成功后6帧内松手免后摇；其余松手进入12帧不能移动或射击的后摇#蓝防中按下移动方向立即绿冲，额外消耗0.5格；冲刺可平滑转向#移动满4帧可反向刹车，满5帧可射击取消#绿冲或完美蓝防：一次满蓄力，首次实际射击起3秒内射速至少4.0；重复保留最早奖励#击杀回1格；自然每秒回0.1格，有输入且实际行走加快50%#斗气归零力竭：攻击与射速乘0.75，满槽解除；自然20秒回满#蓝防不能挡炸弹或生命代价；普通防御还不能挡接触、激光、地板及无来源伤害#绿冲实际受伤翻倍并中断；防御和其他护盾挡住可继续" },
+    },
+    [Items.Blinky] = {
+        en_us = { name = "Blinky", eidDescription = "Hold Active: absorb obstacles and ground pickups in a 30-degree cone; range follows your range stat#Ctrl + Active: open storage; arrows select; Active spits forward#Infinite storage for this run, including Continue and Glowing Hourglass; prices and independent choice items are preserved#Close press: 20% damage melee and permanent Wounded mark#Suction deals 50% damage to Wounded enemies every 15 frames; only suction kills store one red heart#Rock: 5 + 20% damage; poop: 2 + 30% damage and four half-damage droplets on hit#Chests: 20 damage and open once; spikes: three nail tears; TNT: 40 explosion damage; fireplaces: Bird's Eye flames#Tinted rocks break instead; giant poop cannot be absorbed; shopkeeper corpses give no drops" },
+        zh_cn = { name = "凸眼鱼", eidDescription = "按住主动键：吸取前方总宽30度内的障碍和地面物品，距离随射程增加#Ctrl+主动键打开储物清单；方向键选择，主动键朝面向吐出#本局无限储物，继续游戏和发光沙漏保留；价格及同组选项独立保留#贴近时按下改为20%攻击力近战，永久标记受创#吸取对受创敌人每15帧造成50%攻击力伤害；仅吸取击杀存入一颗红心#石头：5+20%攻击；大便：2+30%攻击，命中分裂四颗半伤害粪滴#箱子：20伤害并开一次；尖刺：三根钉子；TNT：40爆炸伤害；火堆：鸟眼火焰#X石只破坏，巨型大便不可吸取；店主尸体无掉落" },
+    },
+    [Items.BombSuit] = {
+        en_us = {
+            name = "Bomb Suit",
+            eidDescription = "After actual damage: +0.5 speed, cannot shoot, and immune to damage for 3 seconds#Then explode at your position using your current ordinary bomb damage and effects; the explosion cannot hurt you#Blood donation machines, IV Bag and Devil Beggars still hurt and never trigger this item#Extra copies do not stack; the timer does not refresh#The fuse follows you between rooms; death, item loss or exiting cancels it#Glowing Hourglass rewind cancels the fuse",
+        },
+        zh_cn = {
+            name = "炸弹套装",
+            eidDescription = "实际受伤后，3秒内移速+0.5、无法射击，并免疫除卖血外的伤害#随后在自身位置爆炸，沿用当前普通炸弹的伤害及特效；此次自爆不伤自己#献血机、IV袋、恶魔乞丐正常扣血，且不触发效果#多份不叠加，倒计时不刷新#换房继续倒计时；死亡、失去道具或退出时取消#发光沙漏回溯会取消状态",
+        },
+    },
+    [Items.DivineLeftHand] = {
+        en_us = { name = "Divine Left Hand, Demonic Right Hand", eidDescription = "Copies the last normally acquired collectible that is still held#Only passive items and familiars are eligible; a last active item makes use fail#All copies created by this item expire on the next floor#Does not grant one-time pickup resources#Failed use does not consume charge" },
+        zh_cn = { name = "神的左手，恶魔之右手", eidDescription = "临时复制最后正常取得且仍持有的道具#只接受被动或跟班；最后取得的是主动时使用失败，不回溯#此道具创建的所有临时份数在下一层移除#不发放首次拾取资源#使用失败不消耗充能" },
+    },
+    [Items.EchoBaby] = {
+        en_us = { name = "Echo Baby", eidDescription = "Spectral shooter: 3 damage every 28 frames#Immediately grants Conjoined#After acquiring this item, each new physical baby-tagged collectible copies its complete familiar group#Each such pickup has a 50% chance for +1 permanent damage, otherwise +0.5 permanent tears#Its own tears contribution stops at 5 tears per second; excess is remembered#Copies and bonuses remain for this run after losing the item; extra copies of Echo Baby do not multiply rewards" },
+        zh_cn = { name = "回声宝宝", eidDescription = "每28帧发射3伤害灵体泪弹#直接获得连体变身#取得后，新拾取的宝宝标签实物道具会复制对应的完整跟班组#每次互斥抽取：50%永久+1攻击，否则永久+0.5射速#自身射速贡献最多加到5.0；超出部分仍记录，其他突破上限来源保留#失去本道具后本局复制与属性保留；多份本道具不倍增奖励" },
+    },
+    [Items.GodComplex] = {
+        en_us = {
+            name = "God Complex",
+            eidDescription = "Only usable in an uncleared hostile room; lasts 8 seconds#Randomly grants one form, never the same form twice in a row#{{Warning}} Solar: suppresses normal direct attacks; burns nearby enemies, clears nearby ordinary enemy projectiles, and reduces speed#{{Warning}} War: double damage, faster tears, and piercing tears; directly killing a normal enemy or miniboss releases 8 hostile shots from its corpse#{{Warning}} Eye: automatically judges one target; your normal direct attacks (including explosive tears) can only hurt that target; indirect effects and real bombs can still hurt other enemies",
+        },
+        zh_cn = {
+            name = "神性过载",
+            eidDescription = "仅限未清理的敌对房使用，持续8秒#每次随机获得一种神性，且不会连续获得同一种#{{Warning}} 日冕：无法常规直接攻击，近身持续灼烧并清除近处普通敌方泪弹，移速降低#{{Warning}} 战争之手：攻击力翻倍、射速提高、泪弹穿透；直接击杀普通敌人或小Boss会在尸体处产生8向敌对泪弹#{{Warning}} 独眼审判：自动处刑单个目标；自身常规直接攻击（包括爆炸泪弹）只能伤害该目标，间接特效和真正炸弹仍可伤害其他敌人",
+        },
+    },
+    [Items.IAmAGod] = {
+        en_us = {
+            name = "I Am a God",
+            eidDescription = "Only usable in an uncleared hostile room#For 6 seconds: user damage x3, speed +0.30, range +4, shot speed +0.25, piercing and spectral tears#All players take double damage and lose damage invincibility frames during the declaration#This room permanently prevents heart drops and healing for everyone until the end of the floor, even after clearing or re-entering#At the end: clearing the room grants 1 golden chest; otherwise only the user takes 2 full red hearts of damage",
+        },
+        zh_cn = {
+            name = "我即神明",
+            eidDescription = "仅限未清理的敌对房使用#6秒内使用者攻击力×3、移速+0.30、射程+4、弹速+0.25，常规泪弹获得穿透与幽灵效果#宣告期间全员受到伤害×2且受伤无敌帧失效#本房本层永久不掉落生命且全员无法回复生命，清房、离开重进后仍然有效#结束时清房生成1个金色宝箱，否则仅使用者受到2颗红心伤害",
+        },
+    },
     [Items.HealthySleep] = {
         en_us = {
             name = "Healthy Sleep",
@@ -308,21 +385,21 @@ local EID_DESCRIPTIONS = {
     [Items.RingOfSevenCurses] = {
         en_us = {
             name = "Ring of the Seven Curses",
-            eidDescription = "Permanently occupies your primary active slot for the rest of the run#Forces the Curses of Darkness, the Lost, the Unknown, and the Maze#Disables trinkets and flight; prevents sleeping in beds except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Doubles enemy health and the damage you take#Caps health at 6 hearts, keys at 2, bombs at 1, and coins at 20#Every 2 rooms, adds 1 charge to your character's built-in secondary active, if retained#Quality 4 and modded items cannot be picked up; an item you can pick up spawns beside each one#Rerolling a blocked item checks it again; active items dropped when equipping the ring do not grant replacements#Taking an item that costs hearts also adds 1 broken heart",
+            eidDescription = "Only available in the starting room; disappears permanently when you leave#Permanently occupies your primary active slot for the rest of the run#Forces the Curses of Darkness, the Lost, the Unknown, and the Maze#Disables trinkets and flight; prevents sleeping in beds except Mom's Bed#{{Damage}} Damage x0.75#{{Tears}} Fire rate x0.75#{{Shotspeed}} Shot speed x1.25#{{Luck}} -5 luck#Doubles enemy health and the damage you take#Caps health at 6 hearts, keys at 2, bombs at 1, and coins at 20#Every 2 rooms, adds 1 charge to your character's built-in secondary active, if retained#Quality 4 and modded items cannot be picked up; an item you can pick up spawns beside each one#Rerolling a blocked item checks it again; active items dropped when equipping the ring do not grant replacements#Taking an item that costs hearts also adds 1 broken heart",
         },
         zh_cn = {
             name = "七咒之戒",
-            eidDescription = "本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#无法使用床，妈妈的床除外#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
+            eidDescription = "仅能在开局初始房间拾取，离开后永久消失#本局永久绑定主手主动栏#强制黑暗、迷失、未知、迷宫诅咒；禁用饰品栏与飞行#无法使用床，妈妈的床除外#{{Damage}}攻击力变为75%#{{Tears}}射击频率变为75%#{{Shotspeed}}弹速变为125%#{{Luck}}幸运-5#敌人生命与自身受到伤害翻倍#上限：6颗心、2钥匙、1炸弹、20硬币#每过2个房间，为保留的角色原生副手主动充能1格#品质4与模组道具保留但无法拾取，旁边生成1件可拾取道具#原底座重骰后重新判定；换下的原有主动不参与补偿#交易道具额外增加1颗碎心",
         },
     },
     [Items.MemoryDisorder] = {
         en_us = {
             name = "Memory Disorder",
-            eidDescription = "Starting with the next room, entering a room turns you into a random unlocked character#Temporarily grants that character's starting items and abilities while preserving your existing build#Losing this item restores your original character#Once picked up, guarantees a Void portal after eligible endgame encounters for the rest of the run: Boss Rush, Hush, Mega Satan, and the final Greed Mode boss room",
+            eidDescription = "Starting with the next room, entering a room turns you into a random unlocked character#Temporarily grants that character's starting items and abilities while preserving your existing build#Disguised as a random passive item no player has acquired this run; the disguise grants no item effects#Losing this item restores your original character#Once picked up, guarantees a Void portal after eligible endgame encounters for the rest of the run: Boss Rush, Hush, Mega Satan, and the final Greed Mode boss room",
         },
         zh_cn = {
             name = "记忆紊乱",
-            eidDescription = "从下次进房开始，每次进房都会随机变为一名已解锁角色#角色初始组件随身份临时替换；正常构筑永久保留#失去本道具会恢复原始身份#本局曾拾取后，原版有效终局节点必定提供虚空入口",
+            eidDescription = "从下次进房开始，每次进房都会随机变为一名已解锁角色#角色初始组件随身份临时替换；正常构筑永久保留#外观随机伪装成本局所有玩家均未获得过的被动道具，不获得所示道具效果#失去本道具会恢复原始身份#本局曾拾取后，原版有效终局节点必定提供虚空入口",
         },
     },
     [Items.KamikazeSquad] = {
@@ -396,11 +473,15 @@ local EID_DESCRIPTIONS = {
     [Items.YinsCurse] = {
         en_us = {
             name = "Yin's Curse",
-            eidDescription = "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If you held {{Collectible260}} Black Candle when you picked up Yin's Curse, Ipecac spawns beside that item instead#Existing explosion immunity still works; Black Candle does not grant explosion immunity",
+            eidDescription = yinExplosionApiReady
+                and "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If you held {{Collectible260}} Black Candle when you picked up Yin's Curse, Ipecac spawns beside that item instead#Blocks explosion immunity unless the damaged player currently holds {{Collectible260}} Black Candle#Other effects and general protection still apply; Black Candle does not grant immunity"
+                or "The first quality 4 item is replaced by {{Collectible149}} Ipecac#If you held {{Collectible260}} Black Candle when you picked up Yin's Curse, Ipecac spawns beside that item instead#Existing explosion immunity still works; Black Candle does not grant explosion immunity",
         },
         zh_cn = {
             name = "阴的诅咒",
-            eidDescription = "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#已有防爆效果目前仍会生效；{{Collectible260}}黑蜡烛本身不提供防爆",
+            eidDescription = yinExplosionApiReady
+                and "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#封锁爆炸免疫，除非实际受伤玩家当前持有{{Collectible260}}黑蜡烛#其他道具效果和通用保护照常生效；黑蜡烛本身不提供防爆"
+                or "首个品质4道具会被{{Collectible149}}吐根酊取代#若拾取时持有黑蜡烛，则改为在其旁额外生成吐根酊#已有防爆效果目前仍会生效；{{Collectible260}}黑蜡烛本身不提供防爆",
         },
     },
     [Items.ACEAntiCheatSystem] = {
@@ -904,10 +985,20 @@ Neverbirth:RegisterPickupBannerText(Items.ReviveMyLove, "Arise, My Love!", "Plea
 Neverbirth:RegisterPickupBannerText(Items.NightOfTheCowards, "Night of the Cowards", "Everybody is a Scaredy-Shroom.", "胆小鬼之夜", "人人都是胆小菇")
 Neverbirth:RegisterPickupBannerText(Items.Annihilation, "Annihilation", "Feel my pain!", "诛", "感受！我的痛苦！")
 Neverbirth:RegisterPickupBannerText(Items.KamikazeSquad, "Kamikaze Squad", "For victory! Give it all!", "神风特攻队", "为胜利！献身！")
+Neverbirth:RegisterPickupBannerText(Items.BombSuit, "Bomb Suit", "Go! You're a real Bomberman now!", "炸弹套装", "上吧，你现在是真正的炸弹人了!")
 Neverbirth:RegisterPickupBannerText(Items.MemoryDisorder, "Memory Disorder", "Who am I?", "记忆紊乱", "我是谁？")
 Neverbirth:RegisterPickupBannerText(Items.RingOfSevenCurses, "Ring of the Seven Curses", "This world isn't worth it.", "七咒之戒", "人间不值得")
 Neverbirth:RegisterPickupBannerText(Items.AvadaKedavra, "Avada Kedavra", "", "阿瓦达啃大瓜", "")
 Neverbirth:RegisterPickupBannerText(Items.HealthySleep, "Healthy Sleep", "Get your eight hours", "健康睡眠", "睡够八小时")
+Neverbirth:RegisterPickupBannerText(Items.IAmAGod, "I Am a God", "I just told you who I thought I was.", "我即神明", "I just told you who I thought I was.")
+Neverbirth:RegisterPickupBannerText(Items.GodComplex, "God Complex", "Too much power for one body.", "神性过载", "Too much power for one body.")
+Neverbirth:RegisterPickupBannerText(Items.DivineLeftHand, "Divine Left Hand, Demonic Right Hand", "temporary copy", "神的左手，恶魔之右手", "临时性复制")
+Neverbirth:RegisterPickupBannerText(Items.EchoBaby, "Echo Baby", "Baby up baby up baby up baaaaaabyuuuuuupppp", "回声宝宝", "宝宝上升宝宝上升宝宝上升宝宝宝宝上升上升")
+Neverbirth:RegisterPickupBannerText(Items.Blinky, "Blinky", "Can only absorb dead things", "凸眼鱼", "只能吸死物")
+Neverbirth:RegisterPickupBannerText(Items.DriveGlove, "Drive Glove", "Parry, then punish!", "斗气拳套", "防住，再反击！")
+
+-- Register before the eager EID pass, including when EID is already loaded.
+include("motion_item_text")(Neverbirth, { Items = Items, EIDDescriptions = EID_DESCRIPTIONS })
 
 local eidDescriptionsRegistered = false
 
@@ -1158,10 +1249,8 @@ function Neverbirth.DebugController.ExecuteCommand(number)
 end
 
 function Neverbirth.DebugController.GetControllerIndex(player)
-    if not player then
-        return 0
-    end
-    return player.ControllerIndex or player.ControllerId or player.Controller or 0
+    if not player then return nil end
+    return player.ControllerIndex or player.ControllerId or player.Controller
 end
 
 function Neverbirth.DebugController.IsDirectionPressed(player, direction)
@@ -1170,6 +1259,7 @@ function Neverbirth.DebugController.IsDirectionPressed(player, direction)
     end
 
     local controllerIndex = Neverbirth.DebugController.GetControllerIndex(player)
+    if controllerIndex == nil then return false end
     for _, actionName in ipairs(Neverbirth.DebugController.actions[direction] or {}) do
         local action = ButtonAction[actionName]
         if action ~= nil then
@@ -7015,7 +7105,8 @@ end
 
 function Neverbirth.Cleaver.GetTriggeredShootDirection(player)
     if not (Input and Input.IsActionTriggered and ButtonAction) then return nil end
-    local controller = (player and player.ControllerIndex) or 0
+    local controller = player and player.ControllerIndex
+    if controller == nil then return nil end
     local actions = {
         ButtonAction.ACTION_SHOOTLEFT,
         ButtonAction.ACTION_SHOOTRIGHT,
@@ -20686,6 +20777,104 @@ include("healthy_sleep")(Neverbirth, {
     DebugLog = DebugLog,
 })
 -- HEALTHY_SLEEP_END
+
+-- I_AM_A_GOD_BEGIN
+include("i_am_a_god")(Neverbirth, {
+    ItemId = Items.IAmAGod,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers,
+    GetPlayerHeadWorldPosition = Neverbirth.BurnAwayResentment.GetPlayerHeadWorldPosition,
+    DebugLog = DebugLog,
+})
+-- I_AM_A_GOD_END
+
+-- GOD_COMPLEX_BEGIN
+include("god_complex")(Neverbirth, {
+    ItemId = Items.GodComplex,
+    GetSaveRoot = function()
+        EnsureMusicboxDataLoaded()
+        return musicboxSaveData
+    end,
+    Save = SaveMusicboxData,
+    GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- GOD_COMPLEX_END
+
+-- PENDING_CONTENT_COMPLETION_BEGIN
+include("pending_content_integration")(Neverbirth, {
+    Items = Items, EIDDescriptions = EID_DESCRIPTIONS,
+    GetSaveRoot = function() EnsureMusicboxDataLoaded(); return musicboxSaveData end,
+    Save = SaveMusicboxData, GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers, DebugLog = DebugLog,
+})
+-- PENDING_CONTENT_COMPLETION_END
+
+-- BLINKY_BEGIN
+include("blinky")(Neverbirth, {
+    ItemId=Items.Blinky,
+    GetSaveRoot=function() EnsureMusicboxDataLoaded(); return musicboxSaveData end,
+    Save=SaveMusicboxData, GetCurrentRunSeed=GetCurrentRunSeed,
+    GetPlayers=GetPlayers, DebugLog=DebugLog,
+})
+-- BLINKY_END
+
+-- BOMB_SUIT_BEGIN
+include("bomb_suit")(Neverbirth, {
+    ItemId = Items.BombSuit,
+    GetPlayers = GetPlayers,
+    GetPlayerHeadWorldPosition = Neverbirth.BurnAwayResentment.GetPlayerHeadWorldPosition,
+    DebugLog = DebugLog,
+})
+-- BOMB_SUIT_END
+
+-- DRIVE_GLOVE_BEGIN
+include("drive_glove")(Neverbirth, {
+    ItemId = Items.DriveGlove,
+    GetSaveRoot = function() EnsureMusicboxDataLoaded(); return musicboxSaveData end,
+    Save = SaveMusicboxData, GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers, DebugLog = DebugLog,
+    IncomingDamageMultiplier = function(player)
+        local ring = Neverbirth.RingOfSevenCursesTestAPI
+        local state = ring and ring.GetPlayerState(player)
+        return state and state.active and 2 or 1
+    end,
+})
+-- DRIVE_GLOVE_END
+
+-- MOTION_INPUT_BEGIN
+include("motion_input")(Neverbirth, {
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- MOTION_INPUT_END
+
+-- MOTION_PRESENTATION_BEGIN
+include("motion_presentation")(Neverbirth, {
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- MOTION_PRESENTATION_END
+
+-- MOTION_ITEMS_BEGIN
+include("motion_combat")(Neverbirth, {
+    GetSaveRoot = function() EnsureMusicboxDataLoaded(); return musicboxSaveData end,
+    Save = SaveMusicboxData, GetCurrentRunSeed = GetCurrentRunSeed,
+    GetPlayers = GetPlayers, Key = function(player) return Neverbirth.PendingContentState.InventoryPlayerKey(player) end,
+    DebugLog = DebugLog,
+})
+include("motion_items")(Neverbirth, {
+    Items = Items,
+    GetPlayers = GetPlayers,
+    DebugLog = DebugLog,
+})
+-- MOTION_ITEMS_END
 
 -- DANTE_CHARACTER_BEGIN
 -- Custom characters are temporarily disabled; do not load their gameplay or visual callbacks.

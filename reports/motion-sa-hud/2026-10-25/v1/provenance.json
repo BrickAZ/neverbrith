@@ -1,0 +1,2094 @@
+{
+  "source": "local Street Fighter 6 original pak",
+  "source_pak": "F:/SteamLibrary/steamapps/common/Street Fighter 6/re_chunk_000.pak",
+  "gui_version": 530035,
+  "clip_version": 53,
+  "original_fps": 60,
+  "isaac_logic_fps": 30,
+  "files": [
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/cmn/lib/part/tex_gradcircle_iam.tex.241101895",
+      "sha256": "e01f4a927bb9f75a6133901d4c3532e36021e69d3f2cfdca010e60cf59089fb8"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/cmn/lib/part/tex_gradsquare_iam.tex.241101895",
+      "sha256": "c765e8b4c2069892813824652c0fb31aca243a65a11a7282fe0faaee657021f4"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/cmn/lib/part/tex_lineframe_iam.tex.241101895",
+      "sha256": "81096c1b86f9cd112483219ad546bd97a54a5d1dad335fa756625b8c869be007"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/cmn/lib/part/uv_cmn_9grid.uvs.7",
+      "sha256": "999a10458e9bde5df2edbc2835a2156f283734c2579432d1f1c377a96ab502ba"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/lib/part/tex_gaugeframe_iam.tex.241101895",
+      "sha256": "479a198ae5c64507fc5be8d8762b1c2808edfd4bf6917be6f93313c770d38334"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/lib/part/tex_vital_bg_iam.tex.241101895",
+      "sha256": "209d8a2271201928008b84caec95889b9c2fea40e5ec69c67b132b80d3ac0a9e"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/lib/part/tex_vital_bg_s9g_iam.tex.241101895",
+      "sha256": "338fcd6087876da7c3478ad07a2257d96a8a70e83a4c39eb17173ba385512b43"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/lib/part/uv_gaugeframe.uvs.7",
+      "sha256": "c92162288fb490b9043590cf26d8670da73c1ddeae3705a3cf815102cc3029e1"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/lib/part/uv_vital_bg.uvs.7",
+      "sha256": "cedf75fe91292902baccfee5d83e1188c00922023f5f4358702c1ea1cdd28aa8"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/battlehud_sagauge.pfb.17",
+      "sha256": "72cdb1c2f60af7cc3a6eb7398833881143e42a33a13a64f55c2ff714d9504f60"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/battlehud_sagauge_02.pfb.17",
+      "sha256": "befa645d73c321a17f5efa018326d72182bc92d406b338b000ecf620470b585a"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/battlehud_sagauge_03.pfb.17",
+      "sha256": "2d102b23a21972835a3168b9b68eac398dad614571a6bd6064566034b930c01d"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/battlehud_sagauge_04.pfb.17",
+      "sha256": "9deb1a557d497945feaf37c4cfde5af71c7d8863920bbc7514a65823c8ff1485"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/battlehud_sagauge_05.pfb.17",
+      "sha256": "199a54423eb9a4c1f10a5ab7a10fc4ff5d91f86b3a4e8650d71e86ec072413d8"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/battlehud_sagauge_06.pfb.17",
+      "sha256": "2a74b9b5ec42b4c3bd5bed3bffdd2d6790b76b46773249981853cd7dd7f7298e"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/battlehud_sagauge_07.pfb.17",
+      "sha256": "e65aae16e6ad7c7027eb6bea4584a5371bda535ff628218204219aceec2972ef"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-02_sa_iam.tex.241101895",
+      "sha256": "d4a64415b28ef7d0e11b60fe5ed28c3e76ee44fdd84136fce004793c6009a552"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-03_sa_iam.tex.241101895",
+      "sha256": "e2cc074adb60fa4bbe86f1cab2557fb0ba421f2666980b80f442bf41be3d6f4e"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-04_sa_iam.tex.241101895",
+      "sha256": "6e093e66a5581625cf4728862f8d4f13b0441114c7fd1d1af268b23deb71454f"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-05_sa_0_iam.tex.241101895",
+      "sha256": "f26a545813a861c730516d132db0aec3c098bbc3274272ba44217185f45189e8"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-05_sa_1_iam.tex.241101895",
+      "sha256": "f37d6ddf542163e40e59b9f4c3e1a8a8bafc83f0d88da12ae4d9d269fac47b13"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-05_sa_2_iam.tex.241101895",
+      "sha256": "bb7c9e0e7594ae4ae635d2b252fa16c79c766afaee9699df6b6f3a4230e8dc7c"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-05_sa_3_iam.tex.241101895",
+      "sha256": "25b680bfc957cb9e8d5ffba98934507684e832f468dae4dd1e213878e1007602"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-05_sa_4_iam.tex.241101895",
+      "sha256": "caca9c02cd8409e6241da187648b89f69244df3ca55d4caf4f0a23c681ad53a8"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-06_sa_iam.tex.241101895",
+      "sha256": "8ac89872b7eb8bdc52305fee8e72218469dfd9eeca88762564a3f7b559291dca"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-07_sa_gauge_base_iam.tex.241101895",
+      "sha256": "1e0378daf3020cb063a074017df9da768b2e1dd281bb0d0f32eeff3cf5faf217"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-07_sa_gauge_frame_iam.tex.241101895",
+      "sha256": "31fa252b8626e9055c53a7e980f5d5b95f15bcacdf7f8db63689a9a57937ec32"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_hud-07_sa_parts_iam.tex.241101895",
+      "sha256": "3043e50a9d1f596cc09fd429fe839f9b956a7935954d59562c48487f2a505659"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/tex_spcombo_num_iam.tex.241101895",
+      "sha256": "e41603a4b9e4a525d5f829ca9a037c7a0e20d619fd1e51f78cc5dd230dafac53"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/uvs_hud-02_sa.uvs.7",
+      "sha256": "e89ab5c6eeb13931090a3046cddb7d0ea544a46bab6f6417cca88d12f3b39746"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/uvs_hud-03_sa.uvs.7",
+      "sha256": "06b230f9b19cee85a2bfd325daf45183c3169a6623a48cc26d0ddd1ccf9ed177"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/uvs_hud-04_sa.uvs.7",
+      "sha256": "62745f8c5f37e222d365848ef6481377f92df051537eae93632e7b22ae6c068b"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/uvs_hud-05_sa.uvs.7",
+      "sha256": "72c07b72a04716092c5d2eef4a98899737d4887eeaf2efb0b21a096d1e10fcb3"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/uvs_hud-06_sa.uvs.7",
+      "sha256": "e9a9914425820eabe8f994a200448e5f9562f43724337e0df225fe42ddf3882c"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/uvs_hud-07_sa_parts.uvs.7",
+      "sha256": "18f101855b2c4c63ca84ded47f53b7ce3b2361829e4ae180f1e6c3c7ec049986"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/part/uvs_number.uvs.7",
+      "sha256": "a7766559763e9c98aaa4cc12e1ba7f766b136df2882a7c8e18ca10468a6d6ecb"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/ui30012.gui.530035",
+      "sha256": "bec2cbe841d7958f51c887256b5f844c102933fdd4f4cb0c6604cb4807fde5a3"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/ui30012_02.gui.530035",
+      "sha256": "ae5f63b3766eec05a3c22d70d195d9983480a4976030ece596d3f6ea1a91436b"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/ui30012_03.gui.530035",
+      "sha256": "04d8de07c81a7ab4fcf8850c6b09df518a02c03353882ee12f9f42003f6dafda"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/ui30012_04.gui.530035",
+      "sha256": "0da4bd747a26b04d243baba42a06db392074f92591dac7de7f785852e909622c"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/ui30012_05.gui.530035",
+      "sha256": "ff987be34632ab3f55f073dd5ce3a7952e2224f47d9b16e3ade83ad25630f804"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/ui30012_06.gui.530035",
+      "sha256": "d5451e5064c1baf11f9c83bd35bf32752ae4d966a86f911ad0e9a97a29929738"
+    },
+    {
+      "path": "reports/motion-sa-hud/2026-10-25/v1/work/re_chunk_000/natives/stm/product/gui/es/ui30000/ui30012/ui30012_07.gui.530035",
+      "sha256": "0ada938833805afc37c6cafae74f6fe91881769302181f9ac284c94e3e9b65ad"
+    }
+  ],
+  "uv_crops": [
+    {
+      "uv": "Product/GUI/es/lib/part/uv_GaugeFrame.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        1,
+        0,
+        5,
+        22
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_GaugeFrame.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        5,
+        4,
+        128,
+        22
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_GaugeFrame.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        5,
+        4,
+        128,
+        22
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_GaugeFrame.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        1,
+        0,
+        5,
+        22
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_GaugeFrame.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        5,
+        4,
+        128,
+        22
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_GaugeFrame.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        5,
+        4,
+        128,
+        22
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        100,
+        50
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        100,
+        0,
+        102,
+        50
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        0,
+        0,
+        100,
+        50
+      ],
+      "flags": 4
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        50,
+        100,
+        51
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        100,
+        50,
+        102,
+        51
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        0,
+        50,
+        100,
+        51
+      ],
+      "flags": 4
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        0,
+        100,
+        50
+      ],
+      "flags": 6
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        100,
+        0,
+        102,
+        50
+      ],
+      "flags": 6
+    },
+    {
+      "uv": "Product/GUI/es/lib/part/uv_Vital_Bg.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        0,
+        0,
+        100,
+        50
+      ],
+      "flags": 2
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 0,
+      "source_box": [
+        0,
+        0,
+        63,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 1,
+      "source_box": [
+        63,
+        0,
+        65,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 2,
+      "source_box": [
+        65,
+        0,
+        128,
+        63
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 3,
+      "source_box": [
+        0,
+        63,
+        63,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 4,
+      "source_box": [
+        63,
+        63,
+        65,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 5,
+      "source_box": [
+        65,
+        63,
+        128,
+        65
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 6,
+      "source_box": [
+        0,
+        65,
+        63,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 7,
+      "source_box": [
+        63,
+        65,
+        65,
+        128
+      ],
+      "flags": 0
+    },
+    {
+      "uv": "Product/GUI/cmn/lib/part/uv_cmn_9grid.uvs",
+      "sequence": 0,
+      "pattern": 8,
+      "source_box": [
+        65,
+        65,
+        128,
+        128
+      ],
+      "flags": 0
+    }
+  ],
+  "conversion": "Original RGBA BC7 textures, native UVs, native gradient colors/geometry, native linear/discrete keys; additive layers retained. Isaac owns read-only visual transitions only.",
+  "format_reference": "https://github.com/alphazolam/RE-Engine-010-Templates"
+}

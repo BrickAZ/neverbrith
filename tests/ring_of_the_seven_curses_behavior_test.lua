@@ -429,6 +429,7 @@ end
 Isaac.Spawn = function(entityType, variant, subtype, position, velocity, spawner)
     local pickup = { Type = entityType, Variant = variant, SubType = subtype }
     function pickup:ToPickup() return self end
+    function pickup:Remove() self.removed = true end
     startSpawnCalls[#startSpawnCalls + 1] = {
         pickup = pickup, position = position, velocity = velocity, spawner = spawner,
     }
@@ -455,8 +456,66 @@ api.Callbacks.PostNewLevel()
 api.Callbacks.PostGameStarted(nil, true)
 assertEquals(#startSpawnCalls, 1, "updates, rooms, floors, and continue never repeat the starting reward")
 
+-- Leaving the opening room forfeits the offer, including after save/continue.
+-- The engine restores room pickups on re-entry; removal must precede collision.
+do
+    local openingRoomKey = currentRoomKey
+    local ring = startSpawnCalls[1].pickup
+    local previousGetRoomEntities = Isaac.GetRoomEntities
+    api.Callbacks.PostPickupUpdate(nil, ring)
+    assertEquals(ring.removed, nil, "staying or continuing in the opening room preserves the ring")
+    assertEquals(api.Callbacks.PrePickupCollision(nil, ring, startPlayerOne), nil,
+        "the ring is collectible before leaving the opening room")
+
+    currentRoomKey = "opening-offer:other-room"
+    api.Callbacks.PostNewRoom()
+    local restoredMod = { AddCallback = function() end, AddPriorityCallback = function() end }
+    initialize(restoredMod, {
+        ItemId = api.ItemId, TrinketId = api.TrinketId,
+        GetPlayers = function() return players end,
+        GetSaveRoot = function() return saveRoot end,
+        GetCurrentRunSeed = function() return "test-run" end,
+        GetRoomKey = function() return currentRoomKey end,
+    })
+    local restoredAPI = restoredMod.RingOfSevenCursesTestAPI
+    restoredAPI.Callbacks.PostGameStarted(nil, true)
+    currentRoomKey = openingRoomKey
+    local otherPickup = { Type = EntityType.ENTITY_PICKUP, Variant = 100, SubType = 25 }
+    function otherPickup:Remove() self.removed = true end
+    Isaac.GetRoomEntities = function() return { ring, otherPickup } end
+    restoredAPI.Callbacks.PostNewRoom()
+    assertEquals(ring.removed, true, "returning after continue removes the forfeited ring pedestal")
+    assertEquals(otherPickup.removed, nil, "room cleanup preserves other collectibles")
+
+    ring.removed = nil -- A restored pickup may collide before its first update.
+    assertEquals(restoredAPI.Callbacks.PrePickupCollision(nil, ring, startPlayerTwo), true,
+        "an expired ring cannot be acquired by another co-op player")
+    assertEquals(ring.removed, true, "collision also removes an expired ring")
+    ring.removed = nil
+    restoredAPI.Callbacks.PostPickupUpdate(nil, ring)
+    assertEquals(ring.removed, true, "pickup updates also clean a restored expired ring")
+
+    -- The exchanged starting active is a different item on the same pedestal.
+    ring.removed, ring.SubType = nil, 105
+    restoredAPI.Callbacks.PostPickupUpdate(nil, ring)
+    assertEquals(ring.removed, nil, "a swapped-out native active is never removed as the ring")
+    ring.SubType = api.ItemId
+    Isaac.GetRoomEntities = previousGetRoomEntities
+end
+
 api.Callbacks.PostGameStarted(nil, false)
 assertEquals(#startSpawnCalls, 2, "another fresh run spawns again even when its start seed is unchanged")
+local freshRing = startSpawnCalls[2].pickup
+api.Callbacks.PostPickupUpdate(nil, freshRing)
+assertEquals(freshRing.removed, nil, "a fresh run resets the forfeited offer")
+assertEquals(api.Callbacks.PrePickupCollision(nil, freshRing, startPlayerOne), nil,
+    "the new run's opening ring is collectible")
+startPlayerOne.activeItems[0] = api.ItemId
+api.Callbacks.PostPEffectUpdate(nil, startPlayerOne)
+currentRoomKey = "opening-offer:picked-up-then-left"
+api.Callbacks.PostNewRoom()
+assertEquals(startPlayerOne:GetActiveItem(0), api.ItemId, "leaving keeps an already equipped ring")
+assertTruthy(api.GetPlayerState(startPlayerOne).active, "leaving keeps the ring's permanent effects")
 
 local registeredRingConfig = itemConfigs[api.ItemId]
 itemConfigs[api.ItemId] = nil
@@ -469,6 +528,42 @@ Isaac.Spawn = function() error("simulated spawn failure") end
 local startOk = pcall(api.Callbacks.PostGameStarted, nil, false)
 assertTruthy(startOk, "a failed owned starting spawn must not prevent the game from loading")
 assertEquals(api.GetSavedState().startingPedestalSpawned, false, "failed engine spawn is not recorded as success")
+
+-- Pre-update saves only recorded that the pedestal spawned. Native room
+-- history can preserve the offer only on the first visit to the starting room.
+do
+    local previousGame, previousEntities = Game, Isaac.GetRoomEntities
+    for _, case in ipairs({
+        { stage = 1, index = 84, visits = 1, expired = false },
+        { stage = 1, index = 85, visits = 1, expired = true },
+        { stage = 1, index = 84, visits = 2, expired = true },
+        { stage = 2, index = 84, visits = 1, expired = true },
+    }) do
+        api.ResetForTest()
+        api.GetSavedState().startingPedestalSpawned = true
+        players = { startPlayerTwo }
+        local legacyRing = { Type = 5, Variant = 100, SubType = api.ItemId, removed = false }
+        function legacyRing:Remove() self.removed = true end
+        Game = function() return {
+            GetRoom = function() return startRoom end,
+            GetLevel = function() return {
+                GetStage = function() return case.stage end,
+                GetCurrentRoomIndex = function() return case.index end,
+                GetStartingRoomIndex = function() return 84 end,
+                GetCurrentRoomDesc = function() return { VisitedCount = case.visits } end,
+            } end,
+        } end
+        Isaac.GetRoomEntities = function() return { legacyRing } end
+        api.Callbacks.PostGameStarted(nil, true)
+        assertEquals(legacyRing.removed, case.expired, "legacy continue respects native starting-room history")
+        if not case.expired then
+            currentRoomKey = currentRoomKey .. ":left-legacy-start"
+            api.Callbacks.PostNewRoom()
+            assertEquals(legacyRing.removed, true, "a migrated first-visit offer expires on departure")
+        end
+    end
+    Game, Isaac.GetRoomEntities = previousGame, previousEntities
+end
 
 local xml = readFile("content/items.xml")
 -- Regressions from the in-game Q4 report: test the actual pickup transaction,

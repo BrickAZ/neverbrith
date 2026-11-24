@@ -7,13 +7,16 @@ description: Develop items for the Binding of Isaac Repentance mod `neverbrith`.
 
 Use this skill for code or code-prompt work in the `neverbrith` Binding of Isaac mod.
 
-Before suggesting or applying item identity, mechanic, visual, pool, quality, or tag decisions, read `../isaac-neverbrith-router/references/user-decision-authority.md`. Preserve explicit user choices and leave omissions as `TBD`.
+Before suggesting or applying item identity, mechanic, visual, pool, quality, or tag decisions, read `../isaac-neverbrith-router/references/user-decision-authority.md`. Preserve explicit user choices and separate undecided design choices from technical discovery.
 
 The goal is not to invent a new architecture. The goal is to keep future item work close to the known-good patterns already present in this repository, especially around item registration, stat cache handling, and damage interception.
 
 ## First Move
 
-Before editing or writing a code prompt, inspect the current repository state:
+Before editing or writing a code prompt, confirm the actual checkout and read
+its `AGENTS.md` and `docs/agent/index.md`. The bootstrap requires REPENTOGON;
+check `main.lua` and the project README for the supported release and startup
+behavior. Then inspect the current repository state:
 
 1. Read `main.lua` to identify the bootstrap/load path, then locate the file that currently owns the closest existing item implementation. Do not assume `main.lua` is the implementation owner after modularization.
 2. Read `content/items.xml`, `content/items.en_us.xml`, and `content/items.zh_cn.xml` when item metadata is involved.
@@ -24,11 +27,11 @@ Do not rely on memory of Isaac callbacks when the repo already has a working exa
 
 ## Basic Item Spec Gate
 
-For any new item, item rewrite, item handoff prompt, or item review, read `references/item-basic-spec.md` before route-specific references.
+For a new item, a full redesign or a handoff for either, read `references/item-basic-spec.md`. For a targeted bug fix, path check or metadata change, review the affected fields and preserve the existing item contract.
 
 The item's basic identity must be explicit before implementation. Do not guess missing fundamentals such as active/passive type, display names, quality, item pools, pickup text, collectible art, or whether the visual request changes Isaac's body versus adds a separate effect.
 
-If a user intentionally leaves a field undecided, mark it as `TBD` in the handoff or final report and avoid silently filling it with a default. In this mod, guessed metadata is a common source of plausible-looking but wrong item work.
+If an unresolved user choice affects the task, record it as `TBD — user decision required`. Discover missing paths, registrations and callback owners from the actual project. In this mod, guessed metadata is a common source of plausible-looking but wrong item work.
 
 ## Route The Task
 
@@ -52,7 +55,7 @@ If a request says "trinket", "smelted", "gulped", or "golden trinket", use `isaa
 - For each new item, update all language variants that exist in the repo. Do not update only `content/items.xml` if `items.en_us.xml` and `items.zh_cn.xml` also exist.
 - If behavior is non-trivial, add or extend a Lua behavior test under `tests/`.
 - If callback choice, filter, return policy, or cache refresh is non-trivial, use `isaac-callback-contracts` before registering it.
-- After file changes, use `isaac-validators` for static XML/path/language checks when possible.
+- After file changes, use the repository checks documented in `docs/agent/testing.md`. The strict route checks synchronization of the generated collectible registry.
 - When writing a prompt for another coding agent, include the route, files to read, reference item examples, edge cases, and expected tests.
 
 ## Known Project Conventions

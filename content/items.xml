@@ -359,6 +359,20 @@
   <passive name="Avada Kedavra" description="" gfx="AvadaKedavraMelon.png" id="57" quality="0" cache="damage firedelay tearflag" tags="offensive noeden nochallenge" />
   <!-- HealthySleep: bilingual display text; existing pool and tag choices are unchanged. -->
   <passive name="Healthy Sleep" description="Get your eight hours" gfx="healthy_sleep.png" id="58" quality="0" />
+  <!-- I Am a God: pool placement intentionally pending; no itempools entry. -->
+  <active name="I Am a God" description="I just told you who I thought I was." gfx="i_am_a_god.png" id="59" quality="3" maxcharges="8" cache="damage speed range shotspeed tearflag" />
   <!-- Hidden technical trinket used only to occupy the trinket HUD slot while the run contract is active. -->
   <trinket name="Seven Curses Slot Seal" description="" gfx="447586_trinket.png" id="1" hidden="true" />
+  <active name="God Complex" description="Too much power for one body." gfx="god_complex.png" id="60" quality="3" maxcharges="2" cache="damage firedelay speed tearflag" />
+  <active name="Divine Left Hand, Demonic Right Hand" description="temporary copy" gfx="divine_left_hand.png" id="61" quality="4" maxcharges="3" tags="offensive nocantrip" />
+  <familiar name="Echo Baby" description="Baby up baby up baby up baaaaaabyuuuuuupppp" gfx="echo_baby.png" id="62" quality="3" cache="damage firedelay familiars" tags="baby offensive lazarussharedglobal" />
+  <trinket name="Low Grade" description="All stats up,Focus on participation" gfx="low_grade.png" id="2" cache="damage firedelay range" />
+  <passive name="Bomb Suit" description="Go! You're a real Bomberman now!" gfx="bomb_suit.png" id="63" quality="3" cache="speed" />
+  <active name="Blinky" description="Can only absorb dead things" gfx="blinky.png" id="64" quality="3" maxcharges="0" tags="offensive nocantrip" />
+  <active name="Drive Glove" description="Parry, then punish!" gfx="drive_glove_v1.png" id="65" quality="0" maxcharges="0" chargetype="special" cache="damage firedelay"/>
+  <!-- Presentation-only motion actives. Quality, pools and combat costs remain undecided. -->
+  <active name="360" description="Hold Active, then circle once" gfx="zangief_360.png" id="66" maxcharges="0" chargetype="special" />
+  <active name="720" description="Hold Active, then circle twice" gfx="zangief_720.png" id="67" maxcharges="0" chargetype="special" />
+  <active name="Wave" description="Hold Active, then tap a shooting direction" gfx="motion_wave.png" id="68" maxcharges="0" chargetype="special" />
+  <active name="Dragon Punch" description="Hold Active, then enter a dragon-punch motion" gfx="motion_dp.png" id="69" maxcharges="0" chargetype="special" />
 </items>

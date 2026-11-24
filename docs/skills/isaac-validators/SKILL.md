@@ -11,11 +11,12 @@ The goal is to catch static mistakes early. This does not replace in-game testin
 
 ## First Move
 
-Before reviewing by eye, run the generic bundled validator from the target mod
-root. Replace `<skill-directory>` with the installed skill folder:
+In this repository, follow the [verification guide](../../agent/testing.md) and run its unified entry point. The standalone generic command below is for a discovered mod without a project-owned static entry point.
+
+For other mods, discover the target mod root and actual tool path before using the fallback below. Replace the example path with the actual skill directory.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File <skill-directory>/scripts/validate-isaac-mod.ps1 -Root . -ModObjectName <mod-object-name>
+pwsh -NoProfile -File "./path/to/isaac-validators/scripts/validate-isaac-mod.ps1" -Root .
 ```
 
 When the project is unfamiliar, use `isaac-mod-context` first to discover the
