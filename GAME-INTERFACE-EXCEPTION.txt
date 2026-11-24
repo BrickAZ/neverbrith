@@ -1,0 +1,27 @@
+Additional permission under GNU GPL version 3 section 7
+neverbrith game interface exception
+
+Copyright (C) 2026 BrickZhou/青春啊砖在he边看月亮 (GitHub: BrickAZ)
+
+For the portions of neverbrith for which the copyright holder above is
+authorized to grant this permission, you have additional permission to use,
+link, or combine the GPL-covered code with The Binding of Isaac: Repentance,
+Repentance+, their game-provided Lua interfaces and runtime libraries, and
+REPENTOGON, solely to run this mod or a GPL-covered modification of this mod,
+and to convey the resulting mod under the GNU GPL version 3.
+
+This permission addresses interaction of this mod's GPL-covered code with
+those game components. It does not permit incorporating this code into
+unrelated proprietary software. The GPLv3 obligations for the covered mod
+code, including modifications and its Corresponding Source, remain in force.
+
+This exception does not grant permission to copy or distribute the game,
+its DLC, proprietary runtime libraries, original game assets, or REPENTOGON.
+Obtain and use those components under their respective terms. It does not
+relicense third-party code or separately licensed artwork, ANM2 animation
+assets, music, or sound recordings. See COPYRIGHT.md, ASSET-LICENSES.md and
+THIRD-PARTY-NOTICES.md.
+
+You may extend this additional permission to your own modifications if you
+hold the necessary rights, but you are not required to do so. You may remove
+this additional permission from your version as permitted by GPLv3 section 7.
