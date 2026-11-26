@@ -29,7 +29,7 @@ rg -n 'GetItemConfig|GetCollectibles' tests/dice_set_behavior_test.lua memory_di
 
 ## 开发材料边界
 
-`docs/skills/` 是仓库中的 Skill 与部分工具副本；已安装 Skill 可能是另一版本。使用本项目检查命令时以[检查入口](../../tools/check-neverbrith.ps1)实际调用的仓库脚本为准，不混用只在另一版本存在的参数。
+有效 Isaac Skills 统一维护在 [`.agents/skills/`](../../.agents/skills/)。旧包已移入 [`deprecated/skills/`](../../deprecated/skills/README.md)，`docs/skills/` 只保留说明与旧命令转发。项目验证器由 [tools/validators](../../tools/validators/) 维护，来源与安装说明见 [Skill 入口](../skills/README.md)。
 
 `reports/`、`diagnostics/`、`outputs/` 保存任务产物；`release/`、`worktrees/`、`.worktrees/` 可包含发布包或独立源码副本。它们不是当前模组 Lua 入口的组成部分。寻找当前实现先限定根目录相关模块、`tests/`、`content/` 和 `resources/`，需要历史证据时再单独阅读这些目录。
 

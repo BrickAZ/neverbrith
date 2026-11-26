@@ -1,0 +1,29 @@
+{
+  "skill_name": "isaac-neverbrith-validator-profile",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "给 neverbrith 新增了自定义卡牌和实体后，除了通用校验还要跑什么？",
+      "expected_output": "先确认实际 neverbrith 仓库，读取 docs/agent/testing.md 后用 PowerShell 7 运行仓库 tools/check-neverbrith.ps1 的适用范围。统一入口调用仓库通用与严格验证器。需要纯静态检查时，使用仓库指南的严格检查命令。区分实际运行、阻塞、静态和实机证据。",
+      "files": [
+        ".agents/skills/isaac-neverbrith-validator-profile/SKILL.md"
+      ],
+      "fixture_files": [
+        "tools/validators/validate-neverbrith.ps1"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "通用 validator 已经通过，Agent 因此宣称 Neverbirth 道具注册和本地安装副本也全部正确。请审查这个结论。",
+      "expected_output": "单独的通用检查只能支持其静态覆盖范围；按仓库指南运行适用的项目检查。记录缺失证据，只有任务实际涉及安装副本一致性时才比较副本。",
+      "files": [
+        ".agents/skills/isaac-neverbrith-validator-profile/SKILL.md"
+      ],
+      "fixture_files": [
+        "content/items.xml",
+        "main.lua",
+        "installed-skills/isaac-neverbrith-validator-profile"
+      ]
+    }
+  ]
+}

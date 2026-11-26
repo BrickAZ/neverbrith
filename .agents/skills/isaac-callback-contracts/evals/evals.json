@@ -1,0 +1,102 @@
+{
+  "skill_name": "isaac-callback-contracts",
+  "evals": [
+    {
+      "id": "deferred-once-claims-task-before-user-code",
+      "prompt": "Mod:Load(func) 每次注册MC_PRE_RENDER wrapper，先执行func，再RemoveCallback和清表。非法func直接return；func报错由pcall吞掉。请审查一次性语义和错误处理。",
+      "expected_output": "入队前校验函数，非法输入不得留下回调；在用户代码前claim/移出pending或解绑精确wrapper。区分至多尝试一次与成功一次；异常清理且保留诊断，不能吞错当成功或无界重试。共享pump仅移除任务不等于注销整个pump；任意task返回值不能逃逸void native callback。",
+      "files": [
+        "skills/isaac-callback-contracts/SKILL.md",
+        "skills/isaac-callback-contracts/references/deferred-one-shot-callbacks.md"
+      ]
+    },
+    {
+      "id": "deferred-batch-cutoff-is-not-native-frame-guarantee",
+      "prompt": "任务A执行时又注册一个临时渲染回调B。开发者说B必定在下一游戏帧，并把任务返回false原样返回给MC_PRE_RENDER。请定义验证边界。",
+      "expected_output": "不能由注册动作保证下一native frame；检查匹配版本分发增删语义，或定义自有批次快照和重入策略，但后一次Pump仍不是后一个game tick。MC_PRE_RENDER是void，不让任意任务false成为引擎控制返回；核对依赖版本和上下文可用性。",
+      "files": [
+        "skills/isaac-callback-contracts/references/deferred-one-shot-callbacks.md"
+      ]
+    },
+    {
+      "id": "method-adapter-is-not-native-string-registration",
+      "prompt": "参考 Mod 写 Item:AddCallback(id,'OnUse')，它的 Component 内部注册 function(_,...) return self[key](self,...) end。陌生项目只有普通 RegisterMod 对象，Agent 直接照抄字符串注册，并认为 registry.Item 换对象后旧回调会自动跟随。请审查。",
+      "expected_output": "先发现项目适配层；原生注册需要函数。区分同一对象的方法替换与整个对象替换，旧 wrapper 仍捕获旧 self；核对参数转发、filter、priority、返回值和重绑路径，不抄参考 Mod 类系统。",
+      "files": [
+        "skills/isaac-callback-contracts/SKILL.md",
+        "skills/isaac-callback-contracts/references/method-adapters.md"
+      ]
+    },
+    {
+      "id": "wrapper-return-and-removal-identity",
+      "prompt": "回调 helper 包装 method 后用 result or nil 返回，并在卸载时 RemoveCallback(id,owner.Method)。method 可能返回 false。请定位问题并定义可执行验证。",
+      "expected_output": "识别 false 被吞掉和移除函数身份不一致；直接转发受支持的返回值，保存真实 wrapper 用于清理。测试参数中的 nil、返回 false/nil、优先级/过滤、方法替换和其他回调保留；不随意用 false 作为错误兜底。",
+      "files": [
+        "skills/isaac-callback-contracts/references/method-adapters.md",
+        "skills/isaac-callback-contracts/tests/test-method-adapter.lua"
+      ]
+    },
+    {
+      "id": "managed-unload-versus-live-double-import",
+      "prompt": "目标版本源码证明卸载 Mod 会清掉该 Mod 的回调。有人因此说任何 include 都不会重复注册；另一个人说每次 luamod 必然累积。当前代码既有同一实例连续 include，也有正常 unload 再 load。请判断。",
+      "expected_output": "两种绝对结论都不成立；分别核对同一 live 实例重复注册和目标原生卸载清理，外部 EID/ImGui/缓存另验。引用源码证据不能冒充已执行的游戏热重载。",
+      "files": [
+        "skills/isaac-callback-contracts/references/method-adapters.md"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "新被动道具会给伤害和移速。代码里已经有 Evaluate 函数，但玩家拿到道具后属性不变。请先审核 callback 合同，不要先改数值。",
+      "expected_output": "Checks MC_EVALUATE_CACHE registration, handler existence/signature, cache-flag gates, ownership count, and the AddCacheFlags/EvaluateItems refresh path; asks for a test proving the registered callback fires.",
+      "files": [
+        "skills/isaac-callback-contracts/SKILL.md"
+      ],
+      "fixture_files": [
+        "main.lua",
+        "tests/"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "一个受伤取消道具已经有 MC_ENTITY_TAKE_DMG，但献血机和恶魔交易也被取消了。该怎么审核回调？",
+      "expected_output": "Keeps the damage callback but requires source/flag exclusion guards, player filtering, recursion policy, and callback-specific return verification instead of switching blindly to an update callback.",
+      "files": [
+        "skills/isaac-callback-contracts/references/callback-choice-and-filters.md"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "一个自定义卡的 MC_GET_CARD 现在会影响普通局所有卡牌生成。请给出 callback 合同。",
+      "expected_output": "Requires a narrow owned-generation/challenge gate, verifies card id return semantics for MC_GET_CARD, preserves unknown third-party cards, and adds normal-run non-firing tests.",
+      "files": [
+        "skills/isaac-callback-contracts/references/registration-and-return-contracts.md"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "另一个 mod 的回调都在 modules/，对象叫 MyMod。我要修一个不触发的 MC_USE_ITEM。",
+      "expected_output": "先用 isaac-mod-context 确认 MyMod、modules/ 和测试入口，再选择回调与过滤器；不假定 main.lua 或固定项目对象名。",
+      "files": [
+        "skills/isaac-callback-contracts/SKILL.md"
+      ]
+    },
+    {
+      "id": "player-render-offset-pass-contract",
+      "prompt": "MC_POST_PLAYER_RENDER 给了 player、renderOffset 和 renderMode。Agent 看到参数就把 renderOffset 加到 WorldToScreen(player.Position) 后，并在水面反射/折射通道都画同一个蓄力条。请审核 callback 合同。",
+      "expected_output": "不能从参数名推断必须相加；要记录 RenderOffset 由谁消费、选择逻辑锚点或项目 adapter、证明 exact-once。定义允许的 renderMode，默认一次性 HUD-like 玩家提示应过滤反射/折射，且 gameplay 不在 render 结算。",
+      "files": [
+        "skills/isaac-callback-contracts/SKILL.md",
+        "skills/isaac-callback-contracts/references/callback-choice-and-filters.md"
+      ]
+    },
+    {
+      "id": "adjacency-move-reuses-real-registration-coverage",
+      "prompt": "只将回调注册移动到同文件对应函数旁，事件、filter、priority、返回值和安装先后均保持。现有测试加载真实入口并覆盖注册、触发、排除、返回及顺序；另有直接调用处理器的测试。如何验证？",
+      "expected_output": "运行已有真实入口覆盖并核对安装顺序；不机械新增等价测试，不拿仅直接调用handler的测试代替注册证据；发现差异或覆盖缺口才补测试，仍区分模拟检查与实机证据。",
+      "files": [
+        "skills/isaac-callback-contracts/SKILL.md",
+        "skills/isaac-callback-contracts/references/callback-review-checklist.md"
+      ]
+    }
+  ]
+}

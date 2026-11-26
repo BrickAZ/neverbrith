@@ -23,7 +23,7 @@ pwsh -NoProfile -File tools/check-neverbrith.ps1 -Profile Pilot -LuaPath "$env:L
 
 - 根目录、`generated/` 和 `tests/` 直接包含的 Lua 文件语法解析；不执行被解析的源码，不扫描嵌套工作树。
 - 所选 Lua 行为测试。`Pilot` 的明确列表由检查脚本维护；`LuaAll` 发现 `tests/` 直接包含的 `*_test.lua`，发现零个测试必须失败。
-- 仓库版[通用验证器](../skills/isaac-validators/scripts/validate-isaac-mod.ps1)、[严格验证器](../skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1)。严格验证器内部对生成道具登记使用 `-Check`。
+- 仓库版[通用验证器](../../tools/validators/validate-isaac-mod.ps1)、[严格验证器](../../tools/validators/validate-neverbrith.ps1)。严格验证器内部对生成道具登记使用 `-Check`。
 - [My Stuff 专项检查](../../tools/validate_mystuff_local_ids.ps1)、[README 检查](../../tests/compatibility_docs_test.ps1)的 `-ReadmeOnly` 分支，以及[知识导航检查](../../tests/agent_wiki_navigation_test.ps1)。
 
 这些配置不会自动运行其他 PowerShell、Python、Node 测试、资源生成器、语言切换、工作簿写回或上传脚本。它们也不调用完整兼容示例测试或入口自测。按改动选择额外检查，不把 `LuaAll` 写成“整个项目全部检查通过”。
@@ -50,7 +50,7 @@ Lua 测试可能用 `io.tmpfile()` 构造原生对象边界的模拟值，因此
 | 无法静态确定的加载 | 动态参数、无法解析的模块字面量、未知外部 `require` 会警告扫描范围不完整；缺失的入口或明确 `include` 文件报失败。游戏提供的 `json` 单独列为外部模块。加载器别名、替换和运行时修改加载路径不在追踪能力内。 |
 | 内容与资源 | 继续检查 `content/` 直接包含的 XML、实体至 ANM2/贴图链、卡牌字段、道具池语言一致性与生成登记。`deathanm2` 相对其 XML 所在的 `content/` 目录解析，不能用 `resources/` 中的同名文件代替。 |
 | 游戏原生资源 | 普通资源先查模组；未命中时只检查选定游戏目录中已解包的 `resources-dlc3/`、`resources-dlc2/`、`resources/`。必须找到实际文件才能记为 `Native asset found`；只证明文件存在。 |
-| Skill 包 | 继续检查仓库 `docs/skills/` 的元数据、评估 JSON 和自包含规则。不会写入已安装的全局 Skill。 |
+| Skill 包 | 检查权威 `.agents/skills/` 的元数据、评估 JSON 和自包含规则；不以 `deprecated/skills/` 归档作为当前规则。 |
 
 严格验证器会打印本次 Lua 文件清单、外部模块和游戏资源查找目录。回调检查仍只识别已有的直接 `Neverbirth:AddCallback(..., Neverbirth.Handler, ...)` 形式及相应函数声明，不是完整 Lua 语义分析，也不能证明回调在运行时只执行一次。
 
@@ -86,4 +86,6 @@ pwsh -NoProfile -File tests/strict_validator_scope_test.ps1
 
 模拟接口验证逻辑与调用契约；原生渲染、输入、碰撞、音频、回调实际时序、真实存档继续及第三方 Mod 组合仍需对应实机验证。每次报告必须列出实际执行的层级；测试通过不得自动更新用户确认的可玩状态。
 
-稳定的排错方法按需读取[测试排错 Skill](../skills/isaac-testing-debugging/SKILL.md)与[验证 Skill](../skills/isaac-validators/SKILL.md)。本页维护项目入口，具体机制规则由原 Skill 维护。
+稳定的排错方法按需读取[测试排错 Skill](../../.agents/skills/isaac-testing-debugging/SKILL.md)与[验证 Skill](../../.agents/skills/isaac-validators/SKILL.md)。本页维护项目入口，具体机制规则由原 Skill 维护。
+
+独立 Skill 包检查：`pwsh -NoProfile -File tests/skill_packages_test.ps1`。它检查元数据、引用和旧目录隔离；旧 skill-layer 命令转发到此检查。

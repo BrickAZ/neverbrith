@@ -1,0 +1,96 @@
+{
+  "skill_name": "isaac-character-art-surfaces",
+  "evals": [
+    {
+      "id": "full-skin-not-concept-art",
+      "prompt": "用户说：“生成一个以撒顶着香蕉皮。”这是一个 Isaac 模组项目，但没有提供任何图片、项目文件、ANM2 或其他角色资源。请给出美术交接方案。",
+      "expected_output": "若明确要游戏内皮肤，先发现或索要相应原图和 ANM2；找不到时报告待查证据，暂停锁定编辑，保留已获授权的概念或发现工作。概念图不能冒充原生图集。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ]
+    },
+    {
+      "id": "surface-matrix-separate-assets",
+      "prompt": "我要做一个自定义角色，需要游戏内角色贴图、角色选择头像、合作头像、死亡界面肖像和名字图片。没有给任何图片或项目路径。请说明应该生成哪些素材。",
+      "expected_output": "输出独立的表面矩阵，分开 512x512 游戏内皮肤、144x144 肖像、192x64 名称图、48x48 选择头像、32x32 合作头像与死亡素材；不虚构实际图集路径或 ANM2 映射，并汇总用户决定。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ]
+    },
+    {
+      "id": "reference-locked-preserves-crop-manifest",
+      "prompt": "我给了完整 512x512 透明角色 skin 图集，只想把头发颜色改成蓝色，不改变任何轮廓。项目另有对应 player ANM2，但没有说明它的裁切方式。请生成一份给绘图 Agent 的资源任务。",
+      "expected_output": "选择纯换色路线；要求先读取实际 player ANM2 并建立 crop manifest，保持原始画布、RGBA alpha、裁切矩形、帧序、pivot、脚底和未授权区域。不得假设 8x8 或统一 64x64 网格；只改获批头发 recolor mask，排除概念图、新姿势、3D 渲染和轮廓变化。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ]
+    },
+    {
+      "id": "official-isaac-mixed-crops",
+      "prompt": "原版 Character_001_Isaac.png 与 001.000_player.anm2 已提供。用户问：做一个完整的苹果头连帽衫 Isaac，要画多少部分？",
+      "expected_output": "读取实际 ANM2，说明官方模板为 512x512 但有混合 32x32、64x64、偏移、重叠与空槽；区分 26 个基础头/身体区域、66 个当前主图集的完整可见源区域、5 个默认不绘制的透明 body0 占位槽，并说明另有 actor spritesheet 时不能把主图集通过称为完整角色视觉。所有数字只适用于该模板，不是通用固定数。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ]
+    },
+    {
+      "id": "original-full-skin-controlled-expansion",
+      "prompt": "我想把原版 Isaac 角色 skin 改成原创角色：有高出的角、兜帽和宽衣领，但仍要沿用现有玩家 ANM2 的动画、脚底和攻击方向。请制定绘图与验证路线。",
+      "expected_output": "明确选择原创完整皮肤或按需 Null Costume 路线；允许在获批裁切格内部改变 alpha 和轮廓，不要求完整 alpha 哈希相等；要求保留画布、裁切矩形、pivot、脚底、方向与帧覆盖，禁止跨格。说明若装饰需要独立遮挡顺序，应发现 type=none Null Costume、ANM2、priority 与 Add/Remove 生命周期。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ]
+    },
+    {
+      "id": "head-decoration-canvas-is-capacity",
+      "prompt": "一个普通以撒头发挂饰的 ANM2 裁切格是 64x64。当前透明素材实际约 36x34，四方向锚点正常，但测试要求左右边缘必须有像素，并设置很高的最小可见像素数量。代码 Agent 说素材没有铺满，所以应该放大。请审查并给出交付与验收合同。",
+      "expected_output": "必须拒绝把 64x64 裁切格当作视觉占满目标，拒绝边缘像素与高最小像素量测试；先测量原版头部和锚点，以普通头发约 34-38px 宽、29-38px 高、无明确理由不超过约 40x40 作为用户未指定时的建议；要求透明图集、四方向原版叠加、1x 和 4x 最近邻预览，并以 1x 为比例裁决。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ]
+    },
+    {
+      "id": "ordinary-hair-head-shell-fails-visual-gate",
+      "prompt": "一套普通长发素材的画布、alpha、裁切、pivot 和八帧一致性测试全部通过，但 1x 原版头部叠加图显示它是一个封闭大圆壳，只在中间挖出脸孔，整体明显比参考角色大。绘图 Agent 准备整体缩小 10% 后继续使用。请审查。",
+      "expected_output": "必须把技术通过和视觉通过分开；普通头发的封闭头套轮廓应判视觉失败，要求废弃并重画外轮廓、刘海/侧发/后发层次和留空，而不是仅缩放或扩大脸孔。只有用户明确要求头盔、封闭兜帽或巨大变身轮廓时才允许例外。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ]
+    },
+    {
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md"
+      ],
+      "prompt": "自定义角色的头发会被部分道具服装遮挡。Agent 建议把 Null Costume priority 统一设成 999，并在每个房间重新 AddNullCostume。用户没有决定头发应盖住哪些帽子、变身和飞行层。请审查。",
+      "expected_output": "必须先输出普通/里角色、皮肤色、头/身体、飞行、变身和典型道具服装的兼容矩阵，把遮挡与优先级策略标为 TBD — user decision required；不得默认 999 或每房间重加。应按已决定的层级选择基础 skin、独立 Null Costume 或专用 ANM2，并验证 Add/Remove 生命周期。",
+      "id": "costume-compatibility-and-priority-is-policy"
+    },
+    {
+      "id": "generated-size-is-candidate-not-native-asset",
+      "prompt": "任务要求在官方 512x512 玩家图集上制作原创完整皮肤。内置图像生成器返回了一张 1254x1254 PNG，视觉方向不错，Agent 准备整体缩小到 512x512 并称为 directly usable。请审查交付状态和后续路线。",
+      "expected_output": "必须分别报告 requested canvas=512x512、actual generated canvas=1254x1254 和 final native canvas=尚未产生；把输出标记为 generation-candidate，禁止直接接入、禁止整体缩放进原生 atlas、禁止称为 directly usable。应回到真实 edit target 和 crop manifest，在原生坐标合同中完成 native conformance 后再做静态与 1x 验收。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md",
+        "skills/isaac-character-art-surfaces/references/art-delivery-lifecycle.md"
+      ]
+    },
+    {
+      "id": "full-skin-identity-cannot-collapse-to-hair-only",
+      "prompt": "用户批准的原创完整皮肤要求银发、宽肩红外套和黑色内搭。最终图集没有跨格，pivot 与脚底也正确，但身体 Alpha 完全等于原版，只在内部换成红黑色，只有头发改变外轮廓。可以判原创完整皮肤完成吗？",
+      "expected_output": "技术 crop 合同可以暂时通过，但视觉模式一致性失败：用户批准的外套和宽肩身份没有分布到身体轮廓。不得以全 Alpha 相等作为完整皮肤优点，也不得普遍强迫所有角色改变身体；应按本任务身份账本在获批身体 owning mask 内重建设计，再重新完成 1x、游戏内和用户审批。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md",
+        "skills/isaac-character-art-surfaces/references/source-fact-and-mode-validation.md"
+      ]
+    },
+    {
+      "id": "surface-and-art-mode-are-separate-axes",
+      "prompt": "Agent 把 independent-ui-surface 与 pure-recolor、original-full-skin、separate-decoration 当成四个互斥的同级美术模式，并想把 192x64 姓名图按玩家皮肤的 binary Alpha 规则检查。请审查。",
+      "expected_output": "必须拆成两个轴：surface/consumer 决定姓名图、肖像、玩家皮肤等用途，art mode 决定纯换色、原创皮肤、独立装饰或独立构图；Alpha policy 由实际原版 surface 测量与项目合同决定，不能把玩家图集规则套到姓名 UI。",
+      "files": [
+        "skills/isaac-character-art-surfaces/SKILL.md",
+        "skills/isaac-character-art-surfaces/references/source-fact-and-mode-validation.md"
+      ]
+    }
+  ]
+}

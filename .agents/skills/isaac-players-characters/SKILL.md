@@ -1,0 +1,131 @@
+---
+name: isaac-players-characters
+description: Design, implement, review, or write handoff prompts for custom player characters and tainted variants in Binding of Isaac Repentance mods. Use this when a task mentions players.xml, player type, custom paired bodies or controllable clones, birthright, starting inventory, character select, player costume, character-specific HUD, co-op player state, death/revive, or player-type checks. 中文触发：自定义角色、里角色、双角色、自定义双子、可控分身、角色选择、players.xml、出生道具、出生卡、Birthright、角色服装、多人角色、角色 HUD、复活。
+---
+
+# Isaac Players And Characters
+
+## User Decisions and Technical Discovery
+
+Read the [shared decision and evidence policy](../isaac-mod-context/references/tbd-disclosure.md).
+
+Use this skill for a playable character system, not for a one-off item effect
+that happens to inspect a player.
+
+## REPENTOGON Companion
+
+For declared REPENTOGON characters, use `isaac-repentogon-content` for players.xml
+extensions, native identity/progression and starting innate grants; use
+`isaac-repentogon-callbacks` when inventory/death event semantics matter.
+Matching-build extension contracts take precedence over vanilla-only API advice.
+Keep character identity, co-op ownership, starting-kit intent and art surfaces
+explicit; do not replay native grants as extra Lua pickup rewards.
+
+## First Move
+
+Use `isaac-mod-context` to discover `players.xml`, player id lookups,
+bootstrap/load files, existing character modules, costumes, starting content,
+and supported locale surfaces. Do not assume a player name, tainted variant,
+`players.xml`, or character-select integration exists.
+
+Before code, write a Character Contract. Read
+`references/character-contract.md`.
+
+## High-Priority Official Native-UI Defaults
+
+When a requested character-select or co-op visual surface has no established current-project route, read `../isaac-anm2-visuals/references/official-native-ui-baselines.md`.
+
+- Character select: start from the official `characterportraits.anm2` baseline, using 48x48 portrait frame crops from a 512x1024 `CharacterMenu.png` sheet.
+- Co-op menu: start from the official `coop menu.anm2` baseline, using 32x32 portrait frame crops from a 192x128 base or 192x224 Repentance-DLC sheet.
+- These defaults do not prove boss, HUD, death, costume, or completion-mark routes. Preserve a user-selected or project-established alternative with a declared mapping and per-surface in-game proof.
+- If a requested select or co-op image is absent, recommend the matching 48x48 or 32x32 source frame. If generation is requested, generate that frame and integrate it into the discovered character-select or co-op atlas, not as a loose replacement file.
+## High-Priority Official Heart-HUD Suggestion
+
+Use this only when the task explicitly requests a custom heart HUD surface. Read `../isaac-anm2-visuals/references/official-native-ui-baselines.md`.
+
+- Recommend a 16x16 heart-HUD cell from the official `ui_hearts.anm2` route and its 112x64 sheet.
+- If generation is requested, generate a 16x16 cell and integrate it into the discovered heart-HUD atlas/ANM2 mapping.
+- Heart appearance is separate from player health mechanics. Do not change health logic merely to display custom art.
+- A non-16x16 heart cell requires an explicit user decision or project-owned mapping; otherwise report the mismatch instead of guessing a render route.
+## Route The Work
+
+- **Existing vanilla character reskin**: when the request changes an existing character without adding a separately selectable identity, do not register a new player type. Route loading, exact-path overrides, runtime actor replacement, and Null Costume compatibility to `isaac-reskins-resource-overrides`.
+- **Registration**: player type, `players.xml`, and character identity.
+- **Custom paired bodies or controllable clones**: read
+  `references/custom-partner-topology.md` for creation, ownership, input and
+  native HUD checks. A mod-created extra player is not automatically a native
+  twin, an independent co-op participant, or a familiar. Use
+  `isaac-state-lifecycle` for reconstruction and `isaac-active-item-mechanics`
+  only when inventory is actually parked or transferred.
+- **In-run identity switching**: when gameplay changes or restores a live
+  player's actual `PlayerType`, use `isaac-character-switching` as primary for
+  migration order, health capabilities, native partners, ownership and failure
+  recovery. This skill still owns the registered source/target identities and
+  starting-kit intent.
+- **Native character visuals**: character select, co-op menu, in-run HUD, boss portrait, death screen, costumes, and optional completion marks are separate surfaces. Discover each requested route; use `isaac-anm2-visuals` for ANM2/assets and do not assume one portrait supplies another.
+- **Character art plan**: before generating or commissioning character pixels, use isaac-character-art-surfaces to produce the per-surface matrix and choose pure recolor versus original full skin. Preserve the actual player ANM2 coordinate contract, not the vanilla alpha silhouette by default. Route base body replacement through a discovered `players.xml` `skin`; route independent hair/clothes/horns through a project-proven `type="none"` Null Costume only when its ANM2, priority, and Add/Remove lifecycle are discovered. Keep portrait, name image, select, co-op, and death art separate.
+- **Starting kit**: starting collectibles, trinkets, cards, pills, health, and
+  active slots. Use `isaac-cards-pockets` or `isaac-rewards-pickups` for the
+  owned content surfaces.
+- **Base and runtime stats**: distinguish values supplied by discovered player registration/configuration from character-identity cache modifiers. This skill owns the character identity/stat contract; route only callback registration and return details to `isaac-callback-contracts`, while reusing the idempotent cache discipline documented by `isaac-passive-collectibles`. Do not repeatedly mutate stats from player init or update callbacks.
+- **Character mechanic**: callback choice and gameplay semantics belong to
+  `isaac-mechanic-contracts` and `isaac-callback-contracts`.
+- **Per-player state**: co-op, twins, death, revive, and reset rules belong to
+  `isaac-state-lifecycle`.
+- **Birthright and descriptions**: user design choices stay locked; use
+  `isaac-compat-descriptions` and `isaac-localization-runtime` only for
+  actual text or runtime language surfaces.
+
+## Hard Rules
+
+- Resolve a player type from a registered project name; never invent a raw
+  type id or assume a tainted variant exists.
+- Resolve normal and tainted/alternate player types from their actual registered names and discovered XML relation. Never infer the alternate as `normalType + 1` or another numeric offset.
+- Evaluate identity and state for each actual callback player. `Isaac.GetPlayer(0)` is not a co-op ownership strategy.
+- Keep character state per actual player. Do not use one global flag for a
+  co-op character mechanic.
+- State whether a starting grant happens on new run, continue, revive, or
+  every player init. Prevent duplicate grants on reload and co-op joins.
+- If the user did not decide the continue, revive, reinitialization, or
+  mid-co-op-join boundary, list each as `TBD`. Do not turn a common character
+  policy into final behavior; label any proposal as `Suggestion`.
+- Do not use a costume as proof of character identity. Costumes are visual;
+  player type and ownership drive gameplay.
+- Do not treat a successful in-run `ChangePlayerType` call as a complete
+  character migration. Route the switch protocol and postconditions to
+  `isaac-character-switching`.
+- Do not use a working character-select, co-op, HUD, boss, death, or costume asset as proof another character surface is registered. Each requested surface needs its own source asset/ANM2/registration evidence and in-game check.
+- Do not make a custom character require EID, CuerLib, StageAPI, or another
+  third-party mod unless the project explicitly declares that dependency.
+- Do not invent starting items, health, Birthright behavior, or a tainted
+  counterpart when the user has not decided them.
+- Keep user-specified starting/base stat values locked. When a stat is implemented through cache evaluation, derive an idempotent contribution from the actual callback player and current character identity, request only the affected cache flags on an identity/state transition, and test new run, continue, revive, and two-player isolation. A one-time visible value is not proof that cache refresh or reconstruction is correct.
+- In an unknown project, use semantic state labels, not invented variable
+  names, XML attributes, or implementation keys. Concrete field names come
+  only from discovered code.
+
+## Handoff Prompt Template
+
+```markdown
+## Character Contract
+
+- Registered player type and source:
+- Tainted/alternate variant:
+- Starting-kit grant boundary:
+- Base-stat source and cache-refresh route:
+- Character mechanic and sibling skills:
+- Per-player state owner and reset points:
+- Custom body creation, pair ownership, controller and HUD contract, if present:
+- Costume/visual route:
+- Native character surface matrix:
+- Birthright and user-locked decisions:
+- Optional integrations:
+- Locale and description surfaces:
+- Required static and in-game checks:
+```
+
+## Completion Checks
+
+Review the actual player ids, grant boundary, co-op behavior, reset/death
+behavior, visual carrier, requested native character surfaces, and in-game
+checks for new run, continue, and two players when supported.

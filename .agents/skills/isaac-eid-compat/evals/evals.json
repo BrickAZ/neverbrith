@@ -1,0 +1,68 @@
+{
+  "skill_name": "isaac-eid-compat",
+  "evals": [
+    {
+      "id": "dynamic-query-cannot-consume-gameplay",
+      "prompt": "EID 每次绘制调用 GetNextItems，用玩法 RNG 抽取并从真实池移除条目，再排序返回表展示下一次结果。请审查。",
+      "expected_output": "使用玩法拥有的无副作用查询/既定结果或等价确定性预测，不推进玩法 RNG/池/资源，不执行效果，不擅自提前抽取改变机制。格式化前尊重返回表所有权，明确上下文和缓存失效，测试连续查询与真实执行一致性。",
+      "files": ["skills/isaac-eid-compat/references/dynamic-descriptions.md"]
+    },
+    {
+      "id": "modifier-factory-and-live-provider",
+      "prompt": "描述模块 return function(LANG)，加载早于玩法模块；Agent 想 require 一次就结束所有语言注册，或再 include 道具取得其接口。请审查。",
+      "expected_output": "区分缓存工厂和按语言调用注册；在已证实的就绪时机查当前玩法 provider，缺失时保留原描述/跳过附加内容，不重执行道具。EID 仍可选，重建后重新绑定或延迟取得当前实例。",
+      "files": ["skills/isaac-eid-compat/references/dynamic-descriptions.md"]
+    },
+    {
+      "id": "eid-locale-and-registration-generation",
+      "prompt": "EID 选择英语而游戏是中文。每次 reload 都注册同名 modifier，开发者说肯定重复累积所以永久设置 registered=true。请审查。",
+      "expected_output": "读取已安装 EID 的有效语言而非只读 Options.Language；核对同名 API 是更新/追加/拒绝，稳定命名并更新当前闭包；注册记录关联实际 EID/Mod 世代，不能用永久布尔阻止替换对象需要的注册。",
+      "files": ["skills/isaac-eid-compat/references/dynamic-descriptions.md", "skills/isaac-eid-compat/references/eid-api-contract.md"]
+    },
+    {
+      "id": 1,
+      "prompt": "陌生模组想加 EID 描述，但没有证明 EID 已安装。请给出实现边界。",
+      "expected_output": "应要求先发现可用 EID global/API；EID 缺失时只跳过描述注册，核心玩法和 XML 本地化继续工作，不 require EID。",
+      "files": [
+        "skills/isaac-eid-compat/SKILL.md",
+        "skills/isaac-eid-compat/references/eid-api-contract.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "EID 在运行中可用但注册函数被重复调用。如何避免描述重复且不覆盖别的模组？",
+      "expected_output": "应使用发现的 API 和本模已确认 ID，确保幂等注册；不覆盖陌生/原版描述，并分别验证 EID 不存在与重复调用分支。",
+      "files": [
+        "skills/isaac-eid-compat/SKILL.md",
+        "skills/isaac-eid-compat/references/eid-api-contract.md"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "项目 XML 中已经给道具写了本地 id，EID 注册能否直接把这个字符串或固定全局数字当 subtype？",
+      "expected_output": "不能。应从本模注册内容解析运行期 subtype，并区分 XML-local id 与运行时 ItemConfig id；还要验证 EID 缺失分支。",
+      "files": [
+        "skills/isaac-eid-compat/SKILL.md",
+        "skills/isaac-eid-compat/references/eid-api-contract.md"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "模组可能比 EID 更早加载，Agent 打算每帧反复调用 addCollectible 直到成功。",
+      "expected_output": "应先检查已安装版本是否支持 EID_POST_LOAD 或项目既有有界时机，并保证首次成功后停止；禁止无界每帧重复注册。",
+      "files": [
+        "skills/isaac-eid-compat/SKILL.md",
+        "skills/isaac-eid-compat/references/eid-api-contract.md"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Agent 在 EID 源码里看到它为了追踪当前模组而覆盖全局 RegisterMod，于是准备把这段抄进普通内容模组；metadata.xml 与 Lua 内版本号还不一致。请审查。",
+      "expected_output": "必须拒绝复制 EID 的库内部全局拦截；普通模组只通过已发现的 EID 公共对象/API 注册自己的运行时 subtype。版本能力以运行对象和安装源码/文档交叉确认，metadata 冲突要报告，不能自行选更高版本。",
+      "files": [
+        "skills/isaac-eid-compat/SKILL.md",
+        "skills/isaac-eid-compat/references/eid-api-contract.md"
+      ]
+    }
+  ]
+}

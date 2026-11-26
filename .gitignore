@@ -1,4 +1,9 @@
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/isaac-*/
+# Personal policy remains local.
+.agents/skills/isaac-repentogon-user-policy/
 .codex/
 tmp/
 node_modules/

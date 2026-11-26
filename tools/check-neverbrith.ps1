@@ -143,8 +143,8 @@ foreach ($test in $luaTests) {
     } else { Record-Check (Invoke-Check $id $luaExecutable @($test)) }
 }
 
-Invoke-ScriptCheck 'static:generic' 'docs/skills/isaac-validators/scripts/validate-isaac-mod.ps1' @('-Root', $rootPath, '-ModObjectName', 'Neverbirth', '-SkillRoot', (Join-Path $rootPath 'docs/skills'))
-Invoke-ScriptCheck 'static:strict' 'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1' @('-Root', $rootPath)
+Invoke-ScriptCheck 'static:generic' 'tools/validators/validate-isaac-mod.ps1' @('-Root', $rootPath, '-ModObjectName', 'Neverbirth', '-SkillRoot', (Join-Path $rootPath '.agents/skills'))
+Invoke-ScriptCheck 'static:strict' 'tools/validators/validate-neverbrith.ps1' @('-Root', $rootPath)
 Invoke-ScriptCheck 'static:mystuff' 'tools/validate_mystuff_local_ids.ps1'
 Invoke-ScriptCheck 'docs:readme' 'tests/compatibility_docs_test.ps1' @('-Root', $rootPath, '-ReadmeOnly')
 Invoke-ScriptCheck 'docs:agent-wiki' 'tests/agent_wiki_navigation_test.ps1' @('-Root', $rootPath)

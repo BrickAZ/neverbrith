@@ -34,8 +34,8 @@ try {
     # status handling; actual repository validators run separately in Pilot/LuaAll.
     $stub = 'param([string]$Root,[string]$ModObjectName,[string]$SkillRoot,[switch]$ReadmeOnly); exit 0'
     foreach ($path in @(
-        'docs/skills/isaac-validators/scripts/validate-isaac-mod.ps1',
-        'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1',
+        'tools/validators/validate-isaac-mod.ps1',
+        'tools/validators/validate-neverbrith.ps1',
         'tools/validate_mystuff_local_ids.ps1',
         'tests/compatibility_docs_test.ps1',
         'tests/agent_wiki_navigation_test.ps1'
@@ -62,12 +62,12 @@ try {
     $cases++
     Put 'main.lua' 'return {}'
 
-    Put 'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1' 'Write-Output "intentional static failure"; exit 7'
+    Put 'tools/validators/validate-neverbrith.ps1' 'Write-Output "intentional static failure"; exit 7'
     $result = Run
     Require ($result.Code -eq 1) 'PowerShell validator failure must propagate'
     Require (@($result.Data.Checks | Where-Object { $_.Id -eq 'static:strict' -and $_.ExitCode -eq 7 }).Count -eq 1) 'validator exit code must survive aggregation'
     $cases++
-    Put 'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1' $stub
+    Put 'tools/validators/validate-neverbrith.ps1' $stub
 
     $result = Run (Join-Path $sandbox 'missing-lua.exe')
     Require ($result.Code -eq 2 -and -not $result.Data.Passed) 'explicit missing runner must be blocked, with no fallback'

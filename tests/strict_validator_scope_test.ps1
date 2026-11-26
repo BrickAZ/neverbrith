@@ -1,6 +1,6 @@
 #requires -Version 7.0
 param(
-    [string]$ValidatorPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1'),
+    [string]$ValidatorPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'tools/validators/validate-neverbrith.ps1'),
     [string]$ReportPath
 )
 

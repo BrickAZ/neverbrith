@@ -1,0 +1,123 @@
+{
+  "skill_name": "isaac-mod-architecture",
+  "evals": [
+    {
+      "id": "deferred-render-is-not-provider-ready-barrier",
+      "prompt": "为了跨模组兼容，所有初始化都推迟一次MC_PRE_RENDER，认为一个render后所有脚本、可选服务、房间玩家一定就绪。项目未声明REPENTOGON。请审查加载设计。",
+      "expected_output": "拆分文件exports、全部脚本加载、provider后续ready、世界context和调度机会。按实际load wiring/ready事件选择，不凭一帧等待解决依赖，不静默引入REPENTOGON；MC_POST_MODS_LOADED如匹配build只证明scripts complete，不证明异步provider和run context。",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md",
+        "skills/isaac-mod-architecture/references/module-loading-and-exports.md"
+      ]
+    },
+    {
+      "id": "custom-load-helper-is-not-module-loader-or-required-framework",
+      "prompt": "参考模组有Mod:Load(func)和一个延迟队列。Agent准备替换当前正常的include/registry结构，规定所有模块通过它加载，并不断等待缺失的可选库。",
+      "expected_output": "自定义deferred-call名字不是include/require或强制框架；先发现真正缺少的prerequisite，既有加载顺序能解决就不扩架构。可选provider保持optional，区分not-ready/absent/failed，等待需有界timeout与failure，不无限poll或伪造ready。",
+      "files": [
+        "skills/isaac-mod-architecture/references/module-loading-and-exports.md",
+        "skills/isaac-state-lifecycle/references/deferred-task-lifetime.md"
+      ]
+    },
+    {
+      "id": "class-copy-and-live-instance-boundaries",
+      "prompt": "项目 Class 用 pairs 把基类字段复制进子类，实例通过 __index 查子类。基类的 Shared 是可变表；创建两个实例后再替换 base.Method，并由其中一个修改 Shared。Agent 认为这是独立深拷贝和实时继承。请评审。",
+      "expected_output": "识别浅复制的函数快照和嵌套表别名；基类方法后改不一定传播，两个实例可能共享可变表；需要独立状态时在构造中创建。沿用实际项目 helper，不把自定义 Class 变成 Isaac 官方 API 或默认依赖。",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md",
+        "skills/isaac-mod-architecture/references/classes-and-method-dispatch.md"
+      ]
+    },
+    {
+      "id": "local-name-does-not-protect-returned-state",
+      "prompt": "local cache={ids={1,2}}；公开 GetState 直接 return cache。EID 对结果 ids 排序后，作者说 cache 是 local 所以不可能影响玩法；他准备只复制外层表。请审查。",
+      "expected_output": "local 仅限制名称作用域，返回引用仍可被修改；外层浅拷贝保留 ids 别名。根据已确认可变性合同返回副本或窄查询，不强制所有项目引入只读代理框架。",
+      "files": [
+        "skills/isaac-mod-architecture/references/classes-and-method-dispatch.md"
+      ]
+    },
+    {
+      "id": "include-consumers-share-one-instance",
+      "prompt": "道具文件顶层有 local cache 和 AddCallback，最后 return Planner。入口已 include 一次；B 道具和 EID 准备各 include 一次取得 GetPreview。有人说 local 不能复用，必须复制或改全局。请审查。",
+      "expected_output": "保留私有 local，通过返回接口及闭包复用；由已发现的 bootstrap/registry 保存同一实例，消费者不重执行注册模块。明确缓存、方法调用和结果所有权；不假设项目已有注册表名称。",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md",
+        "skills/isaac-mod-architecture/references/module-loading-and-exports.md"
+      ]
+    },
+    {
+      "id": "loader-namespace-is-not-folder-style",
+      "prompt": "两个 Mod 都 require('scripts.shared')。Agent 想把所有模块统一改 require 保状态，或强制所有 include-only 项目重命名 scripts。请判断。",
+      "expected_output": "区分 require 名称缓存/跨 Mod 冲突与 include 每次执行/所属 Mod 路径，发现 wrapper 和目标构建后按实例、副作用、生命周期选型；不统一替换，不把 include-only scripts 目录本身判成错误，不修改全局 require 或清除他人缓存。",
+      "files": [
+        "skills/isaac-mod-architecture/references/module-loading-and-exports.md"
+      ]
+    },
+    {
+      "id": "module-table-not-published-during-construction",
+      "prompt": "mod.Items={A=loadA(),B=loadB()}，A 初始化时读取 mod.Items.B；开发者认为把 B 写在 A 前面就一定能修好。请评审。",
+      "expected_output": "说明新表右侧构造完成前尚未赋给 mod.Items，可能读到 nil 或旧表；按真实依赖先加载并发布、注入工厂或必要的分阶段绑定，不能只靠表字段排列，也不为独立模块引入大框架。",
+      "files": [
+        "skills/isaac-mod-architecture/references/module-loading-and-exports.md"
+      ]
+    },
+    {
+      "id": "public-query-and-effect-ownership",
+      "prompt": "GetPreview 返回内部可变表，另一个道具直接调用原 OnUse 以复用部分效果。请定义最小公共接口。",
+      "expected_output": "明确查询、执行、返回数据所有权及显式玩家/RNG/flags；浅拷贝不隔离嵌套可变对象。判断需要完整原生 UseActiveItem 还是既有共享效果核心，不把 OnUse 自动当成公共 API，不决定未确认消耗或平衡。",
+      "files": [
+        "skills/isaac-mod-architecture/references/module-loading-and-exports.md"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "main.lua 越来越大了，我想把道具、卡牌、挑战、实体拆模块，但不要把现有功能弄坏。先写一个执行提示词。",
+      "expected_output": "Plans module boundaries, load order, callback ownership, shared helpers, validator/test verification, and rollback while preserving existing conventions.",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "现在三个道具都在复制同一种玩家状态表和 reset 逻辑，应该怎么整理？",
+      "expected_output": "Suggests a narrow shared helper only for real duplication, routes state details to state lifecycle, and avoids broad unrelated refactor.",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "加一个新实体时顺手改 loader，可以吗？",
+      "expected_output": "Requires reading current load pattern, keeping callback/load order explicit, scoping loader changes, and running validators/tests.",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "main.lua 现在只是加载模块。新增一个道具时，代码 Codex 又把所有逻辑写回 main.lua；请审核并给出正确归属。",
+      "expected_output": "Distinguishes bootstrap owner from behavior owner, keeps the new item beside the existing item module, and treats any loader change as a separate scoped change with verification.",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "陌生 mod 有 boot.lua、src 和 modules，我想加共享 helper，但不知道真正加载入口。",
+      "expected_output": "先用 isaac-mod-context 确认加载入口、模块根和现有 helper；只在真实重复存在时提议 helper，不把 boot.lua 当作默认实现位置。",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md"
+      ]
+    },
+    {
+      "id": "one-consumer-with-real-boundary",
+      "prompt": "用户批准提取一个存档边界，当前只有一个道具使用；它需要集中处理读档失败与区域引用。另一个提议只是为单条加伤害语句预建通用效果框架。请判断。",
+      "expected_output": "允许职责明确、有当前消费者的存档边界，不要求凑第二调用者；拒绝没有实际职责收益的泛化框架。两者都需保留现有玩法、实例、引用、加载副作用和必要验证，公共库按项目规范交付用法。",
+      "files": [
+        "skills/isaac-mod-architecture/SKILL.md",
+        "skills/isaac-mod-architecture/references/module-boundaries.md",
+        "skills/isaac-mod-architecture/references/shared-helpers.md"
+      ]
+    }
+  ]
+}

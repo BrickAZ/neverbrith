@@ -1,0 +1,48 @@
+{
+  "skill_name": "isaac-hud-ui-state",
+  "evals": [
+    {
+      "id": "unknown-project-world-marker",
+      "prompt": "陌生 Isaac 模组要在受伤玩家头顶显示红点 20 帧。没有提供项目文件、资源、ANM2、回调或现有 UI 写法。只输出发现项、载体判断、坐标和生命周期合同，不写代码。",
+      "expected_output": "保留路径和回调为 TBD；区分世界和屏幕坐标；要求 WorldToScreen 或实体路线的验证；包含 co-op 清理。",
+      "files": [
+        "skills/isaac-hud-ui-state/SKILL.md"
+      ]
+    },
+    {
+      "id": "screen-counter-with-gameplay-risk",
+      "prompt": "给玩家做一个屏幕右上角连击计数器，并在 render 回调里顺便结算连击奖励。项目未知。请审查设计。",
+      "expected_output": "选择 HUD；拒绝在 render 结算游戏机制；说明所有者、暂停和持久化/清理待定。",
+      "files": [
+        "skills/isaac-hud-ui-state/SKILL.md"
+      ]
+    },
+    {
+      "id": "world-following-chargebar-offset-domains",
+      "prompt": "玩家头顶蓄力条在骑乘或动画偏移时跑远。代码把 player.Position、PositionOffset、WorldToScreen 结果和 MC_POST_PLAYER_RENDER 的 RenderOffset 全部相加；项目未知。请给 UI 坐标与生命周期审查合同，不写代码。",
+      "expected_output": "建立坐标账本并选择 logical owner 或 proven body-visual adapter；默认蓄力条只用 Position+世界偏移后转换一次，不盲加视觉/回调偏移。要求 exact-once、转换失败不画、render mode 过滤、每玩家状态，以及非恒等相机和非零 offset 的脚本测试与实机 riding/flying/co-op 验证。",
+      "files": [
+        "skills/isaac-hud-ui-state/SKILL.md",
+        "skills/isaac-hud-ui-state/references/ui-state-review.md"
+      ]
+    },
+    {
+      "id": "equivalent-hud-provider-arbitration",
+      "prompt": "一个模组自己绘制星象房概率；检测到 REPENTOGON 后，扩展也能显示同一数字。Agent 打算两个都保留，并静默改写全局 HUD 选项。请审查。",
+      "expected_output": "必须建立 HUD 可见性矩阵并选定单一显示 owner；不能重复绘制。是否改用扩展显示和是否修改全局选项由项目/用户决定，临时修改必须在退出、错误和 reload 时恢复；REPENTOGON 仍是声明后才可用的依赖。",
+      "files": [
+        "skills/isaac-hud-ui-state/SKILL.md",
+        "skills/isaac-hud-ui-state/references/ui-state-review.md"
+      ]
+    },
+    {
+      "id": "modal-menu-restores-entry-state",
+      "prompt": "一个道具选择菜单打开时锁玩家输入、冻结房间实体、改鼠标状态并临时改了另一个菜单模组的快捷键；当前只在正常确认时恢复。请给生命周期审查。",
+      "expected_output": "必须列出每个被改变状态及其 owner，并为确认、取消、房间切换、reload、错误/异常退出建立对称恢复；不得默认冻结无关实体或修改外国模组快捷键，除非用户/项目明确批准且可可靠恢复。",
+      "files": [
+        "skills/isaac-hud-ui-state/SKILL.md",
+        "skills/isaac-hud-ui-state/references/ui-state-review.md"
+      ]
+    }
+  ]
+}
