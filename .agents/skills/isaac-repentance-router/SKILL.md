@@ -1,0 +1,192 @@
+---
+name: isaac-repentance-router
+description: "Use when choosing a primary Binding of Isaac modding skill for a task that spans multiple mechanics, content types, visual surfaces or verification needs. 中文触发：以撒技能路由、技能选择、多个机制、开发顺序。"
+---
+
+# Isaac Repentance Router
+
+## User Decisions and Technical Discovery
+
+Read the [shared decision and evidence policy](../isaac-mod-context/references/tbd-disclosure.md).
+
+Use this skill to select the smallest useful route. Routing is a selection
+stage within the requested work, not an approval gate or a reason to stop an
+implementation task. If the user asks only for a route, deliver that route.
+Otherwise proceed into discovery and the selected specialist in the same task.
+
+## Boundary
+
+- `isaac-mod-context` discovers actual project facts.
+- This skill selects one primary specialist and necessary companions.
+- Never list `isaac-repentance-router` itself anywhere in the route.
+
+If a target project must be read, edited, reviewed, or tested and its facts are
+unknown, put `isaac-mod-context` in **Project discovery** as a preflight. It is
+primary only when discovery/adaptation is the user's whole request. A preflight
+is not a companion or near-match: do not repeat `isaac-mod-context` in those
+sections. For a feature, bug, or refactor, primary remains its specialist.
+
+Use known context to route without redundant discovery. When facts needed for
+the actual task are missing, inspect the owning source through project discovery
+and then continue. Do not assume a layout, project profile, optional API, or
+third-party library from the route label alone.
+
+## Confirmed Versus Conditional Surfaces
+
+User wording confirms a semantic surface even when project facts are unknown:
+“custom card is blank” confirms cards/pockets; “cancel damage” confirms
+damage/health; “player head marker” confirms HUD/UI; “split `main.lua`” confirms
+architecture. Route those as primary or immediate companions now.
+
+Treat project-specific facts as unknown until discovery: callback names, paths,
+IDs, resource formats, entity variants, existing modules, tests, and optional
+libraries. Put a skill under **Conditional** only if its semantic surface is not
+stated, such as an unchosen visual carrier or undeclared entity/audio/description
+work. A requested required or optional REPENTOGON surface is already confirmed:
+route its specialist now. Missing version/API proof is technical discovery, not
+a reason to demote that surface to Conditional or ask the user to choose it again.
+A standing required preference for new mods does not migrate an existing
+explicitly optional project without a migration request.
+
+## Routing Rules
+
+1. Classify the goal: discovery, design, implementation, review, debug, or
+   verification.
+2. Choose exactly one primary specialist. Discovery preflight cannot displace it.
+3. Add immediate companions for separately stated semantic surfaces only.
+4. Put only unstated or unconfirmed semantic surfaces under Conditional; a
+   confirmed optional integration still has an immediate contract.
+5. Put verification skills in **Verification route** by default. Include
+   `isaac-testing-debugging` as an immediate companion only when debugging/proof
+   itself is central; include `isaac-validators` immediately only when static
+   XML/id/asset validation is already a stated surface.
+6. Keep user-owned balance, assets, mechanics, persistence and dependency policy
+   locked. Discover callback signatures and returns from matching evidence;
+   routine technical choices do not require new user approval.
+7. Exclude near-matches that would duplicate or conflict with the route.
+
+## Primary Matrix
+
+| Stated central behavior | Primary specialist |
+| --- | --- |
+| Project discovery/adaptation only | `isaac-mod-context` |
+| Ambiguous gameplay contract | `isaac-mechanic-contracts` |
+| Callback signature/registration/return | `isaac-callback-contracts` |
+| Damage, healing, i-frames, lethal/re-entry | `isaac-damage-health-contracts` |
+| Poison/burn/slow/freeze/fear/charm/custom timed status | `isaac-status-effects` |
+| Collectible XML/local id/colored icon registration | `isaac-collectible-registration` |
+| Passive held ownership/count/cache/loss | `isaac-passive-collectibles` |
+| Active-item use/charge/input/slot | `isaac-active-item-mechanics` |
+| Pools, quality, weights, tags, availability | `isaac-item-economy` |
+| Shop/deal price, buyer, payment, delivery, restock | `isaac-shops-deals-pricing` |
+| Two-or-more-input content combination | `isaac-item-synergies` |
+| Named/thresholded transformation or player form | `isaac-transformations-forms` |
+| Cards, runes, pills, blank pocket content | `isaac-cards-pockets` |
+| Trinket behavior | `isaac-trinkets` |
+| Player/familiar projectile combat | `isaac-projectile-combat` |
+| Entity/effect lifecycle | `isaac-entities` |
+| Familiar behavior | `isaac-familiars` |
+| Book of Virtues/item-wisp behavior | `isaac-wisps-virtues` |
+| NPC/Boss AI | `isaac-npc-boss-ai` |
+| Custom player/tainted character | `isaac-players-characters` |
+| In-run actual PlayerType switch/restore and state migration | `isaac-character-switching` |
+| Existing vanilla reskin/resource-only exact-path override | `isaac-reskins-resource-overrides` |
+| Custom-player art or sprite-surface generation | `isaac-character-art-surfaces` |
+| Cross-surface source identity/style translation | `isaac-visual-style-translation` |
+| HUD/prompts/world-following marker/UI state | `isaac-hud-ui-state` |
+| ANM2 load/animation/assets | `isaac-anm2-visuals` |
+| Sound/shader/overlay/input blocking | `isaac-audio-render-feedback` |
+| Reward/pickup Spawn/Morph/selection | `isaac-rewards-pickups` |
+| Challenge rules | `isaac-challenges` |
+| Curse/run modifier lifecycle | `isaac-curses-run-modifiers` |
+| Unlock/progress/achievement | `isaac-unlocks-progression` |
+| Reroll/removal/reacquisition reconciliation | `isaac-reroll-removal-contracts` |
+| Seeded randomness/draw ownership/replay policy | `isaac-rng-determinism` |
+| GridEntity placement/collision/destruction/persistence | `isaac-grid-entities` |
+| Rooms/stages/doors/topology | `isaac-rooms-stages` |
+| Multiple owned rooms as one area/network | `isaac-room-networks` |
+| Game-level Dimension identity/entry/return | `isaac-dimensions` |
+| Optional descriptions/dependency integration | `isaac-compat-descriptions` |
+| Exact optional EID API integration | `isaac-eid-compat` |
+| Exact optional MCM API integration | `isaac-mcm-compat` |
+| Exact optional StageAPI integration | `isaac-stageapi-compat` |
+| REPENTOGON required/optional dependency, version and capability gates | `isaac-repentogon-compat` |
+| REPENTOGON new-project setup, requested migration or broad development | `isaac-repentogon-dev` |
+| REPENTOGON changed callbacks, damage chains, inventory, loot and unload | `isaac-repentogon-callbacks` |
+| REPENTOGON native XML stats/null/tags/cache, achievements and players | `isaac-repentogon-content` |
+| REPENTOGON Ambush, RoomConfig, placement and world-preview RNG | `isaac-repentogon-world` |
+| REPENTOGON ImGui panels, in-game UI entry, input and teardown | `isaac-repentogon-ui` |
+| Runtime translation | `isaac-localization-runtime` |
+| Mod config/options | `isaac-config-options` |
+| Runtime state ownership/reset/save/reload | `isaac-state-lifecycle` |
+| Stutter/per-frame scan/repeated Spawn/cache | `isaac-performance-hotpaths` |
+| Module ownership/refactor | `isaac-mod-architecture` |
+| Static checks | `isaac-validators` |
+| Reproduction/debug/proof | `isaac-testing-debugging` |
+
+## Common Routes
+
+- Unknown projectile ownership: trace who fires or spawns the attack and who
+  receives damage credit. Player/familiar attacks use `isaac-projectile-combat`;
+  NPC/Boss patterns use `isaac-npc-boss-ai`. Use `isaac-entities` for a separate
+  registration or entity lifecycle problem.
+
+- Held passive that cancels damage and shows a head marker: primary
+  `isaac-passive-collectibles`; companions damage-health, callback, state, HUD;
+  project context is preflight; testing/validators go in verification.
+- New collectible whose XML/local id and colored icon are missing: primary
+  `isaac-collectible-registration`; add passive or active behavior, economy,
+  localization, and ANM2 only for separately stated surfaces.
+- Optional EID, MCM or StageAPI request: use that exact specialist as primary;
+  compatibility/descriptions remains a companion only for shared text,
+  dependency-gate or synchronization work.
+- REPENTOGON project setup or requested migration: primary
+  `isaac-repentogon-dev`, with compat for the build/loading contract. Carry
+  already-required intent into implementation without reasking or inventing a
+  vanilla substitute; preserve existing optional projects.
+- Focused REPENTOGON work: select callbacks, content, world or UI as primary
+  according to the extension surface. Add the ordinary mechanic skill only for
+  its separate design/ownership responsibilities. Matching-build extension
+  semantics take precedence over generic vanilla API assumptions.
+- Projectile with damage rewriting: primary projectile-combat; add damage-health
+  only for cancellation/replacement/health semantics.
+- Projectile that applies poison without replacing damage: primary
+  `isaac-status-effects`; projectile-combat proves the carrier/source and
+  damage-health joins only for additional or recursive damage.
+- Shop item price bug: primary `isaac-shops-deals-pricing`; economy is a
+  companion only for pool/weight/quality, rewards only for pickup replacement.
+- Active item with a Book of Virtues wisp: primary depends on the stated goal;
+  active-item mechanics owns use/charge, while `isaac-wisps-virtues` owns the
+  item-wisp mapping, duplicate-use, owner, count, death, and resources.
+- Room obstacle at a grid cell: primary `isaac-grid-entities`; rooms-stages is a
+  companion only for room selection/topology, and entities replaces the grid
+  route when HP/AI/custom callback behavior is required.
+- Collect-N-items named form: primary `isaac-transformations-forms`; synergies
+  remains primary only for a combined effect without form/threshold lifecycle.
+- Temporary identity item that calls `ChangePlayerType`: primary
+  `isaac-character-switching`; players-characters supplies registered identity
+  facts, damage-health supplies the approved health outcome, and state-lifecycle
+  supplies stable save/continue ownership.
+- Blank card: primary cards-pockets; context is preflight; testing-debugging is
+  immediate because the user asked for diagnosis; validators are verification;
+  ANM2/descriptions/compatibility are conditional.
+- Large entry-file split: primary mod-architecture; context is preflight; keep
+  mechanism/entity/item/compat skills out unless discovery proves the refactor
+  actually changes those surfaces.
+
+## Routing And Continuation
+
+For a small task, a short statement of the primary skill and relevant check is
+enough when explaining the route helps. For a mixed task, record the necessary
+companions, material unknowns and execution order; omit empty categories and
+irrelevant near-matches. No fixed field order or separate route-plan approval
+is required.
+
+For an implementation, fix, review or verification request, proceed with the
+selected skills and the discovered project commands under existing authorization.
+Do not stop after presenting the route or ask whether to continue. Stop at a
+route-only deliverable only when that is what the user requested. Preserve
+confirmed decisions, investigate technical unknowns, and ask only for a real
+unresolved user-owned choice that affects the next dependent action.
+
+Do not fabricate project facts or load every related skill.

@@ -1,0 +1,21 @@
+{
+  "baseline": "control-baseline-01",
+  "candidate": "control-candidate-01",
+  "baselinePassed": 28,
+  "baselineFailed": 2,
+  "candidatePassed": 30,
+  "candidateFailed": 0,
+  "exactPassTextEqual": false,
+  "failures": [
+    [
+      "bomb-god-early-true early outer release preserves Solar block ",
+      "bomb-god-early-true real POST restores exact original permission "
+    ],
+    []
+  ],
+  "restored": true,
+  "baselineFailuresNowPassed": [
+    "bomb-god-early-true early outer release preserves Solar block ",
+    "bomb-god-early-true real POST restores exact original permission "
+  ]
+}

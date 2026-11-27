@@ -1,0 +1,91 @@
+---
+name: isaac-rooms-stages
+description: Design, implement, review, or write handoff prompts for custom rooms, floors, stage transitions, room selection, doors, room topology, and room-scoped rules in Binding of Isaac Repentance mods. Use this when a task mentions room XML, RoomConfig, MC_POST_NEW_ROOM, MC_POST_NEW_LEVEL, special room, floor rule, stage, door, transition, room replacement, room layout, or StageAPI. Use isaac-grid-entities when the central behavior is GridEntity placement, collision, destruction, or persistence. 中文触发：房间、房间 XML、特殊房、楼层、Stage、门、转场、房间替换、房间布局、房间拓扑、房间规则、StageAPI。
+---
+
+# Isaac Rooms And Stages
+
+## User Decisions and Technical Discovery
+
+Read the [shared decision and evidence policy](../isaac-mod-context/references/tbd-disclosure.md).
+
+Use this skill for world and level structure. A challenge-only room restriction
+belongs to `isaac-challenges`; a single entity behavior belongs to
+`isaac-entities` or `isaac-npc-boss-ai`. A GridEntity mutation routes to
+`isaac-grid-entities`; a multi-room owned area routes to `isaac-room-networks`;
+a game-level Dimension routes to `isaac-dimensions`.
+
+## REPENTOGON Companion
+
+For declared REPENTOGON rooms, use `isaac-repentogon-world` for RoomConfig,
+RoomDescriptor, Level placement and Ambush preconditions. Its matching-build
+signatures, nil/false failures and mutation timing take precedence over generic
+vanilla API advice. This skill retains room/stage intent, topology and transition
+ownership; do not silently add StageAPI or replace placement with raw door writes.
+
+## First Move
+
+Use `isaac-mod-context` to discover actual room XML, room loaders, level
+callbacks, room identifiers, map/door conventions, and dependency facts. Read
+`references/room-stage-contract.md` and `references/room-topology-door-validation.md` before implementing selection or
+replacement behavior.
+
+## Route The Work
+
+- **Official room/floor route**: prefer existing room XML, official level and
+  room APIs, and current project loaders.
+- **StageAPI route**: use only when the project declares it required or when a
+  guarded optional integration is specifically requested. It is never the
+  default answer for a room problem.
+- **Room-local state**: use `isaac-state-lifecycle` for once-per-room/floor
+  flags, cleanup, and save boundaries.
+- **Topology and doors**: prove actual room-map identity, available neighboring slots, and each candidate door/portal position before choosing an official API or mutation.
+- **Room content**: route NPC behavior to `isaac-npc-boss-ai`, rewards to
+  `isaac-rewards-pickups`, custom entities to `isaac-entities`, and native grid
+  placement/destruction/persistence to `isaac-grid-entities`.
+
+## Hard Rules
+
+- Do not assume room XML paths, stage ids, dimensions, doors, or layout names.
+- Define selection separately from mutation: prove a room qualifies before
+  replacing grids, doors, entities, or rewards.
+- State the owner and reset boundary for every room/floor rule. Do not let a
+  room-local flag leak into a new room, level, normal run, or unrelated stage.
+- Preserve unknown third-party room content unless the mechanic explicitly
+  owns and targets it.
+- Do not make StageAPI, MinimapAPI, or another third-party library mandatory
+  without a project declaration or explicit user decision.
+- Use stable room/stage identity from the discovered project/API; do not use a
+  display name as a persistent key.
+- Separate an eligibility attempt from a committed once-per-floor/room success.
+  Commit the success flag only after every owned target is valid and mutation
+  completes. A failed target must preserve the original content and must not
+  silently consume the success unless the user approves that policy.
+
+- Treat a console/debug/goto room as an isolated test surface unless discovered runtime facts prove normal map-grid identity and adjacency. Reloading that room does not create a second real room.
+- Before creating a door, portal, or neighboring-room transition, discover the current room descriptor/grid position, applicable door slots, neighboring-room availability, and collision or grid legality. Generate candidates from those facts; do not rely on fixed coordinates alone.
+- If no legal candidate exists, skip only the owned addition, preserve existing doors/content, and do not commit a success flag. Do not close or delete unrelated doors to make a topology appear valid.
+- Do not promise that an official-looking door API creates a valid adjacent room until its preconditions and observed result are proven for the discovered room context.
+## Handoff Prompt Template
+
+```markdown
+## Room/Stage Contract
+
+- Discovered room/stage registration route:
+- Selection conditions:
+- Mutation targets and ownership:
+- Official API path / optional library path:
+- Room and floor state owner:
+- Reset and save boundaries:
+- Door/grid/entity/reward sibling skills:
+- Room topology, legal candidate source, and no-candidate policy:
+- Third-party preservation policy:
+- Required static and in-game checks:
+```
+
+## Completion Checks
+
+Review the actual room/stage identifiers, selection gate, state reset points,
+mutation ownership, optional dependencies, and tests across new room, new
+floor, continue, unrelated rooms, legal door candidates, no-candidate behavior,
+and a real normal-floor topology check separate from any debug room.

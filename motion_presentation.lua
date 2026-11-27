@@ -5,6 +5,7 @@ return function(mod,context)
     local assets=include('generated/motion_presentation')
     local additions=include('motion_presentation_additions')
     local cinematic=include('motion_cinematic')
+    local entityKey=include('scripts/systems/entity_identity')
     local input=assert(mod.MotionInput,'shared motion input must load first')
     local game=Game();local sfx
     local api={active=true,states={},armed={},soundOwners={}}
@@ -19,7 +20,7 @@ return function(mod,context)
         return sfx
     end
     local function key(p)
-        return context.Key and context.Key(p) or (GetPtrHash and tostring(GetPtrHash(p)) or tostring(p))..':'..tostring(p.InitSeed or 0)
+        return context.Key and context.Key(p) or entityKey(p)
     end
     local function log(message)
         if context.DebugLog then context.DebugLog('[Motion Presentation] '..message)

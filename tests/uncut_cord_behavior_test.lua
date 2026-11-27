@@ -140,6 +140,7 @@ local function loadNeverbirth(options)
     }
     function Game()
         return {
+            GetNumPlayers = function() return #players end,
             GetSeeds = function()
                 return seeds
             end,
@@ -162,6 +163,7 @@ local function loadNeverbirth(options)
     end
 
     Isaac = {
+        GetPlayer = function(index) return players[index + 1] end,
         GetItemIdByName = function(name)
             if name == "Uncut Cord" or name == "未剪断的脐带" then
                 return itemIds.UncutCord
@@ -695,7 +697,7 @@ local function test_uncut_cord_renders_each_player_debt_independently()
     assertRenderedText(env, "DEBT 2.0 0/2", "player B should render their own debt")
 end
 
-local function test_uncut_cord_renders_from_stored_player_when_find_by_type_is_empty()
+local function test_uncut_cord_uses_current_indexed_player_when_find_by_type_is_empty()
     local env = loadNeverbirth()
     local player = env.newPlayer({ randomFloats = { 0.25 } })
 
@@ -703,8 +705,8 @@ local function test_uncut_cord_renders_from_stored_player_when_find_by_type_is_e
     env.setFindPlayersByType(false)
     env.runPostRender()
 
-    assertRenderedText(env, "DELAY 1.0", "delay popup should render from the stored player reference")
-    assertRenderedText(env, "DEBT 1.0 0/2", "debt text should render from the stored player reference")
+    assertRenderedText(env, "DELAY 1.0", "delay popup should render from the current indexed player")
+    assertRenderedText(env, "DEBT 1.0 0/2", "debt text should render from the current indexed player")
 end
 
 test_uncut_cord_delays_and_cancels_triggered_damage()
@@ -721,6 +723,6 @@ test_uncut_cord_tracks_each_player_independently()
 test_uncut_cord_new_run_clears_runtime_debts()
 test_uncut_cord_does_not_render_when_trigger_misses()
 test_uncut_cord_renders_each_player_debt_independently()
-test_uncut_cord_renders_from_stored_player_when_find_by_type_is_empty()
+test_uncut_cord_uses_current_indexed_player_when_find_by_type_is_empty()
 
 print("uncut cord behavior tests passed")

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "loading",
+    "executable": "C:/Users/Anton/AppData/Local/Programs/Lua/bin/lua.exe",
+    "arguments": [
+      "reports/framework-closure/2026-11-27/verify-package.lua",
+      "E:/Isaac - Repentance/mods/neverbrith/reports/framework-closure/2026-11-27/package-03/extracted"
+    ],
+    "log": "package-03-loading.log",
+    "exitCode": 0
+  },
+  {
+    "name": "generic",
+    "executable": "pwsh",
+    "arguments": [
+      "-NoProfile",
+      "-File",
+      "tools/validators/validate-isaac-mod.ps1",
+      "-Root",
+      "E:\\Isaac - Repentance\\mods\\neverbrith\\reports\\framework-closure\\2026-11-27\\package-03\\extracted",
+      "-GameRoot",
+      "E:/Isaac - Repentance",
+      "-ModObjectName",
+      "Neverbirth",
+      "-SkillRoot",
+      "E:\\Isaac - Repentance\\mods\\neverbrith\\.agents\\skills"
+    ],
+    "log": "package-03-generic.log",
+    "exitCode": 0
+  },
+  {
+    "name": "strict",
+    "executable": "pwsh",
+    "arguments": [
+      "-NoProfile",
+      "-File",
+      "tools/validators/validate-neverbrith.ps1",
+      "-Root",
+      "E:\\Isaac - Repentance\\mods\\neverbrith\\reports\\framework-closure\\2026-11-27\\package-03\\extracted",
+      "-GameRoot",
+      "E:/Isaac - Repentance",
+      "-RegistryGenerator",
+      "E:\\Isaac - Repentance\\mods\\neverbrith\\tools\\generate-neverbirth-collectibles.ps1"
+    ],
+    "log": "package-03-strict.log",
+    "exitCode": 0
+  },
+  {
+    "name": "architecture-counterexamples",
+    "executable": "C:/msys64/ucrt64/bin/python.exe",
+    "arguments": [
+      "tests/architecture_check_test.py"
+    ],
+    "log": "package-03-architecture-counterexamples.log",
+    "exitCode": 0
+  },
+  {
+    "name": "package-counterexamples",
+    "executable": "C:/msys64/ucrt64/bin/python.exe",
+    "arguments": [
+      "tests/package_mod_test.py"
+    ],
+    "log": "package-03-package-counterexamples.log",
+    "exitCode": 0
+  }
+]

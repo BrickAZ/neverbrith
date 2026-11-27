@@ -63,7 +63,9 @@ local function loadNeverbirth(savedStore)
         MC_POST_RENDER = 4,
         MC_ENTITY_TAKE_DMG = 5,
         MC_PRE_USE_ITEM = 6,
+        MC_PRE_PICKUP_COLLISION = 6100, -- separate shared acquisition fixture event
     }
+    PickupVariant = { PICKUP_COLLECTIBLE = 100 }
 
     CollectibleType = {
         COLLECTIBLE_PLAN_C = 475,
@@ -399,6 +401,7 @@ local function loadNeverbirth(savedStore)
         getCallbacks = getCallbacks,
         spriteEvents = spriteEvents,
         newPlayer = newPlayer,
+        players = players,
         newEnemy = newEnemy,
     }
 end
@@ -781,6 +784,93 @@ local function test_used_and_reloaded_musicbox_has_early_immunity()
     assertEquals(restored.mod:PreventActiveMusicboxDamage(continuedPlayer, 3, 0, nil, 0), nil)
 end
 
+local function lifecycle(env, event, method, ...)
+    local target = assert(env.mod[method], 'missing lifecycle handler: ' .. method)
+    local count = 0
+    for _, registration in ipairs(env.callbacks[event] or {}) do
+        if registration.fn == target then
+            count = count + 1
+            registration.fn(env.mod, ...)
+        end
+    end
+    assertEquals(count, 1, method .. ' must be registered exactly once')
+end
+
+local function assertVisualsCleared(env)
+    for _, name in ipairs({ 'Visuals', 'PanicVisuals', 'ShadowGuardianVisuals' }) do
+        assertEquals(next(env.mod.Musicbox[name]), nil, name .. ' retains an old player/sprite')
+    end
+end
+
+local function test_musicbox_lifecycle()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ initSeed = 901 })
+    local partner = env.newPlayer({ initSeed = 902 })
+    env.mod:UseMusicbox(nil, nil, player)
+    env.mod:UseMusicbox(nil, nil, partner)
+    tick(env, 17)
+    local remaining = env.savedStore.snapshot.musicboxDeathDebt.debts['901'].timer
+    assertEquals(remaining, 583)
+    -- Queue a separate Plan C death; it must not retain this entity across exit.
+    local pending = env.newPlayer({ initSeed = 903 })
+    env.mod:InterceptPlanC(475, nil, pending, nil, ActiveSlot.SLOT_SECONDARY)
+    lifecycle(env, ModCallbacks.MC_PRE_GAME_EXIT, 'ExitMusicbox', true)
+    assertVisualsCleared(env)
+    assertEquals(env.musicState.current, 1, 'exit restores owned music')
+    assertEquals(env.mod:PreventActiveMusicboxDamage(player), nil, 'exit disables old immunity')
+    local originalGame, originalEntities = Game, Isaac.GetRoomEntities
+    Game = function() error('no game after exit/unload') end
+    Isaac.GetRoomEntities = function() error('no entities after exit/unload') end
+    env.mod:UpdateMusicbox()
+    env.mod:RenderMusicboxCountdown()
+    assertEquals(env.mod:PreventMusicboxDamage(player, 1), nil)
+    assertEquals(env.mod:UseMusicbox(nil, nil, player), false)
+    assertEquals(env.mod:InterceptPlanC(475, nil, player), nil)
+    lifecycle(env, ModCallbacks.MC_PRE_GAME_EXIT, 'ExitMusicbox', true)
+    Game, Isaac.GetRoomEntities = originalGame, originalEntities
+    assertEquals(env.savedStore.snapshot.musicboxDeathDebt.debts['901'].timer, remaining)
+    -- Same module, new player objects on Continue: rebind without granting 600 frames again.
+    for i = #env.players, 1, -1 do env.players[i] = nil end
+    local continued = env.newPlayer({ initSeed = 901, activeItems = {} })
+    local continuedPartner = env.newPlayer({ initSeed = 902, activeItems = {} })
+    lifecycle(env, ModCallbacks.MC_POST_GAME_STARTED, 'StartMusicboxRun', true)
+    assertEquals(env.mod:PreventActiveMusicboxDamage(continued), false)
+    assertEquals(env.mod:PreventActiveMusicboxDamage(continuedPartner), false)
+    assertEquals(env.savedStore.snapshot.musicboxDeathDebt.debts['901'].timer, remaining)
+    tick(env, remaining)
+    assertEquals(continued.killCount, 1)
+    assertEquals(continuedPartner.killCount, 1)
+    assertEquals(player.killCount, 0, 'continued debt must not target the old entity')
+    assertEquals(pending.killCount, 0, 'exit cancels runtime-only Plan C death')
+    -- A genuine new run can reuse both start seed and player InitSeed.
+    local beforeRefresh = continued.evaluated or 0
+    lifecycle(env, ModCallbacks.MC_POST_GAME_STARTED, 'StartMusicboxRun', false)
+    assertEquals(continued.evaluated, beforeRefresh + 1, 'new run invalidates cached contract tear color')
+    assertEquals(next(env.savedStore.snapshot.musicboxDeathDebt.debts), nil)
+    assertEquals(env.mod:PreventActiveMusicboxDamage(continued), nil)
+    env.mod:UseMusicbox(nil, nil, continued)
+    assertEquals(env.savedStore.snapshot.musicboxDeathDebt.debts['901'].timer, 600)
+    lifecycle(env, ModCallbacks.MC_PRE_MOD_UNLOAD, 'UnloadMusicbox', {})
+    assertEquals(env.mod:PreventActiveMusicboxDamage(continued), false, 'other mod unload must be ignored')
+    lifecycle(env, ModCallbacks.MC_PRE_MOD_UNLOAD, 'UnloadMusicbox', env.mod)
+    assertVisualsCleared(env)
+    Game = function() error('unloaded instance accessed Game') end
+    env.mod:UpdateMusicbox()
+    env.mod:RenderMusicboxCountdown()
+    assertEquals(env.mod:PreventActiveMusicboxDamage(continued), nil)
+    lifecycle(env, ModCallbacks.MC_PRE_MOD_UNLOAD, 'UnloadMusicbox', env.mod)
+    lifecycle(env, ModCallbacks.MC_POST_GAME_STARTED, 'StartMusicboxRun', false)
+    assertEquals(env.mod:UseMusicbox(nil, nil, continued), false, 'disposed instance cannot reactivate')
+    Game = originalGame
+    assertEquals(env.savedStore.snapshot.musicboxDeathDebt.debts['901'].timer, 600, 'unload preserves debt')
+    -- A fresh module instance still reads the exact existing save format.
+    local reloaded = loadNeverbirth(env.savedStore)
+    local rebound = reloaded.newPlayer({ initSeed = 901, activeItems = {} })
+    lifecycle(reloaded, ModCallbacks.MC_POST_GAME_STARTED, 'StartMusicboxRun', true)
+    assertEquals(reloaded.mod:PreventActiveMusicboxDamage(rebound), false)
+end
+
+test_musicbox_lifecycle()
 test_active_immunity_precedes_native_shields_without_moving_panic()
 test_used_and_reloaded_musicbox_has_early_immunity()
 test_second_use_does_not_extend_death_timer()

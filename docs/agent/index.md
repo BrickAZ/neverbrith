@@ -5,8 +5,13 @@
 | 当前任务 | 先读 | 读取目的 |
 | --- | --- | --- |
 | 接手项目、找实现归属、判断目录用途 | [项目地图](project-map.md) | 区分运行源码、工具和历史材料，找到模块接入点 |
-| 框架重构：目标架构、状态边界与迁移路线 | [目标架构与渐进重构路线](../architecture/2026-11-24-neverbirth-target-architecture.md) | 用户已认可的架构方向；区分当前源码证据、目标合同和未实施迁移，保持既有玩法与存档语义 |
+| 公共库复用、建库或修改接口 | [公共 API 索引](../api/index.md)、[开发规范](development-conventions.md) | 先查现有能力；同批交付接口详细用法、实际消费者及相称检查 |
+| callback 布局、分阶段安装 | [开发规范](development-conventions.md) | 处理函数与绑定同文件紧邻，保持原生事件、过滤、优先级与安装顺序 |
+| Skill 来源、维护和旧副本 | [Skill 权威来源](skill-authority.md) | `.agents/skills` 为有效来源；历史副本不参与当前开发指令 |
+| Skill 执行方式与规则调整 | [当前规则与技术边界](skill-rule-review.md) | 路由后继续授权工作、复用已有决定和覆盖，按任务组织输出；保留必要技术约束 |
+| 框架重构：目标架构、状态边界与迁移路线 | [目标架构与渐进重构路线](../architecture/2026-11-24-neverbirth-target-architecture.md)、[已重构道具进度入口](../architecture/refactor-progress.md) | 用户已确认逐道具独立模块、薄入口与公共能力复用；核对第 3.3、4.1.1、6.3 节要求、第 9.7–9.8 节验收及第 12 节两份清单，区分目标与实施状态，保持既有玩法与存档语义 |
 | 修改、排错或验收，选择可执行检查 | [检查与证据](testing.md) | 选择范围、运行器和命令，区分失败、未运行与实机验证 |
+| 复活吧，我的爱人！、健康睡眠及阿瓦达/七咒联动 | [复活与睡眠](topics/revival-and-sleep.md) | 查找独立模块、状态归属、控制恢复、存档和原生回调联动边界 |
 | 记忆紊乱行为、图标、配置模拟接口 | [记忆紊乱专题](topics/memory-disorder.md) | 找到完整加载链、测试和原生边界 |
 | 临时复制、零分考卷、回声宝宝、背包选择器 | [本轮实现专题](topics/pending-content.md) | 找到已批准合同、模块、调用接口、资源和实机边界 |
 | 阴的诅咒精确爆炸免疫封锁 | [方案一原生接口规格](../superpowers/specs/2026-10-02-yins-curse-explosion-immunity-interface-design.md)、[候选交付与检查](../../reports/yins-curse/native-interface/2026-10-02/delivery.md)、[实机证据](../../reports/yins-curse/native-interface/2026-10-02/game-acceptance.md)、[实施计划](../superpowers/plans/2026-10-02-yins-curse-explosion-immunity-interface.md) | 修正版候选已安装，真实能力为 1；核心与部分进阶/生命周期实测通过，未闭合验收项见证据卡 |
@@ -14,7 +19,7 @@
 | 外部 Mod 兼容接口 | [兼容指南](../../COMPATIBILITY.zh-CN.md) | 核对已有公开接口和限制 |
 | 道具审批或设计包流程 | [审批流程](../item-approval-ai-review-runbook.md)、[设计包流程](../item-design-agent-runbook.md) | 只在任务涉及对应流程时读取；执行前辨认写回操作 |
 | 凸眼鱼 / Blinky：持续吸取、储物与投掷 | [已确认设计](../superpowers/specs/2026-10-03-blinky-pending-design.md)、[开发交付与实机测试卡](../../reports/blinky/2026-10-03/delivery.md) | `blinky.lua`/`blinky_core.lua` 已接入；核对价格与选项保留、受创红心及沙漏备用行为；实机验收状态看交付记录 |
-| 炸弹套装 / Bomb Suit：受伤后计时自爆 | [已确认设计](../superpowers/specs/2026-10-03-bomb-suit-design.md)、[开发交付与实机证据](../../reports/bomb-suit/2026-10-03/delivery.md) | `bomb_suit.lua` 已接入；核对卖血范围、普通炸弹继承、散射归属和换房/沙漏取消边界；验收状态看交付记录 |
+| 炸弹套装 / Bomb Suit：受伤后计时自爆 | [已确认设计](../superpowers/specs/2026-10-03-bomb-suit-design.md)、[开发交付与实机证据](../../reports/bomb-suit/2026-10-03/delivery.md) | `bomb_suit.lua` 装配道具私有模块；核对卖血范围、普通炸弹继承、散射归属；普通换房/换层继续计时，沙漏取消；验收状态看交付记录 |
 | AZ 折翼咳血主动道具：三秒飞行、假死、全房伤害 | [设计文档](../superpowers/specs/2026-10-12-azazel-broken-wings-active-item-design.md) | 核心玩法与原版 AZ 翅膀方向已确认；区分假死动作与红心代价致死，旧悬浮分镜已替代；尚未指定的身份与边界见文档 |
 | 斗气拳套 / Drive Glove：蓝防、绿冲、斗气与力竭 | [机制设计](../superpowers/specs/2026-10-13-drive-parry-rush-active-item-design.md)、[第一版交付记录](../../reports/drive-rush/2026-10-14/implementation-v1/delivery.md)、[缩放与灰白反馈修订](../../reports/drive-rush/2026-10-14/visual-contact-fix/delivery.md)、[三种防御原声音效](../../reports/drive-rush/2026-10-14/audio-v1/delivery.md)、[蓝防启动与绿冲原音](../../reports/drive-rush/2026-10-15/audio-start-rush/delivery.md)、[蓝防操作与力竭原音修订](../../reports/drive-rush/2026-10-15/burnout-input/delivery.md)、[实机测试卡](../../reports/drive-rush/2026-10-14/implementation-v1/game-acceptance.md)、[实施计划](../superpowers/plans/2026-10-14-drive-glove.md) | 玩法、已采用动画和60×8 HUD已接入当前安装目录；核对30Hz计时、3f完美、成功后6f内退出免后摇、其余退出12f、连续转向／反向刹车和曲线路程、奖励去重、力竭与玩家存档。品质0，本地ID65；蓝防已改为不能移动／射击，单次有效方向立即绿冲；普通防御、普通蓝防、完美蓝防、蓝防启动、绿冲及进入／退出力竭的七种街霸6原音已接入；引擎事件和实际输出的验证范围分别见对应音效交付记录，其他声音事件待定。自动化和部分原生引擎检查已运行，人工手感、画面及复杂组合仍待验收，具体证据见交付记录 |
 | 通用搓招：键盘容错、波动点击与原生攻击限制 | [输入设计](../superpowers/specs/2026-10-22-motion-input-system-design.md)、[实施计划](../superpowers/plans/2026-10-22-motion-input-system.md)、[真实战斗交付](../../reports/motion-items/2026-10-24/combat-v1/delivery.md) | 全部指令使用射击箭头，WASD只移动；四件主动持有即绑定、不需arm。共享核心保留通用双击能力但不恢复已删候选。正式道具现转交独立战斗模块；品质／池不动，真实游戏证据以交付记录为准 |
@@ -22,7 +27,7 @@
 | 街霸6原版SA条：积攒、满气闪光与消耗 | [SA HUD计划](../superpowers/plans/2026-10-25-motion-sa-hud.md)、[资源来源与实机证据](../../reports/motion-sa-hud/2026-10-25/v1/delivery.md) | `motion_sa_hud.lua`只读战斗气量，默认原版SA数字／条形／关键帧转换为独立ANM2；玩家各自显示，隐藏和退出清理。规则、OD、品质、池不变；预览图与真实引擎证据分别记录 |
 | 查阅已归档的待开发道具与系统 | [回声宝宝](../superpowers/specs/2026-09-28-echo-baby-pending-design.md)、[神的左手，恶魔之右手](../superpowers/specs/2026-09-28-divine-left-hand-demonic-right-hand-pending-design.md)、[背包系统](../superpowers/specs/2026-09-28-inventory-selection-system-pending-design.md) | 区分已记录的玩法、候选联动和待定边界；待开发记录不代表已实现或已验收 |
 | 全局回放与接管练习：原生检查点、隔离和确定性 | [八组原生接口设计](../superpowers/specs/2026-10-22-global-replay-native-interfaces-design.md)、[分批验证计划](../superpowers/plans/2026-10-22-global-replay-native-interfaces.md) | 文档阶段，尚未实现；优先验证战斗现场完整恢复，最终覆盖整局、跨重启保存与分享、练习进度隔离，以及结束后精确返回发起时的原房间状态 |
-| 不确定属于哪类 Isaac 开发问题 | [现有项目路由 Skill](../skills/isaac-neverbrith-router/SKILL.md) | 选择具体领域 Skill，按需读取其参考文档 |
+| 不确定属于哪类 Isaac 开发问题 | [现有项目路由 Skill](../../.agents/skills/isaac-neverbrith-router/SKILL.md) | 选择具体领域 Skill，按需读取其参考文档 |
 
 斗气拳套的操作、成功反馈、普通防御伤害换算及持续按键蓄力取消修订，另见[2026-10-15修复与专项回归](../../reports/drive-rush/2026-10-15/mechanic-fixes/delivery.md)。该记录中保留的持续伤害缺口已在[持续伤害归属修复](../../reports/drive-rush/2026-10-15/dot-ownership/delivery.md)处理；后者记录本机原生来源接口、玩家／跟班的毒火流血、多人与原生伤害对照证据。
 

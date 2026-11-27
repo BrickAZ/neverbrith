@@ -54,8 +54,17 @@ foreach ($removedId in @('17499', '17500')) {
     Assert-True ($removed.Count -eq 0) "removed Ringo costume id remains: $removedId"
 }
 
-$main = Get-Content -Raw -LiteralPath (Join-Path $Root 'main.lua')
-$everchanging = [regex]::Match($main, '(?s)-- EVERCHANGING_BEGIN(.*?)-- EVERCHANGING_END').Groups[1].Value
+$seen = @{}
+function Read-FeatureSource([string]$RelativePath) {
+    if ($seen.ContainsKey($RelativePath)) { return }
+    $seen[$RelativePath] = $true
+    $body = Get-Content -Raw -LiteralPath (Join-Path $Root $RelativePath)
+    $body
+    foreach ($match in [regex]::Matches($body, 'include\("(scripts\.[\w.]+)"\)')) {
+        Read-FeatureSource (($match.Groups[1].Value -replace '\.', '/') + '.lua')
+    }
+}
+$everchanging = (Read-FeatureSource 'scripts/features/everchanging.lua') -join "`n"
 Assert-True ($everchanging.Length -gt 0) 'missing Everchanging source block'
 Assert-True ($everchanging.Contains('slots = { "head" }')) 'Ringo must use exactly the head slot'
 Assert-True ($everchanging.Contains('head = { costume = "gfx/characters/costume_ringotsuga_headgear.anm2" }')) `

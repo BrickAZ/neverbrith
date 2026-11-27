@@ -127,11 +127,23 @@ foreach ($directory in @('generated', 'tests')) {
     $path = Join-Path $rootPath $directory
     if (Test-Path -LiteralPath $path) { $syntaxFiles += @(Get-ChildItem -LiteralPath $path -File -Filter '*.lua' | Sort-Object Name | ForEach-Object FullName) }
 }
+foreach ($directory in @('scripts', 'tests/support')) {
+    $path = Join-Path $rootPath $directory
+    if (Test-Path -LiteralPath $path) { $syntaxFiles += @(Get-ChildItem -LiteralPath $path -Recurse -File -Filter '*.lua' | Sort-Object FullName | ForEach-Object FullName) }
+}
 if ($runtime.Status -eq 'passed') {
-    # '-' occupies arg[0]; the explicit file list starts at arg[1]. Exit before
-    # Lua attempts to execute stdin or any parsed file.
-    $syntaxCode = 'assert(#arg>0,"no syntax inputs"); local n=0; for i=1,#arg do local f,e=loadfile(arg[i]); if not f then io.stderr:write(e,"\n"); os.exit(1) end; n=n+1 end; print("SYNTAX_FILES "..n); os.exit(0)'
-    Record-Check (Invoke-Check 'lua-syntax' $luaExecutable (@('-e', $syntaxCode, '--', '-') + $syntaxFiles))
+    # A growing module tree can exceed Windows' command-line limit. Pass one
+    # UTF-8 manifest instead; still parse every discovered file without executing it.
+    $syntaxManifest = [IO.Path]::GetTempFileName()
+    try {
+        [IO.File]::WriteAllLines($syntaxManifest, $syntaxFiles, [Text.UTF8Encoding]::new($false))
+        $syntaxCode = 'local n=0; for path in io.lines(assert(arg[1])) do local f,e=loadfile(path); if not f then io.stderr:write(e,"\n"); os.exit(1) end; n=n+1 end; assert(n>0,"no syntax inputs"); print("SYNTAX_FILES "..n); os.exit(0)'
+        $syntaxResult = Invoke-Check 'lua-syntax' $luaExecutable @('-e', $syntaxCode, '--', '-', $syntaxManifest)
+        $syntaxResult | Add-Member -NotePropertyName InputFiles -NotePropertyValue $syntaxFiles
+        Record-Check $syntaxResult
+    } finally {
+        if (Test-Path -LiteralPath $syntaxManifest) { Remove-Item -LiteralPath $syntaxManifest }
+    }
 } else { Record-Check (New-Result 'lua-syntax' 'not_run' 'Lua runtime preflight did not pass.') }
 
 foreach ($test in $luaTests) {
@@ -143,8 +155,9 @@ foreach ($test in $luaTests) {
     } else { Record-Check (Invoke-Check $id $luaExecutable @($test)) }
 }
 
-Invoke-ScriptCheck 'static:generic' 'docs/skills/isaac-validators/scripts/validate-isaac-mod.ps1' @('-Root', $rootPath, '-ModObjectName', 'Neverbirth', '-SkillRoot', (Join-Path $rootPath 'docs/skills'))
-Invoke-ScriptCheck 'static:strict' 'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1' @('-Root', $rootPath)
+Invoke-ScriptCheck 'static:generic' 'tools/validators/validate-isaac-mod.ps1' @('-Root', $rootPath, '-ModObjectName', 'Neverbirth', '-SkillRoot', (Join-Path $rootPath '.agents/skills'))
+Invoke-ScriptCheck 'static:strict' 'tools/validators/validate-neverbrith.ps1' @('-Root', $rootPath)
+Invoke-ScriptCheck 'knowledge' 'tests/project_knowledge_test.ps1' @('-Root', $rootPath)
 Invoke-ScriptCheck 'static:mystuff' 'tools/validate_mystuff_local_ids.ps1'
 Invoke-ScriptCheck 'docs:readme' 'tests/compatibility_docs_test.ps1' @('-Root', $rootPath, '-ReadmeOnly')
 Invoke-ScriptCheck 'docs:agent-wiki' 'tests/agent_wiki_navigation_test.ps1' @('-Root', $rootPath)
@@ -158,7 +171,7 @@ $report = [pscustomobject][ordered]@{
     Passed = ($exitCode -eq 0); ExitCode = $exitCode; InGameVerified = $false
     LuaTestCount = $luaTests.Count; SyntaxFileCount = $syntaxFiles.Count
     Summary = [pscustomobject]@{Passed=@($checks | Where-Object Status -eq 'passed').Count;Failed=$failed;BlockedOrNotRun=$blocked;Warnings=($checks | Measure-Object WarningCount -Sum).Sum}
-    Scope = 'Selected Lua behavior tests; root/generated/tests Lua syntax; repository generic/strict/My Stuff validators; README-only and agent navigation checks.'
+    Scope = 'Selected Lua behavior tests; root/generated/tests and recursive scripts/tests-support Lua syntax; repository generic/strict/My Stuff validators; README-only, agent navigation, shared-module documentation and authoritative skill-package checks.'
     NotCovered = @('In-game execution, rendering, input, save/continue and mod combinations', 'Other PowerShell tests, Python/Node tests, full compatibility examples, and runner/strict-validator self-tests', 'Historical/release/worktree copies are not independently validated; strict Lua scope follows static literal loads from the selected main.lua and does not resolve loader aliases')
     Checks = @($checks.ToArray())
 }

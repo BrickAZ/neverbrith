@@ -899,6 +899,8 @@ local function test_cleared_room_and_missing_item_do_not_trigger()
     assertEquals(player.Damage, 10, "players without Moon should not trigger")
 end
 
+if arg and arg[1] == "--fixture" then return loadNeverbirth end
+
 test_xml_registers_moon_item_pools_and_resources()
 test_prompt_plays_appear_then_idle()
 test_prompt_respawns_if_visual_table_was_cleared()

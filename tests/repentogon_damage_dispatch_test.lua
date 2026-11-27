@@ -19,7 +19,7 @@ local env = setmetatable({
 }, { __index = _G })
 assert(load(dispatchSource, "@installed-1.0.12a-damage-dispatch", "t", env))()
 
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 local ace = assert(Neverbirth.ACEAntiCheatTestAPI)
 local player = {
     InitSeed = 777,

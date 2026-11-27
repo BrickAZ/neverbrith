@@ -47,6 +47,7 @@ local function setup(candle)
         registrations[id] = registrations[id] or {}
         table.insert(registrations[id], { fn = fn, filter = filter })
     end
+    function include(name) return dofile(name:gsub('%.', '/') .. '.lua') end
     dofile("yins_curse.lua")(mod, {
         ItemId = YIN, GetSaveRoot = function() return root end,
         GetCurrentRunSeed = function() return world.seed end,

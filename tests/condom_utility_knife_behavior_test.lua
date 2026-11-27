@@ -420,7 +420,7 @@ end
 local function test_xml_registers_requested_items_and_pools()
     local items = readFile("content/items.xml")
     local pools = readFile("content/itempools.xml")
-    local main = readFile("main.lua")
+    local main = readFile("scripts/catalog/eid_descriptions.lua")
 
     assertTruthy(items:find('<active%s+name="Condom".-maxcharges="3".-description="She said it doesn\'t count with one on".-gfx="Condom.png".-quality="0"', 1), "Condom XML should be a 3-charge quality 0 active")
     assertTruthy(items:find('<passive%s+name="Utility Knife".-cache="damage".-description="Painful scars".-gfx="UtilityKnife.png".-quality="2".-tags="offensive summonable"', 1), "Utility Knife XML should be a damage passive with requested tags")
@@ -475,6 +475,31 @@ local function test_utility_knife_post_update_fallback_grants_broken_heart_for_n
     player.collectibles[env.items.UtilityKnife] = 3
     env.runPostUpdate()
     assertEquals(player.brokenHearts, 3, "Utility Knife fallback should grant one broken heart per new copy")
+end
+
+local function test_utility_knife_continue_removal_and_region_replacement()
+    local saved = { unrelated = { keep = 17 }, utilityKnife = { runSeed = "TEST RUN", playerCounts = { ["100"] = 1 } } }
+    local env = loadNeverbirth({ hasData = true, decodedData = saved })
+    local player = env.newPlayer({ collectibles = { [env.items.UtilityKnife] = 1 } })
+    env.runPostUpdate()
+    assertEquals(player.brokenHearts, 0, "continued accounted copy must not grant a new broken heart")
+    player.collectibles[env.items.UtilityKnife] = 0
+    env.runPostUpdate()
+    assertEquals(env.mod:GetUtilityKnifeData().playerCounts["100"], 0, "removal lowers the saved count")
+    player.collectibles[env.items.UtilityKnife] = 1
+    env.runPostAddUtilityKnife(player)
+    env.runPostUpdate()
+    env.runPostUpdate()
+    assertEquals(player.brokenHearts, 1, "post-add and polling settle the same acquired copy only once")
+    assertEquals(saved.unrelated.keep, 17, "scoped saves must retain unrelated data")
+    local oldRegion = saved.utilityKnife
+    local restarted = loadNeverbirth({ hasData = true, decodedData = saved, runSeed = "NEW RUN" })
+    local nextPlayer = restarted.newPlayer({ collectibles = { [restarted.items.UtilityKnife] = 1 } })
+    restarted.runPostUpdate()
+    assertEquals(nextPlayer.brokenHearts, 1, "new run resets old accounted copies")
+    assertTruthy(saved.utilityKnife ~= oldRegion, "new run replaces only its data region")
+    assertEquals(oldRegion.runSeed, "TEST RUN", "old region reference must not be mutated into the new run")
+    assertEquals(saved.unrelated.keep, 17, "replacing the region must preserve other fields")
 end
 
 local function test_crazy_coconut_rewards_collectibles_that_do_not_actually_increase_damage()
@@ -534,7 +559,7 @@ local function test_crazy_coconut_uses_pickup_snapshots_not_global_item_enumerat
         "EnsureCrazyCoconutItemCounts",
         "RecordCrazyCoconutUnresolvedAdd",
     }
-    local source = readFile("main.lua")
+    local source = readFile("scripts/features/crazy_coconut.lua")
     for _, helperName in ipairs(forbiddenGlobalScanHelpers) do
         assertEquals(env.mod[helperName], nil, "Crazy Coconut must not expose global inventory scan helper " .. helperName)
         assertTruthy(not source:find("function Neverbirth:" .. helperName, 1, true),
@@ -1097,6 +1122,8 @@ if arg and arg[1] == "--condom-only" then
     return
 end
 
+if arg and arg[1] == "--fixture" then return loadNeverbirth end
+
 test_xml_registers_requested_items_and_pools()
 test_pickup_banner_immediately_uses_chinese_when_count_confirms_pickup()
 test_pickup_banner_immediately_uses_chinese_when_queue_confirms_pickup()
@@ -1107,6 +1134,7 @@ test_public_luck_cap_api_contracts()
 test_utility_knife_adds_damage_and_grants_one_broken_heart_per_pickup()
 test_utility_knife_pickup_accepts_wrapped_player_argument()
 test_utility_knife_post_update_fallback_grants_broken_heart_for_new_copies()
+test_utility_knife_continue_removal_and_region_replacement()
 test_crazy_coconut_rewards_collectibles_that_do_not_actually_increase_damage()
 test_crazy_coconut_uses_pickup_snapshots_not_global_item_enumeration()
 test_crazy_coconut_records_ground_collectible_pickups_before_they_are_added()

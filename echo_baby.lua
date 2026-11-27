@@ -2,6 +2,8 @@
 -- REPENTOGON 1.0.12a: EntityFamiliar:GetItemConfig is the exact granting source.
 -- Copies deliberately have no ItemConfig source: they are not normal collectibles.
 return function(mod, context)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     local itemId, variant, state = context.ItemId, context.FamiliarVariant, context.State
     local SAVE_KEY = "echoBaby"
     local COPY_KEY = "NeverbirthEchoCopy"
@@ -18,12 +20,7 @@ return function(mod, context)
         return
     end
 
-    local function plainCopy(value)
-        if type(value) ~= "table" then return value end
-        local result = {}
-        for key, child in pairs(value) do result[key] = plainCopy(child) end
-        return result
-    end
+    local plainCopy = include("scripts.runtime.plain_data").CopyTree
     local function runSeed() return tostring(context.GetCurrentRunSeed()) end
     local function loadState(reset)
         local root = context.GetSaveRoot()
@@ -166,6 +163,9 @@ return function(mod, context)
         table.insert(beforeAdd[owner][id], { group = nativeGroup(player, id), owner = owner,
             room = state.RoomKey(), beforeCount = receipt and receipt.count or player:GetCollectibleNum(id, true, true),
             echoCount = echoCount, receipt = receipt })
+    end
+    function callbackInstallers.mod_EchoBabyPreAdd()
+        return mod:AddCallback(ModCallbacks.MC_PRE_ADD_COLLECTIBLE, mod.EchoBabyPreAdd)
     end
 
     local function settleAcquisition(player, id, token, physical, temporary, observation, playerKey)
@@ -356,6 +356,9 @@ return function(mod, context)
         familiar:GetData().NeverbirthEchoCooldown = 0
         familiar:AddToFollowers()
     end
+    function callbackInstallers.mod_EchoBabyFamiliarInit()
+        return mod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, mod.EchoBabyFamiliarInit, variant)
+    end
     function mod:EchoBabyFamiliarUpdate(familiar)
         if not familiar:GetData()[BODY_KEY] then return end
         familiar:FollowParent()
@@ -374,6 +377,9 @@ return function(mod, context)
             familiar.FireCooldown = 28
         end
     end
+    function callbackInstallers.mod_EchoBabyFamiliarUpdate()
+        return mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, mod.EchoBabyFamiliarUpdate, variant)
+    end
     function mod:EchoBabyFiredTear(tear)
         local source = tear.SpawnerEntity
         local familiar = source and source:ToFamiliar()
@@ -382,6 +388,9 @@ return function(mod, context)
         tear.TearFlags = tear.TearFlags | TearFlags.TEAR_SPECTRAL
         tear:GetData().NeverbirthEchoTear = true
         familiar:GetData().NeverbirthEchoFired = true
+    end
+    function callbackInstallers.mod_EchoBabyFiredTear()
+        return mod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_FIRE_PROJECTILE, mod.EchoBabyFiredTear, variant)
     end
     function mod:EchoBabyPlayerUpdate(player)
         if not active(player) then return end
@@ -394,9 +403,15 @@ return function(mod, context)
             refresh(player)
         end
     end
+    function callbackInstallers.mod_EchoBabyPlayerUpdate()
+        return mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.EchoBabyPlayerUpdate)
+    end
     function mod:EchoBabyNewRoom()
         beforeAdd = {}
         for _, player in ipairs(context.GetPlayers()) do if active(player) then refresh(player) end end
+    end
+    function callbackInstallers.mod_EchoBabyNewRoom()
+        return mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.EchoBabyNewRoom)
     end
     function mod:EchoBabyGameStarted(continued)
         beforeAdd, activeOwners, lastCounts = {}, {}, {}
@@ -406,9 +421,15 @@ return function(mod, context)
         end
         -- The first player update refreshes caches after the main save loader.
     end
+    function callbackInstallers.mod_EchoBabyGameStarted()
+        return mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, mod.EchoBabyGameStarted)
+    end
     function mod:EchoBabyGameExit(shouldSave)
         if shouldSave then ensureState(); save() end
         beforeAdd, activeOwners, lastCounts = {}, {}, {}
+    end
+    function callbackInstallers.mod_EchoBabyGameExit()
+        return mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, mod.EchoBabyGameExit)
     end
 
     state.SubscribeAcquisition(acquired)
@@ -426,7 +447,7 @@ return function(mod, context)
         -- now would race the Hourglass's own familiar state reconstruction.
     end)
 
-    mod:AddCallback(ModCallbacks.MC_PRE_ADD_COLLECTIBLE, mod.EchoBabyPreAdd)
+    callbackInstallers.mod_EchoBabyPreAdd()
     -- Observe native and earlier cap-breaking contributions before deciding
     -- how much of Echo's recorded reward still fits under 5 tears/second.
     mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(self, player, flag)
@@ -438,13 +459,13 @@ return function(mod, context)
     if mod.AddPriorityCallback and CallbackPriority then
         mod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, CallbackPriority.LATE + 1, tearsCache)
     else mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, tearsCache) end
-    mod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, mod.EchoBabyFamiliarInit, variant)
-    mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, mod.EchoBabyFamiliarUpdate, variant)
-    mod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_FIRE_PROJECTILE, mod.EchoBabyFiredTear, variant)
-    mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.EchoBabyPlayerUpdate)
-    mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.EchoBabyNewRoom)
-    mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, mod.EchoBabyGameStarted)
-    mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, mod.EchoBabyGameExit)
+    callbackInstallers.mod_EchoBabyFamiliarInit()
+    callbackInstallers.mod_EchoBabyFamiliarUpdate()
+    callbackInstallers.mod_EchoBabyFiredTear()
+    callbackInstallers.mod_EchoBabyPlayerUpdate()
+    callbackInstallers.mod_EchoBabyNewRoom()
+    callbackInstallers.mod_EchoBabyGameStarted()
+    callbackInstallers.mod_EchoBabyGameExit()
 
     local api = { GetRewards = function(player)
         local record = rewards(player, false)

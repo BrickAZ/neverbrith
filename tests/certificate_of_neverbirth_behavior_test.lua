@@ -77,7 +77,7 @@ for _, image in ipairs({ "archive_prev.png", "archive_next.png", "archive_return
 end
 
 local source = readFile("main.lua")
-local block = source:match("%-%- CERTIFICATE_OF_NEVERBIRTH_BEGIN(.-)%-%- CERTIFICATE_OF_NEVERBIRTH_END")
+local block = dofile("tests/support/read_feature_source.lua" )("scripts/features/certificate_of_neverbirth.lua")
 assertTruthy(block, "isolated Certificate runtime block")
 assertTruthy(block:find('include("generated.neverbirth_collectibles")', 1, true), "runtime consumes generated registry")
 assertTruthy(block:find("local ITEMS_PER_PAGE = 6", 1, true), "page size is centralized at six")
@@ -94,7 +94,7 @@ assertTruthy(block:find("ReturnPress", 1, true), "return press interface")
 assertTruthy(block:find("NextPress", 1, true), "next press interface")
 assertTruthy(block:find("PrevPress", 1, true), "previous press interface")
 
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 Vector = setmetatable({}, {
     __call = function(_, x, y) return { X = x or 0, Y = y or 0, IsIsaacVector = true } end,
 })

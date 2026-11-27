@@ -1,4 +1,5 @@
-local S=dofile('motion_input_shooting.lua')
+include=function(name)return dofile(name..'.lua')end
+local S=include('motion_input_shooting')
 local n=0;local function ok(v,m) assert(v,m);n=n+1 end
 local function entity(kind,owner)
     local e={Type=kind,SpawnerEntity=owner,data={}}

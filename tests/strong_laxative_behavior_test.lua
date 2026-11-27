@@ -546,6 +546,8 @@ local function test_foreign_aquarius_effect_and_teammate_are_untouched()
     assertEquals(foreign.Velocity.X,1,"foreign Aquarius movement remains untouched")
 end
 
+if arg and arg[1] == '--fixture' then return loadNeverbirth end
+
 test_synergy_contact_has_one_damage_authority_and_keeps_tick_cadence()
 test_removal_affects_new_creep_and_invalid_owner_removes_old_creep()
 test_foreign_aquarius_effect_and_teammate_are_untouched()

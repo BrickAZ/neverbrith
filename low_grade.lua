@@ -2,6 +2,8 @@
 -- native damage (ASMCallbacks.cpp); trinket events are 1096/1097. Swallowed
 -- amounts come from GetSmeltedTrinkets()[id], never from the stat multiplier.
 return function(mod, context)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     local id = assert(context.TrinketId, "Low Grade requires its registered trinket ID")
     local state = assert(context.State, "Low Grade requires pending-content state")
     local golden = TrinketType.TRINKET_GOLDEN_FLAG
@@ -12,12 +14,7 @@ return function(mod, context)
     local rangeMultipliers = {}
     local api = {}
 
-    local function clone(value)
-        if type(value) ~= "table" then return value end
-        local result = {}
-        for key, child in pairs(value) do result[key] = clone(child) end
-        return result
-    end
+    local clone = include("scripts.runtime.plain_data").CopyTree
     local function log(message)
         if context.DebugLog then context.DebugLog("Low Grade: " .. message) end
     end
@@ -225,6 +222,9 @@ return function(mod, context)
         reconcile(true)
         save()
     end
+    function callbackInstallers.start()
+        return mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, start)
+    end
     local function eligibleDamage(amount, flags)
         -- Perfection exceptions: fake/no-penalty damage, donation/payment,
         -- cursed doors, spiked chests, and sacrifice-room spikes. Regular room
@@ -263,6 +263,9 @@ return function(mod, context)
         if expired then refresh(player) end
         save()
     end
+    function callbackInstallers.damage()
+        return mod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, damage, EntityType.ENTITY_PLAYER)
+    end
     local function boss(_, _rng, position)
         if not ready or Game():GetRoom():GetType() ~= RoomType.ROOM_BOSS then return end
         -- Native floor settlement belongs to the last boss-room descriptor,
@@ -286,6 +289,9 @@ return function(mod, context)
         end
         save()
     end
+    function callbackInstallers.boss()
+        return mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, boss)
+    end
     local function cache(_, player, flag)
         local multiplier = player:GetTrinketMultiplier(id)
         if multiplier <= 0 then return end
@@ -294,6 +300,12 @@ return function(mod, context)
             local tears = 30 / math.max(0.00001, player.MaxFireDelay + 1)
             player.MaxFireDelay = 30 / (tears + 5 * multiplier) - 1
         elseif flag == CacheFlag.CACHE_RANGE then player.TearRange = player.TearRange + 5 * 40 * multiplier end
+    end
+    function callbackInstallers.cache()
+        return mod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, CallbackPriority.LATE, cache)
+    end
+    function callbackInstallers.cache2()
+        return mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, cache)
     end
     local function queuedItem(player)
         return player.QueuedItem and player.QueuedItem.Item
@@ -311,6 +323,9 @@ return function(mod, context)
             frame = Game():GetFrameCount(), wasQueued = queuedItem(player) ~= nil } end
         -- Observation only: leave native trinket collection/cancellation intact.
     end
+    function callbackInstallers.collision()
+        return mod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, collision, PickupVariant.PICKUP_TRINKET)
+    end
     local function added(_, player, raw)
         if not ready or not isOurs(raw) or removing then return end
         local key = holderKey(player)
@@ -326,6 +341,9 @@ return function(mod, context)
             confirmed[key] = confirmed[key] or {}
             confirmed[key][#confirmed[key] + 1] = { raw = raw, frame = frame, token = token }
         end
+    end
+    function callbackInstallers.added()
+        return mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, added)
     end
     local function postCollision(_, pickup, collider)
         if not ready then return end
@@ -357,6 +375,9 @@ return function(mod, context)
         reconcile()
         save()
     end
+    function callbackInstallers.postCollision()
+        return mod:AddCallback(ModCallbacks.MC_POST_PICKUP_COLLISION, postCollision, PickupVariant.PICKUP_TRINKET)
+    end
     local function removed(_, player, raw)
         -- TriggerTrinketRemoved can run before a smelt operation has finished
         -- updating both inventories. Reconcile after the native operation, not
@@ -369,6 +390,9 @@ return function(mod, context)
                 removalFrames[holder][raw] = Game():GetFrameCount()
             end
         end
+    end
+    function callbackInstallers.removed()
+        return mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_REMOVED, removed)
     end
     local function update()
         if not ready then return end
@@ -395,6 +419,9 @@ return function(mod, context)
             end
         end
     end
+    function callbackInstallers.update()
+        return mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, update)
+    end
     state.RegisterParticipant("lowGrade", function() return clone(data) end, function(snapshot)
         -- A native save can precede MC_POST_GAME_STARTED. Its empty module
         -- snapshot is still a real rollback boundary, not permission to retain
@@ -406,15 +433,15 @@ return function(mod, context)
         save()
         for _, player in ipairs(players()) do refresh(player) end
     end)
-    mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, start)
+    callbackInstallers.start()
     mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function() ensureFloor(); save() end)
-    mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, boss)
-    mod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, damage, EntityType.ENTITY_PLAYER)
+    callbackInstallers.boss()
+    callbackInstallers.damage()
     if mod.AddPriorityCallback and CallbackPriority then
-        mod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, CallbackPriority.LATE, cache)
-    else mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, cache) end
-    mod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, collision, PickupVariant.PICKUP_TRINKET)
-    mod:AddCallback(ModCallbacks.MC_POST_PICKUP_COLLISION, postCollision, PickupVariant.PICKUP_TRINKET)
+        callbackInstallers.cache()
+    else callbackInstallers.cache2() end
+    callbackInstallers.collision()
+    callbackInstallers.postCollision()
     mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, function(_, pickup)
         if not ready or not isOurs(pickup.SubType) then return end
         local token = state.PickupToken(pickup)
@@ -422,11 +449,11 @@ return function(mod, context)
         reconcile(); trackGround(pickup)
     end, PickupVariant.PICKUP_TRINKET)
     mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, function(_, pickup) trackGround(pickup) end, PickupVariant.PICKUP_TRINKET)
-    mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, update)
+    callbackInstallers.update()
     -- Register without an optional ID filter: the native callback parameter can
     -- include GOLDEN_FLAG, whereas the registered base ID does not.
-    mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, added)
-    mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_REMOVED, removed)
+    callbackInstallers.added()
+    callbackInstallers.removed()
     mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function(_, shouldSave)
         if shouldSave then reconcile(); save() end
         ready = false

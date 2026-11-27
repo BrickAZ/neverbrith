@@ -1,5 +1,6 @@
 -- Owns attack provenance and restriction state, never the player's CanShoot flag.
 local S={}
+local pointerSeed=include('scripts/systems/entity_identity')
 local attackTypes={[2]=true,[4]=true,[7]=true,[8]=true,[9]=true}
 local TAG='NeverbirthMotionAttackV1'
 local function player(e) return e and e.ToPlayer and e:ToPlayer() end
@@ -10,11 +11,11 @@ function S.New(context)
     local issuer={}
     local function key(p)
         if context.Key then return context.Key(p) end
-        return (GetPtrHash and tostring(GetPtrHash(p)) or tostring(p))..':'..tostring(p.InitSeed or 0)
+        return pointerSeed(p)
     end
     local function entityKey(e)
         if context.EntityKey then return context.EntityKey(e) end
-        return (GetPtrHash and tostring(GetPtrHash(e)) or tostring(e))..':'..tostring(e.InitSeed or 0)
+        return pointerSeed(e)
     end
     function gate:Update(p,owners)
         local k=key(p);self.players[k]=p;self.owned[k]=type(owners)=='table' and next(owners)~=nil or owners==true

@@ -75,7 +75,7 @@ for _, path in ipairs({ "content/itempools.xml", "content/itempools.en_us.xml", 
         path .. " should exclude " .. itemName .. " from natural item pools")
 end
 
-local block = source:match("%-%- ACE_ANTI_CHEAT_SYSTEM_BEGIN(.-)%-%- ACE_ANTI_CHEAT_SYSTEM_END")
+local block = dofile('tests/support/read_lua_module_tree.lua')("scripts/features/ace_anti_cheat_system.lua")
 assertTruthy(block, "main.lua should contain an isolated ACE runtime block")
 assertTruthy(block:find("ACEAntiCheatTestAPI", 1, true), "ACE should expose deterministic behavior helpers")
 assertTruthy(block:find("MC_ENTITY_TAKE_DMG", 1, true), "ACE should listen for player and NPC damage")
@@ -95,7 +95,7 @@ assertTruthy(block:find("SetBrokenWatchState", 1, true), "ACE should use the nat
 assertTruthy(block:find(':Kill()', 1, true), "the room's third one-hit kill should force every player to die")
 assertEquals(block:find("FindByType", 1, true), nil, "ACE must not scan all entities every frame")
 
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 
 local api = assert(Neverbirth and Neverbirth.ACEAntiCheatTestAPI, "ACE runtime API should load through main.lua")
 local runtime = assert(api.Runtime, "ACE runtime state should be exposed")

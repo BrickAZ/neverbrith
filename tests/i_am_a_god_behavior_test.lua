@@ -183,6 +183,7 @@ local function fixture(saved)
     function f.mod:AddCallback(id,fn,filter) self:AddPriorityCallback(id,0,fn,filter) end
     f.doors={}; f:door(0,1,true); f:door(1,14,true)
     f:player(101);f:player(102);f:enemy()
+    include = function(name) return dofile((name:gsub('%.','/'))..'.lua') end
     local path="i_am_a_god.lua"
     local file=io.open(path,"r"); assert(file,"I Am a God runtime module has not been implemented");file:close()
     dofile(path)(f.mod,{ItemId=991,GetPlayers=function() return f.players end,

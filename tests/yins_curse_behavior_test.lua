@@ -56,7 +56,7 @@ local function makePickup(itemId)
     return pickup
 end
 
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 
 local api = Neverbirth and Neverbirth.YinsCurseTestAPI
 assertTruthy(api, "Yin's Curse test API must be registered")
@@ -186,7 +186,7 @@ for _, poolPath in ipairs({
 end
 
 local source = readFile("main.lua")
-local block = readFile("yins_curse.lua")
+local block = dofile('tests/support/read_lua_module_tree.lua')("yins_curse.lua")
 assertEquals(block:find("GetCollectibles", 1, true), nil, "must not enumerate the global ItemConfig collection")
 assertTruthy(block:find("MC_PRE_PICKUP_COLLISION", 1, true), "must snapshot normal pedestal pickup")
 assertTruthy(block:find("MC_POST_PICKUP_UPDATE", 1, true), "must observe visible/rerolled Q4 pedestals")

@@ -121,6 +121,7 @@ local function fixture(saved)
     end
     function f.mod:AddCallback(id,fn,filter)self:AddPriorityCallback(id,0,fn,filter)end
     f:player(1);f:player(2);f:entity(10)
+    include = function(name) return dofile((name:gsub('%.','/'))..'.lua') end
     local file=io.open('god_complex.lua','r');assert(file,'God Complex module missing');file:close()
     dofile('god_complex.lua')(f.mod,{ItemId=992,GetPlayers=function()return f.players end,GetSaveRoot=function()return f.saved end,
         GetCurrentRunSeed=function()return f.runSeed or 'run1' end,Save=function()f.saves=(f.saves or 0)+1 end,DebugLog=function(s)f.logs[#f.logs+1]=s end})

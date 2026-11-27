@@ -18,7 +18,7 @@ EntityGridCollisionClass={GRIDCOLL_NONE=0}
 function Color(r,g,b,a,ro,go,bo) return {R=r,G=g,B=b,A=a,RO=ro,GO=go,BO=bo} end
 function Vector(x,y) return {X=x,Y=y} end
 function EntityRef(e) return {Entity=e} end
-local factory=assert(loadfile("strong_laxative_synergies.lua"))()
+local factory=assert(loadfile("scripts/features/strong_laxative/synergies.lua"))()
 local function env(o)
     o=o or {}
     local p={Damage=o.damage or 20,Position=Vector(0,0),InitSeed=12,flags=o.flags or TearFlags.TEAR_NORMAL,

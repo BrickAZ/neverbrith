@@ -867,6 +867,41 @@ local function test_missing_native_source_never_guesses_a_held_collectible()
     end
 end
 
+local function test_new_run_invalidates_native_growth_cache_without_manual_refresh()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ initSeed = 991, collectibles = { [8] = 1 } })
+    local untouched = env.newPlayer({ initSeed = 992, activeItems = {} })
+    -- Model native cache invalidation: base stats are restored only for flagged caches.
+    function player:EvaluateItems()
+        self.evaluated = self.evaluated + 1
+        local flags = self.cacheFlags
+        self.cacheFlags = {}
+        for _, flag in ipairs(flags) do
+            if flag == CacheFlag.CACHE_DAMAGE then self.Damage = 3.5 end
+            if flag == CacheFlag.CACHE_RANGE then self.TearRange = 260 end
+            env.runEvaluateCache(self, flag)
+        end
+    end
+    env.newFamiliar(player, { variant = FamiliarVariant.BROTHER_BOBBY })
+    runUseBloodSkullGu(env, player)
+    assertEquals(player.Damage, 5.0)
+    assertEquals(player.TearRange, 300)
+    local before = player.evaluated
+    env.mod:ResetBloodSkullGuState(true)
+    assertEquals(player.evaluated, before, 'Continue must leave current growth and cache intact')
+    assertEquals(player.TearRange, 300)
+    player.activeItems = {} -- stale bonuses also matter when the new player has no item
+    env.runPostGameStarted(false)
+    assertEquals(player.Damage, 3.5, 'new-run callback must invalidate damage without caller assistance')
+    assertEquals(player.TearRange, 260, 'new-run callback must invalidate range without caller assistance')
+    before = player.evaluated
+    local untouchedBefore = untouched.evaluated
+    env.mod:ResetBloodSkullGuState(false)
+    assertEquals(player.evaluated, before, 'no redundant cache refresh after growth is empty')
+    assertEquals(untouched.evaluated, untouchedBefore, 'unaffected players need no growth refresh')
+end
+
+test_new_run_invalidates_native_growth_cache_without_manual_refresh()
 test_room_entity_conversion_preserves_sacrifice_instead_of_backlash()
 test_native_source_wins_over_shared_variant_and_guessed_fields()
 test_missing_native_source_never_guesses_a_held_collectible()

@@ -1,3 +1,4 @@
+include = function(path) return dofile((path:gsub('%.', '/')) .. '.lua') end
 local function eq(a,b,m) assert(a==b,(m or "assertion")..": expected "..tostring(b)..", got "..tostring(a)) end
 local function near(a,b,m) assert(math.abs(a-b)<0.00001,m or "numeric assertion") end
 local loader=loadfile("low_grade.lua")

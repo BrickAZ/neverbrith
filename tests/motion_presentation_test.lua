@@ -288,7 +288,8 @@ GetPtrHash=ptrBefore
 -- XML-local IDs. Combat is isolated by a fake executor here; actual collision,
 -- HP, grabs, OD and meter are exercised in motion_combat_test and native tests.
 local executions,acquired=0,{}
-mod.MotionCombat={OnAcquire=function(_,who,move)acquired[#acquired+1]={who,move};return true end,
+mod.MotionCombat={Specifications=include('motion_combat_core').Specifications,
+ OnAcquire=function(_,who,move)acquired[#acquired+1]={who,move};return true end,
  IsBusy=function(_,who)return runtime:GetState(who)~=nil end,Execute=function(_,who,move,command,owner)
  executions=executions+1
  return runtime:Play(who,move,{variant='normal',facing=command.facing,presentationOnly=true,sourceOwner=owner.owner})

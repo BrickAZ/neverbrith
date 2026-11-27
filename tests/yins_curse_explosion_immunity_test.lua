@@ -1,4 +1,5 @@
 -- Real Yin module and registration, simulated API. Not evidence of Isaac play.
+function include(name) return dofile(name:gsub('%.', '/') .. '.lua') end
 ModCallbacks={MC_PRE_PLAYER_EXPLOSION_IMMUNITY=1485,MC_POST_UPDATE=1}
 CollectibleType={COLLECTIBLE_BLACK_CANDLE=260}
 local function setup(version,callbackId)
@@ -50,15 +51,16 @@ test('four_candle_source_combinations_and_inactive',function()
     eq(h.damage,2);eq(h.flags,4);eq(h.source.Type,1);eq(h.countdown,12)
 end)
 test('eid_reports_the_loaded_capability_in_both_languages',function()
-    local f=assert(io.open('main.lua','rb'));local text=f:read('*a');f:close()
-    local first=assert(text:find('local yinExplosionApiReady = false',1,true))
-    local last=assert(text:find('local EID_DESCRIPTIONS = {',first,true))
-    local begin=assert(text:find('[Items.YinsCurse] = {',last,true))
-    local finish=assert(text:find('[Items.ACEAntiCheatSystem] = {',begin,true))
+    local loadMod=dofile('tests/support/neverbirth_fixture.lua')
     for _,v in ipairs({0,1}) do
-        local env={pcall=pcall,type=type,Items={YinsCurse=1},Isaac={GetPlayerExplosionImmunityAPIVersion=function()return v end}}
-        local entries=assert(load(text:sub(first,last-1)..'return {'..text:sub(begin,finish-1)..'}','@actual-yin-eid','t',env))()
-        local en,zh=entries[1].en_us.eidDescription,entries[1].zh_cn.eidDescription
+        local env=loadMod({OnModCreated=function()
+            Isaac.GetPlayerExplosionImmunityAPIVersion=function()return v end
+        end})
+        local localized={}
+        for _,entry in ipairs(env.eidCalls)do
+            if entry.itemName=="Yin's Curse" or entry.itemName=='阴的诅咒' then localized[entry.language]=entry.description end
+        end
+        local en,zh=assert(localized.en_us),assert(localized.zh_cn)
         if v==1 then assert(en:find('Blocks explosion immunity',1,true));assert(zh:find('封锁爆炸免疫',1,true))
         else assert(en:find('Existing explosion immunity still works',1,true));assert(zh:find('已有防爆效果目前仍会生效',1,true)) end
     end

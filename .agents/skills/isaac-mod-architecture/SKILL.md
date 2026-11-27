@@ -1,0 +1,94 @@
+---
+name: isaac-mod-architecture
+description: Plan, review, or implement architecture-safe organization for Binding of Isaac Repentance mods. Use this whenever work risks making a bootstrap file too large, duplicating callback logic, adding many items/entities/cards at once, creating shared helpers, moving code into modules, changing load order, creating registries, or deciding where constants, state tables, tests, validators, and content files should live. Use isaac-mod-context first in an unfamiliar project. 中文触发：main.lua 太大、拆文件、拆模块、重构、加载顺序、回调重复、公共函数、注册表、代码放哪里。
+---
+
+# Isaac Mod Architecture
+
+## User Decisions and Technical Discovery
+
+Read the [shared decision and evidence policy](../isaac-mod-context/references/tbd-disclosure.md).
+
+Use this skill when the task touches module organization, load order, shared helpers, or repeated patterns across multiple Isaac content types.
+
+The goal is not to redesign the mod for its own sake. The goal is to keep future item/entity/card/challenge work easy to route, test, and debug without breaking current working patterns.
+
+## First Move
+
+Before moving code:
+
+1. In an unfamiliar project, use `isaac-mod-context` to identify bootstrap/load files, module roots, mod objects, and test/validation entry points.
+2. Read the discovered bootstrap/load file and identify the current registration pattern.
+3. Write down whether that file is a bootstrap, an implementation owner, or both; then locate the actual owner of the behavior being changed.
+4. Read the closest existing helper or repeated block.
+5. Decide whether the task needs architecture work or only a local implementation.
+6. If the implementation stays in a large single Lua entry file, inspect its existing top-level local declarations before adding a feature-local group of helpers or tables.
+7. If the change is broad, write a short migration plan and keep it reversible.
+8. Use `isaac-testing-debugging` and `isaac-validators` after structural changes.
+
+## Route The Architecture Work
+
+- **Loading and exports**: `include`/`require`, shared instances, returned tables/factories, public query/effect methods, namespaces and dependency cycles. Read `references/module-loading-and-exports.md`.
+- **Deferred initialization**: distinguish script-load completion, provider
+  readiness, live world context and a later dispatch opportunity in that same
+  reference. Do not add a scheduler or arbitrary render wait to hide load order.
+- **Classes and replacement**: existing class helpers, shallow inheritance, mutable prototype fields and method-versus-instance replacement. Read `references/classes-and-method-dispatch.md`; custom callback adapters belong to `isaac-callback-contracts`.
+- **Module boundaries**: when to split item/card/entity/challenge code and what each module owns. Read `references/module-boundaries.md`.
+- **Callback registration**: shared callback helpers, load order, duplicate callback prevention, per-content registration. Read `references/callback-registration.md`.
+- **Shared helpers and constants**: id maps, state helpers, RNG helpers, language helpers, asset helpers. Read `references/shared-helpers.md`.
+- **Public-library handoff**: save detailed API usage, actual consumers and appropriate checks with the implementation. Read `references/public-library-usage.md`.
+- **Implementation ownership**: distinguish bootstrap/load files from behavior owners so content skills do not regress into `main.lua`. Read `references/implementation-ownership.md`.
+- **Architecture review**: before final answer, read `references/architecture-review-checklist.md`.
+
+## Hard Rules
+
+- Do not refactor unrelated content while implementing one item or card.
+- Do not move working code without a verification plan.
+- Give each abstraction a concrete reason: repeated stable logic, an established project pattern, or an independent responsibility such as persistence isolation or an external-API boundary. One current consumer can be enough; avoid speculative frameworks and keep gameplay policy with its owner.
+- Preserve existing public names and mod naming quirks unless the user explicitly asks to rename them.
+- Keep callback ownership obvious. A future agent should be able to find who registers a callback and why.
+- Keep new or touched callback bindings adjacent to their handlers in the same file. Preserve existing installation order with explicit installers when necessary; follow `references/callback-registration.md`.
+- Creating or changing a public library requires persistent usage documentation in the target project in the same delivery; chat-only explanations do not satisfy the handoff. Follow the discovered project index and `references/public-library-usage.md`.
+- Before sharing a module, identify its export, instance owner, import-time side effects and registration lifetime. Private `local` values can remain private behind returned methods; neither copying the implementation nor making every helper global is required.
+- Consumers reuse the instance saved by the discovered bootstrap/registry. Re-running a stateful or registering module to fetch one method requires an explicit independent-instance contract.
+- A loader cache is not a lifecycle manager. Use `isaac-state-lifecycle` for stale references and reconstruction, `isaac-repentogon-ui` for UI ownership, and `isaac-testing-debugging` for loader/reload boundary tests.
+- Keep tests close to behavior changes.
+- Do not import an opaque tutorial template, custom callback bus, global helper table, or third-party library merely because an example uses it. Adopt it only when the current project already owns that abstraction or the user explicitly approves a dependency; otherwise express the same contract with discovered project modules and official Isaac APIs.
+
+## Monolithic Lua Scope Budget
+
+Lua compiles a source chunk with a finite local-variable budget. A large `main.lua` can be structurally valid before a feature adds one more group of top-level `local` helpers and makes the whole mod fail to load.
+
+- Do not add a feature's entire state machine as new chunk-level locals just because the file has no modules.
+- For a self-contained feature in a monolithic file, prefer a `do ... end` block so its helper locals are out of scope before later code, or attach only the deliberately public handler to the existing mod/module table.
+- Do not invent a numerical "safe local count". Parse or load the full discovered entry file with the closest available compatible Lua runner after the change.
+- A unit test that imports only an extracted helper does not cover this failure. At least one regression test must load the real entry file or an equivalent complete chunk.
+
+## Handoff Prompt Template
+
+```markdown
+## Architecture Spec
+
+- Current pattern:
+- Pain point:
+- Proposed boundary:
+- Files to move or create:
+- Callback/load order:
+- Shared helpers:
+- Export / shared-instance owner / import side effects:
+- Query versus effect API / result ownership:
+- Registration / invalidation / teardown and rebind:
+- Risks:
+- Verification:
+- Rollback path:
+```
+
+## Completion Checks
+
+Review the following where relevant to the change:
+
+- Structural changes made.
+- Why each new file/helper exists.
+- Load order and callback ownership.
+- Tests and validators run.
+- Any intentionally deferred cleanup.

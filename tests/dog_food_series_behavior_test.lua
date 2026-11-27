@@ -345,6 +345,7 @@ local function loadNeverbirth(options)
 
         return {
         mod = mod,
+        callbacks = callbacks,
         items = itemIds,
         roomEntities = roomEntities,
         spawnedEntities = spawnedEntities,
@@ -397,6 +398,43 @@ local function test_xml_and_pool_registration()
                 file .. " must keep " .. name .. " in boss at weight 0.1")
         end
     end
+end
+
+local function test_registered_pickup_transaction()
+    local env=loadNeverbirth()
+    local api=env.mod.DogFoodSeriesTestAPI
+    local function registered(event, expected, param)
+        local found
+        for _,entry in ipairs(env.callbacks[event] or {}) do
+            if entry.fn==expected then
+                assertEquals(found,nil,'no duplicate registered transaction handler')
+                assertEquals(entry.param,param,'preserve transaction callback filter')
+                found=entry.fn
+            end
+        end
+        return assert(found,'transaction must execute through registered handler')
+    end
+    local collide=registered(ModCallbacks.MC_PRE_PICKUP_COLLISION,api.Callbacks.TrackPickupCollision,100)
+    local update=registered(ModCallbacks.MC_POST_UPDATE,api.Callbacks.Update)
+    local p=env.newPlayer({maxHearts=2,hearts=1})
+    local id=env.items.ProteinStrip
+    local pickup={Type=EntityType.ENTITY_PICKUP,Variant=100,SubType=id,InitSeed=601}
+    collide(env.mod,pickup,p)
+    collide(env.mod,pickup,p)
+    p.collectibles[id]=1
+    update(env.mod)
+    assertEquals(p.maxHearts,2,'first frame cannot settle pickup')
+    update(env.mod)
+    assertEquals(p.maxHearts,4,'second frame grants exactly one container')
+    assertEquals(p.hearts,4,'confirmed pickup fills red hearts')
+    collide(env.mod,pickup,p)
+    update(env.mod);update(env.mod)
+    assertEquals(p.maxHearts,4,'duplicate collision without acquisition cannot pay again')
+    local rejected=env.newPlayer({initSeed=777,maxHearts=2})
+    pickup.InitSeed=602
+    collide(env.mod,pickup,rejected)
+    update(env.mod);update(env.mod)
+    assertEquals(rejected.maxHearts,2,'collision without acquired item never grants health')
 end
 
 local function test_pickup_benefits_and_reacquisition()
@@ -486,6 +524,15 @@ end
 local function test_dental_chew_direct_tear_cooldown_cap_and_filters()
     local env = loadNeverbirth()
     local api = env.mod.DogFoodSeriesTestAPI
+    local candidate = env.newEnemy()
+    local previousPlayerEntity = _G.PLAYER_ENTITY
+    _G.PLAYER_ENTITY = candidate.Type -- unrelated Mod global must not change the private target filter
+    local accepted = api.EligibleDentalTarget(candidate)
+    _G.PLAYER_ENTITY = previousPlayerEntity
+    assertEquals(accepted, candidate, "dental target filtering must use its own entity constant")
+    local playerLike = env.newEnemy()
+    playerLike.Type = EntityType.ENTITY_PLAYER
+    assertEquals(api.EligibleDentalTarget(playerLike), nil, "player type is excluded before NPC conversion")
     local holder = env.newPlayer({ initSeed = 101, collectibles = { [env.items.DentalChew] = 2 } })
     local tear = env.newTear(holder, Vector(100, 100), { velocity = Vector(3, 4) })
     local enemy = env.newEnemy({ velocity = Vector(4, 0) })
@@ -532,6 +579,7 @@ if arg and arg[1] == "--registration-only" then
     print("dog food series registration tests passed")
     return
 end
+test_registered_pickup_transaction()
 test_pickup_benefits_and_reacquisition()
 test_continue_and_coop_independence()
 test_stat_cache_stacks_and_retracts()

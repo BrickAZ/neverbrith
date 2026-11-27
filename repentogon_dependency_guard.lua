@@ -2,6 +2,8 @@
 -- Legacy REPENTOGON 1.0.12a cannot conditionally hide content XML: disable Lua
 -- gameplay at the entrypoint, then exclude the already registered drops here.
 return function(mod)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     local game = Game()
     local active = true -- Also works when Lua is reloaded during an existing run.
     local poolCleanupPending = true -- Reapply on the first update after a Lua reload.
@@ -36,15 +38,27 @@ return function(mod)
         for id in pairs(trinketIds) do pool:RemoveTrinket(id) end
         poolCleanupPending = false
     end
+    function callbackInstallers.removeFromPools()
+        return mod:AddCallback(ModCallbacks.MC_POST_UPDATE, removeFromPools)
+    end
 
     local function queuePoolCleanup()
         -- PLAYER_INIT can run before the native pool is ready (vanilla crashes
         -- inside RemoveCollectible). Only record intent during initialization.
         poolCleanupPending = true
     end
+    function callbackInstallers.queuePoolCleanup()
+        return mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, queuePoolCleanup)
+    end
+    function callbackInstallers.queuePoolCleanup2()
+        return mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, queuePoolCleanup)
+    end
 
     local function replacementCollectible(_, id)
         if collectibleIds[id] then return CollectibleType.COLLECTIBLE_BREAKFAST end
+    end
+    function callbackInstallers.replacementCollectible()
+        return mod:AddCallback(ModCallbacks.MC_POST_GET_COLLECTIBLE, replacementCollectible)
     end
 
     local function replacementTrinket(_, id)
@@ -52,6 +66,9 @@ return function(mod)
         if trinketIds[id % goldenFlag] then
             return TrinketType.TRINKET_PAPER_CLIP + (id >= goldenFlag and goldenFlag or 0)
         end
+    end
+    function callbackInstallers.replacementTrinket()
+        return mod:AddCallback(ModCallbacks.MC_GET_TRINKET, replacementTrinket)
     end
 
     local function replacePickup(_, pickup)
@@ -67,6 +84,18 @@ return function(mod)
             pickup:Morph(EntityType.ENTITY_PICKUP, pickup.Variant, replacement, true, true, true)
             pickup.OptionsPickupIndex = optionsIndex
         end
+    end
+    function callbackInstallers.replacePickup()
+        return mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, replacePickup, PickupVariant.PICKUP_COLLECTIBLE)
+    end
+    function callbackInstallers.replacePickup2()
+        return mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, replacePickup, PickupVariant.PICKUP_COLLECTIBLE)
+    end
+    function callbackInstallers.replacePickup3()
+        return mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, replacePickup, PickupVariant.PICKUP_TRINKET)
+    end
+    function callbackInstallers.replacePickup4()
+        return mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, replacePickup, PickupVariant.PICKUP_TRINKET)
     end
 
     local texts = {
@@ -125,8 +154,11 @@ return function(mod)
             end
         end
     end
+    function callbackInstallers.renderWarning()
+        return mod:AddCallback(ModCallbacks.MC_POST_RENDER, renderWarning)
+    end
 
-    mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, queuePoolCleanup)
+    callbackInstallers.queuePoolCleanup()
     mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
         active = true
         poolCleanupPending = true
@@ -134,20 +166,20 @@ return function(mod)
     end)
     -- NEW_LEVEL also runs before GAME_STARTED on the initial floor. Generation
     -- and pickup callbacks below cover drops until this deferred cleanup runs.
-    mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, queuePoolCleanup)
-    mod:AddCallback(ModCallbacks.MC_POST_UPDATE, removeFromPools)
+    callbackInstallers.queuePoolCleanup2()
+    callbackInstallers.removeFromPools()
     mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
         active = false
         poolCleanupPending = false
     end)
-    mod:AddCallback(ModCallbacks.MC_POST_GET_COLLECTIBLE, replacementCollectible)
-    mod:AddCallback(ModCallbacks.MC_GET_TRINKET, replacementTrinket)
+    callbackInstallers.replacementCollectible()
+    callbackInstallers.replacementTrinket()
     mod:AddCallback(ModCallbacks.MC_GET_PILL_EFFECT, function(_, effect)
         if pillIds[effect] then return PillEffect.PILLEFFECT_BAD_GAS end
     end)
-    mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, replacePickup, PickupVariant.PICKUP_COLLECTIBLE)
-    mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, replacePickup, PickupVariant.PICKUP_COLLECTIBLE)
-    mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, replacePickup, PickupVariant.PICKUP_TRINKET)
-    mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, replacePickup, PickupVariant.PICKUP_TRINKET)
-    mod:AddCallback(ModCallbacks.MC_POST_RENDER, renderWarning)
+    callbackInstallers.replacePickup()
+    callbackInstallers.replacePickup2()
+    callbackInstallers.replacePickup3()
+    callbackInstallers.replacePickup4()
+    callbackInstallers.renderWarning()
 end

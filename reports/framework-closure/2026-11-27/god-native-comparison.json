@@ -1,0 +1,14 @@
+{
+  "baseline": "god-baseline-01",
+  "candidate": "god-candidate-01",
+  "baselinePassed": 29,
+  "baselineFailed": 0,
+  "candidatePassed": 29,
+  "candidateFailed": 0,
+  "exactPassTextEqual": true,
+  "failures": [
+    [],
+    []
+  ],
+  "restored": true
+}

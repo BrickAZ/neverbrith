@@ -679,6 +679,8 @@ local function test_does_not_reference_original_whore_of_babylon()
     assertTruthy(not main:find("COLLECTIBLE_WHORE", 1, true), "Good Girl should not call original Whore of Babylon logic")
 end
 
+if arg and arg[1] == "--fixture" then return loadNeverbirth end
+
 test_xml_registers_good_girl_and_pools()
 test_good_girl_effect_resources_are_registered()
 test_good_girl_body_costume_uses_body_layer()

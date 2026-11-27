@@ -2,18 +2,14 @@
 return function(mod,context)
     context=context or {}
     if mod.MotionItems then mod.MotionItems:Shutdown() end
-    local input=assert(mod.MotionInput,'motion input must load first')
-    local presentation=assert(mod.MotionPresentation,'motion presentation must load first')
-    local combat=assert(mod.MotionCombat,'motion combat must load before formal bindings')
-    local specs={
-        {field='Piledriver360',key='circle_360',profile='circle_360'},
-        {field='Ultimate720',key='circle_720',profile='circle_720'},
-        {field='MotionWave',key='wave',profile='wave_tap'},
-        {field='DragonPunch',key='dp',profile='dp',anyDirection=true},
-    }
+    local input=assert(context.Input or mod.MotionInput,'motion input must load first')
+    local presentation=assert(context.Presentation or mod.MotionPresentation,'motion presentation must load first')
+    local combat=assert(context.Combat or mod.MotionCombat,'motion combat must load before formal bindings')
+    local specs=assert(combat.Specifications,'motion combat must supply the item specifications')
+    local entityKey=include('scripts/systems/entity_identity')
     local api={active=true,registered={},playbacks={}}
     local function key(p)
-        return context.Key and context.Key(p) or (GetPtrHash and tostring(GetPtrHash(p)) or tostring(p))..':'..tostring(p.InitSeed or 0)
+        return context.Key and context.Key(p) or entityKey(p)
     end
     local function owned(p,id)return p and p:Exists() and p:HasCollectible(id) end
     local function stop(record)

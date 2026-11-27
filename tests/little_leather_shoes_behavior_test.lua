@@ -23,7 +23,14 @@ local function readFile(path)
 end
 
 local source = readFile("main.lua")
-local block = source:match("%-%- LITTLE_LEATHER_SHOES_BEGIN(.-)%-%- LITTLE_LEATHER_SHOES_END")
+local block = readFile("scripts/features/little_leather_shoes/init.lua")
+    .. readFile("scripts/features/little_leather_shoes/rules.lua")
+    .. readFile("scripts/features/little_leather_shoes/rewards.lua")
+    .. readFile("scripts/features/little_leather_shoes/presentation.lua")
+    .. readFile("scripts/features/little_leather_shoes/runtime_views.lua")
+    .. readFile("scripts/features/traffic_heat.lua")
+    .. readFile("scripts/features/traffic_exposure.lua")
+    .. readFile("scripts/features/traffic_unboxing.lua")
 
 assertTruthy(block, "main.lua should contain the isolated Little Leather Shoes runtime block")
 assertTruthy(block:find("LittleLeatherShoesTestAPI", 1, true), "runtime block should expose deterministic behavior helpers")
@@ -50,7 +57,7 @@ for _ in block:gmatch("for _, entity in ipairs%(Isaac%.GetRoomEntities and Isaac
 assertEquals(roomScanCount, 1, "runtime should contain exactly one room-entity scan in the one-time room scan helper")
 assertEquals(block:find("FindByType", 1, true), nil, "runtime must not perform a per-frame global entity scan")
 
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 local api = assert(Neverbirth and Neverbirth.LittleLeatherShoesTestAPI, "runtime API should load through the full main.lua entry")
 local state = assert(Neverbirth.LittleLeatherShoesState, "runtime state should exist")
 

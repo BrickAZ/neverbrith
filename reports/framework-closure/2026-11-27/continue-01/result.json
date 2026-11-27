@@ -1,0 +1,60 @@
+{
+  "startedUtc": "2026-11-26T23:59:34.6390597Z",
+  "snapshotFiles": 229,
+  "phases": [
+    {
+      "phase": "seed",
+      "startedUtc": "2026-11-26T23:59:35.1741857Z",
+      "pid": 7828,
+      "normalExit": true,
+      "exitCode": 0,
+      "cleanShutdown": true,
+      "completed": true,
+      "passed": 9,
+      "failed": 0,
+      "menuConfirm": 0,
+      "exits": 2
+    },
+    {
+      "phase": "resume",
+      "startedUtc": "2026-11-27T00:00:15.9154135Z",
+      "pid": 46128,
+      "normalExit": true,
+      "exitCode": 0,
+      "cleanShutdown": true,
+      "completed": true,
+      "passed": 34,
+      "failed": 0,
+      "menuConfirm": 0,
+      "exits": 1
+    }
+  ],
+  "status": "COMPLETED",
+  "probeRemoved": true,
+  "newModSaveHash": "2A3E23874D4E9C7A95CB6FC4D045EE53768B1A2AAC433224E81F8834CA382498",
+  "archivedNewFiles": [
+    {
+      "absentBefore": true,
+      "path": "C:\\Users\\Anton\\AppData\\Roaming\\Goldberg SteamEmu Saves\\250900\\remote\\rep_gamestate3.dat",
+      "hash": "9F69A3B501EA83541F645D23859AF8D400A4720107793AEEC547F012959C9F89",
+      "writtenUtc": "2026-11-27T00:00:56.1135949Z"
+    },
+    {
+      "absentBefore": true,
+      "path": "C:\\Users\\Anton\\AppData\\Roaming\\Goldberg SteamEmu Saves\\250900\\remote\\rep_persistentgamedata3.dat",
+      "hash": "513C88CC87020B37EDED593EDDEDFEA6B4BA43FDD5FB207C77903ABD983C2D20",
+      "writtenUtc": "2026-11-27T00:00:56.1146951Z"
+    },
+    {
+      "absentBefore": true,
+      "path": "C:\\Users\\Anton\\Documents\\My Games\\Binding of Isaac Repentance\\20261127.rep_persistentgamedata3.dat",
+      "hash": "7CA21DDAAA0D5A1840678A4E77283ABBC07885B6F56274584A5DB3DE8986ED32",
+      "writtenUtc": "2026-11-27T00:00:56.1146951Z"
+    }
+  ],
+  "unresolvedNewFiles": [],
+  "restoredFiles": 3,
+  "mainRestored": true,
+  "stateRestored": true,
+  "restoreErrors": []
+}

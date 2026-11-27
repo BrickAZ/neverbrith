@@ -1,14 +1,13 @@
 -- Physical temporary copies tracked by full native history receipts, never by same-ID count removal.
 -- REPENTOGON 1.0.12a: Lua history arrays start at 1; native history removal uses vector indices.
 return function(mod, context)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     local State, itemId = assert(context.State, "DivineLeftHand requires State"), assert(context.ItemId)
     local api, granting = {}, {}
     local fields = {"time", "stage", "stageType", "room", "pool", "trinket"}
 
-    local function copy(value)
-        if type(value) ~= "table" then return value end
-        local result = {}; for key, child in pairs(value) do result[key] = copy(child) end; return result
-    end
+    local copy = include("scripts.runtime.plain_data").CopyTree
 
     local function log(message)
         if context.DebugLog then pcall(context.DebugLog, "DivineLeftHand: " .. tostring(message)) end
@@ -253,6 +252,9 @@ return function(mod, context)
         if not ok then log(err) end
         return succeeded and {Discharge = true, ShowAnim = true, Remove = false} or failed
     end
+    function callbackInstallers.use(add)
+        return add("MC_USE_ITEM", use, itemId)
+    end
 
     State.SubscribeAcquisition(function(player)
         if not granting[key(player)] then safeSync(player) end
@@ -265,7 +267,7 @@ return function(mod, context)
     end)
     mod.DivineLeftHand = api
     local function add(name, fn, filter) if ModCallbacks[name] then mod:AddCallback(ModCallbacks[name], fn, filter) end end
-    add("MC_USE_ITEM", use, itemId)
+    callbackInstallers.use(add)
     add("MC_POST_PLAYER_UPDATE", function(_, player) guardedCleanup(player) end)
     add("MC_POST_NEW_LEVEL", function() for _, player in ipairs(context.GetPlayers()) do guardedCleanup(player) end end)
     add("MC_POST_GAME_STARTED", function(_, continued)

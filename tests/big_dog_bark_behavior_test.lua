@@ -29,10 +29,15 @@ local function assertVectorNear(actual, x, y, epsilon, message)
     assertNear(actual.Y, y, epsilon, (message or "vector") .. " Y")
 end
 
--- localization_test owns the project's complete ordinary-Repentance stub and
--- loads main.lua.  Keeping this behavior test on that entrypoint prevents the
--- production module from accidentally depending on REPENTOGON or StageAPI.
-dofile("tests/localization_test.lua")
+-- Shared fixture supplies the required REPENTOGON contract and loads main.lua.
+-- This test exercises the actual production entry without localization assertions.
+local familySources = { "big_dog_bark.lua" }
+dofile("tests/support/neverbirth_fixture.lua")({ OnInclude = function(name)
+    if name:match("^scripts%.features%.big_dog_bark")
+        or name == "scripts.features.wind_charge_rod" or name == "scripts.features.echo_shard" then
+        familySources[#familySources + 1] = name:gsub("%.", "/") .. ".lua"
+    end
+end })
 
 local api = assert(Neverbirth and Neverbirth.BigDogBarkTestAPI,
     "Big Dog Bark runtime API should load through main.lua")
@@ -1459,7 +1464,9 @@ local function test_mature_chew_events_pathing_and_retry_contract()
         "a newly blocked route invalidates the cached path")
 end
 local function test_source_has_no_hot_global_scans()
-    local module = readFile("big_dog_bark.lua")
+    local sources = {}
+    for _, path in ipairs(familySources) do sources[#sources + 1] = readFile(path) end
+    local module = table.concat(sources, "\n")
     assertEquals(module:find("GetCollectibles", 1, true), nil,
         "food pickup tracking must not enumerate global ItemConfig")
     assertEquals(module:find("MC_POST_ADD_COLLECTIBLE", 1, true), nil,
@@ -1467,13 +1474,15 @@ local function test_source_has_no_hot_global_scans()
     assertTruthy(module:find("FindInRadius", 1, true),
         "dash and trail collision should use local radius queries")
 
-    local effectUpdateStart = assert(module:find("local function updateDog", 1, true),
-        "dog effect update should exist")
-    local effectUpdateEnd = assert(module:find("local function movementInput", effectUpdateStart, true),
-        "effect hot-update block should have a stable end marker")
-    local effectUpdate = module:sub(effectUpdateStart, effectUpdateEnd - 1)
-    assertEquals(effectUpdate:find("GetRoomEntities", 1, true), nil,
-        "per-effect hot update must not scan the whole room")
+    for _, name in ipairs({ "updateDog", "updateEcho", "updateTrail" }) do
+        local effectUpdateStart = assert(module:find("local function " .. name, 1, true),
+            name .. " effect update should exist")
+        local effectUpdateEnd = assert(module:find("\n    end", effectUpdateStart, true),
+            name .. " effect update should have a closing function boundary")
+        local effectUpdate = module:sub(effectUpdateStart, effectUpdateEnd - 1)
+        assertEquals(effectUpdate:find("GetRoomEntities", 1, true), nil,
+            "per-effect hot update must not scan the whole room")
+    end
 end
 
 test_registration()

@@ -177,9 +177,10 @@ local function makePlayer(seed, playerType)
         self.batteryCharges[slot] = 0
     end
     function player:GetCard(slot) return self.cards[slot] or 0 end
-    function player:SetCard(slot, id) self.cards[slot] = id end
+    -- Native card/pill setters replace the same pocket, including a zero ID.
+    function player:SetCard(slot, id) self.cards[slot] = id; self.pills[slot] = 0 end
     function player:GetPill(slot) return self.pills[slot] or 0 end
-    function player:SetPill(slot, id) self.pills[slot] = id end
+    function player:SetPill(slot, id) self.pills[slot] = id; self.cards[slot] = 0 end
     function player:GetMaxHearts() return self.health.maxHearts end
     function player:GetHearts() return self.health.hearts end
     function player:GetSoulHearts() return self.health.soulHearts end

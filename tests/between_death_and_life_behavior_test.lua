@@ -19,8 +19,15 @@ end
 
 local function loadNeverbirth(options)
     options = options or {}
+    local function copy(value)
+        if type(value) ~= "table" then return value end
+        local result = {}
+        for key, child in pairs(value) do result[key] = copy(child) end
+        return result
+    end
     local callbacks = {}
     local savedData = options.savedData or "{}"
+    local savedRoot = copy(options.savedRoot or {})
     local itemIds = {
         EssentialBalm = 733,
         Wuhu = 734,
@@ -46,10 +53,11 @@ local function loadNeverbirth(options)
         return {
             encode = function(value)
                 savedData = value
+                savedRoot = copy(value)
                 return "<json>"
             end,
             decode = function()
-                return {}
+                return copy(savedRoot)
             end,
         }
     end
@@ -159,7 +167,7 @@ local function loadNeverbirth(options)
 
     local seeds = {
         GetStartSeedString = function()
-            return "TEST RUN"
+            return options.runSeed or "TEST RUN"
         end,
     }
 
@@ -454,6 +462,7 @@ local function loadNeverbirth(options)
 
     return {
         mod = mod,
+        callbacks = callbacks,
         items = itemIds,
         room = room,
         level = level,
@@ -468,6 +477,7 @@ local function loadNeverbirth(options)
         savedData = function()
             return savedData
         end,
+        savedRoot = function() return copy(savedRoot) end,
     }
 end
 
@@ -522,6 +532,86 @@ local function test_pickup_immediately_activates_trial_and_consumes_item()
     assertEquals(#player.removeCalls, 1, "pickup should immediately consume Between Death and Life")
     assertEquals(player.removeCalls[1].itemId, env.items.BetweenDeathAndLife, "pickup consumption should remove Between Death and Life")
     assertEquals(enemy.champion, true, "pickup should activate Death Trial without requiring manual use or charge")
+end
+
+local function withUserdataPlayer(player, body)
+    -- A real Lua userdata exercises the type boundary; native behavior is tested separately.
+    local proxy = assert(io.tmpfile())
+    local originalMetatable = getmetatable(proxy)
+    debug.setmetatable(proxy, { __index = player, __newindex = player })
+    local ok, err = pcall(body, proxy)
+    debug.setmetatable(proxy, originalMetatable)
+    proxy:close()
+    assertTruthy(ok, err)
+end
+
+local function test_native_player_pickup_preserves_slots_owner_and_save_contract()
+    for slot = 0, 3 do
+        local env = loadNeverbirth({ hasData = true, savedRoot = { sentinel = { value = 123 } } })
+        local otherPlayer = env.newPlayer()
+        local player = env.newPlayer({
+            activeItems = { [slot] = env.items.BetweenDeathAndLife },
+            activeCharges = { [slot] = 0 },
+        })
+        withUserdataPlayer(player, function(nativePlayer)
+            assertEquals(type(nativePlayer), "userdata", "player must exercise the native type boundary")
+            env.runPostAddCollectible(nativePlayer, slot)
+            assertEquals(#player.removeCalls, 1, "pickup must consume exactly one owned item")
+            assertEquals(player.removeCalls[1].slot, slot, "pickup must consume the callback's active slot")
+            assertEquals(#otherPlayer.removeCalls, 0, "pickup must not consume another player's copy")
+            local saved = env.savedRoot()
+            assertEquals(saved.deathTrial.active, true, "zero-charge userdata pickup must persist activation")
+            assertEquals(saved.sentinel.value, 123, "unrelated save fields must survive")
+            local expectedKeys = {
+                active = true, runSeed = true, activatedFloorKey = true, activatedRoomKey = true,
+                spawnedByFloor = true, preActivationBossClearedFloors = true,
+            }
+            local fields = 0
+            for key in pairs(saved.deathTrial) do
+                assertTruthy(expectedKeys[key], "pickup must not introduce a new save field: " .. key)
+                fields = fields + 1
+            end
+            assertEquals(fields, 6, "activated save must retain the six original fields")
+            local sameRoom = env.newNpc()
+            env.runPostNpcInit(sameRoom)
+            assertEquals(sameRoom.champion, false, "pickup must not empower its activation room")
+            env.level.currentRoomIndex = 1
+            local laterRoom = env.newNpc()
+            env.runPostNpcInit(laterRoom)
+            assertEquals(laterRoom.champion, true, "pickup must empower later rooms")
+
+            player.activeItems[slot] = env.items.BetweenDeathAndLife
+            env.runPostAddCollectible(nativePlayer, slot)
+            assertEquals(#player.removeCalls, 2, "another copy must be consumed once")
+            assertEquals(env.savedRoot().deathTrial.activatedRoomKey, saved.deathTrial.activatedRoomKey,
+                "another pickup must not restart an active trial")
+        end)
+    end
+end
+
+local function test_pickup_callback_remains_filtered_and_has_no_return_override()
+    local env = loadNeverbirth()
+    local count = 0
+    for _, entry in ipairs(env.callbacks[ModCallbacks.MC_POST_ADD_COLLECTIBLE] or {}) do
+        if entry.fn == env.mod.ActivateBetweenDeathAndLifeOnPickup then
+            count = count + 1
+            assertEquals(entry.param, env.items.BetweenDeathAndLife, "pickup callback must stay item-filtered")
+            assertEquals(entry.fn(env.mod, env.items.BetweenDeathAndLife, 0, true, 0, 0, nil), nil,
+                "missing player must have no effect or POST return override")
+        end
+    end
+    assertEquals(count, 1, "pickup callback must have one owner and registration")
+end
+
+local function test_manual_use_still_requires_twelve_charges()
+    local env = loadNeverbirth()
+    local player = env.newPlayer({ activeCharges = { [ActiveSlot.SLOT_PRIMARY] = 11 } })
+    assertEquals(env.runUse(player), false, "manual use below twelve charges must fail")
+    assertEquals(#player.removeCalls, 0, "failed manual use must retain the item")
+    env.level.currentRoomIndex = 1
+    local enemy = env.newNpc()
+    env.runPostNpcInit(enemy)
+    assertEquals(enemy.champion, false, "failed manual use must not start the trial")
 end
 
 local function test_use_does_not_stack_trial()
@@ -621,9 +711,14 @@ local function test_new_run_resets_trial_state()
     assertEquals(enemy.champion, false, "new run should reset Death Trial state")
 end
 
+if ... == "--fixture" then return loadNeverbirth end
+
 test_xml_registers_active_twelve_charge_item_and_pools()
 test_use_activates_trial_and_consumes_item()
 test_pickup_immediately_activates_trial_and_consumes_item()
+test_native_player_pickup_preserves_slots_owner_and_save_contract()
+test_pickup_callback_remains_filtered_and_has_no_return_override()
+test_manual_use_still_requires_twelve_charges()
 test_use_does_not_stack_trial()
 test_normal_enemy_spawn_after_activation_becomes_champion()
 test_activation_room_spawn_is_not_elite_until_later_rooms()

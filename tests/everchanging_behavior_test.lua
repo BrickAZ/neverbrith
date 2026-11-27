@@ -26,7 +26,7 @@ local function itemBlock(text, name)
     return text:match('<passive%s+name="' .. escaped .. '"(.-)/>')
 end
 
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 
 PlayerType = {
     PLAYER_JACOB = 19,
@@ -634,7 +634,7 @@ assertEquals(api.Callbacks.PlayerInit(nil, fresh), nil, "player init callback re
 assertEquals(api.Callbacks.NewRoom(nil), nil, "new room callback return")
 assertEquals(api.Callbacks.NewLevel(nil), nil, "new level callback return")
 local mainText = readFile("main.lua")
-local block = assert(mainText:match("%-%- EVERCHANGING_BEGIN(.-)%-%- EVERCHANGING_END"), "Everchanging source block")
+local block = dofile("tests/support/read_feature_source.lua")("scripts/features/everchanging.lua")
 assertTruthy(block:find("sprite:Load(anm2Path, true)", 1, true),
     "Everchanging full skins must load a complete player ANM2")
 assertEquals(block:find("ReplaceSpritesheet", 1, true), nil,

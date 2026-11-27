@@ -5,12 +5,12 @@ return function(mod,context)
     local C=include('motion_input_core')
     local A=include('motion_input_any_direction')(C)
     local S=include('motion_input_shooting')
+    local entityKey=include('scripts/systems/entity_identity')
     local service={active=true,bindings={},rehearsals={},states={},facings={},serials={},Capabilities={}}
     local rehearsalOwner={}
     local game=Game();local readDepth=0
     local function key(p)
-        return context.Key and context.Key(p) or
-            (GetPtrHash and tostring(GetPtrHash(p)) or tostring(p))..':'..tostring(p.InitSeed or 0)
+        return context.Key and context.Key(p) or entityKey(p)
     end
     local function log(message)
         if context.DebugLog then context.DebugLog('[Motion Input] '..message)

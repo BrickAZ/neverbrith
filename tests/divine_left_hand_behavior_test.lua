@@ -1,3 +1,4 @@
+include = function(path) return dofile((path:gsub('%.', '/')) .. '.lua') end
 local function eq(a,b,m) assert(a==b,(m or 'mismatch')..': expected '..tostring(b)..', got '..tostring(a)) end
 local function clone(t) if type(t)~='table' then return t end local r={} for k,v in pairs(t) do r[k]=clone(v) end return r end
 ModCallbacks={MC_USE_ITEM=1,MC_POST_PLAYER_UPDATE=2,MC_POST_NEW_LEVEL=3,MC_POST_GAME_STARTED=4,MC_PRE_GAME_EXIT=5}

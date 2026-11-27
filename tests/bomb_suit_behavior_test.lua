@@ -154,6 +154,7 @@ local function environment(options)
         function bomb:ToBomb()return self end
         return bomb
     end
+    include = function(name) return dofile((name:gsub('%.','/'))..'.lua') end
     dofile('bomb_suit.lua')(mod,{ItemId=900,GetPlayers=function()return env.players end,
         DebugLog=function(message)env.error=message end})
     dispatch(ModCallbacks.MC_POST_GAME_STARTED,nil,false)

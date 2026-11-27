@@ -1,5 +1,7 @@
 -- Shared Angel/Devil Box deal selection. REPENTOGON 1.0.12a door callback.
 return function(mod, context)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     local ANGEL, DEVIL = RoomType.ROOM_ANGEL, RoomType.ROOM_DEVIL
     local INDEX = GridRooms and GridRooms.ROOM_DEVIL_IDX or -1
     local changing = false
@@ -116,8 +118,11 @@ return function(mod, context)
         log(string.format("deal source=%d roll=%.6f threshold=0.5 target=%d applied=%s", original, roll, target, tostring(ok and applied)))
         return nil
     end
+    function callbackInstallers.convertDoor()
+        return mod:AddCallback(ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_UPDATE, convertDoor)
+    end
     mod.BoxDealRooms = { Open = open, Log = log }
     if ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_UPDATE then
-        mod:AddCallback(ModCallbacks.MC_PRE_GRID_ENTITY_DOOR_UPDATE, convertDoor)
+        callbackInstallers.convertDoor()
     end
 end

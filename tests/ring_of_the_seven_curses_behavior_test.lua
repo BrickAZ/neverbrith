@@ -207,6 +207,7 @@ local function makePlayer(seed, playerType)
     return player
 end
 
+function include(name) return dofile(name:gsub('%.', '/') .. '.lua') end
 local initialize = assert(loadfile("ring_of_the_seven_curses.lua"))()
 initialize(mod, {
     ItemId = 9000,

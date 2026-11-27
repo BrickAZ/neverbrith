@@ -16,9 +16,7 @@ local native = read("E:/Isaac - Repentance/resources/scripts/main_ex.lua")
 dofile("tests/repentogon_installed_dispatch_contract.lua")(native)
 local comparator = assert(load(section(native, "local function CallbackComparator(",
     "-- Normally if you execute") .. "\nreturn CallbackComparator"))()
-local fixture = read("tests/localization_test.lua")
-local loader = assert(load(fixture:sub(1, assert(fixture:find("local expectedXmlItems =", 1, true)) - 1)
-    .. "\nreturn loadNeverbirthWithEID"))()
+local loader = dofile("tests/support/neverbirth_fixture.lua")
 local env = loader()
 local mod, registrations = Neverbirth, env.callbacks
 local ace = assert(mod.ACEAntiCheatTestAPI)

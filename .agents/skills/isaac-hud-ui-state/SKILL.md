@@ -1,0 +1,110 @@
+---
+name: isaac-hud-ui-state
+description: "Design, implement, review, debug, or write handoff prompts for Binding of Isaac: Repentance mod HUD, world-following indicators, prompts, counters, selectors, and short-lived UI state. Use whenever UI coordinates, player-specific display, manual Sprite rendering, pause, room changes, or HUD state cleanup matters. 中文触发：HUD、UI、提示、计数器、选择菜单、头顶标记、屏幕坐标、WorldToScreen、暂停、界面状态。"
+---
+
+# Isaac HUD and UI State
+
+## User Decisions and Technical Discovery
+
+Read the [shared decision and evidence policy](../isaac-mod-context/references/tbd-disclosure.md).
+
+Use `isaac-mod-context` before an unfamiliar project. Discover existing HUD,
+render, asset, state, and multiplayer conventions rather than assuming paths,
+animation names, or a UI framework.
+
+## REPENTOGON Companion
+
+For declared REPENTOGON ImGui/HUD integration, use `isaac-repentogon-ui` for
+construction, events, input, menu/run guards and owned teardown. Its matching-build
+UI contract takes precedence over vanilla-only advice. A pinned ImGui window is
+not an interactive normal-play HUD entry; preserve the requested in-game location
+and test each input device separately. This skill retains carrier, coordinates
+and display-state ownership.
+
+## Boundary
+
+This skill governs visual carrier selection, coordinate domains, UI ownership, and
+lifecycle. It does not decide gameplay effects, item balance, or ANM2 asset
+authoring. Use `isaac-mechanic-contracts` for settlement, `isaac-anm2-visuals`
+for ANM2 facts, `isaac-state-lifecycle` for durable state, and
+`isaac-audio-render-feedback` for broader audiovisual feedback.
+
+Keep the official UI route when no extension is declared. For explicitly
+selected REPENTOGON, retain its required or optional mode and verify the build.
+Required projects do not need a behaviorally different vanilla fallback;
+optional projects preserve their proven core without the enhancement.
+
+## Select a Carrier Before Coding
+
+- **HUD/screen UI:** fixed to the screen, such as counters and menus.
+- **World-following indicator:** attached above a player or entity.
+- **Entity visual:** needs engine-world placement or entity lifecycle.
+- **Costume:** only when the request explicitly changes player appearance.
+
+Do not use HUD coordinates for world movement or a loose manually-rendered sprite
+as a collision, damage, AI, HP, or targeting entity. Route such behavior through
+`isaac-entities`.
+
+## Visibility And Display Ownership
+
+Before rendering a HUD feature, write a visibility matrix for the discovered
+game/project states that matter: HUD hidden or disabled, pause/menu, special
+rooms or sequences, no-HUD seeds, co-op/player ownership, render pass, and any
+third-party equivalent display. Unknown states stay explicit; do not infer the
+whole matrix from one working room.
+
+If the base game, REPENTOGON, or another declared integration can show the same
+information, choose one display owner. Do not draw both. Enabling, disabling, or
+temporarily mutating another provider's option requires project/user authority;
+if a temporary mutation is approved, restore it on every exit, error, reload,
+and shutdown path. A library's equivalent feature is not a default dependency.
+
+Cache layout only when its inputs are stable. Recompute on discovered
+invalidation edges such as HUD offset, viewport, player count/identity, language,
+or option changes; do not use stale coordinates or rebuild immutable sprites
+every render.
+
+## Coordinate Contract
+
+Read `../isaac-anm2-visuals/references/lua-sprite-effects.md` for the canonical
+manual-Sprite coordinate contract. Before coding, label every input as world,
+visual/render, callback offset, or screen space.
+
+- Use `owner.Position + declaredWorldOffset` as the default logical anchor for
+  head prompts, charge bars, and gameplay markers, then call
+  `Isaac.WorldToScreen` exactly once.
+- Do not blindly add `PositionOffset`, `SpriteOffset`, `GetFlyingOffset()`, or
+  callback `RenderOffset`. If the requirement is to match the rendered body,
+  use a discovered project adapter and prove each offset is applied once.
+- A fixed Y offset is provisional and owner-category-specific, not universal.
+  Validate players and NPCs separately when size, Boss scale, or pivot differs.
+- If conversion fails, do not render the raw world position. Define allowed
+  render modes and suppress duplicate reflection/refraction passes unless the
+  design explicitly asks for them.
+
+Code inspection alone does not prove placement. A coordinate behavior test must
+use a non-identity camera transform and independent nonzero visual/callback
+offsets; an identity `WorldToScreen` with zero offsets cannot catch double
+application. Keep real camera, riding/flying, co-op, and pass behavior as
+in-game evidence. Record unresolved policies as `TBD`.
+
+## State, Render, and Cleanup
+
+Keep gameplay settlement outside render callbacks. Owner-bound UI must identify
+the owner and distinguish co-op players; do not replace it with a global boolean
+unless the feature is explicitly global.
+
+For temporary UI define creation, update, visibility, and cleanup at duration
+expiry, owner removal/death/invalidity, required room/level/run boundaries,
+pause/menu behavior, and mod reload. Discover asset paths and animation names;
+never invent them.
+
+For modal menus, inventory every state changed on entry: input capture, player
+controls, frozen entities, timers, mouse state, and foreign configuration. Every
+normal close, cancellation, room transition, reload, and error path must restore
+the approved changes. Do not freeze unrelated entities or rewrite another mod's
+menu key merely because one reference implementation did so.
+
+Read `references/ui-state-review.md` for the carrier/coordinate/lifecycle table.
+Never call a UI correct merely because it did not crash or because a stub rendered.

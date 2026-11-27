@@ -34,11 +34,12 @@ try {
     # status handling; actual repository validators run separately in Pilot/LuaAll.
     $stub = 'param([string]$Root,[string]$ModObjectName,[string]$SkillRoot,[switch]$ReadmeOnly); exit 0'
     foreach ($path in @(
-        'docs/skills/isaac-validators/scripts/validate-isaac-mod.ps1',
-        'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1',
+        'tools/validators/validate-isaac-mod.ps1',
+        'tools/validators/validate-neverbrith.ps1',
         'tools/validate_mystuff_local_ids.ps1',
         'tests/compatibility_docs_test.ps1',
         'tests/agent_wiki_navigation_test.ps1'
+        'tests/project_knowledge_test.ps1'
     )) { Put $path $stub }
     Put 'main.lua' 'return {}'
     Put 'tests/a_test.lua' 'SHOULD_NOT_LEAK=99; assert(io.open("main.lua", "r")):close(); print("first child ran")'
@@ -62,12 +63,37 @@ try {
     $cases++
     Put 'main.lua' 'return {}'
 
-    Put 'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1' 'Write-Output "intentional static failure"; exit 7'
+    Put 'scripts/features/nested/broken.lua' 'local = invalid'
+    $result = Run
+    Require ($result.Code -eq 1) 'nested runtime module syntax failure must fail the command'
+    Require (@($result.Data.Checks | Where-Object { $_.Id -eq 'lua-syntax' -and $_.Stderr -match 'broken.lua' }).Count -eq 1) 'new runtime directory must really be parsed'
+    $cases++
+    Put 'scripts/features/nested/broken.lua' 'return {}'
+    Put 'tests/support/broken_fixture.lua' 'local = invalid'
+    $result = Run
+    Require ($result.Code -eq 1) 'shared fixture syntax failure must fail the command'
+    $cases++
+    Put 'tests/support/broken_fixture.lua' 'return {}'
+
+    # The file list itself must exceed the Windows command-line limit. Include
+    # a late syntax error so chunking/truncation cannot silently drop a suffix.
+    foreach ($index in 1..400) {
+        Put ("scripts/long_manifest/module_{0:D4}_with_a_long_descriptive_filename.lua" -f $index) 'return {}'
+    }
+    $result = Run
+    Require ($result.Code -eq 0 -and $result.Data.SyntaxFileCount -ge 405) 'long syntax manifest must parse every file'
+    Put 'scripts/long_manifest/module_0400_with_a_long_descriptive_filename.lua' 'local = invalid'
+    $result = Run
+    Require (@($result.Data.Checks | Where-Object { $_.Id -eq 'lua-syntax' -and $_.Status -eq 'failed' -and $_.Stderr -match 'module_0400' }).Count -eq 1) 'late manifest syntax error must not be omitted'
+    Put 'scripts/long_manifest/module_0400_with_a_long_descriptive_filename.lua' 'return {}'
+    $cases++
+
+    Put 'tools/validators/validate-neverbrith.ps1' 'Write-Output "intentional static failure"; exit 7'
     $result = Run
     Require ($result.Code -eq 1) 'PowerShell validator failure must propagate'
     Require (@($result.Data.Checks | Where-Object { $_.Id -eq 'static:strict' -and $_.ExitCode -eq 7 }).Count -eq 1) 'validator exit code must survive aggregation'
     $cases++
-    Put 'docs/skills/isaac-neverbrith-validator-profile/scripts/validate-neverbrith.ps1' $stub
+    Put 'tools/validators/validate-neverbrith.ps1' $stub
 
     $result = Run (Join-Path $sandbox 'missing-lua.exe')
     Require ($result.Code -eq 2 -and -not $result.Data.Passed) 'explicit missing runner must be blocked, with no fallback'

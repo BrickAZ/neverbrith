@@ -1,4 +1,5 @@
 -- Behavioral contracts for the shared acquisition/rollback service.
+include = function(path) return dofile((path:gsub('%.', '/')) .. '.lua') end
 ModCallbacks = {MC_PRE_PICKUP_COLLISION=1,MC_PRE_ADD_COLLECTIBLE=2,MC_POST_ADD_COLLECTIBLE=3,
  MC_POST_UPDATE=4,MC_POST_GAME_STARTED=5,MC_PRE_GAME_EXIT=6,MC_POST_GLOWING_HOURGLASS_SAVE=7,
  MC_POST_GLOWING_HOURGLASS_LOAD=8,MC_POST_PICKUP_INIT=9,MC_POST_NEW_ROOM=10,MC_POST_PICKUP_COLLISION=11,

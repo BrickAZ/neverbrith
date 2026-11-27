@@ -1,0 +1,2448 @@
+{
+  "passed": true,
+  "runtimeFiles": [
+    "annihilation.lua",
+    "avada_kedavra.lua",
+    "big_dog_bark.lua",
+    "blinky.lua",
+    "blinky_core.lua",
+    "bomb_suit.lua",
+    "box_deal_rooms.lua",
+    "divine_left_hand.lua",
+    "drive_glove.lua",
+    "drive_glove_audio.lua",
+    "drive_glove_core.lua",
+    "drive_glove_damage.lua",
+    "drive_glove_visuals.lua",
+    "drive_glove_weapon.lua",
+    "echo_baby.lua",
+    "generated/motion_presentation.lua",
+    "generated/motion_sa_hud.lua",
+    "generated/neverbirth_collectibles.lua",
+    "god_complex.lua",
+    "healthy_sleep.lua",
+    "i_am_a_god.lua",
+    "inventory_selector.lua",
+    "kamikaze_squad.lua",
+    "low_grade.lua",
+    "main.lua",
+    "memory_disorder.lua",
+    "motion_cinematic.lua",
+    "motion_combat.lua",
+    "motion_combat_core.lua",
+    "motion_input.lua",
+    "motion_input_any_direction.lua",
+    "motion_input_core.lua",
+    "motion_input_shooting.lua",
+    "motion_item_text.lua",
+    "motion_items.lua",
+    "motion_presentation.lua",
+    "motion_presentation_additions.lua",
+    "motion_sa_hud.lua",
+    "night_of_the_cowards.lua",
+    "pending_content_integration.lua",
+    "pending_content_state.lua",
+    "repentogon_dependency_guard.lua",
+    "revive_my_love.lua",
+    "ring_of_the_seven_curses.lua",
+    "scripts/catalog/collectibles.lua",
+    "scripts/catalog/eid_descriptions.lua",
+    "scripts/catalog/item_config.lua",
+    "scripts/catalog/item_id.lua",
+    "scripts/catalog/pickup_texts.lua",
+    "scripts/features/ace_anti_cheat_system.lua",
+    "scripts/features/ace_anti_cheat_system/audit.lua",
+    "scripts/features/ace_anti_cheat_system/combat.lua",
+    "scripts/features/ace_anti_cheat_system/queries.lua",
+    "scripts/features/ace_anti_cheat_system/runtime.lua",
+    "scripts/features/ace_anti_cheat_system/state.lua",
+    "scripts/features/annihilation/combat.lua",
+    "scripts/features/annihilation/ledger.lua",
+    "scripts/features/annihilation/presentation.lua",
+    "scripts/features/annihilation/queries.lua",
+    "scripts/features/annihilation/runtime.lua",
+    "scripts/features/avada_kedavra/casts.lua",
+    "scripts/features/avada_kedavra/controls.lua",
+    "scripts/features/avada_kedavra/entities.lua",
+    "scripts/features/avada_kedavra/hits.lua",
+    "scripts/features/avada_kedavra/queries.lua",
+    "scripts/features/avada_kedavra/runtime.lua",
+    "scripts/features/avada_kedavra/weapon.lua",
+    "scripts/features/between_death_and_life.lua",
+    "scripts/features/between_death_and_life/save_schema.lua",
+    "scripts/features/big_dog_bark.lua",
+    "scripts/features/big_dog_bark/audio.lua",
+    "scripts/features/big_dog_bark/chew.lua",
+    "scripts/features/big_dog_bark/dash.lua",
+    "scripts/features/big_dog_bark/effects.lua",
+    "scripts/features/big_dog_bark/food.lua",
+    "scripts/features/big_dog_bark/hud.lua",
+    "scripts/features/big_dog_bark/input.lua",
+    "scripts/features/big_dog_bark/lifecycle.lua",
+    "scripts/features/big_dog_bark/queries.lua",
+    "scripts/features/big_dog_bark/rules.lua",
+    "scripts/features/big_dog_bark/save_schema.lua",
+    "scripts/features/big_dog_bark/state.lua",
+    "scripts/features/big_dog_bark/targets.lua",
+    "scripts/features/big_dog_bark/trails.lua",
+    "scripts/features/big_dog_bark/upgrade_pool.lua",
+    "scripts/features/black_taisui.lua",
+    "scripts/features/black_taisui/growth.lua",
+    "scripts/features/black_taisui/lifecycle.lua",
+    "scripts/features/black_taisui/presentation.lua",
+    "scripts/features/black_taisui/purification.lua",
+    "scripts/features/black_taisui/save_schema.lua",
+    "scripts/features/black_taisui/survival.lua",
+    "scripts/features/blood_skull_gu.lua",
+    "scripts/features/bomb_suit/bombs.lua",
+    "scripts/features/bomb_suit/config.lua",
+    "scripts/features/bomb_suit/damage.lua",
+    "scripts/features/bomb_suit/lifecycle.lua",
+    "scripts/features/bomb_suit/presentation.lua",
+    "scripts/features/bomb_suit/state.lua",
+    "scripts/features/boss_order.lua",
+    "scripts/features/boxes/active_charge.lua",
+    "scripts/features/boxes/angelbox.lua",
+    "scripts/features/boxes/angelbox_save_schema.lua",
+    "scripts/features/boxes/devilbox.lua",
+    "scripts/features/boxes/devilbox_save_schema.lua",
+    "scripts/features/boxes/heart_bonuses.lua",
+    "scripts/features/boxes/reward_delivery.lua",
+    "scripts/features/boxes/reward_ledger.lua",
+    "scripts/features/boxes/reward_selection.lua",
+    "scripts/features/boxes/shared.lua",
+    "scripts/features/burn_away_resentment.lua",
+    "scripts/features/burn_away_resentment/attributes.lua",
+    "scripts/features/burn_away_resentment/combat.lua",
+    "scripts/features/burn_away_resentment/ledger.lua",
+    "scripts/features/burn_away_resentment/presentation.lua",
+    "scripts/features/burn_away_resentment/queries.lua",
+    "scripts/features/burn_away_resentment/runtime.lua",
+    "scripts/features/certificate_of_neverbirth.lua",
+    "scripts/features/certificate_of_neverbirth/flow.lua",
+    "scripts/features/certificate_of_neverbirth/gallery.lua",
+    "scripts/features/certificate_of_neverbirth/ledger.lua",
+    "scripts/features/certificate_of_neverbirth/pickups.lua",
+    "scripts/features/certificate_of_neverbirth/runtime.lua",
+    "scripts/features/certificate_of_neverbirth/save_schema.lua",
+    "scripts/features/chunyao.lua",
+    "scripts/features/cleansed_wavy_cap.lua",
+    "scripts/features/cleaver.lua",
+    "scripts/features/cleaver/attributes.lua",
+    "scripts/features/cleaver/combat.lua",
+    "scripts/features/cleaver/controls.lua",
+    "scripts/features/cleaver/geometry.lua",
+    "scripts/features/cleaver/presentation.lua",
+    "scripts/features/cleaver/queries.lua",
+    "scripts/features/cleaver/runtime.lua",
+    "scripts/features/cleaver/shadows.lua",
+    "scripts/features/coin_faced_mask.lua",
+    "scripts/features/coin_faced_mask/presentation.lua",
+    "scripts/features/coin_faced_mask/settlement.lua",
+    "scripts/features/coin_faced_mask/state.lua",
+    "scripts/features/coin_sewn_sword.lua",
+    "scripts/features/coin_sewn_sword/aiming.lua",
+    "scripts/features/coin_sewn_sword/attack.lua",
+    "scripts/features/coin_sewn_sword/input.lua",
+    "scripts/features/coin_sewn_sword/presentation.lua",
+    "scripts/features/coin_sewn_sword/qi.lua",
+    "scripts/features/coin_sewn_sword/rules.lua",
+    "scripts/features/condom.lua",
+    "scripts/features/condom/bans.lua",
+    "scripts/features/condom/presentation.lua",
+    "scripts/features/condom/replacement.lua",
+    "scripts/features/condom/save_schema.lua",
+    "scripts/features/crazy_coconut.lua",
+    "scripts/features/crazy_coconut/acquisition.lua",
+    "scripts/features/crazy_coconut/attributes.lua",
+    "scripts/features/crazy_coconut/ledger.lua",
+    "scripts/features/crazy_coconut/save_schema.lua",
+    "scripts/features/debug_controller.lua",
+    "scripts/features/dental_chew.lua",
+    "scripts/features/dha_fish_oil.lua",
+    "scripts/features/divine_left_hand/notices.lua",
+    "scripts/features/dog_food_series.lua",
+    "scripts/features/dog_food_series/save_schema.lua",
+    "scripts/features/drive_glove/attribution.lua",
+    "scripts/features/drive_glove/damage.lua",
+    "scripts/features/drive_glove/freeze.lua",
+    "scripts/features/drive_glove/init.lua",
+    "scripts/features/drive_glove/input.lua",
+    "scripts/features/drive_glove/lifecycle.lua",
+    "scripts/features/drive_glove/players.lua",
+    "scripts/features/drive_glove/state.lua",
+    "scripts/features/drive_glove/weapons.lua",
+    "scripts/features/echo_shard.lua",
+    "scripts/features/empty_cradle.lua",
+    "scripts/features/energy_kibble.lua",
+    "scripts/features/essential_balm.lua",
+    "scripts/features/everchanging.lua",
+    "scripts/features/everchanging/player_anm2.lua",
+    "scripts/features/everchanging/presentation.lua",
+    "scripts/features/everchanging/registry.lua",
+    "scripts/features/everchanging/resources.lua",
+    "scripts/features/everchanging/runtime.lua",
+    "scripts/features/everchanging/save_schema.lua",
+    "scripts/features/everchanging/selection.lua",
+    "scripts/features/everchanging/state.lua",
+    "scripts/features/fortune_rivalling_heaven_gu.lua",
+    "scripts/features/fortune_rivalling_heaven_gu/audit.lua",
+    "scripts/features/fortune_rivalling_heaven_gu/registry.lua",
+    "scripts/features/fortune_rivalling_heaven_gu/runtime.lua",
+    "scripts/features/goat_milk_pudding.lua",
+    "scripts/features/god_complex/combat.lua",
+    "scripts/features/god_complex/config.lua",
+    "scripts/features/god_complex/lifecycle.lua",
+    "scripts/features/god_complex/presentation.lua",
+    "scripts/features/god_complex/state.lua",
+    "scripts/features/god_complex/targeting.lua",
+    "scripts/features/good_girl_of_babylon.lua",
+    "scripts/features/good_girl_of_babylon/combat.lua",
+    "scripts/features/good_girl_of_babylon/presentation.lua",
+    "scripts/features/good_girl_of_babylon/rewards.lua",
+    "scripts/features/good_girl_of_babylon/state.lua",
+    "scripts/features/healthy_sleep.lua",
+    "scripts/features/healthy_sleep/input.lua",
+    "scripts/features/healthy_sleep/lifecycle.lua",
+    "scripts/features/healthy_sleep/presentation.lua",
+    "scripts/features/healthy_sleep/runtime.lua",
+    "scripts/features/healthy_sleep/state.lua",
+    "scripts/features/house_vs_elephant.lua",
+    "scripts/features/house_vs_elephant/flow.lua",
+    "scripts/features/house_vs_elephant/gallery.lua",
+    "scripts/features/house_vs_elephant/ledger.lua",
+    "scripts/features/house_vs_elephant/pickups.lua",
+    "scripts/features/house_vs_elephant/runtime.lua",
+    "scripts/features/house_vs_elephant/save_schema.lua",
+    "scripts/features/i_am_a_god/combat.lua",
+    "scripts/features/i_am_a_god/config.lua",
+    "scripts/features/i_am_a_god/health.lua",
+    "scripts/features/i_am_a_god/lifecycle.lua",
+    "scripts/features/i_am_a_god/presentation.lua",
+    "scripts/features/i_am_a_god/state.lua",
+    "scripts/features/inventory_selector/entries.lua",
+    "scripts/features/inventory_selector/text.lua",
+    "scripts/features/kamikaze_squad.lua",
+    "scripts/features/kamikaze_squad/queries.lua",
+    "scripts/features/kamikaze_squad/runtime.lua",
+    "scripts/features/kamikaze_squad/targets.lua",
+    "scripts/features/kamikaze_squad/units.lua",
+    "scripts/features/lean_can.lua",
+    "scripts/features/little_leather_shoes/init.lua",
+    "scripts/features/little_leather_shoes/presentation.lua",
+    "scripts/features/little_leather_shoes/rewards.lua",
+    "scripts/features/little_leather_shoes/rules.lua",
+    "scripts/features/little_leather_shoes/runtime_views.lua",
+    "scripts/features/lucky_liver_bites.lua",
+    "scripts/features/meat_lump.lua",
+    "scripts/features/meat_lump/ledger.lua",
+    "scripts/features/meat_lump/presentation.lua",
+    "scripts/features/memory_disorder.lua",
+    "scripts/features/memory_disorder/health.lua",
+    "scripts/features/memory_disorder/icons.lua",
+    "scripts/features/memory_disorder/identity.lua",
+    "scripts/features/memory_disorder/inventory.lua",
+    "scripts/features/memory_disorder/lifecycle.lua",
+    "scripts/features/memory_disorder/pairs.lua",
+    "scripts/features/memory_disorder/player_access.lua",
+    "scripts/features/memory_disorder/profiles.lua",
+    "scripts/features/memory_disorder/save_schema.lua",
+    "scripts/features/memory_disorder/state.lua",
+    "scripts/features/memory_disorder/void_route.lua",
+    "scripts/features/motion_items/dragon_punch.lua",
+    "scripts/features/motion_items/motion_wave.lua",
+    "scripts/features/motion_items/piledriver_360.lua",
+    "scripts/features/motion_items/ultimate_720.lua",
+    "scripts/features/musicbox/core.lua",
+    "scripts/features/musicbox/init.lua",
+    "scripts/features/musicbox/presentation.lua",
+    "scripts/features/musicbox/save_schema.lua",
+    "scripts/features/needletick.lua",
+    "scripts/features/night_of_the_cowards.lua",
+    "scripts/features/night_of_the_cowards/aura.lua",
+    "scripts/features/night_of_the_cowards/fear.lua",
+    "scripts/features/night_of_the_cowards/grants.lua",
+    "scripts/features/night_of_the_cowards/queries.lua",
+    "scripts/features/night_of_the_cowards/runtime.lua",
+    "scripts/features/night_of_the_cowards/save_schema.lua",
+    "scripts/features/protein_strip.lua",
+    "scripts/features/revive_my_love.lua",
+    "scripts/features/revive_my_love/presentation.lua",
+    "scripts/features/revive_my_love/runtime.lua",
+    "scripts/features/revive_my_love/save_schema.lua",
+    "scripts/features/revive_my_love/state.lua",
+    "scripts/features/ring_of_the_seven_curses/inventory.lua",
+    "scripts/features/ring_of_the_seven_curses/rewards.lua",
+    "scripts/features/ring_of_the_seven_curses/runtime.lua",
+    "scripts/features/ring_of_the_seven_curses/save_schema.lua",
+    "scripts/features/ring_of_the_seven_curses/state.lua",
+    "scripts/features/ring_of_the_seven_curses/world.lua",
+    "scripts/features/shredded_tarot.lua",
+    "scripts/features/sterilization_certificate.lua",
+    "scripts/features/strong_laxative.lua",
+    "scripts/features/strong_laxative/creep.lua",
+    "scripts/features/strong_laxative/creep_variants.lua",
+    "scripts/features/strong_laxative/players.lua",
+    "scripts/features/strong_laxative/poop.lua",
+    "scripts/features/strong_laxative/presentation.lua",
+    "scripts/features/strong_laxative/synergies.lua",
+    "scripts/features/the_moon_is_beautiful.lua",
+    "scripts/features/the_moon_is_beautiful/combat.lua",
+    "scripts/features/the_moon_is_beautiful/presentation.lua",
+    "scripts/features/the_moon_is_beautiful/rewards.lua",
+    "scripts/features/the_moon_is_beautiful/room.lua",
+    "scripts/features/tower_of_babel.lua",
+    "scripts/features/tower_of_babel/creep_variants.lua",
+    "scripts/features/traffic_exposure.lua",
+    "scripts/features/traffic_heat.lua",
+    "scripts/features/traffic_unboxing.lua",
+    "scripts/features/uncut_cord.lua",
+    "scripts/features/utility_knife.lua",
+    "scripts/features/utility_knife/save_schema.lua",
+    "scripts/features/wind_charge_rod.lua",
+    "scripts/features/wuhu.lua",
+    "scripts/features/yins_curse/acquisition.lua",
+    "scripts/features/yins_curse/pedestals.lua",
+    "scripts/features/yins_curse/queries.lua",
+    "scripts/features/yins_curse/runtime.lua",
+    "scripts/features/yins_curse/save_schema.lua",
+    "scripts/features/yins_curse/state.lua",
+    "scripts/integrations/eid.lua",
+    "scripts/integrations/low_grade_eid.lua",
+    "scripts/runtime/feature_installation.lua",
+    "scripts/runtime/item_diagnostics.lua",
+    "scripts/runtime/legacy_save_schema.lua",
+    "scripts/runtime/localization.lua",
+    "scripts/runtime/log.lua",
+    "scripts/runtime/new_run_reset.lua",
+    "scripts/runtime/persistence.lua",
+    "scripts/runtime/pickup_banners.lua",
+    "scripts/runtime/plain_data.lua",
+    "scripts/runtime/player_identity.lua",
+    "scripts/runtime/players.lua",
+    "scripts/runtime/run_section.lua",
+    "scripts/runtime/run_seed.lua",
+    "scripts/runtime/snapshot_participants.lua",
+    "scripts/runtime/world_feedback.lua",
+    "scripts/runtime/world_queries.lua",
+    "scripts/systems/acquisition_state.lua",
+    "scripts/systems/active_slots.lua",
+    "scripts/systems/archive_controls.lua",
+    "scripts/systems/archive_room.lua",
+    "scripts/systems/attack_ownership.lua",
+    "scripts/systems/card_rewards.lua",
+    "scripts/systems/collectible_rng.lua",
+    "scripts/systems/collectible_stats.lua",
+    "scripts/systems/combat_source.lua",
+    "scripts/systems/control_ownership.lua",
+    "scripts/systems/dice_set.lua",
+    "scripts/systems/dice_set/save_schema.lua",
+    "scripts/systems/dog_food_acquisition.lua",
+    "scripts/systems/entity_identity.lua",
+    "scripts/systems/fire_rate.lua",
+    "scripts/systems/folk_costumes.lua",
+    "scripts/systems/folk_lifecycle.lua",
+    "scripts/systems/folk_parasite_state.lua",
+    "scripts/systems/folk_survival_cooldown.lua",
+    "scripts/systems/folk_visual_effects.lua",
+    "scripts/systems/folk_world.lua",
+    "scripts/systems/incoming_damage.lua",
+    "scripts/systems/null_costumes.lua",
+    "scripts/systems/player_geometry.lua",
+    "scripts/systems/shooting_scope.lua",
+    "yins_curse.lua"
+  ],
+  "edges": [
+    {
+      "from": "main.lua",
+      "to": "repentogon_dependency_guard.lua",
+      "line": 33
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/feature_installation.lua",
+      "line": 40
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/catalog/collectibles.lua",
+      "line": 45
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/localization.lua",
+      "line": 47
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/log.lua",
+      "line": 49
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/catalog/eid_descriptions.lua",
+      "line": 59
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/catalog/item_id.lua",
+      "line": 61
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/pickup_banners.lua",
+      "line": 64
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/catalog/pickup_texts.lua",
+      "line": 65
+    },
+    {
+      "from": "main.lua",
+      "to": "motion_item_text.lua",
+      "line": 68
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/integrations/eid.lua",
+      "line": 70
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/item_diagnostics.lua",
+      "line": 72
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/players.lua",
+      "line": 74
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/debug_controller.lua",
+      "line": 77
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/needletick.lua",
+      "line": 82
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/essential_balm.lua",
+      "line": 91
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/wuhu.lua",
+      "line": 96
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/chunyao.lua",
+      "line": 102
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/persistence.lua",
+      "line": 112
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/legacy_save_schema.lua",
+      "line": 114
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/musicbox/save_schema.lua",
+      "line": 115
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/boxes/angelbox_save_schema.lua",
+      "line": 116
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/boxes/devilbox_save_schema.lua",
+      "line": 117
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/between_death_and_life/save_schema.lua",
+      "line": 118
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/dice_set/save_schema.lua",
+      "line": 119
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/condom/save_schema.lua",
+      "line": 120
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/utility_knife/save_schema.lua",
+      "line": 121
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/crazy_coconut/save_schema.lua",
+      "line": 122
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/black_taisui/save_schema.lua",
+      "line": 123
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/certificate_of_neverbirth/save_schema.lua",
+      "line": 124
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/house_vs_elephant/save_schema.lua",
+      "line": 125
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/everchanging/save_schema.lua",
+      "line": 126
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/dog_food_series/save_schema.lua",
+      "line": 127
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/big_dog_bark/save_schema.lua",
+      "line": 128
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/yins_curse/save_schema.lua",
+      "line": 129
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/revive_my_love/save_schema.lua",
+      "line": 130
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/memory_disorder/save_schema.lua",
+      "line": 131
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/ring_of_the_seven_curses/save_schema.lua",
+      "line": 132
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/night_of_the_cowards/save_schema.lua",
+      "line": 133
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/run_seed.lua",
+      "line": 136
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/player_identity.lua",
+      "line": 137
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/control_ownership.lua",
+      "line": 138
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/entity_identity.lua",
+      "line": 139
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/dice_set.lua",
+      "line": 143
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/incoming_damage.lua",
+      "line": 144
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/musicbox/init.lua",
+      "line": 145
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/uncut_cord.lua",
+      "line": 156
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/shredded_tarot.lua",
+      "line": 167
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/blood_skull_gu.lua",
+      "line": 177
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/boss_order.lua",
+      "line": 189
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/between_death_and_life.lua",
+      "line": 192
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/player_geometry.lua",
+      "line": 193
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/folk_world.lua",
+      "line": 200
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/strong_laxative/creep_variants.lua",
+      "line": 205
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/tower_of_babel.lua",
+      "line": 208
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/cleaver.lua",
+      "line": 217
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/burn_away_resentment.lua",
+      "line": 226
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/the_moon_is_beautiful.lua",
+      "line": 235
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/coin_sewn_sword.lua",
+      "line": 243
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/folk_visual_effects.lua",
+      "line": 251
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/strong_laxative.lua",
+      "line": 258
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/coin_faced_mask.lua",
+      "line": 271
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/folk_parasite_state.lua",
+      "line": 281
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/cleansed_wavy_cap.lua",
+      "line": 289
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/folk_survival_cooldown.lua",
+      "line": 298
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/meat_lump.lua",
+      "line": 302
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/black_taisui.lua",
+      "line": 314
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/good_girl_of_babylon.lua",
+      "line": 337
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/folk_lifecycle.lua",
+      "line": 347
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/sterilization_certificate.lua",
+      "line": 361
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/empty_cradle.lua",
+      "line": 371
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/boxes/shared.lua",
+      "line": 381
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/boxes/angelbox.lua",
+      "line": 382
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/boxes/devilbox.lua",
+      "line": 384
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/boxes/heart_bonuses.lua",
+      "line": 385
+    },
+    {
+      "from": "main.lua",
+      "to": "box_deal_rooms.lua",
+      "line": 387
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/condom.lua",
+      "line": 407
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/utility_knife.lua",
+      "line": 409
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/crazy_coconut.lua",
+      "line": 414
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/catalog/item_config.lua",
+      "line": 415
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/fortune_rivalling_heaven_gu.lua",
+      "line": 416
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/folk_costumes.lua",
+      "line": 420
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/little_leather_shoes/init.lua",
+      "line": 495
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/certificate_of_neverbirth.lua",
+      "line": 501
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/house_vs_elephant.lua",
+      "line": 508
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/everchanging.lua",
+      "line": 516
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/dog_food_series.lua",
+      "line": 520
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/features/ace_anti_cheat_system.lua",
+      "line": 528
+    },
+    {
+      "from": "main.lua",
+      "to": "yins_curse.lua",
+      "line": 532
+    },
+    {
+      "from": "main.lua",
+      "to": "big_dog_bark.lua",
+      "line": 544
+    },
+    {
+      "from": "main.lua",
+      "to": "revive_my_love.lua",
+      "line": 569
+    },
+    {
+      "from": "main.lua",
+      "to": "night_of_the_cowards.lua",
+      "line": 584
+    },
+    {
+      "from": "main.lua",
+      "to": "avada_kedavra.lua",
+      "line": 600
+    },
+    {
+      "from": "main.lua",
+      "to": "annihilation.lua",
+      "line": 608
+    },
+    {
+      "from": "main.lua",
+      "to": "kamikaze_squad.lua",
+      "line": 623
+    },
+    {
+      "from": "main.lua",
+      "to": "memory_disorder.lua",
+      "line": 633
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/runtime/world_feedback.lua",
+      "line": 644
+    },
+    {
+      "from": "main.lua",
+      "to": "ring_of_the_seven_curses.lua",
+      "line": 650
+    },
+    {
+      "from": "main.lua",
+      "to": "healthy_sleep.lua",
+      "line": 662
+    },
+    {
+      "from": "main.lua",
+      "to": "i_am_a_god.lua",
+      "line": 673
+    },
+    {
+      "from": "main.lua",
+      "to": "god_complex.lua",
+      "line": 685
+    },
+    {
+      "from": "main.lua",
+      "to": "scripts/systems/acquisition_state.lua",
+      "line": 697
+    },
+    {
+      "from": "main.lua",
+      "to": "pending_content_integration.lua",
+      "line": 702
+    },
+    {
+      "from": "main.lua",
+      "to": "blinky.lua",
+      "line": 717
+    },
+    {
+      "from": "main.lua",
+      "to": "bomb_suit.lua",
+      "line": 727
+    },
+    {
+      "from": "main.lua",
+      "to": "drive_glove.lua",
+      "line": 737
+    },
+    {
+      "from": "main.lua",
+      "to": "motion_input.lua",
+      "line": 750
+    },
+    {
+      "from": "main.lua",
+      "to": "motion_presentation.lua",
+      "line": 757
+    },
+    {
+      "from": "main.lua",
+      "to": "motion_combat.lua",
+      "line": 764
+    },
+    {
+      "from": "main.lua",
+      "to": "motion_items.lua",
+      "line": 771
+    },
+    {
+      "from": "motion_items.lua",
+      "to": "scripts/systems/entity_identity.lua",
+      "line": 9
+    },
+    {
+      "from": "motion_combat.lua",
+      "to": "motion_combat_core.lua",
+      "line": 5
+    },
+    {
+      "from": "motion_combat.lua",
+      "to": "drive_glove_damage.lua",
+      "line": 5
+    },
+    {
+      "from": "motion_combat.lua",
+      "to": "scripts/systems/entity_identity.lua",
+      "line": 6
+    },
+    {
+      "from": "motion_combat.lua",
+      "to": "motion_sa_hud.lua",
+      "line": 31
+    },
+    {
+      "from": "motion_sa_hud.lua",
+      "to": "generated/motion_sa_hud.lua",
+      "line": 3
+    },
+    {
+      "from": "motion_combat_core.lua",
+      "to": "scripts/features/motion_items/piledriver_360.lua",
+      "line": 6
+    },
+    {
+      "from": "motion_combat_core.lua",
+      "to": "scripts/features/motion_items/ultimate_720.lua",
+      "line": 7
+    },
+    {
+      "from": "motion_combat_core.lua",
+      "to": "scripts/features/motion_items/motion_wave.lua",
+      "line": 8
+    },
+    {
+      "from": "motion_combat_core.lua",
+      "to": "scripts/features/motion_items/dragon_punch.lua",
+      "line": 9
+    },
+    {
+      "from": "motion_presentation.lua",
+      "to": "generated/motion_presentation.lua",
+      "line": 5
+    },
+    {
+      "from": "motion_presentation.lua",
+      "to": "motion_presentation_additions.lua",
+      "line": 6
+    },
+    {
+      "from": "motion_presentation.lua",
+      "to": "motion_cinematic.lua",
+      "line": 7
+    },
+    {
+      "from": "motion_presentation.lua",
+      "to": "scripts/systems/entity_identity.lua",
+      "line": 8
+    },
+    {
+      "from": "motion_input.lua",
+      "to": "motion_input_core.lua",
+      "line": 5
+    },
+    {
+      "from": "motion_input.lua",
+      "to": "motion_input_any_direction.lua",
+      "line": 6
+    },
+    {
+      "from": "motion_input.lua",
+      "to": "motion_input_shooting.lua",
+      "line": 7
+    },
+    {
+      "from": "motion_input.lua",
+      "to": "scripts/systems/entity_identity.lua",
+      "line": 8
+    },
+    {
+      "from": "motion_input_shooting.lua",
+      "to": "scripts/systems/entity_identity.lua",
+      "line": 3
+    },
+    {
+      "from": "drive_glove.lua",
+      "to": "scripts/features/drive_glove/init.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "drive_glove_core.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "drive_glove_damage.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "drive_glove_weapon.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "drive_glove_audio.lua",
+      "line": 8
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/systems/shooting_scope.lua",
+      "line": 9
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/state.lua",
+      "line": 16
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/freeze.lua",
+      "line": 20
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/input.lua",
+      "line": 29
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/weapons.lua",
+      "line": 34
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/players.lua",
+      "line": 36
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/damage.lua",
+      "line": 39
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/attribution.lua",
+      "line": 41
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "drive_glove_visuals.lua",
+      "line": 46
+    },
+    {
+      "from": "scripts/features/drive_glove/init.lua",
+      "to": "scripts/features/drive_glove/lifecycle.lua",
+      "line": 48
+    },
+    {
+      "from": "bomb_suit.lua",
+      "to": "scripts/features/bomb_suit/config.lua",
+      "line": 17
+    },
+    {
+      "from": "bomb_suit.lua",
+      "to": "scripts/systems/shooting_scope.lua",
+      "line": 18
+    },
+    {
+      "from": "bomb_suit.lua",
+      "to": "scripts/features/bomb_suit/state.lua",
+      "line": 19
+    },
+    {
+      "from": "bomb_suit.lua",
+      "to": "scripts/features/bomb_suit/bombs.lua",
+      "line": 22
+    },
+    {
+      "from": "bomb_suit.lua",
+      "to": "scripts/features/bomb_suit/presentation.lua",
+      "line": 26
+    },
+    {
+      "from": "bomb_suit.lua",
+      "to": "scripts/features/bomb_suit/damage.lua",
+      "line": 30
+    },
+    {
+      "from": "bomb_suit.lua",
+      "to": "scripts/features/bomb_suit/lifecycle.lua",
+      "line": 36
+    },
+    {
+      "from": "blinky.lua",
+      "to": "blinky_core.lua",
+      "line": 3
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "pending_content_state.lua",
+      "line": 3
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "scripts/features/inventory_selector/text.lua",
+      "line": 14
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "scripts/features/divine_left_hand/notices.lua",
+      "line": 15
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "divine_left_hand.lua",
+      "line": 16
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "low_grade.lua",
+      "line": 26
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "echo_baby.lua",
+      "line": 28
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "inventory_selector.lua",
+      "line": 29
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "scripts/features/inventory_selector/entries.lua",
+      "line": 30
+    },
+    {
+      "from": "pending_content_integration.lua",
+      "to": "scripts/integrations/low_grade_eid.lua",
+      "line": 36
+    },
+    {
+      "from": "echo_baby.lua",
+      "to": "scripts/runtime/plain_data.lua",
+      "line": 23
+    },
+    {
+      "from": "low_grade.lua",
+      "to": "scripts/runtime/plain_data.lua",
+      "line": 17
+    },
+    {
+      "from": "divine_left_hand.lua",
+      "to": "scripts/runtime/plain_data.lua",
+      "line": 10
+    },
+    {
+      "from": "pending_content_state.lua",
+      "to": "scripts/systems/acquisition_state.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/systems/acquisition_state.lua",
+      "to": "scripts/runtime/plain_data.lua",
+      "line": 8
+    },
+    {
+      "from": "scripts/systems/acquisition_state.lua",
+      "to": "scripts/runtime/player_identity.lua",
+      "line": 24
+    },
+    {
+      "from": "scripts/systems/acquisition_state.lua",
+      "to": "scripts/runtime/snapshot_participants.lua",
+      "line": 146
+    },
+    {
+      "from": "god_complex.lua",
+      "to": "scripts/features/god_complex/config.lua",
+      "line": 17
+    },
+    {
+      "from": "god_complex.lua",
+      "to": "scripts/systems/shooting_scope.lua",
+      "line": 18
+    },
+    {
+      "from": "god_complex.lua",
+      "to": "scripts/features/god_complex/state.lua",
+      "line": 19
+    },
+    {
+      "from": "god_complex.lua",
+      "to": "scripts/features/god_complex/targeting.lua",
+      "line": 23
+    },
+    {
+      "from": "god_complex.lua",
+      "to": "scripts/features/god_complex/presentation.lua",
+      "line": 26
+    },
+    {
+      "from": "god_complex.lua",
+      "to": "scripts/features/god_complex/combat.lua",
+      "line": 31
+    },
+    {
+      "from": "god_complex.lua",
+      "to": "scripts/features/god_complex/lifecycle.lua",
+      "line": 36
+    },
+    {
+      "from": "i_am_a_god.lua",
+      "to": "scripts/features/i_am_a_god/config.lua",
+      "line": 17
+    },
+    {
+      "from": "i_am_a_god.lua",
+      "to": "scripts/features/i_am_a_god/state.lua",
+      "line": 18
+    },
+    {
+      "from": "i_am_a_god.lua",
+      "to": "scripts/features/i_am_a_god/health.lua",
+      "line": 21
+    },
+    {
+      "from": "i_am_a_god.lua",
+      "to": "scripts/features/i_am_a_god/presentation.lua",
+      "line": 25
+    },
+    {
+      "from": "i_am_a_god.lua",
+      "to": "scripts/features/i_am_a_god/combat.lua",
+      "line": 28
+    },
+    {
+      "from": "i_am_a_god.lua",
+      "to": "scripts/features/i_am_a_god/lifecycle.lua",
+      "line": 34
+    },
+    {
+      "from": "healthy_sleep.lua",
+      "to": "scripts/features/healthy_sleep.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/features/healthy_sleep.lua",
+      "to": "scripts/features/healthy_sleep/state.lua",
+      "line": 17
+    },
+    {
+      "from": "scripts/features/healthy_sleep.lua",
+      "to": "scripts/features/healthy_sleep/presentation.lua",
+      "line": 18
+    },
+    {
+      "from": "scripts/features/healthy_sleep.lua",
+      "to": "scripts/features/healthy_sleep/input.lua",
+      "line": 19
+    },
+    {
+      "from": "scripts/features/healthy_sleep.lua",
+      "to": "scripts/features/healthy_sleep/runtime.lua",
+      "line": 20
+    },
+    {
+      "from": "scripts/features/healthy_sleep.lua",
+      "to": "scripts/features/healthy_sleep/lifecycle.lua",
+      "line": 21
+    },
+    {
+      "from": "ring_of_the_seven_curses.lua",
+      "to": "scripts/features/ring_of_the_seven_curses/state.lua",
+      "line": 4
+    },
+    {
+      "from": "ring_of_the_seven_curses.lua",
+      "to": "scripts/features/ring_of_the_seven_curses/inventory.lua",
+      "line": 7
+    },
+    {
+      "from": "ring_of_the_seven_curses.lua",
+      "to": "scripts/features/ring_of_the_seven_curses/world.lua",
+      "line": 10
+    },
+    {
+      "from": "ring_of_the_seven_curses.lua",
+      "to": "scripts/features/ring_of_the_seven_curses/rewards.lua",
+      "line": 14
+    },
+    {
+      "from": "ring_of_the_seven_curses.lua",
+      "to": "scripts/features/ring_of_the_seven_curses/runtime.lua",
+      "line": 18
+    },
+    {
+      "from": "memory_disorder.lua",
+      "to": "scripts/features/memory_disorder.lua",
+      "line": 2
+    },
+    {
+      "from": "memory_disorder.lua",
+      "to": "scripts/features/memory_disorder.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/player_access.lua",
+      "line": 34
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/profiles.lua",
+      "line": 39
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/health.lua",
+      "line": 46
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/inventory.lua",
+      "line": 56
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/state.lua",
+      "line": 70
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/icons.lua",
+      "line": 83
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/pairs.lua",
+      "line": 97
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/identity.lua",
+      "line": 122
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/void_route.lua",
+      "line": 168
+    },
+    {
+      "from": "scripts/features/memory_disorder.lua",
+      "to": "scripts/features/memory_disorder/lifecycle.lua",
+      "line": 173
+    },
+    {
+      "from": "kamikaze_squad.lua",
+      "to": "scripts/features/kamikaze_squad.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/features/kamikaze_squad.lua",
+      "to": "scripts/features/kamikaze_squad/queries.lua",
+      "line": 46
+    },
+    {
+      "from": "scripts/features/kamikaze_squad.lua",
+      "to": "scripts/features/kamikaze_squad/targets.lua",
+      "line": 51
+    },
+    {
+      "from": "scripts/features/kamikaze_squad.lua",
+      "to": "scripts/features/kamikaze_squad/units.lua",
+      "line": 58
+    },
+    {
+      "from": "scripts/features/kamikaze_squad.lua",
+      "to": "scripts/features/kamikaze_squad/runtime.lua",
+      "line": 72
+    },
+    {
+      "from": "annihilation.lua",
+      "to": "scripts/features/annihilation/queries.lua",
+      "line": 92
+    },
+    {
+      "from": "annihilation.lua",
+      "to": "scripts/features/annihilation/ledger.lua",
+      "line": 97
+    },
+    {
+      "from": "annihilation.lua",
+      "to": "scripts/features/annihilation/presentation.lua",
+      "line": 102
+    },
+    {
+      "from": "annihilation.lua",
+      "to": "scripts/features/annihilation/combat.lua",
+      "line": 107
+    },
+    {
+      "from": "annihilation.lua",
+      "to": "scripts/features/annihilation/runtime.lua",
+      "line": 114
+    },
+    {
+      "from": "scripts/features/annihilation/runtime.lua",
+      "to": "scripts/systems/attack_ownership.lua",
+      "line": 48
+    },
+    {
+      "from": "avada_kedavra.lua",
+      "to": "scripts/features/avada_kedavra/queries.lua",
+      "line": 20
+    },
+    {
+      "from": "avada_kedavra.lua",
+      "to": "scripts/features/avada_kedavra/weapon.lua",
+      "line": 25
+    },
+    {
+      "from": "avada_kedavra.lua",
+      "to": "scripts/features/avada_kedavra/casts.lua",
+      "line": 28
+    },
+    {
+      "from": "avada_kedavra.lua",
+      "to": "scripts/features/avada_kedavra/entities.lua",
+      "line": 33
+    },
+    {
+      "from": "avada_kedavra.lua",
+      "to": "scripts/features/avada_kedavra/hits.lua",
+      "line": 38
+    },
+    {
+      "from": "avada_kedavra.lua",
+      "to": "scripts/features/avada_kedavra/controls.lua",
+      "line": 43
+    },
+    {
+      "from": "avada_kedavra.lua",
+      "to": "scripts/features/avada_kedavra/runtime.lua",
+      "line": 51
+    },
+    {
+      "from": "night_of_the_cowards.lua",
+      "to": "scripts/features/night_of_the_cowards.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/features/night_of_the_cowards.lua",
+      "to": "scripts/features/night_of_the_cowards/queries.lua",
+      "line": 80
+    },
+    {
+      "from": "scripts/features/night_of_the_cowards.lua",
+      "to": "scripts/features/night_of_the_cowards/grants.lua",
+      "line": 85
+    },
+    {
+      "from": "scripts/features/night_of_the_cowards.lua",
+      "to": "scripts/features/night_of_the_cowards/aura.lua",
+      "line": 94
+    },
+    {
+      "from": "scripts/features/night_of_the_cowards.lua",
+      "to": "scripts/features/night_of_the_cowards/fear.lua",
+      "line": 108
+    },
+    {
+      "from": "scripts/features/night_of_the_cowards.lua",
+      "to": "scripts/features/night_of_the_cowards/runtime.lua",
+      "line": 121
+    },
+    {
+      "from": "revive_my_love.lua",
+      "to": "scripts/features/revive_my_love.lua",
+      "line": 8
+    },
+    {
+      "from": "scripts/features/revive_my_love.lua",
+      "to": "scripts/features/revive_my_love/state.lua",
+      "line": 27
+    },
+    {
+      "from": "scripts/features/revive_my_love.lua",
+      "to": "scripts/features/revive_my_love/presentation.lua",
+      "line": 28
+    },
+    {
+      "from": "scripts/features/revive_my_love.lua",
+      "to": "scripts/features/revive_my_love/runtime.lua",
+      "line": 29
+    },
+    {
+      "from": "big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/queries.lua",
+      "line": 66
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/rules.lua",
+      "line": 70
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/state.lua",
+      "line": 73
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/audio.lua",
+      "line": 77
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/effects.lua",
+      "line": 82
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/targets.lua",
+      "line": 91
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/trails.lua",
+      "line": 101
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/food.lua",
+      "line": 109
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/lifecycle.lua",
+      "line": 116
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/echo_shard.lua",
+      "line": 124
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/dash.lua",
+      "line": 134
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/chew.lua",
+      "line": 146
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/hud.lua",
+      "line": 155
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/wind_charge_rod.lua",
+      "line": 160
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/input.lua",
+      "line": 161
+    },
+    {
+      "from": "scripts/features/big_dog_bark.lua",
+      "to": "scripts/features/big_dog_bark/upgrade_pool.lua",
+      "line": 177
+    },
+    {
+      "from": "yins_curse.lua",
+      "to": "scripts/features/yins_curse/state.lua",
+      "line": 4
+    },
+    {
+      "from": "yins_curse.lua",
+      "to": "scripts/features/yins_curse/queries.lua",
+      "line": 7
+    },
+    {
+      "from": "yins_curse.lua",
+      "to": "scripts/features/yins_curse/pedestals.lua",
+      "line": 11
+    },
+    {
+      "from": "yins_curse.lua",
+      "to": "scripts/features/yins_curse/acquisition.lua",
+      "line": 14
+    },
+    {
+      "from": "yins_curse.lua",
+      "to": "scripts/features/yins_curse/runtime.lua",
+      "line": 19
+    },
+    {
+      "from": "scripts/features/ace_anti_cheat_system.lua",
+      "to": "scripts/features/ace_anti_cheat_system/state.lua",
+      "line": 7
+    },
+    {
+      "from": "scripts/features/ace_anti_cheat_system.lua",
+      "to": "scripts/features/ace_anti_cheat_system/queries.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/features/ace_anti_cheat_system.lua",
+      "to": "scripts/features/ace_anti_cheat_system/audit.lua",
+      "line": 16
+    },
+    {
+      "from": "scripts/features/ace_anti_cheat_system.lua",
+      "to": "scripts/features/ace_anti_cheat_system/combat.lua",
+      "line": 22
+    },
+    {
+      "from": "scripts/features/ace_anti_cheat_system.lua",
+      "to": "scripts/features/ace_anti_cheat_system/runtime.lua",
+      "line": 27
+    },
+    {
+      "from": "scripts/features/ace_anti_cheat_system/queries.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/systems/collectible_stats.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/features/protein_strip.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/features/energy_kibble.lua",
+      "line": 7
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/features/lean_can.lua",
+      "line": 8
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/features/dha_fish_oil.lua",
+      "line": 9
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/features/dental_chew.lua",
+      "line": 10
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/features/lucky_liver_bites.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/features/goat_milk_pudding.lua",
+      "line": 12
+    },
+    {
+      "from": "scripts/features/dog_food_series.lua",
+      "to": "scripts/systems/dog_food_acquisition.lua",
+      "line": 14
+    },
+    {
+      "from": "scripts/features/dental_chew.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/systems/collectible_stats.lua",
+      "to": "scripts/systems/fire_rate.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/features/everchanging.lua",
+      "to": "scripts/features/everchanging/registry.lua",
+      "line": 12
+    },
+    {
+      "from": "scripts/features/everchanging.lua",
+      "to": "scripts/features/everchanging/state.lua",
+      "line": 15
+    },
+    {
+      "from": "scripts/features/everchanging.lua",
+      "to": "scripts/features/everchanging/selection.lua",
+      "line": 24
+    },
+    {
+      "from": "scripts/features/everchanging.lua",
+      "to": "scripts/features/everchanging/resources.lua",
+      "line": 32
+    },
+    {
+      "from": "scripts/features/everchanging.lua",
+      "to": "scripts/features/everchanging/player_anm2.lua",
+      "line": 35
+    },
+    {
+      "from": "scripts/features/everchanging.lua",
+      "to": "scripts/features/everchanging/presentation.lua",
+      "line": 39
+    },
+    {
+      "from": "scripts/features/everchanging.lua",
+      "to": "scripts/features/everchanging/runtime.lua",
+      "line": 47
+    },
+    {
+      "from": "scripts/features/everchanging/resources.lua",
+      "to": "scripts/systems/null_costumes.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/house_vs_elephant.lua",
+      "to": "scripts/systems/archive_room.lua",
+      "line": 67
+    },
+    {
+      "from": "scripts/features/house_vs_elephant.lua",
+      "to": "scripts/systems/archive_controls.lua",
+      "line": 68
+    },
+    {
+      "from": "scripts/features/house_vs_elephant.lua",
+      "to": "scripts/features/house_vs_elephant/ledger.lua",
+      "line": 69
+    },
+    {
+      "from": "scripts/features/house_vs_elephant.lua",
+      "to": "scripts/features/house_vs_elephant/gallery.lua",
+      "line": 77
+    },
+    {
+      "from": "scripts/features/house_vs_elephant.lua",
+      "to": "scripts/features/house_vs_elephant/flow.lua",
+      "line": 86
+    },
+    {
+      "from": "scripts/features/house_vs_elephant.lua",
+      "to": "scripts/features/house_vs_elephant/pickups.lua",
+      "line": 97
+    },
+    {
+      "from": "scripts/features/house_vs_elephant.lua",
+      "to": "scripts/features/house_vs_elephant/runtime.lua",
+      "line": 106
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth.lua",
+      "to": "scripts/systems/archive_room.lua",
+      "line": 69
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth.lua",
+      "to": "scripts/systems/archive_controls.lua",
+      "line": 70
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth.lua",
+      "to": "scripts/features/certificate_of_neverbirth/ledger.lua",
+      "line": 71
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth.lua",
+      "to": "scripts/features/certificate_of_neverbirth/gallery.lua",
+      "line": 79
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth.lua",
+      "to": "scripts/features/certificate_of_neverbirth/flow.lua",
+      "line": 88
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth.lua",
+      "to": "scripts/features/certificate_of_neverbirth/pickups.lua",
+      "line": 98
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth.lua",
+      "to": "scripts/features/certificate_of_neverbirth/runtime.lua",
+      "line": 104
+    },
+    {
+      "from": "scripts/features/certificate_of_neverbirth/ledger.lua",
+      "to": "generated/neverbirth_collectibles.lua",
+      "line": 16
+    },
+    {
+      "from": "scripts/features/little_leather_shoes/init.lua",
+      "to": "scripts/features/traffic_unboxing.lua",
+      "line": 18
+    },
+    {
+      "from": "scripts/features/little_leather_shoes/init.lua",
+      "to": "scripts/features/little_leather_shoes/runtime_views.lua",
+      "line": 28
+    },
+    {
+      "from": "scripts/features/little_leather_shoes/init.lua",
+      "to": "scripts/features/little_leather_shoes/rules.lua",
+      "line": 65
+    },
+    {
+      "from": "scripts/features/little_leather_shoes/init.lua",
+      "to": "scripts/features/traffic_heat.lua",
+      "line": 69
+    },
+    {
+      "from": "scripts/features/little_leather_shoes/init.lua",
+      "to": "scripts/features/little_leather_shoes/presentation.lua",
+      "line": 271
+    },
+    {
+      "from": "scripts/features/little_leather_shoes/init.lua",
+      "to": "scripts/features/little_leather_shoes/rewards.lua",
+      "line": 275
+    },
+    {
+      "from": "scripts/features/little_leather_shoes/rewards.lua",
+      "to": "scripts/features/traffic_exposure.lua",
+      "line": 79
+    },
+    {
+      "from": "scripts/features/traffic_heat.lua",
+      "to": "scripts/systems/fire_rate.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/fortune_rivalling_heaven_gu.lua",
+      "to": "scripts/features/fortune_rivalling_heaven_gu/audit.lua",
+      "line": 22
+    },
+    {
+      "from": "scripts/features/fortune_rivalling_heaven_gu.lua",
+      "to": "scripts/features/fortune_rivalling_heaven_gu/registry.lua",
+      "line": 23
+    },
+    {
+      "from": "scripts/features/fortune_rivalling_heaven_gu.lua",
+      "to": "scripts/features/fortune_rivalling_heaven_gu/runtime.lua",
+      "line": 24
+    },
+    {
+      "from": "scripts/features/crazy_coconut.lua",
+      "to": "scripts/features/crazy_coconut/attributes.lua",
+      "line": 14
+    },
+    {
+      "from": "scripts/features/crazy_coconut.lua",
+      "to": "scripts/features/crazy_coconut/ledger.lua",
+      "line": 18
+    },
+    {
+      "from": "scripts/features/crazy_coconut.lua",
+      "to": "scripts/features/crazy_coconut/acquisition.lua",
+      "line": 19
+    },
+    {
+      "from": "scripts/features/crazy_coconut.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 27
+    },
+    {
+      "from": "scripts/features/crazy_coconut/ledger.lua",
+      "to": "scripts/runtime/run_section.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/features/utility_knife.lua",
+      "to": "scripts/runtime/run_section.lua",
+      "line": 22
+    },
+    {
+      "from": "scripts/features/utility_knife.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 133
+    },
+    {
+      "from": "scripts/features/condom.lua",
+      "to": "scripts/features/condom/presentation.lua",
+      "line": 7
+    },
+    {
+      "from": "scripts/features/condom.lua",
+      "to": "scripts/features/condom/bans.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/features/condom.lua",
+      "to": "scripts/features/condom/replacement.lua",
+      "line": 13
+    },
+    {
+      "from": "scripts/features/condom.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 17
+    },
+    {
+      "from": "scripts/features/condom/bans.lua",
+      "to": "scripts/runtime/run_section.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/features/boxes/heart_bonuses.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 15
+    },
+    {
+      "from": "scripts/features/boxes/devilbox.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/features/boxes/angelbox.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 9
+    },
+    {
+      "from": "scripts/features/boxes/shared.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/boxes/shared.lua",
+      "to": "scripts/systems/active_slots.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/features/boxes/shared.lua",
+      "to": "scripts/features/boxes/active_charge.lua",
+      "line": 93
+    },
+    {
+      "from": "scripts/features/boxes/shared.lua",
+      "to": "scripts/features/boxes/reward_selection.lua",
+      "line": 94
+    },
+    {
+      "from": "scripts/features/boxes/shared.lua",
+      "to": "scripts/features/boxes/reward_ledger.lua",
+      "line": 105
+    },
+    {
+      "from": "scripts/features/boxes/shared.lua",
+      "to": "scripts/features/boxes/reward_delivery.lua",
+      "line": 106
+    },
+    {
+      "from": "scripts/features/empty_cradle.lua",
+      "to": "scripts/systems/collectible_rng.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/empty_cradle.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/empty_cradle.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/empty_cradle.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 394
+    },
+    {
+      "from": "scripts/features/sterilization_certificate.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/sterilization_certificate.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 352
+    },
+    {
+      "from": "scripts/systems/folk_lifecycle.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 8
+    },
+    {
+      "from": "scripts/features/good_girl_of_babylon.lua",
+      "to": "scripts/features/good_girl_of_babylon/presentation.lua",
+      "line": 25
+    },
+    {
+      "from": "scripts/features/good_girl_of_babylon.lua",
+      "to": "scripts/features/good_girl_of_babylon/state.lua",
+      "line": 27
+    },
+    {
+      "from": "scripts/features/good_girl_of_babylon.lua",
+      "to": "scripts/features/good_girl_of_babylon/combat.lua",
+      "line": 28
+    },
+    {
+      "from": "scripts/features/good_girl_of_babylon.lua",
+      "to": "scripts/features/good_girl_of_babylon/rewards.lua",
+      "line": 33
+    },
+    {
+      "from": "scripts/features/good_girl_of_babylon.lua",
+      "to": "scripts/systems/card_rewards.lua",
+      "line": 35
+    },
+    {
+      "from": "scripts/systems/card_rewards.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/good_girl_of_babylon/presentation.lua",
+      "to": "scripts/systems/null_costumes.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/black_taisui.lua",
+      "to": "scripts/features/black_taisui/presentation.lua",
+      "line": 24
+    },
+    {
+      "from": "scripts/features/black_taisui.lua",
+      "to": "scripts/features/black_taisui/growth.lua",
+      "line": 28
+    },
+    {
+      "from": "scripts/features/black_taisui.lua",
+      "to": "scripts/features/black_taisui/survival.lua",
+      "line": 34
+    },
+    {
+      "from": "scripts/features/black_taisui.lua",
+      "to": "scripts/features/black_taisui/purification.lua",
+      "line": 43
+    },
+    {
+      "from": "scripts/features/black_taisui.lua",
+      "to": "scripts/features/black_taisui/lifecycle.lua",
+      "line": 50
+    },
+    {
+      "from": "scripts/features/meat_lump.lua",
+      "to": "scripts/features/meat_lump/ledger.lua",
+      "line": 22
+    },
+    {
+      "from": "scripts/features/meat_lump.lua",
+      "to": "scripts/features/meat_lump/presentation.lua",
+      "line": 123
+    },
+    {
+      "from": "scripts/systems/folk_parasite_state.lua",
+      "to": "scripts/runtime/run_section.lua",
+      "line": 9
+    },
+    {
+      "from": "scripts/features/coin_faced_mask.lua",
+      "to": "scripts/features/coin_faced_mask/state.lua",
+      "line": 10
+    },
+    {
+      "from": "scripts/features/coin_faced_mask.lua",
+      "to": "scripts/features/coin_faced_mask/presentation.lua",
+      "line": 13
+    },
+    {
+      "from": "scripts/features/coin_faced_mask.lua",
+      "to": "scripts/features/coin_faced_mask/settlement.lua",
+      "line": 16
+    },
+    {
+      "from": "scripts/features/coin_faced_mask/settlement.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/coin_faced_mask/presentation.lua",
+      "to": "scripts/systems/null_costumes.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/strong_laxative.lua",
+      "to": "scripts/features/strong_laxative/presentation.lua",
+      "line": 30
+    },
+    {
+      "from": "scripts/features/strong_laxative.lua",
+      "to": "scripts/features/strong_laxative/synergies.lua",
+      "line": 33
+    },
+    {
+      "from": "scripts/features/strong_laxative.lua",
+      "to": "scripts/features/strong_laxative/creep.lua",
+      "line": 35
+    },
+    {
+      "from": "scripts/features/strong_laxative.lua",
+      "to": "scripts/features/strong_laxative/poop.lua",
+      "line": 38
+    },
+    {
+      "from": "scripts/features/strong_laxative.lua",
+      "to": "scripts/features/strong_laxative/players.lua",
+      "line": 43
+    },
+    {
+      "from": "scripts/features/strong_laxative/poop.lua",
+      "to": "scripts/systems/collectible_rng.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/strong_laxative/creep.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/strong_laxative/presentation.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/strong_laxative/presentation.lua",
+      "to": "scripts/systems/null_costumes.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/coin_sewn_sword.lua",
+      "to": "scripts/features/coin_sewn_sword/rules.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/features/coin_sewn_sword.lua",
+      "to": "scripts/features/coin_sewn_sword/aiming.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/coin_sewn_sword.lua",
+      "to": "scripts/features/coin_sewn_sword/presentation.lua",
+      "line": 8
+    },
+    {
+      "from": "scripts/features/coin_sewn_sword.lua",
+      "to": "scripts/features/coin_sewn_sword/qi.lua",
+      "line": 9
+    },
+    {
+      "from": "scripts/features/coin_sewn_sword.lua",
+      "to": "scripts/features/coin_sewn_sword/attack.lua",
+      "line": 16
+    },
+    {
+      "from": "scripts/features/coin_sewn_sword.lua",
+      "to": "scripts/features/coin_sewn_sword/input.lua",
+      "line": 19
+    },
+    {
+      "from": "scripts/features/the_moon_is_beautiful.lua",
+      "to": "scripts/features/the_moon_is_beautiful/presentation.lua",
+      "line": 32
+    },
+    {
+      "from": "scripts/features/the_moon_is_beautiful.lua",
+      "to": "scripts/features/the_moon_is_beautiful/room.lua",
+      "line": 33
+    },
+    {
+      "from": "scripts/features/the_moon_is_beautiful.lua",
+      "to": "scripts/features/the_moon_is_beautiful/combat.lua",
+      "line": 34
+    },
+    {
+      "from": "scripts/features/the_moon_is_beautiful.lua",
+      "to": "scripts/features/the_moon_is_beautiful/rewards.lua",
+      "line": 35
+    },
+    {
+      "from": "scripts/features/the_moon_is_beautiful.lua",
+      "to": "scripts/systems/card_rewards.lua",
+      "line": 37
+    },
+    {
+      "from": "scripts/features/the_moon_is_beautiful/combat.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/the_moon_is_beautiful/presentation.lua",
+      "to": "scripts/systems/player_geometry.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/burn_away_resentment.lua",
+      "to": "scripts/features/burn_away_resentment/queries.lua",
+      "line": 21
+    },
+    {
+      "from": "scripts/features/burn_away_resentment.lua",
+      "to": "scripts/features/burn_away_resentment/attributes.lua",
+      "line": 24
+    },
+    {
+      "from": "scripts/features/burn_away_resentment.lua",
+      "to": "scripts/features/burn_away_resentment/ledger.lua",
+      "line": 27
+    },
+    {
+      "from": "scripts/features/burn_away_resentment.lua",
+      "to": "scripts/features/burn_away_resentment/presentation.lua",
+      "line": 30
+    },
+    {
+      "from": "scripts/features/burn_away_resentment.lua",
+      "to": "scripts/features/burn_away_resentment/combat.lua",
+      "line": 33
+    },
+    {
+      "from": "scripts/features/burn_away_resentment.lua",
+      "to": "scripts/features/burn_away_resentment/runtime.lua",
+      "line": 37
+    },
+    {
+      "from": "scripts/features/burn_away_resentment/queries.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 8
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/queries.lua",
+      "line": 51
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/attributes.lua",
+      "line": 58
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/geometry.lua",
+      "line": 61
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/presentation.lua",
+      "line": 64
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/shadows.lua",
+      "line": 69
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/controls.lua",
+      "line": 76
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/combat.lua",
+      "line": 80
+    },
+    {
+      "from": "scripts/features/cleaver.lua",
+      "to": "scripts/features/cleaver/runtime.lua",
+      "line": 88
+    },
+    {
+      "from": "scripts/features/cleaver/combat.lua",
+      "to": "scripts/systems/attack_ownership.lua",
+      "line": 7
+    },
+    {
+      "from": "scripts/features/tower_of_babel.lua",
+      "to": "scripts/features/tower_of_babel/creep_variants.lua",
+      "line": 11
+    },
+    {
+      "from": "scripts/systems/folk_world.lua",
+      "to": "scripts/systems/collectible_rng.lua",
+      "line": 2
+    },
+    {
+      "from": "scripts/systems/folk_world.lua",
+      "to": "scripts/systems/collectible_stats.lua",
+      "line": 3
+    },
+    {
+      "from": "scripts/systems/folk_world.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/between_death_and_life.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/between_death_and_life.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/between_death_and_life.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 471
+    },
+    {
+      "from": "scripts/features/boss_order.lua",
+      "to": "scripts/systems/card_rewards.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/boss_order.lua",
+      "to": "scripts/systems/collectible_rng.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/boss_order.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 7
+    },
+    {
+      "from": "scripts/features/blood_skull_gu.lua",
+      "to": "scripts/systems/collectible_rng.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/blood_skull_gu.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/blood_skull_gu.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/blood_skull_gu.lua",
+      "to": "scripts/systems/active_slots.lua",
+      "line": 36
+    },
+    {
+      "from": "scripts/features/blood_skull_gu.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 416
+    },
+    {
+      "from": "scripts/features/shredded_tarot.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 4
+    },
+    {
+      "from": "scripts/features/shredded_tarot.lua",
+      "to": "scripts/systems/active_slots.lua",
+      "line": 25
+    },
+    {
+      "from": "scripts/features/shredded_tarot.lua",
+      "to": "scripts/runtime/new_run_reset.lua",
+      "line": 358
+    },
+    {
+      "from": "scripts/features/uncut_cord.lua",
+      "to": "scripts/systems/collectible_rng.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/uncut_cord.lua",
+      "to": "scripts/runtime/world_queries.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/musicbox/init.lua",
+      "to": "scripts/features/musicbox/core.lua",
+      "line": 10
+    },
+    {
+      "from": "scripts/features/musicbox/init.lua",
+      "to": "scripts/features/musicbox/presentation.lua",
+      "line": 20
+    },
+    {
+      "from": "scripts/features/needletick.lua",
+      "to": "scripts/systems/collectible_rng.lua",
+      "line": 5
+    },
+    {
+      "from": "scripts/features/needletick.lua",
+      "to": "scripts/systems/combat_source.lua",
+      "line": 6
+    },
+    {
+      "from": "scripts/features/needletick.lua",
+      "to": "scripts/systems/collectible_stats.lua",
+      "line": 7
+    },
+    {
+      "from": "repentogon_dependency_guard.lua",
+      "to": "generated/neverbirth_collectibles.lua",
+      "line": 12
+    }
+  ],
+  "errors": [],
+  "limitations": [],
+  "exceptions": [
+    "big_dog_bark returns its own legacy TestAPI view; main discards it; no consumer dependency"
+  ],
+  "coverage": "Literal include/require graph, exact path case, runtime layer direction, direct TestAPI member reads, scoped bootstrap, paused characters, temporary probes. Does not resolve aliases or prove native callback behavior."
+}

@@ -48,7 +48,7 @@ do
 end
 
 local source = readFile("main.lua")
-local block = source:match("%-%- HOUSE_VS_ELEPHANT_BEGIN(.-)%-%- HOUSE_VS_ELEPHANT_END")
+local block = dofile("tests/support/read_feature_source.lua" )("scripts/features/house_vs_elephant.lua")
 assertTruthy(block, "main.lua must contain an isolated House VS Elephant block")
 assertTruthy(block:find("MC_POST_NEW_ROOM", 1, true), "encounters must be recorded on room entry")
 assertTruthy(block:find("MC_PRE_PICKUP_COLLISION", 1, true), "selection must snapshot pedestal collisions")
@@ -62,7 +62,7 @@ assertTruthy(block:find("NeverbirthHouseGalleryControl", 1, true), "House contro
 assertTruthy(block:find("PrevPress", 1, true) and block:find("ReturnPress", 1, true)
     and block:find("NextPress", 1, true), "House exposes all three press animations")
 
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 local api = assert(Neverbirth and Neverbirth.HouseVsElephantTestAPI, "House runtime test API should load")
 
 local run = api.NewRunData("RUN-A")

@@ -27,6 +27,7 @@ function mod:AddCallback(id, fn, filter)
     callbacks[id] = callbacks[id] or {}
     callbacks[id][#callbacks[id] + 1] = { fn = fn, filter = filter }
 end
+function include(name) return dofile(name:gsub('%.', '/') .. '.lua') end
 dofile("yins_curse.lua")(mod, {
     ItemId = 9000,
     GetSaveRoot = function() return root end,

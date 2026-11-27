@@ -7,8 +7,8 @@
 | 文件 | 责任 |
 | --- | --- |
 | [main.lua](../../../main.lua) | 名称、运行 ID、双语 EID、拾取横幅，`PENDING_CONTENT_COMPLETION_BEGIN` 加载点 |
-| [pending_content_integration.lua](../../../pending_content_integration.lua) | 共享存档接入、原生名字解析、提示、背包条目适配、饰品 EID |
-| [pending_content_state.lua](../../../pending_content_state.lua) | 已完成实物拾取、物理实例迁移、角色规范化身份与实际形态身份、沙漏快照 |
+| [pending_content_integration.lua](../../../pending_content_integration.lua) | 连接共享实例、各自存档分区与道具；名字/背包条目/提示实现已归属各自私有模块，详见[接口](../../api/shared-state.md) |
+| [acquisition_state.lua](../../../scripts/systems/acquisition_state.lua) | 已完成实物拾取、物理实例迁移与沙漏槽接入；旧 pending_content_state.lua 仅转发，身份和快照参与者分别由明确模块拥有 |
 | [divine_left_hand.lua](../../../divine_left_hand.lua) | 最后正常历史记录锁定、临时授予与历史索引精确移除、无法唯一证明时诊断 |
 | [low_grade.lua](../../../low_grade.lua) | 滚动三层受伤窗口、最终头目奖励、每份耐久、普通/金色/吞下份数 |
 | [echo_baby.lua](../../../echo_baby.lua) | 新宝宝来源组复制、永久本局奖励、普通跟班射击和归属、缓存顺序 |

@@ -348,6 +348,8 @@ local function test_strong_laxative_poop_stays_but_creep_is_removed_with_tower_o
     assertEquals(#env.gridSpawns, 1, "Tower of Babel should not block Strong Laxative poop")
 end
 
+if arg and arg[1] == '--fixture' then return loadNeverbirth end
+
 test_xml_registers_tower_of_babel_item_and_pools()
 if arg and arg[1] == "--registration-only" then
     print("Tower of Babel registration tests passed")

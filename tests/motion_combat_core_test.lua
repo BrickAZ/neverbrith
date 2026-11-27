@@ -1,7 +1,8 @@
 local count=0
 local function check(v,m)assert(v,m);count=count+1 end
 local exists=io.open('motion_combat_core.lua','r');check(exists~=nil,'real combat core is missing');exists:close()
-local C=dofile('motion_combat_core.lua')
+include=function(name)return dofile(name..'.lua')end
+local C=include('motion_combat_core')
 check(C.Definition('wave','normal').damage==1,'wave confirmed damage')
 check(C.Definition('dp','od').damage[2]==3,'OD second stage damage')
 check(C.Definition('circle_360','normal').damage==3,'ordinary 360 now deals three times panel damage')

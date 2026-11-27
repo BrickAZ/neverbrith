@@ -1,0 +1,36 @@
+# Registration And Return Contracts
+
+## Registration Proof
+
+For each handler, prove all four links:
+
+1. The handler function exists.
+2. Its `AddCallback` registration executes at the intended bootstrap or owned
+   activation boundary; declaring a handler alone does not register it.
+3. The callback filter matches the intended item/entity/card when applicable.
+4. A behavior test invokes the registered callback and checks the observable result.
+
+The generic validator scans direct `ModObject:AddCallback(..., Owner.Handler)` registrations across Lua modules when given the mod object name. Project profiles may add stricter conventions. Neither form can prove that an unregistered helper should have been a callback; use the Mechanic Contract and tests for that.
+
+Keep new or touched native bindings adjacent to their handlers in the same file.
+When preserving an existing installation phase, declare an explicit installer
+beside the original handler and invoke it at the old position; preserve handler
+identity, lookup timing, guards, filters, priority and order. See
+[callback-registration.md](../../isaac-mod-architecture/references/callback-registration.md).
+
+## Return Rule
+
+`nil`, `false`, and `true` do not have one universal meaning in Isaac callbacks. Before using a return value, inspect the closest known-good callback of the same `ModCallbacks` type and confirm the API behavior. Record the selected return in the Callback Contract together with its intended consequence.
+
+## Cache Rule
+
+`MC_EVALUATE_CACHE` reads cache flags; it does not automatically run just because arbitrary state changed. When a mechanic arms, expires, gains stacks, or loses an item, state the exact cache-refresh call and flags.
+
+## Priority And Duplicate Rule
+
+Use priority only when callback order changes observable behavior and explain the competing callback. Do not register the same callback/handler/filter pair twice; it can double rewards, double damage, or make a bug look random.
+
+Same-instance repeated registration is distinct from a verified native unload
+that clears the Mod's callbacks. For method-name helpers, inspect the adapter's
+native function and retained owner; use [method-adapters.md](method-adapters.md).
+Removal must identify the registered wrapper, not merely its target method.

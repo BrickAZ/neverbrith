@@ -1,0 +1,26 @@
+[
+  {
+    "expected": 0,
+    "name": "explicit-valid",
+    "exitCode": 0,
+    "output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\\main.lua\nINFO Game resources unavailable; native assets are not verified.\nINFO Explicit registry checker: E:\\Isaac - Repentance\\mods\\neverbrith\\tools\\generate-neverbirth-collectibles.ps1; checking XML/generated data under C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\nVerified 1 neverbrith collectible rows in C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\\generated\\neverbirth_collectibles.lua\n\nStatic validation completed with 0 warning(s) and 0 failure(s)."
+  },
+  {
+    "expected": 1,
+    "name": "default-missing-still-fails",
+    "exitCode": 1,
+    "output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\\main.lua\nINFO Game resources unavailable; native assets are not verified.\n\nFailures:\nFAIL Neverbirth collectible registry generator is missing: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\\tools\\generate-neverbirth-collectibles.ps1"
+  },
+  {
+    "expected": 1,
+    "name": "tampered-package-registry-fails",
+    "exitCode": 1,
+    "output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\\main.lua\nINFO Game resources unavailable; native assets are not verified.\nINFO Explicit registry checker: E:\\Isaac - Repentance\\mods\\neverbrith\\tools\\generate-neverbirth-collectibles.ps1; checking XML/generated data under C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\n\nFailures:\nFAIL Neverbirth collectible registry is not synchronized with content/items*.xml :: Generated collectible registry is out of date. Run tools/generate-neverbirth-collectibles.ps1 -Root \"C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\""
+  },
+  {
+    "expected": 1,
+    "name": "explicit-missing-fails",
+    "exitCode": 1,
+    "output": "Validating neverbrith at C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\nINFO Lua scope: 1 files reachable by static literal loads from main.lua\nINFO Lua source: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\\main.lua\nINFO Game resources unavailable; native assets are not verified.\n\nFailures:\nFAIL Neverbirth collectible registry generator is missing: C:\\Users\\Anton\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2161b7d5-22a8-4a81-85a3-fc9f9609dc8b}\\Temp\\neverbrith-registry-e10ea04150044fc6914104bc3a873814\\missing.ps1"
+  }
+]

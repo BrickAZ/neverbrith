@@ -480,6 +480,15 @@ local function test_needletick_kills_nearby_normal_enemies_on_collision()
     assertEquals(hit.damageCalls[1].source.Entity, tear, "execution source should be the special tear")
     assertEquals(#nearby.damageCalls, 1, "nearby normal enemy inside radius should take lethal damage")
     assertEquals(far.died, false, "enemy outside radius should survive")
+
+    local afterCollision = env.newEnemy({ position = Vector(115, 100) })
+    function tear:IsDead() return true end
+    env.runPostTearUpdate(tear)
+    env.runPostTearUpdate(tear)
+    env.runTearCollision(tear, afterCollision)
+    assertEquals(#afterCollision.damageCalls, 0, "death updates and repeated collision must not execute new enemies after settlement")
+    assertEquals(#hit.damageCalls, 1, "original target must not be hit again by death updates")
+    assertEquals(#env.spawnedEntities, 1, "a resolved tear creates only one impact effect")
 end
 
 local function test_needletick_does_not_kill_boss_champion_friendly_invulnerable_or_players()

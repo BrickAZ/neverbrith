@@ -1,13 +1,17 @@
 -- Approved combat values and pure geometry; no native objects or callbacks.
 local C={OD_COOLDOWN=180,ENERGY_PER_BAR=30,MAX_ENERGY=90,BOSS_ANTIGRAB=90}
-local definitions={
- wave={normal={damage=1,duration=14,sourceFrames=66,radius=10,speed=10,range=260,spawn=6}},
- dp={normal={damage=2,duration=30,sourceFrames=78,length=48,radius=18,windows={{6,15}}},
-     od={damage={2,3},duration=50,sourceFrames=78,length=56,radius=20,windows={{6,12},{22,32}}}},
- circle_360={normal={damage=3,splash=3,splashRadius=80,duration=54,sourceFrames=108,reach=16,grab=6,slam=42,release=44},
-             od={damage=6,splash=3,splashRadius=80,duration=48,sourceFrames=108,reach=24,grab=6,slam=34,release=36}},
- circle_720={normal={damage=15,splash=10,duration=394,sourceFrames=394,grab=0,slam=261,release=289}},
+-- Read-only specifications, loaded once with this core and passed to bindings
+-- through the existing combat instance. Values and timing stay item-owned.
+C.Specifications={
+ include('scripts/features/motion_items/piledriver_360'),
+ include('scripts/features/motion_items/ultimate_720'),
+ include('scripts/features/motion_items/motion_wave'),
+ include('scripts/features/motion_items/dragon_punch'),
 }
+local definitions,maps,directFrames={},{},{}
+for _,spec in ipairs(C.Specifications)do
+ definitions[spec.key]=spec.combat;maps[spec.key]=spec.frames;directFrames[spec.key]=spec.directFrames
+end
 function C.Definition(move,variant)return definitions[move] and definitions[move][variant]end
 function C.Clone(v)if type(v)~='table'then return v end;local c={};for k,x in pairs(v)do c[k]=C.Clone(x)end;return c end
 function C.Record(root,seed,key)
@@ -27,14 +31,9 @@ function C.InCone(x,y,fx,fy,reach)
  local distance=math.sqrt(x*x+y*y)
  return distance<=reach and (distance==0 or (x*fx+y*fy)/distance>=.5)
 end
-local maps={
- wave={normal={{0,5,0,16},{6,13,35,65}}},
- dp={normal={{0,5,0,17},{6,15,18,42},{16,29,43,77}},od={{0,5,0,17},{6,12,18,29},{13,21,30,37},{22,32,38,53},{33,49,54,77}}},
- circle_360={normal={{0,5,0,17},{6,39,18,65},{40,42,66,73},{43,43,78,78},{44,53,79,107}},od={{0,5,0,17},{6,29,18,65},{30,34,66,73},{35,35,78,78},{36,47,79,107}}},
-}
 function C.SourceFrame(move,variant,t)
  local def=C.Definition(move,variant);t=math.max(0,math.min(def.duration-1,t))
- if move=='circle_720'then return t end
+ if directFrames[move]then return t end
  for _,s in ipairs(maps[move][variant])do
   if t<=s[2]then return math.floor(s[3]+(s[4]-s[3])*(t-s[1])/math.max(1,s[2]-s[1])+.5)end
  end

@@ -49,6 +49,13 @@ end
 
 local function loadNeverbirth(options)
     options = options or {}
+    local savedStore = options.savedStore
+    local encodedSnapshot
+    local function copy(value)
+        if type(value) ~= 'table' then return value end
+        local result = {}; for key, child in pairs(value) do result[key] = copy(child) end
+        return result
+    end
     local callbacks = {}
     local players = {}
     local roomEntities = {}
@@ -74,6 +81,10 @@ local function loadNeverbirth(options)
 
     package.loaded.json = nil
     package.preload.json = function()
+        if savedStore then return {
+            encode = function(value) encodedSnapshot = copy(value); return '<folk-save>' end,
+            decode = function() return copy(savedStore.snapshot or {}) end,
+        } end
         return { encode = function() return "{}" end, decode = function() return {} end }
     end
 
@@ -140,7 +151,7 @@ local function loadNeverbirth(options)
     function Game()
         return {
             GetSeeds = function()
-                return { GetStartSeedString = function() return "TEST RUN" end }
+                return { GetStartSeedString = function() return options.runSeed or "TEST RUN" end }
             end,
             GetNumPlayers = function() return #players end,
             GetItemPool = function()
@@ -348,9 +359,14 @@ local function loadNeverbirth(options)
             callbacks[callbackId] = callbacks[callbackId] or {}
             callbacks[callbackId][#callbacks[callbackId] + 1] = { fn = fn, param = param }
         end
-        function mod:HasData() return false end
-        function mod:LoadData() return "{}" end
-        function mod:SaveData() end
+        function mod:HasData() return savedStore ~= nil and savedStore.snapshot ~= nil end
+        function mod:LoadData() return savedStore and '<folk-save>' or '{}' end
+        function mod:SaveData()
+            if savedStore then
+                savedStore.snapshot = copy(encodedSnapshot)
+                savedStore.writes = (savedStore.writes or 0) + 1
+            end
+        end
         return mod
     end
 

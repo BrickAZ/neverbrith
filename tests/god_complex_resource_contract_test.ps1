@@ -20,7 +20,16 @@ foreach($locale in @('','en_us','zh_cn')) {
     Assert-True (@($pools.SelectNodes('/ItemPools/Pool/Item') | Where-Object { $_.GetAttribute('Name') -eq $old.name }).Count -eq 0) 'I Am a God remains outside pools'
 }
 Add-Type -AssemblyName System.Drawing
-$lua=Get-Content -LiteralPath (Join-Path $rootPath 'god_complex.lua') -Raw
+$seenLua=[Collections.Generic.HashSet[string]]::new()
+function Read-FeatureLua([string]$relative) {
+    if(-not $seenLua.Add($relative)){return}
+    $text=Get-Content -LiteralPath (Join-Path $rootPath $relative) -Raw
+    $text
+    foreach($load in [regex]::Matches($text,'include\("([\w.]+)"\)')) {
+        Read-FeatureLua ($load.Groups[1].Value.Replace('.','/')+'.lua')
+    }
+}
+$lua=(Read-FeatureLua 'god_complex.lua') -join "`n"
 $haloBlock=[regex]::Match($lua,'(?s)local SOLAR_HALO_BOUNDS=\{(.*?)\n\s*\}')
 Assert-True $haloBlock.Success 'solar halo alpha bounds contract missing'
 $haloBounds=@([regex]::Matches($haloBlock.Groups[1].Value,'\{(\d+),(\d+),(\d+),(\d+)\}'))

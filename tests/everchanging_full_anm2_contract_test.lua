@@ -18,10 +18,7 @@ local function readFile(path)
 end
 
 local mainText = readFile("main.lua")
-local block = assert(
-    mainText:match("%-%- EVERCHANGING_BEGIN(.-)%-%- EVERCHANGING_END"),
-    "Everchanging source block"
-)
+local block = dofile("tests/support/read_feature_source.lua")("scripts/features/everchanging.lua")
 
 assertEquals(block:find('anm2 = "gfx/characters/costume_ringotsuga_apple_storyteller.anm2"', 1, true), nil,
     "RingoTsuga must no longer register a complete player ANM2")

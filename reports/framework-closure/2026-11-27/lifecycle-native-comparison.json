@@ -1,0 +1,788 @@
+{
+  "diagnosticComparisonEqual": true,
+  "acceptancePassed": false,
+  "reason": "Two original native discrepancies are reproduced on both snapshots; neither is waived.",
+  "rows": [
+    {
+      "attempt": "lifecycle-baseline-v2",
+      "passed": 27,
+      "failed": 2,
+      "passes": [
+        "revival entitlement ",
+        "revival genuine death ",
+        "revival native callback consumed item ",
+        "revival effect naturally completes ",
+        "revival exact red-heart survival ",
+        "revival effect removed ",
+        "revival entitlement consumed ",
+        "revival persisted trigger ",
+        "sleep one native starting-room bed ",
+        "sleep native overlay handed off ",
+        "sleep native target detached ",
+        "sleep native sleeper recorded ",
+        "sleep native instant heal deferred ",
+        "sleep clock advances without direct mutation 2.032",
+        "sleep loss cancels persisted session ",
+        "sleep cancelled bed removed ",
+        "sleep reacquire keeps once-per-floor latch ",
+        "sleep native overlay exits ",
+        "memory real room transition completes ",
+        "memory starts transition at frame zero ",
+        "memory switches at logical frame fifteen ",
+        "memory clears transition at logical frame thirty 30",
+        "memory advances one switch serial ",
+        "memory removal restores original identity ",
+        "memory restores permanent active slots ",
+        "memory restores original health ",
+        "memory removes player save while retaining run unlock "
+      ],
+      "failures": [
+        "revival alive but presentation locked",
+        "memory restores permanent pockets"
+      ],
+      "observations": [
+        [
+          "revival first render flags",
+          {
+            "gameFrame": 58,
+            "source": "first-render-after-consumption",
+            "noCollision": 0,
+            "collision": 4,
+            "controls": true,
+            "dead": false,
+            "visible": true
+          }
+        ],
+        [
+          "revival effect player flags",
+          {
+            "gameFrame": 59,
+            "source": "effect-before-item-handler",
+            "noCollision": 0,
+            "collision": 4,
+            "controls": false,
+            "visible": false,
+            "frame": 1,
+            "dead": false
+          }
+        ],
+        [
+          "revival effect player flags",
+          {
+            "gameFrame": 106,
+            "source": "effect-before-item-handler",
+            "noCollision": 0,
+            "collision": 4,
+            "controls": false,
+            "visible": false,
+            "frame": 47,
+            "dead": false
+          }
+        ],
+        [
+          "revival",
+          {
+            "health": {
+              "golden": 0,
+              "bone": 0,
+              "rotten": 0,
+              "eternal": 0,
+              "broken": 0,
+              "soul": 0,
+              "max": 6,
+              "black": 0,
+              "red": 2
+            },
+            "deathCallback": true,
+            "samples": [
+              {
+                "gameFrame": 59,
+                "source": "effect-before-item-handler",
+                "noCollision": 0,
+                "collision": 4,
+                "controls": false,
+                "visible": false,
+                "frame": 1,
+                "dead": false
+              },
+              {
+                "gameFrame": 106,
+                "source": "effect-before-item-handler",
+                "noCollision": 0,
+                "collision": 4,
+                "controls": false,
+                "visible": false,
+                "frame": 47,
+                "dead": false
+              }
+            ],
+            "animationFinished": true,
+            "effect": true
+          }
+        ],
+        [
+          "sleep",
+          {
+            "multiplier": 1.0,
+            "overlay": 33,
+            "health": {
+              "golden": 0,
+              "bone": 0,
+              "rotten": 0,
+              "eternal": 0,
+              "broken": 0,
+              "soul": 0,
+              "max": 6,
+              "black": 0,
+              "red": 2
+            },
+            "phase": "sleeping"
+          }
+        ],
+        [
+          "pocket native SetCard stars",
+          {
+            "pill0": 0,
+            "pill1": 0,
+            "card0": 18,
+            "card1": 0
+          }
+        ],
+        [
+          "pocket native SetPill zero after stars",
+          {
+            "pill0": 0,
+            "pill1": 0,
+            "card0": 0,
+            "card1": 0
+          }
+        ],
+        [
+          "memory owned before room",
+          {
+            "slots": {
+              "0": {
+                "item": 34,
+                "charge": 3,
+                "battery": 0
+              },
+              "1": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              },
+              "2": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              }
+            },
+            "permanentSlots": {
+              "1": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              },
+              "2": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              },
+              "0": {
+                "item": 34,
+                "charge": 3,
+                "battery": 0
+              }
+            },
+            "pockets": {
+              "pill0": 0,
+              "pill1": 0,
+              "card0": 18,
+              "card1": 0
+            },
+            "permanentPockets": {
+              "cards": {
+                "1": 0,
+                "0": 18
+              },
+              "pills": {
+                "1": 0,
+                "0": 0
+              }
+            },
+            "temporary": []
+          }
+        ],
+        [
+          "memory switched",
+          {
+            "timing": {
+              "newRoom": {
+                "frame": 0,
+                "serial": 0
+              },
+              "clearedAt": 30,
+              "firstSwitch": {
+                "serial": 1,
+                "tick": 15,
+                "profile": "isaac",
+                "frame": 15,
+                "type": 0
+              }
+            },
+            "health": {
+              "golden": 0,
+              "bone": 0,
+              "rotten": 0,
+              "eternal": 0,
+              "broken": 0,
+              "soul": 0,
+              "max": 6,
+              "black": 0,
+              "red": 2
+            },
+            "ledger": {
+              "blackMask": 0,
+              "soulHearts": 0,
+              "eternalHearts": 0,
+              "bloodCharge": 0,
+              "rottenHearts": 0,
+              "soulCharge": 0,
+              "boneHearts": 0,
+              "maxHearts": 6,
+              "goldenHearts": 0,
+              "hearts": 2,
+              "brokenHearts": 0
+            },
+            "type": 0,
+            "permanentPockets": {
+              "cards": {
+                "1": 0,
+                "0": 0
+              },
+              "pills": {
+                "1": 0,
+                "0": 0
+              }
+            },
+            "profile": "isaac",
+            "permanentSlots": {
+              "1": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              },
+              "2": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              },
+              "0": {
+                "item": 34,
+                "charge": 3,
+                "battery": 0
+              }
+            },
+            "icon": 637,
+            "pockets": {
+              "pill0": 0,
+              "pill1": 0,
+              "card0": 0,
+              "card1": 0
+            },
+            "slots": {
+              "0": {
+                "item": 34,
+                "charge": 3,
+                "battery": 0
+              },
+              "1": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              },
+              "2": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              }
+            },
+            "temporary": []
+          }
+        ],
+        [
+          "memory restored",
+          {
+            "original": {
+              "slots": {
+                "0": {
+                  "item": 34,
+                  "charge": 3,
+                  "battery": 0
+                },
+                "1": {
+                  "item": 0,
+                  "charge": 0,
+                  "battery": 0
+                },
+                "2": {
+                  "item": 0,
+                  "charge": 0,
+                  "battery": 0
+                }
+              },
+              "pockets": {
+                "pill0": 0,
+                "pill1": 0,
+                "card0": 18,
+                "card1": 0
+              },
+              "type": 0,
+              "health": {
+                "golden": 0,
+                "bone": 0,
+                "rotten": 0,
+                "eternal": 0,
+                "broken": 0,
+                "soul": 0,
+                "max": 6,
+                "black": 0,
+                "red": 2
+              }
+            },
+            "health": {
+              "golden": 0,
+              "bone": 0,
+              "rotten": 0,
+              "eternal": 0,
+              "broken": 0,
+              "soul": 0,
+              "max": 6,
+              "black": 0,
+              "red": 2
+            },
+            "pockets": {
+              "pill0": 0,
+              "pill1": 0,
+              "card0": 0,
+              "card1": 0
+            },
+            "type": 0,
+            "slots": {
+              "0": {
+                "item": 34,
+                "charge": 3,
+                "battery": 0
+              },
+              "1": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              },
+              "2": {
+                "item": 0,
+                "charge": 0,
+                "battery": 0
+              }
+            }
+          }
+        ]
+      ],
+      "sleepWallClockElapsed": 2.032,
+      "restored": true
+    },
+    {
+      "attempt": "lifecycle-candidate-v2",
+      "passed": 27,
+      "failed": 2,
+      "passes": [
+        "revival entitlement ",
+        "revival genuine death ",
+        "revival native callback consumed item ",
+        "revival effect naturally completes ",
+        "revival exact red-heart survival ",
+        "revival effect removed ",
+        "revival entitlement consumed ",
+        "revival persisted trigger ",
+        "sleep one native starting-room bed ",
+        "sleep native overlay handed off ",
+        "sleep native target detached ",
+        "sleep native sleeper recorded ",
+        "sleep native instant heal deferred ",
+        "sleep clock advances without direct mutation 2.031",
+        "sleep loss cancels persisted session ",
+        "sleep cancelled bed removed ",
+        "sleep reacquire keeps once-per-floor latch ",
+        "sleep native overlay exits ",
+        "memory real room transition completes ",
+        "memory starts transition at frame zero ",
+        "memory switches at logical frame fifteen ",
+        "memory clears transition at logical frame thirty 30",
+        "memory advances one switch serial ",
+        "memory removal restores original identity ",
+        "memory restores permanent active slots ",
+        "memory restores original health ",
+        "memory removes player save while retaining run unlock "
+      ],
+      "failures": [
+        "revival alive but presentation locked",
+        "memory restores permanent pockets"
+      ],
+      "observations": [
+        [
+          "revival first render flags",
+          {
+            "collision": 4,
+            "source": "first-render-after-consumption",
+            "visible": true,
+            "controls": true,
+            "gameFrame": 58,
+            "noCollision": 0,
+            "dead": false
+          }
+        ],
+        [
+          "revival effect player flags",
+          {
+            "collision": 4,
+            "source": "effect-before-item-handler",
+            "visible": false,
+            "gameFrame": 59,
+            "controls": false,
+            "noCollision": 0,
+            "dead": false,
+            "frame": 1
+          }
+        ],
+        [
+          "revival effect player flags",
+          {
+            "collision": 4,
+            "source": "effect-before-item-handler",
+            "visible": false,
+            "gameFrame": 106,
+            "controls": false,
+            "noCollision": 0,
+            "dead": false,
+            "frame": 47
+          }
+        ],
+        [
+          "revival",
+          {
+            "effect": true,
+            "deathCallback": true,
+            "samples": [
+              {
+                "collision": 4,
+                "source": "effect-before-item-handler",
+                "visible": false,
+                "gameFrame": 59,
+                "controls": false,
+                "noCollision": 0,
+                "dead": false,
+                "frame": 1
+              },
+              {
+                "collision": 4,
+                "source": "effect-before-item-handler",
+                "visible": false,
+                "gameFrame": 106,
+                "controls": false,
+                "noCollision": 0,
+                "dead": false,
+                "frame": 47
+              }
+            ],
+            "health": {
+              "black": 0,
+              "rotten": 0,
+              "broken": 0,
+              "bone": 0,
+              "soul": 0,
+              "golden": 0,
+              "eternal": 0,
+              "red": 2,
+              "max": 6
+            },
+            "animationFinished": true
+          }
+        ],
+        [
+          "sleep",
+          {
+            "overlay": 33,
+            "multiplier": 1.0,
+            "health": {
+              "black": 0,
+              "rotten": 0,
+              "broken": 0,
+              "bone": 0,
+              "soul": 0,
+              "golden": 0,
+              "eternal": 0,
+              "red": 2,
+              "max": 6
+            },
+            "phase": "sleeping"
+          }
+        ],
+        [
+          "pocket native SetCard stars",
+          {
+            "pill0": 0,
+            "pill1": 0,
+            "card0": 18,
+            "card1": 0
+          }
+        ],
+        [
+          "pocket native SetPill zero after stars",
+          {
+            "pill0": 0,
+            "pill1": 0,
+            "card0": 0,
+            "card1": 0
+          }
+        ],
+        [
+          "memory owned before room",
+          {
+            "temporary": [],
+            "pockets": {
+              "pill0": 0,
+              "pill1": 0,
+              "card0": 18,
+              "card1": 0
+            },
+            "permanentSlots": {
+              "1": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "2": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "0": {
+                "item": 34,
+                "battery": 0,
+                "charge": 3
+              }
+            },
+            "permanentPockets": {
+              "cards": {
+                "1": 0,
+                "0": 18
+              },
+              "pills": {
+                "1": 0,
+                "0": 0
+              }
+            },
+            "slots": {
+              "1": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "2": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "0": {
+                "item": 34,
+                "battery": 0,
+                "charge": 3
+              }
+            }
+          }
+        ],
+        [
+          "memory switched",
+          {
+            "timing": {
+              "newRoom": {
+                "serial": 0,
+                "frame": 0
+              },
+              "clearedAt": 30,
+              "firstSwitch": {
+                "serial": 1,
+                "type": 0,
+                "profile": "isaac",
+                "tick": 15,
+                "frame": 15
+              }
+            },
+            "icon": 637,
+            "health": {
+              "black": 0,
+              "rotten": 0,
+              "broken": 0,
+              "bone": 0,
+              "soul": 0,
+              "golden": 0,
+              "eternal": 0,
+              "red": 2,
+              "max": 6
+            },
+            "permanentPockets": {
+              "cards": {
+                "1": 0,
+                "0": 0
+              },
+              "pills": {
+                "1": 0,
+                "0": 0
+              }
+            },
+            "slots": {
+              "1": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "2": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "0": {
+                "item": 34,
+                "battery": 0,
+                "charge": 3
+              }
+            },
+            "temporary": [],
+            "type": 0,
+            "ledger": {
+              "soulCharge": 0,
+              "goldenHearts": 0,
+              "eternalHearts": 0,
+              "maxHearts": 6,
+              "blackMask": 0,
+              "bloodCharge": 0,
+              "rottenHearts": 0,
+              "boneHearts": 0,
+              "brokenHearts": 0,
+              "soulHearts": 0,
+              "hearts": 2
+            },
+            "permanentSlots": {
+              "1": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "2": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "0": {
+                "item": 34,
+                "battery": 0,
+                "charge": 3
+              }
+            },
+            "pockets": {
+              "pill0": 0,
+              "pill1": 0,
+              "card0": 0,
+              "card1": 0
+            },
+            "profile": "isaac"
+          }
+        ],
+        [
+          "memory restored",
+          {
+            "original": {
+              "health": {
+                "black": 0,
+                "rotten": 0,
+                "broken": 0,
+                "bone": 0,
+                "soul": 0,
+                "golden": 0,
+                "eternal": 0,
+                "red": 2,
+                "max": 6
+              },
+              "pockets": {
+                "pill0": 0,
+                "pill1": 0,
+                "card0": 18,
+                "card1": 0
+              },
+              "slots": {
+                "1": {
+                  "item": 0,
+                  "battery": 0,
+                  "charge": 0
+                },
+                "2": {
+                  "item": 0,
+                  "battery": 0,
+                  "charge": 0
+                },
+                "0": {
+                  "item": 34,
+                  "battery": 0,
+                  "charge": 3
+                }
+              },
+              "type": 0
+            },
+            "type": 0,
+            "health": {
+              "black": 0,
+              "rotten": 0,
+              "broken": 0,
+              "bone": 0,
+              "soul": 0,
+              "golden": 0,
+              "eternal": 0,
+              "red": 2,
+              "max": 6
+            },
+            "pockets": {
+              "pill0": 0,
+              "pill1": 0,
+              "card0": 0,
+              "card1": 0
+            },
+            "slots": {
+              "1": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "2": {
+                "item": 0,
+                "battery": 0,
+                "charge": 0
+              },
+              "0": {
+                "item": 34,
+                "battery": 0,
+                "charge": 3
+              }
+            }
+          }
+        ]
+      ],
+      "sleepWallClockElapsed": 2.031,
+      "restored": true
+    }
+  ],
+  "excludedComparisonFields": [
+    "sleep bedSeed (runtime entity token)",
+    "sleep elapsed real-time value; both advancement assertions pass and raw values retained"
+  ],
+  "initialExactComparison": "Failed only on sleep 2.032 vs 2.031 seconds and runtime bed seed; not a gameplay difference."
+}

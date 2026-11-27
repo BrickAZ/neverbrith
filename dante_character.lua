@@ -1,4 +1,6 @@
 return function(mod, deps)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     deps = deps or {}
 
     local PLAYER_NAME = "Dante"
@@ -102,10 +104,16 @@ return function(mod, deps)
         syncPlayer(player)
         return nil
     end
+    function callbackInstallers.playerInit()
+        return mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, playerInit)
+    end
 
     local function gameStarted(_, isContinued)
         for _, player in ipairs(getPlayers()) do syncPlayer(player) end
         return nil
+    end
+    function callbackInstallers.gameStarted()
+        return mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, gameStarted)
     end
 
     mod.DanteVisualTestAPI = {
@@ -120,10 +128,10 @@ return function(mod, deps)
     }
 
     if ModCallbacks.MC_POST_PLAYER_INIT then
-        mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, playerInit)
+        callbackInstallers.playerInit()
     end
     if ModCallbacks.MC_POST_GAME_STARTED then
-        mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, gameStarted)
+        callbackInstallers.gameStarted()
     end
 end
 

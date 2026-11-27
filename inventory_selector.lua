@@ -1,6 +1,8 @@
 -- Transient, owner-scoped inventory chooser. The caller owns eligibility, effects and costs.
 -- Native carriers verified in the installed game's unpacked resources; no entity is spawned.
 return function(mod, context)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     context = context or {}
     local api, sessions, releases = {}, {}, {}
     local game = Game()
@@ -244,6 +246,9 @@ return function(mod, context)
             session.page = math.floor((session.selected - 1) / pageSize) + 1
         end)
     end
+    function callbackInstallers.updatePlayer(add)
+        return add("MC_POST_PLAYER_UPDATE", updatePlayer)
+    end
 
     local function inputAction(_, entity, hook, action)
         if readingInput > 0 or not entity or not blocked[action] then return end
@@ -253,6 +258,9 @@ return function(mod, context)
         if not sessions[key] and not releases[key] then return end
         if hook == hooks.GET_ACTION_VALUE then return 0 end
         if hook == hooks.IS_ACTION_PRESSED or hook == hooks.IS_ACTION_TRIGGERED then return false end
+    end
+    function callbackInstallers.inputAction(add)
+        return add("MC_INPUT_ACTION", inputAction)
     end
 
     local function text(value, x, y, r, g, b)
@@ -315,6 +323,9 @@ return function(mod, context)
             safely(item.key, function() renderSession(item.session, index, #list) end)
         end
     end
+    function callbackInstallers.render(add)
+        return add("MC_POST_RENDER", render)
+    end
 
     local function sweep()
         local present
@@ -331,6 +342,9 @@ return function(mod, context)
             if not alive(release.player) or (present and not present[key]) then releases[key] = nil end
         end
     end
+    function callbackInstallers.sweep(add)
+        return add("MC_POST_UPDATE", sweep)
+    end
 
     local function debugCommand(_, command, parameters)
         if command ~= "inventory_selector" then return end
@@ -346,21 +360,24 @@ return function(mod, context)
             end})
         log(opened and "debug opened" or "debug not opened")
     end
+    function callbackInstallers.debugCommand(add)
+        return add("MC_EXECUTE_CMD", debugCommand)
+    end
 
     local function add(name, callback)
         if ModCallbacks[name] then mod:AddCallback(ModCallbacks[name], callback) end
     end
     mod.InventorySelector = api
-    add("MC_POST_PLAYER_UPDATE", updatePlayer)
-    add("MC_INPUT_ACTION", inputAction)
-    add("MC_POST_RENDER", render)
-    add("MC_POST_UPDATE", sweep)
+    callbackInstallers.updatePlayer(add)
+    callbackInstallers.inputAction(add)
+    callbackInstallers.render(add)
+    callbackInstallers.sweep(add)
     add("MC_POST_NEW_ROOM", function() closeAll("room_changed") end)
     add("MC_POST_NEW_LEVEL", function() closeAll("floor_changed") end)
     add("MC_PRE_GAME_EXIT", function() closeAll("game_exit", true) end)
     add("MC_POST_GAME_END", function() closeAll("game_end", true) end)
     add("MC_POST_GAME_STARTED", function() closeAll("game_started", true) end)
     add("MC_PRE_MOD_UNLOAD", function() closeAll("mod_unload", true) end)
-    add("MC_EXECUTE_CMD", debugCommand)
+    callbackInstallers.debugCommand(add)
     return api
 end

@@ -1,5 +1,5 @@
 -- Exercise real module callbacks against a deterministic, depleting item pool.
-dofile("tests/localization_test.lua")
+dofile("tests/support/neverbirth_fixture.lua")()
 
 local function equal(actual, expected, message)
     assert(actual == expected, message .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual))

@@ -1,4 +1,5 @@
 -- Engine doubles exercise the module's ownership and event contracts, not native AI.
+include = function(path) return dofile((path:gsub('%.', '/')) .. '.lua') end
 local function equal(got, want, message)
     if got ~= want then error((message or "mismatch") .. ": expected " .. tostring(want) .. ", got " .. tostring(got), 2) end
 end

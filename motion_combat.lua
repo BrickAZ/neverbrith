@@ -3,13 +3,16 @@ return function(mod,context)
  context=context or {}
  if mod.MotionCombat then mod.MotionCombat:Shutdown() end
  local C=include('motion_combat_core');local D=include('drive_glove_damage')
- local input=assert(mod.MotionInput);local presentation=assert(mod.MotionPresentation);local game=Game()
+ local entityKey=include('scripts/systems/entity_identity')
+ local input=assert(context.Input or mod.MotionInput);local presentation=assert(context.Presentation or mod.MotionPresentation);local game=Game()
  local waveVariant=context.WaveVariant
  local function waveRegistered()
   if not waveVariant and Isaac.GetEntityVariantByName then waveVariant=Isaac.GetEntityVariantByName('Neverbirth Motion Wave')end
   return type(waveVariant)=='number'and waveVariant>0
  end
  local api={active=true,sessions={},shots={},grabs={},bossLocks={},feedback={},clock=0};local fallback={}
+ -- Shared read-only specification references; formal bindings reuse this instance.
+ api.Specifications=C.Specifications
  local directions={right={1,0},down={0,1},left={-1,0},up={0,-1}}
  local lastFrame=-1;local snapshots={};local dirty=false;local runSeed;local inRun=false
  local receipts={};local currentHit
@@ -17,7 +20,6 @@ return function(mod,context)
  local function exists(e)return e and e:Exists()end
  local function live(e)return exists(e) and not e:IsDead()end
  local function key(e)return context.Key and context.Key(e)or tostring(e.InitSeed or 0)..':'..tostring(e.ControllerIndex or 0)end
- local function entityKey(e)return (GetPtrHash and tostring(GetPtrHash(e))or tostring(e))..':'..tostring(e.InitSeed or 0)end
  local function same(a,b)return a and b and entityKey(a)==entityKey(b)end
  local function root()return context.GetSaveRoot and context.GetSaveRoot()or fallback end
  local function seed()

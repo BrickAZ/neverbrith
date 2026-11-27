@@ -1,5 +1,7 @@
 -- Presentation only. Animation ticks follow the 30 Hz update, never render FPS.
 return function(mod,context)
+    -- Keep native bindings beside handlers; invoke at their original installation phase.
+    local callbackInstallers = {}
     local game=Game()
     local state,ghosts={},{}
     local RUSH='gfx/Effects/DriveRush/v3/drive_parry_rush_v3.anm2'
@@ -169,6 +171,9 @@ return function(mod,context)
             p.SpriteRotation=v.originalRotation+lean
         end
     end
+    function callbackInstallers.beforePlayer()
+        return mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER,beforePlayer)
+    end
     local function afterPlayer(_,p)
         local v=state[context.Key(p)]
         restore(v)
@@ -185,6 +190,9 @@ return function(mod,context)
         end
         if v.endAt and frame-v.endAt<6 then draw(v.rush,'End',frame-v.endAt,pos,v.endAngle) end
         if v.hit then draw(v.front,v.hit.animation,math.min(v.hit.duration-1,v.hit.age),Isaac.WorldToScreen(v.hit.position),v.hit.angle) end
+    end
+    function callbackInstallers.afterPlayer()
+        return mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER,afterPlayer)
     end
     local function hearts(_,offset,_,position,_,p)
         if not context.IsReady() or not game:GetHUD():IsVisible() then return end
@@ -215,8 +223,11 @@ return function(mod,context)
             or t.mode~='idle' and 'Pause' or t.walking and 'Walk'
         if indicator then draw(v.icons,indicator,0,pos+Vector(62,0)) end
     end
-    mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER,beforePlayer)
-    mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER,afterPlayer)
-    mod:AddCallback(ModCallbacks.MC_POST_PLAYERHUD_RENDER_HEARTS,hearts)
+    function callbackInstallers.hearts()
+        return mod:AddCallback(ModCallbacks.MC_POST_PLAYERHUD_RENDER_HEARTS,hearts)
+    end
+    callbackInstallers.beforePlayer()
+    callbackInstallers.afterPlayer()
+    callbackInstallers.hearts()
     return api
 end

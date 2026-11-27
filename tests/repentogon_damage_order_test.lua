@@ -15,9 +15,7 @@ local comparator = assert(load(section(native, "local function CallbackComparato
 local enums = read("E:/Isaac - Repentance/resources/scripts/enums.lua")
 assert(load(section(enums, "CallbackPriority = {", "EntityType = {")))()
 assert(CallbackPriority.EARLY == -100 and CallbackPriority.DEFAULT == 0)
-local fixture = read("tests/localization_test.lua")
-local loader = assert(load(fixture:sub(1, assert(fixture:find("local expectedXmlItems =", 1, true)) - 1)
-    .. "\nreturn loadNeverbirthWithEID"))()
+local loader = dofile("tests/support/neverbirth_fixture.lua")
 local registrations = loader().callbacks
 local mod = Neverbirth
 local ace = assert(mod.ACEAntiCheatTestAPI)

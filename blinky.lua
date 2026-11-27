@@ -5,8 +5,10 @@ return function(mod, context)
     local id=context.ItemId
     if not id or id<=0 then return end
     local api,holds,flights,swings={},{},{},{}
-    local stateService=mod.PendingContentState
-    local selector=mod.InventorySelector
+    local stateService=context.State or mod.PendingContentState
+    local selector
+    if context.GetSelector then selector=assert(context.GetSelector(), 'Blinky requires inventory selector')
+    else selector=context.Selector or mod.InventorySelector end
     local flightVariant=Isaac.GetEntityVariantByName('Blinky Thrown Object')
     local activeDamage,readingInput,reconcileAt=nil,0,nil
     local G=GridEntityType
